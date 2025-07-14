@@ -17,7 +17,6 @@ export default function SidebarContent() {
   const [completedPages, setCompletedPages] = useState<Set<number>>(new Set());
   const [isReady, setIsReady] = useState(false);
 
-  // 1. Initialisation robuste pour tous les appareils
   useEffect(() => {
     const initStorage = () => {
       try {
@@ -37,7 +36,6 @@ export default function SidebarContent() {
     return () => clearTimeout(timer);
   }, []);
 
-  // 2. Sauvegarde fiable multi-support
   useEffect(() => {
     if (!isReady) return;
 
@@ -48,7 +46,6 @@ export default function SidebarContent() {
         sessionStorage.setItem('completedPages_mobile_fallback', data);
       } catch (e) {
         console.error("Erreur de sauvegarde:", e);
-        // Dernière tentative
         try {
           sessionStorage.setItem('completedPages', data);
         } catch (err) {
@@ -60,7 +57,6 @@ export default function SidebarContent() {
     saveData();
   }, [completedPages, isReady]);
 
-  // 3. Synchronisation entre onglets
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key?.startsWith('completedPages') && e.newValue) {
@@ -101,14 +97,13 @@ export default function SidebarContent() {
   };
 
   return (
-    <>
+    <div className="flex flex-col h-full text-zinc-300">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-zinc-700">
+      <div className="px-6 py-5 border-b border-zinc-700 flex-shrink-0">
         <h1 className="text-xl font-bold flex items-center gap-2">
           <BookOpen className="text-blue-400" size={20} />
           <span>Sommaire du Cours</span>
         </h1>
-        
         <div className="mt-4">
           <div className="flex justify-between text-sm mb-1">
             <span className="text-zinc-300">Progression</span>
@@ -125,12 +120,11 @@ export default function SidebarContent() {
         </div>
       </div>
 
-      {/* Contenu navigable */}
- <nav
-      className="overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent flex-grow"
-      style={{ WebkitOverflowScrolling: 'touch' }}
-    >
-
+      {/* Navigation scrollable */}
+      <nav
+        className="flex-grow overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         <ul className="space-y-1 px-3">
           {chapters.map((chapter) => {
             const chapterComplete = isChapterCompleted(chapter);
@@ -205,7 +199,7 @@ export default function SidebarContent() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-zinc-700 p-4 text-sm bg-zinc-800/50">
+      <div className="border-t border-zinc-700 p-4 text-sm bg-zinc-800/50 flex-shrink-0">
         <div className="flex justify-between text-zinc-400">
           <div className="flex items-center gap-1">
             <CheckCircle className="text-green-400" size={14} />
@@ -221,6 +215,6 @@ export default function SidebarContent() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

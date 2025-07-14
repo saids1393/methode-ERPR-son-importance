@@ -8,7 +8,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="md:hidden flex flex-col h-screen w-full bg-zinc-950">
-      {/* Header mobile - version légèrement ajustée */}
+      {/* Header mobile */}
       <header className="sticky top-0 z-30 p-4 bg-zinc-900 flex items-center border-b border-zinc-700">
         <button 
           onClick={() => setSidebarOpen(!sidebarOpen)} 
@@ -23,21 +23,24 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
         </h1>
       </header>
 
-      {/* Contenu principal - version optimisée */}
+      {/* Contenu principal scrollable */}
       <main className="flex-1 overflow-y-auto p-4 w-full">
         <div className="w-full h-full">
           {children}
         </div>
       </main>
 
-      {/* Sidebar mobile - version améliorée */}
+      {/* Sidebar mobile en overlay */}
       {sidebarOpen && (
          <div className="fixed inset-0 z-40 flex">
-      <div onClick={() => setSidebarOpen(false)} className="absolute inset-0 bg-black/50 transition-opacity duration-300" />
-      <aside className="relative z-50 h-full w-72 bg-gradient-to-b from-zinc-900 to-zinc-800 shadow-xl transform transition-transform duration-300">
-        <SidebarContent />
-      </aside>
-    </div>
+          <div 
+            onClick={() => setSidebarOpen(false)} 
+            className="absolute inset-0 bg-black/50 transition-opacity duration-300" 
+          />
+          <aside className="relative z-50 h-full w-72 bg-gradient-to-b from-zinc-900 to-zinc-800 shadow-xl transform transition-transform duration-300">
+            <SidebarContent />
+          </aside>
+        </div>
       )}
     </div>
   );
