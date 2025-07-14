@@ -152,7 +152,7 @@ export default function SidebarContent() {
                 >
                   <div className="flex items-center gap-3">
                     <span className="font-bold">
-                      {chapter.chapterNumber === 0 ? "Commencement" : `${chapter.chapterNumber}.`} {chapter.title}
+                      {chapter.chapterNumber === 0 ? "Phase préparatoire" : `${chapter.chapterNumber}.`} {chapter.title}
                     </span>
                   </div>
                   {open[chapter.chapterNumber] ? 

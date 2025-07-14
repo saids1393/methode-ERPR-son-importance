@@ -16,11 +16,11 @@ export type Chapter = {
 
 export const chapters: Chapter[] = [
   {
-    title: "Sorties des lettres",
+    title: " avant la méthode",
     chapterNumber: 0,
     pages: [
       {
-        title: "Getting Started",
+        title: "Prononciation des lettres arabes",
         href: "/chapitres/0/0",
         pageNumber: 0,
         status: 'completed'
@@ -68,7 +68,7 @@ export const chapters: Chapter[] = [
         status: 'completed'
       },
       {
-        title: "Ḥourouf Al mouqatta'ah - Lettres disjointes coraniques",
+        title: "Lettres disjointes coraniques",
         href: "/chapitres/1/7",
         pageNumber: 7,
         status: 'completed'
