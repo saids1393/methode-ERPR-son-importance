@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import domtoimage from "dom-to-image-more";
+import * as htmlToImage from "html-to-image";
 
 import LettresAttacheesDebut from "@/app/components/ecritures/LettresAttacheesDebut";
 import LettresAttacheesMilieu from "@/app/components/ecritures/LettresAttacheesMilieu";
@@ -25,22 +25,28 @@ const Page5 = () => {
   const handleDownload = () => {
     if (!captureRef.current) return;
 
-    captureRef.current.classList.add("no-borders");
+    // Assurer que la police est chargée
+    document.fonts.ready.then(() => {
+      captureRef.current?.classList.add("no-borders");
 
-    domtoimage
-      .toPng(captureRef.current)
-      .then((dataUrl: string) => {
-        captureRef.current?.classList.remove("no-borders");
+      // Utiliser requestAnimationFrame pour s'assurer que tout est bien rendu
+      requestAnimationFrame(() => {
+        htmlToImage
+          .toPng(captureRef.current!, { cacheBust: true })
+          .then((dataUrl: string) => {
+            captureRef.current?.classList.remove("no-borders");
 
-        const link = document.createElement("a");
-        link.download = "page5-capture.png";
-        link.href = dataUrl;
-        link.click();
-      })
-      .catch((error: any) => {
-        captureRef.current?.classList.remove("no-borders");
-        console.error("Oops, something went wrong!", error);
+            const link = document.createElement("a");
+            link.download = "page5-capture.png";
+            link.href = dataUrl;
+            link.click();
+          })
+          .catch((error: any) => {
+            captureRef.current?.classList.remove("no-borders");
+            console.error("Oops, something went wrong!", error);
+          });
       });
+    });
   };
 
   return (
@@ -80,15 +86,17 @@ const Page5 = () => {
         </div>
       </div>
 
-      {/* Ajout de la section LettresAttacheesDebut avec un séparateur visuel */}
+      {/* Lettres attachées - début */}
       <div className="border-t border-gray-200 pt-8 px-8">
         <LettresAttacheesDebut />
       </div>
-       {/* Ajout de la section LettresAttacheesMilieu avec un séparateur visuel */}
+
+      {/* Lettres attachées - milieu */}
       <div className="border-t border-gray-200 pt-8 px-8">
         <LettresAttacheesMilieu />
       </div>
-       {/* Ajout de la section LettresAttacheesfin avec un séparateur visuel */}
+
+      {/* Lettres attachées - fin */}
       <div className="border-t border-gray-200 pt-8 px-8">
         <LettresAttacheesFin />
       </div>
