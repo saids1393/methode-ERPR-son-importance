@@ -59,28 +59,32 @@ const LettresAttacheesDebut = () => {
       className="font-arabic min-h-screen bg-white relative"
       style={{ direction: "rtl" }}
     >
-      {/* Bouton téléchargement */}
-      <div className="absolute top-4 right-4 z-50">
-        <button
-          onClick={handleDownload}
-          className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-blue-600 text-white px-4 py-2 rounded-xl font-semibold shadow-lg hover:scale-105 transition-transform"
-          title="Télécharger la grille"
-        >
-          <DownloadIcon />
-          Télécharger
-        </button>
-      </div>
-
-      {/* Titre principal */}
+      {/* Titre principal avec bouton intégré */}
       <div
-        className="text-white p-6 text-center bg-white"
+        className="text-white p-3 md:p-4 bg-white flex items-center justify-between"
         style={{
           background: "linear-gradient(to right, #a855f7, #3b82f6)",
         }}
       >
-        <div className="px-5 py-1 text-2xl font-bold">
-          Écriture des lettres attachées au début d’un mot
+        {/* Espace vide à gauche pour équilibrer */}
+        <div className="w-8 flex-shrink-0"></div>
+        
+        {/* Titre centré */}
+
+ <div className="text-3xl sm:text-lg md:text-xl lg:text-2xl font-bold text-center flex-1 px-2 py-5">
+          <span className="hidden sm:inline">Écriture des lettres attachées au début d'un mot</span>
+          <span className="sm:hidden">Lettres attachées - début</span>
         </div>
+        
+        {/* Bouton téléchargement */}
+        <button
+          onClick={handleDownload}
+          className="flex items-center justify-center w-8 h-8 bg-white/20 backdrop-blur-sm text-white rounded-md shadow-lg hover:bg-white/30 transition-all flex-shrink-0"
+          title="Télécharger la grille"
+          aria-label="Télécharger"
+        >
+          <DownloadIcon />
+        </button>
       </div>
 
       {/* Grille de lettres */}
@@ -121,7 +125,7 @@ const Cell = ({
 const DownloadIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-5 w-5"
+    className="h-4 w-4"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
