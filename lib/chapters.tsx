@@ -20,11 +20,11 @@ export const chapters: Chapter[] = [
     chapterNumber: 0,
     pages: [
       {
-        title: "C'est parti !",
-        href: "/chapitres/1/0",
+        title: "Getting Started",
+        href: "/chapitres/0/0",
         pageNumber: 0,
         status: 'completed'
-      },
+      }
     ]
   },
   {
@@ -277,6 +277,7 @@ export const chapters: Chapter[] = [
 
 // Fonctions utilitaires pour faciliter l'utilisation
 
+// Helper functions
 export const getChapterByNumber = (chapterNumber: number): Chapter | undefined => {
   return chapters.find(chapter => chapter.chapterNumber === chapterNumber);
 };
@@ -290,29 +291,6 @@ export const getAllPages = (): Page[] => {
   return chapters.flatMap(chapter => chapter.pages);
 };
 
-export const getTotalPages = (): number => {
-  return chapters.reduce((total, chapter) => total + chapter.pages.length, 0);
-};
-
-export const getTotalChapters = (): number => {
-  return chapters.length;
-};
-
-export const getCompletedPages = (): Page[] => {
-  return getAllPages().filter(page => page.status === 'completed');
-};
-
-export const getPendingPages = (): Page[] => {
-  return getAllPages().filter(page => page.status === 'pending');
-};
-
-export const getProgressPercentage = (): number => {
-  const total = getTotalPages();
-  const completed = getCompletedPages().length;
-  return Math.round((completed / total) * 100);
-};
-
-// Pour générer automatiquement les static params
 export const generateAllStaticParams = () => {
   return chapters.flatMap(chapter => 
     chapter.pages.map(page => ({
@@ -321,6 +299,7 @@ export const generateAllStaticParams = () => {
     }))
   );
 };
+
 
 // Fonction pour obtenir la page suivante
 export const getNextPage = (currentChapter: number, currentPage: number): Page | undefined => {

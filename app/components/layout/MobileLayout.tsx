@@ -32,16 +32,12 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
 
       {/* Sidebar mobile - version améliorée */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 flex">
-          {/* Overlay avec animation */}
-          <div 
-            onClick={() => setSidebarOpen(false)}
-            className="absolute inset-0 bg-black/50 transition-opacity duration-300"
-          />
-          <aside className="relative z-50 h-full w-72 bg-gradient-to-b from-zinc-900 to-zinc-800 shadow-xl transform transition-transform duration-300">
-            <SidebarContent />
-          </aside>
-        </div>
+         <div className="fixed inset-0 z-40 flex">
+      <div onClick={() => setSidebarOpen(false)} className="absolute inset-0 bg-black/50 transition-opacity duration-300" />
+      <aside className="relative z-50 h-full w-72 bg-gradient-to-b from-zinc-900 to-zinc-800 shadow-xl transform transition-transform duration-300">
+        <SidebarContent />
+      </aside>
+    </div>
       )}
     </div>
   );

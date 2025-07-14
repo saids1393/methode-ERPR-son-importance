@@ -126,7 +126,11 @@ export default function SidebarContent() {
       </div>
 
       {/* Contenu navigable */}
-      <nav className="flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent">
+    <nav
+  className="overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent"
+  style={{ height: 'calc(100vh - 120px)' }} // 120px = hauteur header + footer (ajuste selon)
+>
+
         <ul className="space-y-1 px-3">
           {chapters.map((chapter) => {
             const chapterComplete = isChapterCompleted(chapter);
