@@ -15,18 +15,55 @@ export default function SidebarContent() {
   const pathname = usePathname();
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [completedPages, setCompletedPages] = useState<Set<number>>(new Set());
+  const [isReady, setIsReady] = useState(false);
 
-  // Synchronisation avec localStorage et entre onglets
+  // 1. Initialisation robuste pour tous les appareils
   useEffect(() => {
-    // 1. Chargement initial
-    const saved = localStorage.getItem('completedPages');
-    if (saved) {
-      setCompletedPages(new Set(JSON.parse(saved)));
-    }
+    const initStorage = () => {
+      try {
+        const saved = window.localStorage?.getItem('completedPages') || 
+                     sessionStorage.getItem('completedPages_mobile_fallback');
+        if (saved) {
+          setCompletedPages(new Set(JSON.parse(saved)));
+        }
+      } catch (e) {
+        console.error("Erreur d'accès au stockage:", e);
+      } finally {
+        setIsReady(true);
+      }
+    };
 
-    // 2. Écoute des changements depuis d'autres onglets
+    const timer = setTimeout(initStorage, 150);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 2. Sauvegarde fiable multi-support
+  useEffect(() => {
+    if (!isReady) return;
+
+    const saveData = () => {
+      const data = JSON.stringify(Array.from(completedPages));
+      try {
+        localStorage.setItem('completedPages', data);
+        sessionStorage.setItem('completedPages_mobile_fallback', data);
+      } catch (e) {
+        console.error("Erreur de sauvegarde:", e);
+        // Dernière tentative
+        try {
+          sessionStorage.setItem('completedPages', data);
+        } catch (err) {
+          console.error("Échec complet de sauvegarde:", err);
+        }
+      }
+    };
+
+    saveData();
+  }, [completedPages, isReady]);
+
+  // 3. Synchronisation entre onglets
+  useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'completedPages' && e.newValue) {
+      if (e.key?.startsWith('completedPages') && e.newValue) {
         setCompletedPages(new Set(JSON.parse(e.newValue)));
       }
     };
@@ -34,11 +71,6 @@ export default function SidebarContent() {
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
-
-  // Sauvegarde dans localStorage
-  useEffect(() => {
-    localStorage.setItem('completedPages', JSON.stringify(Array.from(completedPages)));
-  }, [completedPages]);
 
   const togglePageCompletion = (pageNumber: number, e: React.MouseEvent) => {
     e.preventDefault();
