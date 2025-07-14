@@ -19,7 +19,7 @@ const Page0 = () => {
     'ص': { mot: 'Bout de la langue derrière les dents du bas' },
     'ض': { mot: "Langue entière collée sur tout le palais en bloquant l'air (les joues doivent se gonfler avant la prononciation de la lettre)" },
     'ط': { mot: "Même sortie que la lettre [Ta], mais en la prononçant d'une façon lourde et grave" },
-    'ظ': { mot: "Comme ‘that’ en Anglais, mais en rendant la lettre grave tout en freinant l’air (les joues doivent normalement gonfler avant la sortie de la lettre)"  },
+    'ظ': { mot: "Comme ‘that’ en Anglais, mais en rendant la lettre grave tout en freinant l’air avec la langue contre les incisives supérieures (les joues doivent normalement gonfler avant la sortie de la lettre)"  },
     'ع': { mot: "Vibration en haut de la pomme d'Adam" },
     'غ': { mot: "Gargouillis dans la gorge après s'être brossé les dents" },
     'ف': { mot: 'Farine'},

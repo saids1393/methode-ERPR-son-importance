@@ -32,7 +32,7 @@ export const chapters: Chapter[] = [
     chapterNumber: 1,
     pages: [
       {
-        title: "Lettres seules",
+        title: "Lettres seules (non attachées)",
         href: "/chapitres/1/1",
         pageNumber: 1,
         status: 'completed'
@@ -62,7 +62,7 @@ export const chapters: Chapter[] = [
         status: 'completed'
       },
       {
-        title: "Reconnaissance des lettres sous toutes leurs formes",
+        title: " Exercice de reconnaissance des lettres",
         href: "/chapitres/1/6",
         pageNumber: 6,
         status: 'completed'
@@ -76,29 +76,29 @@ export const chapters: Chapter[] = [
     ]
   },
   {
-    title: "Lettres et voyelles simples",
+    title: "Voyelles simples",
     chapterNumber: 2,
     pages: [
       {
-        title: "Lettres seules avec voyelles (fatḥah, kasrah, ḍammah)",
+        title: "Lettres seules avec voyelles",
         href: "/chapitres/2/8",
         pageNumber: 8,
         status: 'completed'
       },
       {
-        title: "Lettres attachées avec voyelles - Partie 1",
+        title: "Lettres au début d'un mot (attachées) avec voyelles simples",
         href: "/chapitres/2/9",
         pageNumber: 9,
         status: 'completed'
       },
       {
-        title: "Lettres attachées avec voyelles - Partie 2",
+        title: "Lettres au milieu d'un mot (attachées) avec voyelles simples",
         href: "/chapitres/2/10",
         pageNumber: 10,
         status: 'completed'
       },
       {
-        title: "Lettres attachées avec voyelles - Partie 3",
+        title: "Lettres à la fin d'un mot (attachées) avec voyelles simples",
         href: "/chapitres/2/11",
         pageNumber: 11,
         status: 'completed'
@@ -106,7 +106,7 @@ export const chapters: Chapter[] = [
     ]
   },
   {
-    title: "Doubles voyelles (Tanwīn)",
+    title: "Doubles voyelles",
     chapterNumber: 3,
     pages: [
       {
@@ -116,19 +116,19 @@ export const chapters: Chapter[] = [
         status: 'completed'
       },
       {
-        title: "Lettres attachées avec doubles voyelles - Partie 1",
+        title: "Lettres au début d'un mot (attachées) avec doubles voyelles",
         href: "/chapitres/3/13",
         pageNumber: 13,
         status: 'completed'
       },
       {
-        title: "Lettres attachées avec doubles voyelles - Partie 2",
+        title: "Lettres au milieu d'un mot (attachées) avec doubles voyelles",
         href: "/chapitres/3/14",
         pageNumber: 14,
         status: 'completed'
       },
       {
-        title: "Lettres attachées avec doubles voyelles - Partie 3",
+        title: "Lettres à la fin d'un mot (attachées) avec doubles voyelles",
         href: "/chapitres/3/15",
         pageNumber: 15,
         status: 'completed'
@@ -140,7 +140,7 @@ export const chapters: Chapter[] = [
     chapterNumber: 4,
     pages: [
       {
-        title: "Explications et exemples",
+        title: "Exemples avec explications",
         href: "/chapitres/4/16",
         pageNumber: 16,
         status: 'completed'
@@ -148,11 +148,11 @@ export const chapters: Chapter[] = [
     ]
   },
   {
-    title: "Combinaisons et mots",
+    title: "Mots avec voyelles simples et doubles",
     chapterNumber: 5,
     pages: [
       {
-        title: "Mots avec toutes sortes de voyelles",
+        title: "Exercices de lecture avec voyelles simples et doubles",
         href: "/chapitres/5/17",
         pageNumber: 17,
         status: 'completed'
@@ -160,23 +160,23 @@ export const chapters: Chapter[] = [
     ]
   },
   {
-    title: "Les prolongations (Madd)",
+    title: "Prolongations / Douces",
     chapterNumber: 6,
     pages: [
       {
-        title: "Types de prolongation (Alif, Yāʾ, Wāw ṣaghīrah)",
+        title: "Alif saghirah - Ya saghirah - Waw saghirah",
         href: "/chapitres/6/18",
         pageNumber: 18,
         status: 'completed'
       },
       {
-        title: "Ḥurūf al-Madd - Lettres de prolongation",
+        title: "Les 3 lettres de prolongation",
         href: "/chapitres/6/19",
         pageNumber: 19,
         status: 'completed'
       },
       {
-        title: "Ḥurūf al-Layyinah - Lettres douces",
+        title: "Lettres douces",
         href: "/chapitres/6/20",
         pageNumber: 20,
         status: 'completed'
@@ -184,11 +184,11 @@ export const chapters: Chapter[] = [
     ]
   },
   {
-    title: "Lecture appliquée (règles combinées)",
+    title: "Règles combinées",
     chapterNumber: 7,
     pages: [
       {
-        title: "Mots avec tanwīn, madd et lettres layyinah",
+        title: "Exercices de lecture des mots avec doubles voyelles, prolongations et lettres douces",
         href: "/chapitres/7/21",
         pageNumber: 21,
         status: 'completed'
@@ -196,17 +196,17 @@ export const chapters: Chapter[] = [
     ]
   },
   {
-    title: "Soukūn - Lettre sans voyelle",
+    title: "Soukoune",
     chapterNumber: 8,
     pages: [
       {
-        title: "Le soukūn",
+        title: "Leçon sur le soukūn",
         href: "/chapitres/8/22",
         pageNumber: 22,
         status: 'completed'
       },
       {
-        title: "Mots avec soukūn",
+        title: "Exercices de lecture des mots avec soukoune",
         href: "/chapitres/8/23",
         pageNumber: 23,
         status: 'completed'
@@ -218,7 +218,7 @@ export const chapters: Chapter[] = [
     chapterNumber: 9,
     pages: [
       {
-        title: "Mots avec lettres solaires et lunaires",
+        title: "Exemples et eplications",
         href: "/chapitres/9/24",
         pageNumber: 24,
         status: 'completed'
@@ -230,31 +230,31 @@ export const chapters: Chapter[] = [
     chapterNumber: 10,
     pages: [
       {
-        title: "La shaddah",
+        title: "Leçon sur la shaddah",
         href: "/chapitres/10/25",
         pageNumber: 25,
         status: 'completed'
       },
       {
-        title: "Mots avec shaddah",
+        title: "Exercices de lecture des mots avec la shaddah",
         href: "/chapitres/10/26",
         pageNumber: 26,
         status: 'completed'
       },
       {
-        title: "Mots avec shaddah et soukūn",
+        title: "Exercices de lecture des mots avec la shadda et soukūn",
         href: "/chapitres/10/27",
         pageNumber: 27,
         status: 'completed'
       },
       {
-        title: "Mots avec shaddah, soukūn et madd",
+        title: "Exercices de lecture des mots avec la shaddah, soukoune et prolongations",
         href: "/chapitres/10/28",
         pageNumber: 28,
         status: 'completed'
       },
       {
-        title: "Écriture de mots complets de la méthode",
+        title: "Écriture d'un mot complet",
         href: "/chapitres/10/29",
         pageNumber: 29,
         status: 'completed'

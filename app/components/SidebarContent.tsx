@@ -126,9 +126,12 @@ export default function SidebarContent() {
       </div>
 
       {/* Contenu navigable */}
-    <nav
-  className="overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent"
-  style={{ height: 'calc(100vh - 120px)' }} // 120px = hauteur header + footer (ajuste selon)
+<nav
+  className="overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent"
+  style={{
+    height: 'calc(100vh - 120px)',
+    WebkitOverflowScrolling: 'touch' // pour iOS
+  }}
 >
 
         <ul className="space-y-1 px-3">

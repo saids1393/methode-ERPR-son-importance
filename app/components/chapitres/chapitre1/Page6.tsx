@@ -19,7 +19,7 @@ const Page6 = () => {
     // Row 8
     'قم', 'في', 'ض', 'زي', 'زر', 'ثمر',
     // Row 9
-    'نب', 'nبل', 'بيل', 'بل', 'جل', 'كل'
+    'نب', 'بل', 'بيل', 'بل', 'جل', 'كل'
   ];
 
   // Fonction pour appliquer l'alternance de couleurs
