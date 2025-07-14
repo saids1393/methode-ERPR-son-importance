@@ -1,8 +1,12 @@
 @import "tailwindcss";
+/* Import de la police arabe */
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;600;700&display=swap');
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --arabic-indigo: #4f46e5;
+  --arabic-purple: #7c3aed;
 }
 
 @theme inline {
@@ -10,12 +14,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-arabic: 'Scheherazade New', serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --arabic-indigo: #6366f1;
+    --arabic-purple: #8b5cf6;
   }
 }
 
@@ -23,4 +30,34 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Styles RTL */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+/* Animation pour la barre de progression */
+@keyframes progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-progress {
+  animation: progress 2s ease-out forwards;
+}
+
+/* Classes utilitaires pour l'arabe */
+.font-arabic {
+  font-family: var(--font-arabic);
+}
+
+.bg-arabic-gradient {
+  background: linear-gradient(135deg, var(--arabic-indigo), var(--arabic-purple));
+}
+
+.no-borders * {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
