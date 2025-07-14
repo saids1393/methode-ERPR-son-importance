@@ -44,10 +44,10 @@ function NotFoundPage({
 
         <div className="mt-6">
           <a
-            href="/chapitres/1/1"
+            href="/chapitres/0/0"
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
           >
-            Retour à la page 1
+            Retour au début
           </a>
         </div>
       </div>

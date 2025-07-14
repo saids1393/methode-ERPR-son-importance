@@ -8,7 +8,7 @@ export default function Home() {
       {/* En-tête */}
       <header className="text-center max-w-xl mb-12">
         <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
-          Apprentissage de la Lecture et Écriture
+          Apprentissage de la Lecture et Écriture en 1 mois
         </h1>
     
     
@@ -17,7 +17,7 @@ export default function Home() {
       {/* Boutons */}
       <div className="flex flex-col sm:flex-row gap-8 max-w-md w-full">
         <Link
-          href="/chapitres/1/0"
+          href="/chapitres/0/0"
           className="bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-4 px-8 rounded-full shadow-md transition transform hover:scale-105 flex justify-center items-center gap-2"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -41,7 +41,7 @@ export default function Home() {
       <footer className="mt-20 text-center text-gray-500 dark:text-gray-400 text-sm max-w-md">
         <p>© {new Date().getFullYear()} Méthode "Son Importance" - Tous droits réservés</p>
        <p className="text-md sm:text-lg text-gray-600 dark:text-gray-400">
-          Créé par <span className="font-semibold">"Son Importance" Professeur Soidroudine</span>
+          Créé par <span className="font-semibold">Son Importance, Professeur Soidroudine</span>
         </p>
       </footer>
     </div>
