@@ -43,14 +43,10 @@ const Page22 = () => {
       style={{ direction: 'rtl' }}
     >
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
-        {/* Header */}
+         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
-          <div className="bg-white/10 px-6 py-3 rounded-full text-xl font-bold backdrop-blur-sm border border-white/20 inline-block">
-            كلمات مع السكون
-          </div>
-          <div className="text-sm mt-2 opacity-90">
-            تَعلُّم الْمَقَاطِع مَعَ السُّكُونِ
+          <div className="text-3xl md:text-3xl font-bold">
+            Absence de voyelle sur une lettre (soukoune)
           </div>
         </div>
         
@@ -69,60 +65,16 @@ const Page22 = () => {
                 />
               ))}
             </div>
-            
-            {/* Explication du sukoon */}
-            <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 mb-6">
-              <div className="text-center font-bold text-lg text-red-400 mb-3 bg-red-900/30 py-2 rounded-lg">
-                عَلَامَةُ السُّكُونِ
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center text-sm">
-                <div className="bg-red-900/30 p-4 rounded-lg">
-                  <div className="text-red-400 font-semibold mb-2">رَمْزُ السُّكُونِ</div>
-                  <div className="text-4xl text-red-400 mb-2">ْ</div>
-                  <div className="text-zinc-300">يُوضَعُ فَوْقَ الْحَرْفِ الْسَّاكِنِ</div>
-                </div>
-                <div className="bg-zinc-700 p-4 rounded-lg">
-                  <div className="text-white font-semibold mb-2">مِثَالٌ</div>
-                  <div className="text-3xl mb-2">
-                    <span className="text-white">بَ</span>
-                    <span className="text-red-400">تْ</span>
-                  </div>
-                  <div className="text-zinc-300">الْحَرْفُ الثَّانِي سَاكِنٌ</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="w-full h-2 bg-zinc-800 rounded-full mb-6 overflow-hidden">
-              <div 
-                className="h-full bg-arabic-gradient rounded-full animate-progress"
-              ></div>
-            </div>
-            
-            {/* Note pédagogique */}
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 rounded-lg p-4 mb-6">
-              <div className="text-center text-zinc-300 text-sm">
-                <span className="text-blue-400 font-semibold">فَائِدَةٌ:</span>
-                <span className="mr-2">السُّكُونُ يَعْنِي عَدَمَ وُجُودِ حَرَكَةٍ عَلَى الْحَرْفِ</span>
-              </div>
-            </div>
-            
-            {/* Page Number */}
-            <div className="flex justify-center">
-              <div className="w-12 h-12 bg-arabic-gradient rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                ١
-              </div>
-            </div>
+
+      
           </div>
         </div>
         
         {/* Footer */}
-        <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-5 flex justify-between items-center">
-          <div className="text-lg font-semibold">كلمات مع السكون</div>
-          <div className="bg-arabic-gradient text-white px-5 py-2 rounded-full font-semibold">
-            الصفحة الثانية والعشرون
-          </div>
-        </div>
+        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+          <div>Page 22</div>
+          <div className="mt-1">© 2025 Tous droits réservés</div>
+        </footer>
       </div>
     </div>
   );

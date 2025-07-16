@@ -5,39 +5,39 @@ const Page8 = () => {
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
   
   const letterGroups = [
-    { letter: 'ا', name: 'أَلِف', vowels: ['اَ', 'اُ', 'اِ'] },
-    { letter: 'ب', name: 'بَاء', vowels: ['بَ', 'بُ', 'بِ'] },
-    { letter: 'ت', name: 'تَاء', vowels: ['تَ', 'تُ', 'تِ'] },
-    { letter: 'ث', name: 'ثَاء', vowels: ['ثَ', 'ثُ', 'ثِ'] },
-    { letter: 'ج', name: 'جِيم', vowels: ['جَ', 'جُ', 'جِ'] },
-    { letter: 'ح', name: 'حَاء', vowels: ['حَ', 'حُ', 'حِ'] },
-    { letter: 'خ', name: 'خَاء', vowels: ['خَ', 'خُ', 'خِ'] },
-    { letter: 'د', name: 'دَال', vowels: ['دَ', 'دُ', 'دِ'] },
-    { letter: 'ذ', name: 'ذَال', vowels: ['ذَ', 'ذُ', 'ذِ'] },
-    { letter: 'ر', name: 'رَاء', vowels: ['رَ', 'رُ', 'رِ'] },
-    { letter: 'ز', name: 'زَاي', vowels: ['زَ', 'زُ', 'زِ'] },
-    { letter: 'س', name: 'سِين', vowels: ['سَ', 'سُ', 'سِ'] },
-    { letter: 'ش', name: 'شِين', vowels: ['شَ', 'شُ', 'شِ'] },
-    { letter: 'ص', name: 'صَاد', vowels: ['صَ', 'صُ', 'صِ'] },
-    { letter: 'ض', name: 'ضَاد', vowels: ['ضَ', 'ضُ', 'ضِ'] },
-    { letter: 'ط', name: 'طَاء', vowels: ['طَ', 'طُ', 'طِ'] },
-    { letter: 'ظ', name: 'ظَاء', vowels: ['ظَ', 'ظُ', 'ظِ'] },
-    { letter: 'ع', name: 'عَين', vowels: ['عَ', 'عُ', 'عِ'] },
-    { letter: 'غ', name: 'غَين', vowels: ['غَ', 'غُ', 'غِ'] },
-    { letter: 'ف', name: 'فَاء', vowels: ['فَ', 'فُ', 'فِ'] },
-    { letter: 'ق', name: 'قَاف', vowels: ['قَ', 'قُ', 'قِ'] },
-    { letter: 'ك', name: 'كَاف', vowels: ['كَ', 'كُ', 'كِ'] },
-    { letter: 'ل', name: 'لَام', vowels: ['لَ', 'لُ', 'لِ'] },
-    { letter: 'م', name: 'مِيم', vowels: ['مَ', 'مُ', 'مِ'] },
-    { letter: 'ن', name: 'نُون', vowels: ['نَ', 'نُ', 'نِ'] },
-    { letter: 'ه', name: 'هَاء', vowels: ['هَ', 'هُ', 'هِ'] },
-    { letter: 'و', name: 'وَاو', vowels: ['وَ', 'وُ', 'وِ'] },
-    { letter: 'ي', name: 'يَاء', vowels: ['يَ', 'يُ', 'يِ'] },
-    { letter: 'ء', name: 'هَمْزَة', vowels: ['ءَ', 'ءُ', 'ءِ'] },
-    { letter: 'ة', name: 'تَاء مَرْبُوطَة', vowels: ['ةَ', 'ةُ', 'ةِ'] }
+    { letter: 'ا', vowels: ['اِ', 'اُ', 'اَ'] },
+    { letter: 'ب', vowels: ['بِ', 'بُ', 'بَ'] },
+    { letter: 'ت', vowels: ['تِ', 'تُ', 'تَ'] },
+    { letter: 'ث', vowels: ['ثِ', 'ثُ', 'ثَ'] },
+    { letter: 'ج', vowels: ['جِ', 'جُ', 'جَ'] },
+    { letter: 'ح', vowels: ['حِ', 'حُ', 'حَ'] },
+    { letter: 'خ', vowels: ['خِ', 'خُ', 'خَ'] },
+    { letter: 'د', vowels: ['دِ', 'دُ', 'دَ'] },
+    { letter: 'ذ', vowels: ['ذِ', 'ذُ', 'ذَ'] },
+    { letter: 'ر', vowels: ['رِ', 'رُ', 'رَ'] },
+    { letter: 'ز', vowels: ['زِ', 'زُ', 'زَ'] },
+    { letter: 'س', vowels: ['سِ', 'سُ', 'سَ'] },
+    { letter: 'ش', vowels: ['شِ', 'شُ', 'شَ'] },
+    { letter: 'ص', vowels: ['صِ', 'صُ', 'صَ'] },
+    { letter: 'ض', vowels: ['ضِ', 'ضُ', 'ضَ'] },
+    { letter: 'ط', vowels: ['طِ', 'طُ', 'طَ'] },
+    { letter: 'ظ', vowels: ['ظِ', 'ظُ', 'ظَ'] },
+    { letter: 'ع', vowels: ['عِ', 'عُ', 'عَ'] },
+    { letter: 'غ', vowels: ['غِ', 'غُ', 'غَ'] },
+    { letter: 'ف', vowels: ['فِ', 'فُ', 'فَ'] },
+    { letter: 'ق', vowels: ['قِ', 'قُ', 'قَ'] },
+    { letter: 'ك', vowels: ['كِ', 'كُ', 'كَ'] },
+    { letter: 'ل', vowels: ['لِ', 'لُ', 'لَ'] },
+    { letter: 'م', vowels: ['مِ', 'مُ', 'مَ'] },
+    { letter: 'ن', vowels: ['نِ', 'نُ', 'نَ'] },
+    { letter: 'ه', vowels: ['هِ', 'هُ', 'هَ'] },
+    { letter: 'و', vowels: ['وِ', 'وُ', 'وَ'] },
+    { letter: 'ي', vowels: ['يِ', 'يُ', 'يَ'] },
+    { letter: 'ء', vowels: ['ءِ', 'ءُ', 'ءَ'] },
+    { letter: 'ة', vowels: ['ةِ', 'ةُ', 'ةَ'] }
   ];
 
-  const vowelNames = ['فَتْحَة', 'ضَمَّة', 'كَسْرَة'];
+  const vowelNames = ['Kassrah ( son : i )', 'Dammah ( son : ou )', 'Fathah ( son : a )'];
 
   return (
     <div 
@@ -47,9 +47,8 @@ const Page8 = () => {
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
-          <div className="bg-white/10 px-6 py-3 rounded-full text-lg font-semibold backdrop-blur-sm border border-white/20 inline-block">
-            تَعَلُّمُ الْحُرُوفِ الْعَرَبِيَّةِ مَعَ الْحَرَكَاتِ الثَّلَاثِ
+          <div className="text-3xl md:text-3xl font-bold">
+           Lttres seules avec voyelles
           </div>
         </div>
         
@@ -60,71 +59,35 @@ const Page8 = () => {
               <LetterGroup 
                 key={index} 
                 letter={group.letter}
-                name={group.name}
                 vowels={group.vowels}
                 vowelNames={vowelNames}
                 emphatic={emphaticLetters.includes(group.letter)}
               />
             ))}
           </div>
-          
-          {/* Progress Bar */}
-          <div className="w-full h-2 bg-zinc-800 rounded-full mb-6 overflow-hidden">
-            <div 
-              className="h-full bg-arabic-gradient rounded-full animate-progress"
-            ></div>
-          </div>
-          
-          {/* Légende pour les voyelles */}
-          <div className="bg-zinc-800 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-center gap-6 text-sm flex-wrap">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-green-400 rounded-full"></div>
-                <span className="text-green-400">فَتْحَة (a)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                <span className="text-blue-400">ضَمَّة (u)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-orange-400 rounded-full"></div>
-                <span className="text-orange-400">كَسْرَة (i)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-red-400 rounded-full"></div>
-                <span className="text-red-400">الحروف المفخمة</span>
-              </div>
-            </div>
-          </div>
         </div>
-        
+
         {/* Footer */}
-        <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-5 flex justify-between items-center">
-          <div className="text-lg font-semibold">طريقة التعلم التفاعلية - الحركات الثلاث</div>
-          <div className="bg-arabic-gradient text-white px-5 py-2 rounded-full font-semibold">
-            الصفحة الثامنة
-          </div>
-        </div>
+        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+          <div>Page 8</div>
+          <div className="mt-1">© 2025 Tous droits réservés</div>
+        </footer>
       </div>
     </div>
   );
 };
 
-// LetterGroup Component pour chaque groupe de lettre avec ses 3 voyelles
-const LetterGroup = ({ letter, name, vowels, vowelNames, emphatic }: { 
+// LetterGroup Component
+const LetterGroup = ({ letter, vowels, vowelNames, emphatic }: { 
   letter: string; 
-  name: string; 
   vowels: string[];
   vowelNames: string[];
   emphatic?: boolean;
 }) => (
   <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4">
-    {/* Titre du groupe */}
-    <div className="text-center font-bold text-lg text-indigo-300 mb-4 bg-indigo-900/30 py-2 rounded-lg">
-      {name}
+    <div className="text-center font-bold text-3xl text-white mb-4">
+      {letter}
     </div>
-    
-    {/* Grille des 3 voyelles */}
     <div className="grid grid-cols-3 gap-3">
       {vowels.map((vowelLetter, index) => (
         <div key={index} className="bg-zinc-700 border border-zinc-600 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300">
@@ -134,9 +97,9 @@ const LetterGroup = ({ letter, name, vowels, vowelNames, emphatic }: {
             {vowelLetter}
           </div>
           <div className={`text-xs font-semibold px-2 py-1 rounded ${
-            index === 0 ? 'text-green-400 bg-green-900/30' :
+            index === 0 ? 'text-orange-400 bg-orange-900/30' :
             index === 1 ? 'text-blue-400 bg-blue-900/30' :
-            'text-orange-400 bg-orange-900/30'
+            'text-green-400 bg-green-900/30'
           }`}>
             {vowelNames[index]}
           </div>

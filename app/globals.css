@@ -1,6 +1,7 @@
 @import "tailwindcss";
 /* Import de la police arabe */
 @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 
 :root {
   --background: #ffffff;
@@ -60,4 +61,8 @@ body {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
+}
+
+.font-arabic {
+  font-family: 'Cairo', serif;
 }

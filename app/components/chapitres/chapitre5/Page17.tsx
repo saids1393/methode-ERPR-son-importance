@@ -1,120 +1,89 @@
-// components/chapitres/chapitre5/Page17.tsx
 import React from 'react';
 
 const Page17 = () => {
-  const words = [
-    // Première ligne - mots avec voyelles simples
-    'بَيْتٌ', 'كَلْبٌ', 'نُورٌ', 'فَمٌ', 'يَدٌ', 'دُبٌ',
-    
-    // Deuxième ligne - mots avec tanwin
-    'بَيْتًا', 'كَلْبٍ', 'قَلَمًا', 'شَمْسًا', 'وَرْدًا', 'فِيلًا',
-    
-    // Troisième ligne - mélange de positions correctes
-    'نَارًا', 'مِلْحًا', 'خُبْزًا', 'تِينًا', 'زَيْتًا', 'عَسَلًا',
-    
-    // Quatrième ligne
-    'قُفْلٌ', 'بَحْرٌ', 'جَبَلٌ', 'قَمَرٌ', 'نَجْمٌ', 'لَحْمٌ',
-    
-    // Cinquième ligne
-    'سَمَكٌ', 'طَيْرٌ', 'فَأْرٌ', 'بَقَرٌ', 'غَنَمٌ', 'دِيكٌ',
-    
-    // Sixième ligne
-    'كَرَمٌ', 'قَلَمٌ', 'وَرَقٌ', 'كَأْسٌ', 'بَابٌ', 'سُوقٌ',
-    
-    // Septième ligne
-    'رَأْسٌ', 'عَيْنٌ', 'أُذُنٌ', 'أَنْفٌ', 'فَمٌ', 'حُلُمٌ',
-    
-    // Huitième ligne
-    'رِجْلٌ', 'يَدٌ', 'ظُفْرٌ', 'شَعْرٌ', 'جِلْدٌ', 'قَلْبٌ',
-    
-    // Neuvième ligne
-    'حَجَرٌ', 'تِبْنٌ', 'رَمْلٌ', 'طِينٌ', 'ثَلْجٌ', 'جَمْرٌ'
-  ];
+const words = [
+  'وَرَقٌ',   // feuille – Coran 7:22
+  'قَلَمٌ',   // stylo/plume – Coran 68:1
+  'مَلَكٌ',   // ange – ex. Coran 2:98
+  'بَشَرٌ',   // humain – Coran 15:28
+  'جَبَلٌ',   // montagne – Coran 2:63
+  'بَقَرٌ',   // vache – Coran 2:6    // feu – Coran 2:17
+  'ثَمَرٌ',   // fruit – Coran 2:266
+  'حَجَرٌ',   // pierre – Coran 2:74
+  'لَبَنٌ',   // lait – Coran 16:66
+  'قَمَرٌ',   // lune – Coran 2:189
+  'وَلَدٌ',   // enfant – Coran 6:151
+  'فَمٌ',     // bouche – Coran 5:110
+  'رَجُلٌ',   // homme – Coran 18:32
+     // vêtement – Coran 74:4
+    // chien – Coran 18:18
+];
 
   return (
-    <div 
-      className="font-arabic min-h-screen"
-      style={{ direction: 'rtl' }}
-    >
+    <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
-        {/* Header */}
+        {/* Header */} 
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
-          <div className="bg-white/10 px-6 py-3 rounded-full text-lg font-semibold backdrop-blur-sm border border-white/20 inline-block">
-            الحركات والتنوين - الدرس الثالث
-          </div>
-          <div className="text-sm mt-2 opacity-90">
-            تَعلُّم الكلمات بالحركات والتنوين
+          <div className="text-3xl md:text-3xl font-bold">
+            Exercices de lecture avec voyelles simples et doubles
           </div>
         </div>
         
         {/* Words Grid */}
         <div className="p-8 bg-zinc-900">
           <div className="max-w-6xl mx-auto">
-            {/* Grid des mots */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
               {words.map((word, index) => (
-                <WordCard 
-                  key={index} 
-                  word={word}
-                />
+                <WordCard key={index} word={word} />
               ))}
-            </div>
-            
-            {/* Explication */}
-            <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 mb-6">
-              <div className="text-center font-bold text-lg text-purple-400 mb-3 bg-purple-900/30 py-2 rounded-lg">
-                مُلَاحَظَة تَعْلِيمِيَّة
-              </div>
-              <div className="text-center text-zinc-300 text-base leading-relaxed">
-                هَذِهِ الكَلِمَاتُ تَحْتَوِي عَلَى الحَرَكَاتِ الأَسَاسِيَّةِ وَالتَّنْوِينِ فَقَطْ
-                <br />
-                <span className="text-yellow-400 font-semibold">بِدُونِ شَدَّةٍ وَمُدُودٍ</span>
-              </div>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="w-full h-2 bg-zinc-800 rounded-full mb-6 overflow-hidden">
-              <div 
-                className="h-full bg-arabic-gradient rounded-full animate-progress"
-              ></div>
-            </div>
-            
-            {/* Légende des couleurs */}
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 rounded-lg p-4">
-              <div className="text-center text-zinc-300 text-sm">
-                <span className="text-blue-400 font-semibold">الأَلْوَانُ المُتَنَاوِبَةُ:</span>
-                <span className="mr-4 text-white">أَسْوَد</span>
-                <span className="text-blue-400">وَأَزْرَق</span>
-                <span className="mr-4 text-green-400">لِتَسْهِيلِ القِرَاءَةِ</span>
-              </div>
             </div>
           </div>
         </div>
         
         {/* Footer */}
-        <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-5 flex justify-between items-center">
-          <div className="text-lg font-semibold">بدون شدة ومدود - فقط الحركات والتنوين</div>
-          <div className="bg-arabic-gradient text-white px-5 py-2 rounded-full font-semibold">
-            الصفحة السابعة عشرة
-          </div>
-        </div>
+        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+          <div>Page 17</div>
+          <div className="mt-1">© 2025 Tous droits réservés</div>
+        </footer>
       </div>
     </div>
   );
 };
 
-// WordCard Component avec alternance de couleurs
 const WordCard = ({ word }: { word: string }) => {
+  const simpleVowels = new Set(['َ', 'ُ', 'ِ', 'ً', 'ٌ', 'ٍ']); // fatha, damma, kasra + tanwin
+
   const renderWordWithColors = (word: string) => {
-    return word.split('').map((letter, index) => (
-      <span 
-        key={index} 
-        className={index % 2 === 0 ? 'text-white' : 'text-blue-400'}
-      >
-        {letter}
-      </span>
-    ));
+    const output = [];
+    for (let i = 0; i < word.length; i++) {
+      const char = word[i];
+      const nextChar = word[i + 1];
+
+      // Si la lettre est suivie d’une voyelle simple ou tanwin
+      if (simpleVowels.has(nextChar)) {
+        output.push(
+          <span key={`l-${i}`} className="text-blue-400">
+            {char}
+          </span>
+        );
+      } else if (!simpleVowels.has(char)) {
+        // Lettre sans voyelle simple → blanc
+        output.push(
+          <span key={`l-${i}`} className="text-white">
+            {char}
+          </span>
+        );
+      } else {
+        // Voyelles elles-mêmes → on laisse normales (non colorées)
+        output.push(
+          <span key={`v-${i}`} className="text-white">
+            {char}
+          </span>
+        );
+      }
+    }
+
+    return <span style={{ unicodeBidi: 'plaintext' }}>{output}</span>;
   };
 
   return (

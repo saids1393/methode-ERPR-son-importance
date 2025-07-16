@@ -59,12 +59,8 @@ const Page19 = () => {
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
-          <div className="bg-white/10 px-6 py-3 rounded-full text-xl font-bold backdrop-blur-sm border border-white/20 inline-block">
-            الْحُرُوفُ فِي بِدَايَةِ الْكَلِمَةِ
-          </div>
-          <div className="text-sm mt-2 opacity-90">
-            مَعَ حُرُوفِ الْمَدِّ وَالْإِطَالَةِ
+          <div className="text-3xl md:text-3xl font-bold">
+            Lettres de prolongation (hourrouf al madd)
           </div>
         </div>
         
@@ -81,78 +77,30 @@ const Page19 = () => {
                 />
               ))}
             </div>
-            
-            {/* Explication des prolongations */}
-            <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 mb-6">
-              <div className="text-center font-bold text-lg text-red-400 mb-3 bg-red-900/30 py-2 rounded-lg">
-                حُرُوفُ الْمَدِّ وَالْإِطَالَةِ
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm">
-                <div className="bg-red-900/30 p-3 rounded-lg">
-                  <div className="text-red-400 font-semibold mb-2">أَلِفُ الْمَدِّ</div>
-                  <div className="text-4xl text-red-400">ا</div>
-                  <div className="text-zinc-300 mt-2">مَدُّ الْفَتْحَةِ</div>
-                </div>
-                <div className="bg-red-900/30 p-3 rounded-lg">
-                  <div className="text-red-400 font-semibold mb-2">وَاوُ الْمَدِّ</div>
-                  <div className="text-4xl text-red-400">و</div>
-                  <div className="text-zinc-300 mt-2">مَدُّ الضَّمَّةِ</div>
-                </div>
-                <div className="bg-red-900/30 p-3 rounded-lg">
-                  <div className="text-red-400 font-semibold mb-2">يَاءُ الْمَدِّ</div>
-                  <div className="text-4xl text-red-400">ي</div>
-                  <div className="text-zinc-300 mt-2">مَدُّ الْكَسْرَةِ</div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="w-full h-2 bg-zinc-800 rounded-full mb-6 overflow-hidden">
-              <div 
-                className="h-full bg-arabic-gradient rounded-full animate-progress"
-              ></div>
-            </div>
-            
-            {/* Note pédagogique */}
-            <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 rounded-lg p-4 mb-6">
-              <div className="text-center text-zinc-300 text-sm">
-                <span className="text-orange-400 font-semibold">إِرْشَادٌ:</span>
-                <span className="mr-2">حُرُوفُ الْمَدِّ تُطِيلُ صَوْتَ الْحَرَكَةِ الَّتِي قَبْلَهَا</span>
-              </div>
-            </div>
-            
-            {/* Page Number */}
-            <div className="flex justify-center">
-              <div className="w-12 h-12 bg-arabic-gradient rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                ٢
-              </div>
-            </div>
           </div>
         </div>
-        
+
         {/* Footer */}
-        <div className="bg-gradient-to-r from-zinc-800 to-zinc-700 text-white p-5 flex justify-between items-center">
-          <div className="text-lg font-semibold">الحروف في بداية الكلمة مع حروف المد</div>
-          <div className="bg-arabic-gradient text-white px-5 py-2 rounded-full font-semibold">
-            الصفحة التاسعة عشرة
-          </div>
-        </div>
+        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+          <div>Page 19</div>
+          <div className="mt-1">© 2025 Tous droits réservés</div>
+        </footer>
       </div>
     </div>
   );
 };
 
-// ProlongationCard Component avec base + prolongation colorée
+// ProlongationCard Component avec base + prolongation colorée en violet
 const ProlongationCard = ({ base, prolongation }: { 
   base: string;
   prolongation: string;
 }) => {
   const getProlongationColor = (letter: string) => {
     switch(letter) {
-      case 'ا': return 'text-red-400';
-      case 'و': return 'text-red-400'; 
-      case 'ي': return 'text-red-400';
-      default: return 'text-red-400';
+      case 'ا': return 'text-purple-400';
+      case 'و': return 'text-purple-400'; 
+      case 'ي': return 'text-purple-400';
+      default: return 'text-purple-400';
     }
   };
 

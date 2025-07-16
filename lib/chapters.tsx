@@ -80,25 +80,25 @@ export const chapters: Chapter[] = [
     chapterNumber: 2,
     pages: [
       {
-        title: "Lettres seules avec voyelles",
+        title: "Lettres (non attachées) seules avec voyelles",
         href: "/chapitres/2/8",
         pageNumber: 8,
         status: 'completed'
       },
       {
-        title: "Lettres au début d'un mot (attachées) avec voyelles simples",
+        title: "Lettres (attachées) au début d'un mot avec voyelles simples",
         href: "/chapitres/2/9",
         pageNumber: 9,
         status: 'completed'
       },
       {
-        title: "Lettres au milieu d'un mot (attachées) avec voyelles simples",
+        title: "Lettres (attachées) au milieu d'un mot avec voyelles simples",
         href: "/chapitres/2/10",
         pageNumber: 10,
         status: 'completed'
       },
       {
-        title: "Lettres à la fin d'un mot (attachées) avec voyelles simples",
+        title: "Lettres (attachées) à la fin d'un mot avec voyelles simples",
         href: "/chapitres/2/11",
         pageNumber: 11,
         status: 'completed'
@@ -110,25 +110,25 @@ export const chapters: Chapter[] = [
     chapterNumber: 3,
     pages: [
       {
-        title: "Lettres seules avec doubles voyelles",
+        title: "Lettres seules (non attachées) avec doubles voyelles",
         href: "/chapitres/3/12",
         pageNumber: 12,
         status: 'completed'
       },
       {
-        title: "Lettres au début d'un mot (attachées) avec doubles voyelles",
+        title: "Lettres (attachées) au début d'un mot avec doubles voyelles",
         href: "/chapitres/3/13",
         pageNumber: 13,
         status: 'completed'
       },
       {
-        title: "Lettres au milieu d'un mot (attachées) avec doubles voyelles",
+        title: "Lettres (attachées) au milieu d'un mot avec doubles voyelles",
         href: "/chapitres/3/14",
         pageNumber: 14,
         status: 'completed'
       },
       {
-        title: "Lettres à la fin d'un mot (attachées) avec doubles voyelles",
+        title: "Lettres (attachées) à la fin d'un mot avec doubles voyelles",
         href: "/chapitres/3/15",
         pageNumber: 15,
         status: 'completed'
