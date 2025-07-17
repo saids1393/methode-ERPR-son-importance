@@ -60,7 +60,7 @@ const Page19 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-            Lettres de prolongation (hourrouf al madd)
+           Leçon : les trois lettres de prolongation
           </div>
         </div>
         

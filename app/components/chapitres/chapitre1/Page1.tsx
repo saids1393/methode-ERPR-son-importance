@@ -48,7 +48,7 @@ const Page1 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl font-bold mb-4">
-            Lettres arabes seules (non attachées)
+           Leçon : lettres seules (non attachées)
           </div>
         </div>
 

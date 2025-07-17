@@ -40,7 +40,7 @@ const Page25 = () => {
         {/* Header avec gradient orange spécifique */}
        <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-            Leçon shaddah
+            Leçon : la shaddah
           </div>
         </div>
         

@@ -20,7 +20,7 @@ export const chapters: Chapter[] = [
     chapterNumber: 0,
     pages: [
       {
-        title: "Prononciation des lettres arabes",
+        title: "Leçon : prononciation des lettres arabes",
         href: "/chapitres/0/0",
         pageNumber: 0,
         status: 'completed'
@@ -32,43 +32,43 @@ export const chapters: Chapter[] = [
     chapterNumber: 1,
     pages: [
       {
-        title: "Lettres seules (non attachées)",
+        title: "Leçon : lettres seules (non attachées)",
         href: "/chapitres/1/1",
         pageNumber: 1,
         status: 'completed'
       },
       {
-        title: "Lettres attachées au début d'un mot",
+        title: "Leçon : lettres attachées au début d'un mot",
         href: "/chapitres/1/2",
         pageNumber: 2,
         status: 'completed'
       },
       {
-        title: "Lettres attachées au milieu d'un mot",
+        title: "Leçon : lettres attachées au milieu d'un mot",
         href: "/chapitres/1/3",
         pageNumber: 3,
         status: 'completed'
       },
       {
-        title: "Lettres attachées à la fin d'un mot",
+        title: "Leçon : lettres attachées à la fin d'un mot",
         href: "/chapitres/1/4",
         pageNumber: 4,
         status: 'completed'
       },
       {
-        title: "Écriture des lettres seules et attachées",
+        title: "Exercice : écriture des lettres seules et attachées",
         href: "/chapitres/1/5",
         pageNumber: 5,
         status: 'completed'
       },
       {
-        title: " Exercice de reconnaissance des lettres",
+        title: " Exercice : reconnaissance des lettres seules et attachées",
         href: "/chapitres/1/6",
         pageNumber: 6,
         status: 'completed'
       },
       {
-        title: "Lettres disjointes coraniques",
+        title: "Exercice : reconnaissance des lettres séparées au début de certaines sourates",
         href: "/chapitres/1/7",
         pageNumber: 7,
         status: 'completed'
@@ -80,25 +80,25 @@ export const chapters: Chapter[] = [
     chapterNumber: 2,
     pages: [
       {
-        title: "Lettres (non attachées) seules avec voyelles",
+        title: "Leçon : lettres seules (non attachées) avec voyelles",
         href: "/chapitres/2/8",
         pageNumber: 8,
         status: 'completed'
       },
       {
-        title: "Lettres (attachées) au début d'un mot avec voyelles simples",
+        title: "Leçon : lettres attachées au début d’un mot avec voyelles simples",
         href: "/chapitres/2/9",
         pageNumber: 9,
         status: 'completed'
       },
       {
-        title: "Lettres (attachées) au milieu d'un mot avec voyelles simples",
+        title: "Leçon : lettres attachées au milieu d’un mot avec voyelles simples",
         href: "/chapitres/2/10",
         pageNumber: 10,
         status: 'completed'
       },
       {
-        title: "Lettres (attachées) à la fin d'un mot avec voyelles simples",
+        title: "Leçon : lettres attachées à la fin d’un mot avec voyelles simples",
         href: "/chapitres/2/11",
         pageNumber: 11,
         status: 'completed'
@@ -110,25 +110,25 @@ export const chapters: Chapter[] = [
     chapterNumber: 3,
     pages: [
       {
-        title: "Lettres seules (non attachées) avec doubles voyelles",
+        title: "Leçon : lettres seules (non attachées) avec voyelles doubles",
         href: "/chapitres/3/12",
         pageNumber: 12,
         status: 'completed'
       },
       {
-        title: "Lettres (attachées) au début d'un mot avec doubles voyelles",
+        title: "Leçon : lettres attachées au début d’un mot avec voyelles doubles",
         href: "/chapitres/3/13",
         pageNumber: 13,
         status: 'completed'
       },
       {
-        title: "Lettres (attachées) au milieu d'un mot avec doubles voyelles",
+        title: "Leçon : lettres attachées au milieu d’un mot avec voyelles doubles",
         href: "/chapitres/3/14",
         pageNumber: 14,
         status: 'completed'
       },
       {
-        title: "Lettres (attachées) à la fin d'un mot avec doubles voyelles",
+        title: "Leçon : lettres attachées à la fin d’un mot avec voyelles doubles",
         href: "/chapitres/3/15",
         pageNumber: 15,
         status: 'completed'
@@ -140,7 +140,7 @@ export const chapters: Chapter[] = [
     chapterNumber: 4,
     pages: [
       {
-        title: "Exemples avec explications",
+        title: "Leçon : exemples et compréhension",
         href: "/chapitres/4/16",
         pageNumber: 16,
         status: 'completed'
@@ -152,7 +152,7 @@ export const chapters: Chapter[] = [
     chapterNumber: 5,
     pages: [
       {
-        title: "Exercices de lecture avec voyelles simples et doubles",
+        title: "Exercice : reconnaissance des mots avec voyelles simples et doubles",
         href: "/chapitres/5/17",
         pageNumber: 17,
         status: 'completed'
@@ -164,19 +164,19 @@ export const chapters: Chapter[] = [
     chapterNumber: 6,
     pages: [
       {
-        title: "Alif saghirah - Ya saghirah - Waw saghirah",
+        title: "Leçon : symboles Alif saghirah - Ya saghirah - Waw saghirah",
         href: "/chapitres/6/18",
         pageNumber: 18,
         status: 'completed'
       },
       {
-        title: "Les 3 lettres de prolongation",
+        title: "Leçon : les trois lettres de prolongation",
         href: "/chapitres/6/19",
         pageNumber: 19,
         status: 'completed'
       },
       {
-        title: "Lettres douces",
+        title: "Leçon : lettres douces",
         href: "/chapitres/6/20",
         pageNumber: 20,
         status: 'completed'
@@ -188,7 +188,7 @@ export const chapters: Chapter[] = [
     chapterNumber: 7,
     pages: [
       {
-        title: "Exercices de lecture des mots avec doubles voyelles, prolongations et lettres douces",
+        title: "Exercice : reconnaissance des mots avec doubles voyelles, prolongations et lettres douces",
         href: "/chapitres/7/21",
         pageNumber: 21,
         status: 'completed'
@@ -196,17 +196,17 @@ export const chapters: Chapter[] = [
     ]
   },
   {
-    title: "Soukoune",
+    title: "La soukoun",
     chapterNumber: 8,
     pages: [
       {
-        title: "Leçon sur le soukūn",
+        title: "Leçon : la soukoun",
         href: "/chapitres/8/22",
         pageNumber: 22,
         status: 'completed'
       },
       {
-        title: "Exercices de lecture des mots avec soukoune",
+        title: "Exercice : reconnaissance des mots avec la soukoun",
         href: "/chapitres/8/23",
         pageNumber: 23,
         status: 'completed'
@@ -218,7 +218,7 @@ export const chapters: Chapter[] = [
     chapterNumber: 9,
     pages: [
       {
-        title: "Exemples et eplications",
+        title: "Leçon : exemples et compréhension des lettres solaires et lunaires",
         href: "/chapitres/9/24",
         pageNumber: 24,
         status: 'completed'
@@ -226,35 +226,35 @@ export const chapters: Chapter[] = [
     ]
   },
   {
-    title: "Shaddah - Lettre doublée",
+    title: "La shaddah",
     chapterNumber: 10,
     pages: [
       {
-        title: "Leçon sur la shaddah",
+        title: "Leçon : shaddah",
         href: "/chapitres/10/25",
         pageNumber: 25,
         status: 'completed'
       },
       {
-        title: "Exercices de lecture des mots avec la shaddah",
+        title: "Exercice : reconnaissance des mots avec la shaddah",
         href: "/chapitres/10/26",
         pageNumber: 26,
         status: 'completed'
       },
       {
-        title: "Exercices de lecture des mots avec la shadda et soukūn",
+        title: "Exercice : reconnaissance des mots avec la shaddah et la soukoun",
         href: "/chapitres/10/27",
         pageNumber: 27,
         status: 'completed'
       },
       {
-        title: "Exercices de lecture des mots avec la shaddah, soukoune et prolongations",
+        title: "Exercice : Reconnaissance des mots avec la Chaddah, la soukoun et les prolongations",
         href: "/chapitres/10/28",
         pageNumber: 28,
         status: 'completed'
       },
       {
-        title: "Écriture d'un mot complet",
+        title: "Exercice : écriture complète des mots avec toute les bases de la méthode",
         href: "/chapitres/10/29",
         pageNumber: 29,
         status: 'completed'

@@ -33,7 +33,7 @@ const Page7 = () => {
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">Hourrouf Al mouquata3ah</div>
+          <div className="text-3xl font-bold mb-4">Exercice : reconnaissance des lettres séparées au début de certaines sourates</div>
         </div>
         
         {/* Huruf Muqattaah Grid */}

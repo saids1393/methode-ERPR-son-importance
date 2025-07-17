@@ -39,7 +39,7 @@ const Page28 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-            Exercices de lecture avec la shaddah, soukoune et prolongations
+          Exercice : reconnaissance des mots avec la shaddah, la soukoun et les prolongations
           </div>
         </div>
         

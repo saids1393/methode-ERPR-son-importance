@@ -51,7 +51,7 @@ const Page18 = () => {
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl md:text-3xl font-bold">Signes diacritiques de prolongation réduite (saghirate)</div>
+          <div className="text-3xl md:text-3xl font-bold">Leçon : symbole Alif saghirah - Ya saghirah - Waw saghirah</div>
         </div>
 
         {/* Letters Grid */}

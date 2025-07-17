@@ -50,7 +50,7 @@ const Page26 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-            Exercices de lecture doubles voyelles, prolongations et lettres douces (Tanwine, Madd et Layyinah)
+          Exercice : reconnaissance des mots avec la shaddah
           </div>
         </div>
         

@@ -52,7 +52,7 @@ const Page2 = () => {
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">Les lettres en début de mot</div>
+          <div className="text-3xl font-bold mb-4">Leçon : lettres attachées au début d'un mot</div>
         </div>
         
         {/* Alphabet Grid */}

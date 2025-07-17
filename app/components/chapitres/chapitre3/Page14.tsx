@@ -46,7 +46,7 @@ const Page14 = () => {
         {/* Header */}
        <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-             Lettres attachées en milieu de mot avec doubles voyelles (harakaatane)
+           Leçon : lettres attachées au milieu d’un mot avec voyelles doubles
           </div>
         </div>
         

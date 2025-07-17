@@ -46,7 +46,7 @@ const Page22 = () => {
          {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-            Absence de voyelle sur une lettre (soukoune)
+            Leçon : soukoun
           </div>
         </div>
         

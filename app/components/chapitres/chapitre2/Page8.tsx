@@ -5,39 +5,39 @@ const Page8 = () => {
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
   
   const letterGroups = [
-    { letter: 'ا', vowels: ['اِ', 'اُ', 'اَ'] },
-    { letter: 'ب', vowels: ['بِ', 'بُ', 'بَ'] },
-    { letter: 'ت', vowels: ['تِ', 'تُ', 'تَ'] },
-    { letter: 'ث', vowels: ['ثِ', 'ثُ', 'ثَ'] },
-    { letter: 'ج', vowels: ['جِ', 'جُ', 'جَ'] },
-    { letter: 'ح', vowels: ['حِ', 'حُ', 'حَ'] },
-    { letter: 'خ', vowels: ['خِ', 'خُ', 'خَ'] },
-    { letter: 'د', vowels: ['دِ', 'دُ', 'دَ'] },
-    { letter: 'ذ', vowels: ['ذِ', 'ذُ', 'ذَ'] },
-    { letter: 'ر', vowels: ['رِ', 'رُ', 'رَ'] },
-    { letter: 'ز', vowels: ['زِ', 'زُ', 'زَ'] },
-    { letter: 'س', vowels: ['سِ', 'سُ', 'سَ'] },
-    { letter: 'ش', vowels: ['شِ', 'شُ', 'شَ'] },
-    { letter: 'ص', vowels: ['صِ', 'صُ', 'صَ'] },
-    { letter: 'ض', vowels: ['ضِ', 'ضُ', 'ضَ'] },
-    { letter: 'ط', vowels: ['طِ', 'طُ', 'طَ'] },
-    { letter: 'ظ', vowels: ['ظِ', 'ظُ', 'ظَ'] },
-    { letter: 'ع', vowels: ['عِ', 'عُ', 'عَ'] },
-    { letter: 'غ', vowels: ['غِ', 'غُ', 'غَ'] },
-    { letter: 'ف', vowels: ['فِ', 'فُ', 'فَ'] },
-    { letter: 'ق', vowels: ['قِ', 'قُ', 'قَ'] },
-    { letter: 'ك', vowels: ['كِ', 'كُ', 'كَ'] },
-    { letter: 'ل', vowels: ['لِ', 'لُ', 'لَ'] },
-    { letter: 'م', vowels: ['مِ', 'مُ', 'مَ'] },
-    { letter: 'ن', vowels: ['نِ', 'نُ', 'نَ'] },
-    { letter: 'ه', vowels: ['هِ', 'هُ', 'هَ'] },
-    { letter: 'و', vowels: ['وِ', 'وُ', 'وَ'] },
-    { letter: 'ي', vowels: ['يِ', 'يُ', 'يَ'] },
-    { letter: 'ء', vowels: ['ءِ', 'ءُ', 'ءَ'] },
-    { letter: 'ة', vowels: ['ةِ', 'ةُ', 'ةَ'] }
+    { letter: 'ا', vowels: ['اَ', 'اُ', 'اِ'] },
+    { letter: 'ب', vowels: ['بَ', 'بُ', 'بِ'] },
+    { letter: 'ت', vowels: ['تَ', 'تُ', 'تِ'] },
+    { letter: 'ث', vowels: ['ثَ', 'ثُ', 'ثِ'] },
+    { letter: 'ج', vowels: ['جَ', 'جُ', 'جِ'] },
+    { letter: 'ح', vowels: ['حَ', 'حُ', 'حِ'] },
+    { letter: 'خ', vowels: ['خَ', 'خُ', 'خِ'] },
+    { letter: 'د', vowels: ['دَ', 'دُ', 'دِ'] },
+    { letter: 'ذ', vowels: ['ذَ', 'ذُ', 'ذِ'] },
+    { letter: 'ر', vowels: ['رَ', 'رُ', 'رِ'] },
+    { letter: 'ز', vowels: ['زَ', 'زُ', 'زِ'] },
+    { letter: 'س', vowels: ['سَ', 'سُ', 'سِ'] },
+    { letter: 'ش', vowels: ['شَ', 'شُ', 'شِ'] },
+    { letter: 'ص', vowels: ['صَ', 'صُ', 'صِ'] },
+    { letter: 'ض', vowels: ['ضَ', 'ضُ', 'ضِ'] },
+    { letter: 'ط', vowels: ['طَ', 'طُ', 'طِ'] },
+    { letter: 'ظ', vowels: ['ظَ', 'ظُ', 'ظِ'] },
+    { letter: 'ع', vowels: ['عَ', 'عُ', 'عِ'] },
+    { letter: 'غ', vowels: ['غَ', 'غُ', 'غِ'] },
+    { letter: 'ف', vowels: ['فَ', 'فُ', 'فِ'] },
+    { letter: 'ق', vowels: ['قَ', 'قُ', 'قِ'] },
+    { letter: 'ك', vowels: ['كَ', 'كُ', 'كِ'] },
+    { letter: 'ل', vowels: ['لَ', 'لُ', 'لِ'] },
+    { letter: 'م', vowels: ['مَ', 'مُ', 'مِ'] },
+    { letter: 'ن', vowels: ['نَ', 'نُ', 'نِ'] },
+    { letter: 'ه', vowels: ['هَ', 'هُ', 'هِ'] },
+    { letter: 'و', vowels: ['وَ', 'وُ', 'وِ'] },
+    { letter: 'ي', vowels: ['يَ', 'يُ', 'يِ'] },
+    { letter: 'ء', vowels: ['ءَ', 'ءُ', 'ءِ'] },
+    { letter: 'ة', vowels: ['ةَ', 'ةُ', 'ةِ'] }
   ];
 
-  const vowelNames = ['Kassrah ( son : i )', 'Dammah ( son : ou )', 'Fathah ( son : a )'];
+  const vowelNames = ['Fathah ( son : a )', 'Dammah ( son : ou )', 'Kassrah ( son : i )'];
 
   return (
     <div 
@@ -48,7 +48,7 @@ const Page8 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-           Lettres seules avec voyelles simples
+          Leçon : lettres seules (non attachées) avec voyelles
           </div>
         </div>
         

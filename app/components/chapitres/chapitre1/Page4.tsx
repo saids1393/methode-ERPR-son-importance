@@ -52,7 +52,7 @@ const Page4 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl font-bold mb-2">
-            Les lettres en fin de mot
+            Leçon : lettres attachées à la fin d'un mot
           </div>
         </div>
         

@@ -21,7 +21,7 @@ const Page16 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-            Lettres qui ne s'attachent pas après elles
+           Leçon : exemples et compréhension des lettres qui ne s’attachent pas après elles
           </div>
         </div>
 

@@ -32,7 +32,7 @@ const Page24 = () => {
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* En-tête */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl md:text-3xl font-bold">Lettres solaires et lunaires (chamssiyyah et kamariyyah)</div>
+          <div className="text-3xl md:text-3xl font-bold">Leçon : exemples et compréhension des lettres solaires et lunaires</div>
         </div>
         
         {/* Contenu */}

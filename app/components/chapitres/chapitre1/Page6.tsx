@@ -67,7 +67,7 @@ const Page6 = () => {
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">Reconnaissance des lettres d'alphabet sur toute leurs formes</div>
+          <div className="text-3xl font-bold mb-4"> Exercice : reconnaissance des lettres seules et attachées</div>
         </div>
 
         {/* Words Grid */}

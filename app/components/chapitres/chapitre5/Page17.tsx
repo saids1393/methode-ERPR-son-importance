@@ -26,7 +26,7 @@ const Page17 = () => {
     <div className="min-h-screen bg-zinc-900 text-white font-serif font-amiri" dir="rtl">
       <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-            Exercices de lecture avec voyelles simples et doubles
+           Exercice : reconnaissance des mots avec voyelles simples et doubles
           </div>
         </div>
 
