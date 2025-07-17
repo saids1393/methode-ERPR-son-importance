@@ -31,8 +31,13 @@ const Page1 = () => {
     { letter: 'ن' },
     { letter: 'ه' },
     { letter: 'و' },
-    { letter: 'ي' }
+    { letter: 'ي' },
+    { letter: 'ء' },
+    { letter: 'ة' }
   ];
+
+  // Indices des lettres spéciales : les 3 dernières
+  const specialStartIndex = allLetters.length - 2;
 
   return (
     <div 
@@ -55,10 +60,25 @@ const Page1 = () => {
                 key={index}
                 letter={item.letter}
                 emphatic={emphaticLetters.includes(item.letter)}
+                special={index >= specialStartIndex}
               />
             ))}
           </div>
-          
+
+          {/* Légende simplifiée */}
+          <div className="bg-zinc-800 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+                <span className="text-red-400">Lettres emphatiques</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-purple-400 rounded-full"></div>
+                <span className="text-purple-400">Lettres spéciales</span>
+              </div>
+            </div>
+          </div>
+
           {/* Footer */}
           <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
             <div>Page 1</div>
@@ -70,13 +90,19 @@ const Page1 = () => {
   );
 };
 
-// Cell Component adapté pour le thème sombre (sans le nom)
-const Cell = ({ letter, emphatic }: { letter: string; emphatic?: boolean }) => (
-  <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer">
-    <div className={`text-3xl md:text-4xl font-bold ${emphatic ? 'text-red-400' : 'text-white'} transition-colors`}>
-      {letter}
+// Cell Component adapté pour thème sombre + emphatique + spéciale
+const Cell = ({ letter, emphatic, special }: { letter: string; emphatic?: boolean; special?: boolean }) => {
+  let textColor = 'text-white';
+  if (emphatic) textColor = 'text-red-400';
+  else if (special) textColor = 'text-purple-400';
+
+  return (
+    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer">
+      <div className={`text-3xl md:text-4xl font-bold ${textColor} transition-colors`}>
+        {letter}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Page1;

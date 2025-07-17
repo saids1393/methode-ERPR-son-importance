@@ -40,8 +40,8 @@ const Page2 = () => {
     { letter: 'هـ', emphatic: false, violet: false },
     { letter: 'و', emphatic: false, violet: false },
     { letter: 'يـ', emphatic: false, violet: false },
-    { letter: 'ء', emphatic: false, violet: true },
-    { letter: 'ة', emphatic: false, violet: true }
+    { letter: 'ء', emphatic: false, violet: true }
+
   ];
 
   return (
@@ -67,7 +67,19 @@ const Page2 = () => {
               />
             ))}
           </div>
-          
+          {/* Légende simplifiée */}
+          <div className="bg-zinc-800 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+                <span className="text-red-400">Lettres emphatiques</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-purple-400 rounded-full"></div>
+                <span className="text-purple-400">Lettres spéciales</span>
+              </div>
+            </div>
+          </div>
            {/* Footer */}
         <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
           <div>Page 2</div>

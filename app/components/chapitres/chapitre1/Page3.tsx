@@ -40,7 +40,6 @@ const Page3 = () => {
     { letter: 'ـو', emphatic: false, violet: false },
     { letter: 'ـيـ', emphatic: false, violet: false },
     { letter: 'ء', emphatic: false, violet: true },
-    { letter: 'ة', emphatic: false, violet: true }
   ];
 
   return (
@@ -83,6 +82,7 @@ const Page3 = () => {
             </div>
           </div>
         </div>
+        
         
         {/* Footer standard */}
         <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">

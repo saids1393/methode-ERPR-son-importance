@@ -45,7 +45,7 @@ const Page9 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-           Lettres attachées en début de mot avec des voyelles (harakaat)
+           Lettres attachées en début de mot avec voyelles simples (harakaat)
           </div>
         </div>
 
@@ -61,8 +61,6 @@ const Page9 = () => {
                 nonConnecting={nonConnectingLetters.includes(group.letter)}
               />
             ))}
-
-
           </div>
         </div>
 
@@ -96,7 +94,7 @@ const LetterGroup = ({
       <div className="text-center font-bold text-3xl text-white mb-4">
         {baseForm}
       </div>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3" style={{ direction: 'rtl' }}>
         {vowels.map((vowelLetter, index) => (
           <div
             key={index}

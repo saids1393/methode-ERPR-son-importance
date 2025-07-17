@@ -1,4 +1,4 @@
-// components/chapitres/chapitre1/Page0.tsx
+// components/chapitres/chapitre1/Page0.tsx 
 import React from 'react';
 
 const Page0 = () => {
@@ -9,7 +9,7 @@ const Page0 = () => {
     'ث': { mot: 'Think (le verbe penser en Anglais)' },
     'ج': { mot: 'Jean', emoji: '👖' },
     'ح': { mot: 'Le prénom Mohammad ou le début de la sourate al fatiha Al Hamdou' },
-    'خ': { mot: 'Khôl', emoji: '🖌️' },
+    'خ': { mot: 'Rateau', emoji: '🧹' },
     'د': { mot: 'Dalmatien', emoji: '🐶' },
     'ذ': { mot: 'That (pronom démonstratif: ce/cette/cela)' },
     'ر': { mot: 'Escobar (R roulé en Espagnol)' },
@@ -30,7 +30,9 @@ const Page0 = () => {
     'ن': { mot: 'Nounours', emoji: '🐻' },
     'ه': { mot: "Air d'un bâillement" },
     'و': { mot: "Waww (en anglais, quand on est étonné(e))" },
-    'ي': { mot: 'Yaourt' }
+    'ي': { mot: 'Yaourt' },
+    'ء': { mot: "Prénom : Hamzah" },
+    'ة': { mot: 'Tarte', emoji: '🥧' },
   };
 
   const allLetters = [
@@ -61,7 +63,9 @@ const Page0 = () => {
     { letter: 'ن', name: 'نُون' },
     { letter: 'ه', name: 'هَاء' },
     { letter: 'و', name: 'وَاو' },
-    { letter: 'ي', name: 'يَاء' }
+    { letter: 'ي', name: 'يَاء' },
+    { letter: 'ء', name: 'وَاو' },
+    { letter: 'ة', name: 'يَاء' }
   ];
 
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
@@ -84,7 +88,11 @@ const Page0 = () => {
               {/* Lettre arabe */}
               <div
                 className={`text-6xl md:text-8xl font-bold w-1/4 text-center ${
-                  emphaticLetters.includes(item.letter) ? 'text-red-500' : 'text-white'
+                  index >= allLetters.length - 2
+                    ? 'text-purple-500'
+                    : emphaticLetters.includes(item.letter)
+                    ? 'text-red-500'
+                    : 'text-white'
                 }`}
               >
                 {item.letter}
@@ -106,6 +114,20 @@ const Page0 = () => {
             </div>
           );
         })}
+      </div>
+
+      {/* Légende simplifiée */}
+      <div className="bg-zinc-800 rounded-lg p-4 mb-4">
+        <div className="flex items-center justify-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+            <span className="text-red-400">Lettres emphatiques</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-purple-400 rounded-full"></div>
+            <span className="text-purple-400">Lettres spéciales</span>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8 text-center text-sm text-zinc-400">

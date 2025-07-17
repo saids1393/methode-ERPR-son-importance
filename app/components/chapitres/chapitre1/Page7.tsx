@@ -3,26 +3,26 @@ import React from 'react';
 const Page7 = () => {
   const hurufMuqattaah = [
     // Row 1
-    { letters: 'آلمٓ', emphatic: false },
-    { letters: 'آلمٓصٓ', emphatic: false },
-    { letters: 'آلرٓ', emphatic: false },
-    { letters: 'آلمٓرٓ', emphatic: false },
+    { letters:'الٓمٓ', emphatic: false },
+    { letters:'الٓمٓصٓ', emphatic: true },
+    { letters: 'الٓر',emphatic: false },
+    { letters: 'الٓمٓر', emphatic: true },
     
     // Row 2
-    { letters: 'كٓهيعٓصٓ', emphatic: true },
-    { letters: 'طٓهٓ', emphatic: true },
-    { letters: 'طٓسٓمٓ', emphatic: true },
-    { letters: 'طٓسٓ', emphatic: true },
+    { letters: 'كٓهيعٓصٓ', emphatic: false },
+    { letters: 'طه', emphatic: true },
+    { letters: 'طسٓمٓ', emphatic: false },
+    { letters: 'طسٓ', emphatic: true },
     
     // Row 3
-    { letters: 'يٓسٓ', emphatic: false },
+    { letters: 'يسٓ', emphatic: false },
     { letters: 'صٓ', emphatic: true },
-    { letters: 'قٓ', emphatic: true },
-    { letters: 'نٓ', emphatic: false },
+    { letters: 'قٓ', emphatic: false },
+    { letters: 'نٓ', emphatic: true },
     
     // Row 4
-    { letters: 'حٓمٓ', emphatic: true },
-    { letters: 'حٓمٓعٓسٓقٓ', emphatic: true }
+    { letters: 'حمٓ', emphatic: false },
+    { letters: 'حمٓ عٓسٓقٓ', emphatic: true }
   ];
 
   return (

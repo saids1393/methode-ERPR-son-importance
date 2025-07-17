@@ -48,7 +48,7 @@ const Page8 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-           Lttres seules avec voyelles
+           Lettres seules avec voyelles simples
           </div>
         </div>
         

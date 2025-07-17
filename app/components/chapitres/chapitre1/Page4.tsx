@@ -40,7 +40,7 @@ const Page4 = () => {
     { letter: 'ـو', emphatic: false, violet: false },
     { letter: 'ـي', emphatic: false, violet: false },
     { letter: 'ء', emphatic: false, violet: true },
-    { letter: 'ة', emphatic: false, violet: true }
+    { letter: 'ـة', emphatic: false, violet: true }
   ];
 
   return (
