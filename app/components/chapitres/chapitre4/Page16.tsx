@@ -11,7 +11,6 @@ const Page16 = () => {
     { letter: 'و', example: 'خَوْفٌ', meaning: 'peur' }
   ];
 
-
   return (
     <div
       className="font-arabic min-h-screen"
@@ -21,7 +20,7 @@ const Page16 = () => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-           Leçon : exemples et compréhension des lettres qui ne s’attachent pas après elles
+            Leçon : exemples et compréhension des lettres qui ne s’attachent pas après elles
           </div>
         </div>
 
@@ -67,20 +66,20 @@ const Page16 = () => {
 
 // Fonction utilitaire pour surligner la lettre non attachable dans l'exemple
 const highlightLetterInExample = (example: string, targetLetter: string) => {
-  const index = example.indexOf(targetLetter);
-  if (index === -1) return example;
+  const highlighted = example.replace(
+    new RegExp(targetLetter, 'u'), // Première occurrence uniquement
+    `<span class="text-red-500">${targetLetter}</span>`
+  );
 
   return (
-    <>
-      {example.slice(0, index)}
-      <span className="text-red-500">{example[index]}</span>
-      {example.slice(index + 1)}
-    </>
+    <span
+      dangerouslySetInnerHTML={{ __html: highlighted }}
+      className="text-white"
+    />
   );
 };
 
-
-// DisconnectedLetterCard Component pour chaque lettre avec son exemple
+// DisconnectedLetterCard Component
 const DisconnectedLetterCard = ({ letter, example, meaning }: {
   letter: string;
   example: string;
