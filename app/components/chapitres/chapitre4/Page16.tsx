@@ -62,7 +62,29 @@ const Page16 = () => {
   );
 };
 
-// DisconnectedLetterCard Component
+// Component qui colore la lettre cible dans le mot
+const ColoredLetterInWord = ({ word, targetLetter }: { word: string; targetLetter: string }) => {
+  // Découpe le mot en lettres individuelles
+  const letters = [...word];
+
+  return (
+    <div
+      className="text-3xl md:text-4xl font-bold leading-relaxed text-white"
+      style={{ direction: 'rtl', userSelect: 'text' }}
+    >
+      {letters.map((char, idx) => (
+        <span
+          key={idx}
+          className={char === targetLetter ? 'text-red-500' : ''}
+          style={{ userSelect: 'text' }}
+        >
+          {char}
+        </span>
+      ))}
+    </div>
+  );
+};
+
 const DisconnectedLetterCard = ({ letter, example, meaning }: {
   letter: string;
   example: string;
@@ -77,13 +99,11 @@ const DisconnectedLetterCard = ({ letter, example, meaning }: {
     {/* Ligne de séparation */}
     <div className="w-full h-px bg-zinc-600 mb-4"></div>
 
-    {/* Exemple : mot entier surligné */}
-    <div className="text-3xl md:text-4xl font-bold text-white mb-3 leading-relaxed">
-      {example}
-    </div>
+    {/* Exemple avec la lettre colorée dans le mot */}
+    <ColoredLetterInWord word={example} targetLetter={letter} />
 
     {/* Badge */}
-    <div className="inline-block bg-yellow-900/30 text-yellow-400 px-3 py-1 rounded-full text-xs font-semibold">
+    <div className="inline-block bg-yellow-900/30 text-yellow-400 px-3 py-1 rounded-full text-xs font-semibold mt-3">
       Ne s'attache pas après
     </div>
   </div>
