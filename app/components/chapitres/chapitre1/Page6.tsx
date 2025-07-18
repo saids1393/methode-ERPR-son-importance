@@ -2,61 +2,20 @@ import React from 'react';
 
 const Page6 = () => {
   const words = [
-    // Row 1 (2 lettres + 1 lettre seule)
-    'في', 'من', 'ق', 'قد', 'ل\u200cا', 'هو',
-
-    // Row 2 (2 lettres)
+    'في', 'من', 'ق', 'قد', 'ل', 'هو',
     'ما', 'أن', 'لم', 'كل', 'ثم', 'هل',
-
-    // Row 3 (2 lettres + 1 lettre seule)
     'عن', 'ر', 'به', 'له', 'رب', 'قل',
-
-    // Row 4 (2 lettres)
     'هم', 'هو', 'نا', 'كم', 'أي', 'ف',
-
-    // Row 5 (3 lettres + 1 lettre seule)
     'نور', 'عبد', 'نار', 'يدع', 'فوز', 'ع',
-
-    // Row 6 (3 lettres)
     'ملك', 'نهر', 'قمر', 'غيب', 'رسل', 'نفس',
-
-    // Row 7 (3 lettres + 1 lettre seule)
     'ضر', 'صمت', 'ح', 'خير', 'علم', 'قلب',
-
-    // Row 8 (3 lettres)
     'خلق', 'غفر', 'سجد', 'عدة', 'خوف', 'صدق',
-
-    // Row 9 (3 lettres + 1 lettre seule)
     'كفر', 'نصر', 'س', 'سؤل', 'أمر', 'يئس',
   ];
 
-  // Fonction pour appliquer l'alternance de couleurs
+  // Fonction simplifiée : rendre le mot entier directement en blanc
   const renderWordWithColors = (word: string) => {
-    // Si le mot contient la séquence lam + ZWNJ + alif, on la traite à part
-    if (word.includes('ل\u200cا')) {
-      const parts = word.split('ل\u200cا');
-      return (
-        <>
-          {parts[0] && renderLetters(parts[0])}
-          <span>
-            <span className="text-white">ل</span>
-            <span className="text-blue-400">ا</span>
-          </span>
-          {parts[1] && renderLetters(parts[1])}
-        </>
-      );
-    }
-    // Sinon, alternance normale
-    return renderLetters(word);
-  };
-
-  // Fonction pour rendre chaque lettre en alternance blanche / bleue
-  const renderLetters = (text: string) => {
-    return text.split('').map((letter, index) => (
-      <span key={index} className={index % 2 === 0 ? 'text-white' : 'text-blue-400'}>
-        {letter}
-      </span>
-    ));
+    return word;
   };
 
   return (
@@ -67,7 +26,7 @@ const Page6 = () => {
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4"> Exercice : reconnaissance des lettres seules et attachées</div>
+          <div className="text-3xl font-bold mb-4">Exercice : reconnaissance des lettres seules et attachées</div>
         </div>
 
         {/* Words Grid */}
@@ -89,7 +48,7 @@ const Page6 = () => {
   );
 };
 
-// WordCell Component avec alternance de couleurs, reçoit la fonction pour gérer l'affichage
+// WordCell Component avec texte blanc uniforme
 const WordCell = ({
   word,
   renderWordWithColors,
@@ -99,7 +58,7 @@ const WordCell = ({
 }) => {
   return (
     <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[80px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer">
-      <div className="text-3xl md:text-4xl font-bold transition-colors">
+      <div className="text-3xl md:text-4xl font-bold text-white">
         {renderWordWithColors(word)}
       </div>
     </div>
