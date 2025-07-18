@@ -4,31 +4,23 @@ const Page24 = () => {
   const solarLetters = ['ت', 'ث', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ل', 'ن'];
   const lunarLetters = ['ا', 'ب', 'ج', 'ح', 'خ', 'ع', 'غ', 'ف', 'ق', 'ك', 'م', 'و', 'ه', 'ي'];
 
-  const solarExamples = [
-    { article: 'ال', rest: 'شَّمْسُ' },
-    { article: 'ال', rest: 'نَّهْرُ' },
-    { article: 'ال', rest: 'دَّرْسُ' },
-    { article: 'ال', rest: 'تِّينُ' },
-  ];
-
-  const lunarExamples = [
-    { article: 'الْ', rest: 'قَمَرُ' },
-    { article: 'الْ', rest: 'بَيْتُ' },
-    { article: 'الْ', rest: 'كِتَابُ' },
-    { article: 'الْ', rest: 'مَاءُ' },
-  ];
+  const solarExamples = ['الشَّمْسُ', 'النَّهْرُ', 'الدَّرْسُ', 'التِّينُ'];
+  const lunarExamples = ['الْقَمَرُ', 'الْبَيْتُ', 'الْكِتَابُ', 'الْمَاءُ'];
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
+        {/* En-tête */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
             Leçon : exemples et compréhension des lettres solaires et lunaires
           </div>
         </div>
 
+        {/* Contenu */}
         <div className="p-8 bg-zinc-900">
           <div className="max-w-6xl mx-auto">
+            {/* Lettres solaires */}
             <div className="mb-12">
               <SectionTitle
                 title="Lettres solaires (14 lettres)"
@@ -42,16 +34,13 @@ const Page24 = () => {
               </div>
               <SectionSubtitle title="Exemples de lettres solaires" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {solarExamples.map((example, index) => (
-                  <ExampleCard
-                    key={index}
-                    article={example.article}
-                    rest={example.rest}
-                  />
+                {solarExamples.map((word, index) => (
+                  <ExampleCard key={index} word={word} />
                 ))}
               </div>
             </div>
 
+            {/* Lettres lunaires */}
             <div className="mb-8">
               <SectionTitle
                 title="Lettres lunaires (14 lettres)"
@@ -65,18 +54,15 @@ const Page24 = () => {
               </div>
               <SectionSubtitle title="Exemples de lettres lunaires" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {lunarExamples.map((example, index) => (
-                  <ExampleCard
-                    key={index}
-                    article={example.article}
-                    rest={example.rest}
-                  />
+                {lunarExamples.map((word, index) => (
+                  <ExampleCard key={index} word={word} />
                 ))}
               </div>
             </div>
           </div>
         </div>
 
+        {/* Pied de page */}
         <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
           <div>Page 24</div>
           <div className="mt-1">© 2025 Tous droits réservés</div>
@@ -117,20 +103,20 @@ const LetterCard = ({ letter, type }: {
       hover:scale-105 transition-transform duration-300
       min-w-[50px] min-h-[50px] flex items-center justify-center
     `}>
-      <div className="text-2xl font-bold">
-        {letter}
-      </div>
+      <div className="text-2xl font-bold">{letter}</div>
     </div>
   );
 };
 
-const ExampleCard = ({ article, rest }: {
-  article: string;
-  rest: string;
-}) => (
+const ExampleCard = ({ word }: { word: string }) => (
   <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 text-center hover:bg-zinc-700 transition-all duration-300">
-    <div className="text-3xl md:text-4xl font-bold leading-relaxed text-white">
-      {article}{rest}
+    <div
+      className="text-3xl md:text-4xl font-bold leading-relaxed text-white break-keep"
+      dir="rtl"
+      lang="ar"
+      style={{ fontFeatureSettings: '"calt" 1, "liga" 1' }}
+    >
+      {word}
     </div>
   </div>
 );
