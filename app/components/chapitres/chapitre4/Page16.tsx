@@ -65,23 +65,22 @@ const Page16 = () => {
   );
 };
 
-// Fonction utilitaire qui rend chaque lettre et colore la lettre ciblée en rouge, sans utiliser plusieurs spans
+// Remplace la lettre ciblée dans l'exemple par un <mark> stylé
 const highlightLetterInExample = (example: string, targetLetter: string) => {
+  const parts = example.split(targetLetter);
   return (
     <>
-      {example.split('').map((char, i) => (
-        <span
-          key={i}
-          style={{ color: char === targetLetter ? '#f87171' : 'inherit' }} // rouge Tailwind `text-red-400`
-        >
-          {char}
-        </span>
+      {parts.map((part, i) => (
+        <React.Fragment key={i}>
+          {part}
+          {i !== parts.length -1 && <mark className="bg-transparent text-red-500 font-semibold">{targetLetter}</mark>}
+        </React.Fragment>
       ))}
     </>
   );
 };
 
-// Composant pour afficher chaque lettre déconnectée
+// Composant pour chaque lettre
 const DisconnectedLetterCard = ({ letter, example, meaning }: {
   letter: string;
   example: string;
@@ -96,7 +95,7 @@ const DisconnectedLetterCard = ({ letter, example, meaning }: {
     {/* Ligne de séparation */}
     <div className="w-full h-px bg-zinc-600 mb-4"></div>
 
-    {/* Exemple avec voyelles, lettre non attachée en rouge */}
+    {/* Exemple avec voyelles, lettre mise en évidence avec <mark> */}
     <div className="text-3xl md:text-4xl font-bold text-white mb-3 leading-relaxed">
       {highlightLetterInExample(example, letter)}
     </div>
