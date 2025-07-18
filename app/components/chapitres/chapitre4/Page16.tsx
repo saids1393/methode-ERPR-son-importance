@@ -2,15 +2,15 @@
 import React from 'react';
 
 const Page16 = () => {
+  // Exemple avec réglage manuel des dégradés (startPercent et widthPercent)
   const disconnectedLetters = [
-    { letter: 'ا', example: 'قَالَ', meaning: 'il a dit' },
-    { letter: 'د', example: 'عُدْنَ', meaning: 'revenez !' },
-    { letter: 'ذ', example: 'يَذْكُرُ', meaning: 'il se souvient' },
-    { letter: 'ر', example: 'فَرِحَ', meaning: 'il s’est réjoui' },
-    { letter: 'ز', example: 'تَزَكَّىٰ', meaning: 'il s’est purifié' },
-    { letter: 'و', example: 'خَوْفٌ', meaning: 'peur' }
+    { letter: 'ا', example: 'قَالَ', meaning: 'il a dit', startPercent: 50, widthPercent: 15, color: '#ff0000ff' },
+    { letter: 'د', example: 'عُدْنَ', meaning: 'revenez !', startPercent: 30, widthPercent: 25, color: '#fbbf24' },
+    { letter: 'ذ', example: 'يَذْكُرُ', meaning: 'il se souvient', startPercent: 20, widthPercent: 15, color: '#f43f5e' },
+    { letter: 'ر', example: 'فَرِحَ', meaning: 'il s’est réjoui', startPercent: 35, widthPercent: 20, color: '#f87171' },
+    { letter: 'ز', example: 'تَزَكَّىٰ', meaning: 'il s’est purifié', startPercent: 25, widthPercent: 30, color: '#fb7185' },
+    { letter: 'و', example: 'خَوْفٌ', meaning: 'peur', startPercent: 40, widthPercent: 20, color: '#f43f5e' },
   ];
-
 
   return (
     <div
@@ -19,7 +19,7 @@ const Page16 = () => {
     >
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
         {/* Header */}
-        <div className="bg-arabic-gradient text-white p-6 text-center">
+        <div className="t text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
            Leçon : Exemples et compréhension des lettres qui ne s'attachent
           </div>
@@ -28,7 +28,6 @@ const Page16 = () => {
         {/* Letters Grid */}
         <div className="p-8 bg-zinc-900">
           <div className="max-w-4xl mx-auto">
-            {/* Grid des lettres déconnectées */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {disconnectedLetters.map((item, index) => (
                 <DisconnectedLetterCard
@@ -36,6 +35,9 @@ const Page16 = () => {
                   letter={item.letter}
                   example={item.example}
                   meaning={item.meaning}
+                  startPercent={item.startPercent}
+                  widthPercent={item.widthPercent}
+                  highlightColor={item.color}
                 />
               ))}
             </div>
@@ -51,7 +53,6 @@ const Page16 = () => {
                 <span className="text-red-500 text-4xl font-semibold">ا - د - ذ - ر - ز - و</span>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -65,26 +66,67 @@ const Page16 = () => {
   );
 };
 
-// Remplace la lettre ciblée dans l'exemple par un <mark> stylé
-const highlightLetterInExample = (example: string, targetLetter: string) => {
-  const parts = example.split(targetLetter);
+// Composant avec dégradé contrôlé manuellement
+const HighlightWord = ({
+  word,
+  startPercent,
+  widthPercent,
+  highlightColor,
+}: {
+  word: string;
+  startPercent: number;  // où commence le dégradé (%)
+  widthPercent: number;  // largeur du dégradé (%)
+  highlightColor: string; // couleur du dégradé
+}) => {
+  // Assure que les valeurs sont dans [0,100]
+  const start = Math.min(Math.max(startPercent, 0), 100);
+  const width = Math.min(Math.max(widthPercent, 0), 100 - start);
+
+  // Construction du dégradé linéaire
+  const gradient = `linear-gradient(
+    to right,
+    white 0%,
+    white ${start}%,
+    ${highlightColor} ${start}%,
+    ${highlightColor} ${start + width}%,
+    white ${start + width}%,
+    white 0%
+  )`;
+
   return (
-    <>
-      {parts.map((part, i) => (
-        <React.Fragment key={i}>
-          {part}
-          {i !== parts.length -1 && <mark className="bg-transparent text-red-500 font-semibold">{targetLetter}</mark>}
-        </React.Fragment>
-      ))}
-    </>
+    <span
+      style={{
+        background: gradient,
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        direction: 'rtl',
+        fontWeight: 'bold',
+        fontSize: '1.75rem',
+        userSelect: 'text',
+    
+      }}
+      className="font-arabic"
+      aria-label={word}
+    >
+      {word}
+    </span>
   );
 };
 
-// Composant pour chaque lettre
-const DisconnectedLetterCard = ({ letter, example, meaning }: {
+const DisconnectedLetterCard = ({
+  letter,
+  example,
+  meaning,
+  startPercent,
+  widthPercent,
+  highlightColor,
+}: {
   letter: string;
   example: string;
   meaning: string;
+  startPercent: number;
+  widthPercent: number;
+  highlightColor: string;
 }) => (
   <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 text-center hover:bg-zinc-700 transition-all duration-300 group">
     {/* Lettre principale */}
@@ -95,9 +137,14 @@ const DisconnectedLetterCard = ({ letter, example, meaning }: {
     {/* Ligne de séparation */}
     <div className="w-full h-px bg-zinc-600 mb-4"></div>
 
-    {/* Exemple avec voyelles, lettre mise en évidence avec <mark> */}
-    <div className="text-3xl md:text-4xl font-bold text-white mb-3 leading-relaxed">
-      {highlightLetterInExample(example, letter)}
+    {/* Exemple avec surlignage personnalisé */}
+    <div className="mb-3 leading-relaxed">
+      <HighlightWord
+        word={example}
+        startPercent={startPercent}
+        widthPercent={widthPercent}
+        highlightColor={highlightColor}
+      />
     </div>
 
     {/* Badge indicateur */}
