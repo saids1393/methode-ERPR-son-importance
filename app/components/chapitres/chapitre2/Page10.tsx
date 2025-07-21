@@ -36,7 +36,7 @@ const Page10 = () => {
     { letter: 'ي', name: 'يَاء', vowels: ['ـيَـ', 'ـيُـ', 'ـيِـ'] }
   ];
 
-   const vowelNames = ['Kassrah ( son : i )', 'Dammah ( son : ou )', 'Fathah ( son : a )'];
+   const vowelNames = ['Kassrah ( son : a )', 'Dammah ( son : ou )', 'Fathah ( son : i )'];
 
   return (
     <div 

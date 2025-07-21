@@ -20,6 +20,7 @@ function NotFoundPage({
   pageInfo: ReturnType<typeof getPageByNumbers> | null;
 }) {
   return (
+    
     <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
       <div className="text-center p-8">
         <h1 className="text-3xl font-bold text-red-400 mb-4">صفحة غير موجودة</h1>
