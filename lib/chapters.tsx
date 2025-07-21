@@ -238,7 +238,7 @@ export const chapters: Chapter[] = [
   {
     title: "La shaddah",
     chapterNumber: 10,
-    introduction: "Félicitations et bienvenue au chapitre de la méthode ! Avant de pouvoir enfin lire le Coran sans erreur, il reste bien sûr les règles du tajwid pour apprendre à lire comme un imam, avec une belle récitation. En effet, le mot tajwid signifie « embellissement ».\nAlhamdoulilah, la méthode a tenu sa promesse : tu sais maintenant décoder les bases du Coran.\nPassons directement au sujet : qu'est-ce que la shaddah ?\nLa shaddah est un signe indiquant qu'une lettre est doublée. Par exemple, la lettre « ta » avec la voyelle fatha (qui donne le son « a ») doublée. Au lieu de prononcer « ta-ta », on appuie sur la lettre, on la prononce de manière prolongée, en insistant sur elle sans pause, en maintenant la prononciation.",
+    introduction: "Félicitations et bienvenue au dernier chapitre de la méthode ! Avant de pouvoir enfin lire le Coran sans erreur, il reste bien sûr les règles du tajwid pour apprendre à lire comme un imam, avec une belle récitation. En effet, le mot tajwid signifie « embellissement ».\nAlhamdoulilah, la méthode a tenu sa promesse : tu sais maintenant décoder les bases du Coran.\nPassons directement au sujet : qu'est-ce que la shaddah ?\nLa shaddah est un signe indiquant qu'une lettre est doublée. Par exemple, la lettre « ta » avec la voyelle fatha (qui donne le son « a ») doublée. Au lieu de prononcer « ta-ta », on appuie sur la lettre, on la prononce de manière prolongée, en insistant sur elle sans pause, en maintenant la prononciation.",
     pages: [
       {
         title: "Leçon : shaddah",
