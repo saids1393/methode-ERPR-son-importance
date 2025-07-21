@@ -1,26 +1,28 @@
 import React from 'react';
 
+const noConnect = ['ا', 'د', 'ذ', 'ر', 'ز', 'و'];
+
 const Page19 = () => {
   // Toutes les combinaisons déjà fusionnées (base + prolongation)
   const words = [
-    'با', 'بو', 'بي',
-    'تا', 'تو', 'تي',
-    'ثا', 'ثو', 'ثي',
-    'جا', 'جو', 'جي',
-    'حا', 'حو', 'حي',
-    'خا', 'خو', 'خي',
-    'دا', 'دو', 'دي',
-    'ذا', 'ذو', 'ذي',
-    'را', 'رو', 'ري',
-    'زا', 'زو', 'زي',
-    'سا', 'سو', 'سي',
-    'شا', 'شو', 'شي',
-    'صا', 'صو', 'صي',
-    'ضا', 'ضو', 'ضي',
-    'طا', 'طو', 'طي',
-    'ظا', 'ظو', 'ظي',
-    'عا', 'عو', 'عي',
-    'غا', 'غو', 'غي',
+    'بَـا', 'بُـو', 'بِـي',
+    'تَـا', 'تُـو', 'تِـي',
+    'ثَـا', 'ثُـو', 'ثِـي',
+    'جَـا', 'جُـو', 'جِـي',
+    'حَـا', 'حُـو', 'حِـي',
+    'خَـا', 'خُـو', 'خِـي',
+    'دَـا', 'دُـو', 'دِـي',
+    'ذَـا', 'ذُـو', 'ذِـي',
+    'رَـا', 'رُـو', 'رِـي',
+    'زَـا', 'زُـو', 'زِـي',
+    'سَـا', 'سُـو', 'سِـي',
+    'شَـا', 'شُـو', 'شِـي',
+    'صَـا', 'صُـو', 'صِـي',
+    'ضَـا', 'ضُـو', 'ضِـي',
+    'طَـا', 'طُـو', 'طِـي',
+    'ظَـا', 'ظُـو', 'ظِـي',
+    'عَـا', 'عُـو', 'عِـي',
+    'غَـا', 'غُـو', 'غِـي',
   ];
 
   return (
@@ -56,6 +58,18 @@ const Page19 = () => {
 
 // Composant carte affichant un mot arabe
 const ProlongationCard = ({ word }: { word: string }) => {
+  // Extraire les caractères arabes sans les diacritiques (juste pour détecter la base et la prolongation)
+  const arabicLetters = [...word.replace(/[^\u0600-\u06FF]/g, '')];
+
+  const lettreBase = arabicLetters[0];
+  const prolongation = arabicLetters[arabicLetters.length - 1];
+
+  // Vérifier si la lettre de base ne connecte pas à la suivante
+  const isNoConnect = noConnect.includes(lettreBase);
+
+  // Si la lettre ne connecte pas, retirer le tatweel (ـ) pour que la prolongation soit isolée
+  const displayWord = isNoConnect ? word.replace(/ـ/g, '') : word;
+
   return (
     <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center">
       <div
@@ -64,7 +78,7 @@ const ProlongationCard = ({ word }: { word: string }) => {
         lang="ar"
         style={{ fontFeatureSettings: '"calt" 1, "liga" 1' }}
       >
-        {word}
+        {displayWord}
       </div>
     </div>
   );
