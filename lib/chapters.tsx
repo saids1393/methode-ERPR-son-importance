@@ -8,11 +8,18 @@ export type Page = {
   status?: 'completed' | 'pending'; // Statut de la page
 };
 
+export type QuizQuestion = {
+  question: string;
+  choices: string[];
+  correctAnswerIndex: number;
+};
+
 export type Chapter = {
   title: string;
   chapterNumber: number; // Numéro du chapitre
   pages: Page[];
   introduction?: string;
+  quiz?: QuizQuestion[];
 };
 
 export const chapters: Chapter[] = [
@@ -26,6 +33,33 @@ export const chapters: Chapter[] = [
         href: "/chapitres/0/0",
         pageNumber: 0,
         status: 'completed'
+      }
+    ],
+    quiz: [
+      {
+        question: "Combien y a-t-il de lettres dans l'alphabet arabe ?",
+        choices: ["26", "28", "30", "32"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Comment s'appelle la première lettre de l'alphabet arabe ?",
+        choices: ["Ba", "Ta", "Alif", "Ya"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Comment s'appelle la dernière lettre de l'alphabet arabe ?",
+        choices: ["Alif", "Ya", "Noun", "Mim"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quel est le secret pour bien apprendre la prononciation des lettres arabes selon la méthode ?",
+        choices: ["Écrire beaucoup", "L'écoute et la répétition", "Mémoriser uniquement", "Lire rapidement"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "À quoi compare-t-on les 28 lettres arabes dans l'introduction ?",
+        choices: ["Des animaux", "Des objets", "Des élèves avec des prénoms", "Des couleurs"],
+        correctAnswerIndex: 2
       }
     ]
   },
@@ -76,6 +110,33 @@ export const chapters: Chapter[] = [
         pageNumber: 7,
         status: 'completed'
       }
+    ],
+    quiz: [
+      {
+        question: "Combien de lettres emphatiques y a‑t‑il dans l'alphabet arabe ?",
+        choices: ["5", "8", "12", "28"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quelle lettre est une lettre auxiliaire ?",
+        choices: ["Alif", "Hamzah", "Tâ Marbûta", "Yâ"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Où trouve-t-on le Tâ Marbûta (ة) dans un mot ?",
+        choices: ["Au début", "Au milieu", "À la fin", "N'importe où"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "À quoi sert principalement le Tâ Marbûta ?",
+        choices: ["Indiquer le masculin", "Indiquer le féminin", "Indiquer le pluriel", "Indiquer la négation"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Comment sont colorées les lettres emphatiques dans cette méthode ?",
+        choices: ["En bleu", "En vert", "En rouge", "En violet"],
+        correctAnswerIndex: 2
+      }
     ]
   },
   {
@@ -106,6 +167,33 @@ export const chapters: Chapter[] = [
         href: "/chapitres/2/11",
         pageNumber: 11,
         status: 'completed'
+      }
+    ],
+    quiz: [
+      {
+        question: "Combien y a-t-il de voyelles principales en arabe ?",
+        choices: ["2", "3", "4", "5"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quel son produit la Fatha ?",
+        choices: ["I", "OU", "A", "É"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Quel son produit la Dammah ?",
+        choices: ["A", "I", "É", "OU"],
+        correctAnswerIndex: 3
+      },
+      {
+        question: "Quel son produit la Kasrah ?",
+        choices: ["OU", "A", "I", "É"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Quand une voyelle est placée sur une lettre, qu'est-ce qui est prononcé ?",
+        choices: ["Seulement la lettre", "Seulement la voyelle", "Le point de sortie de la lettre + le son de la voyelle", "Rien"],
+        correctAnswerIndex: 2
       }
     ]
   },
@@ -138,6 +226,33 @@ export const chapters: Chapter[] = [
         pageNumber: 15,
         status: 'completed'
       }
+    ],
+    quiz: [
+      {
+        question: "Qu'est-ce qu'on ajoute aux voyelles simples pour obtenir des doubles voyelles ?",
+        choices: ["Le son 'm'", "Le son 'n'", "Le son 'r'", "Le son 'l'"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Comment se prononce la double voyelle de la Fatha ?",
+        choices: ["in", "oun", "an", "en"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Comment se prononce la double voyelle de la Damma ?",
+        choices: ["an", "in", "en", "oun"],
+        correctAnswerIndex: 3
+      },
+      {
+        question: "Comment se prononce la double voyelle de la Kasra ?",
+        choices: ["an", "oun", "in", "on"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Comment appelle-t-on aussi les doubles voyelles en arabe ?",
+        choices: ["Tashkil", "Tanwin", "Madd", "Sukoun"],
+        correctAnswerIndex: 1
+      }
     ]
   },
   {
@@ -151,6 +266,33 @@ export const chapters: Chapter[] = [
         pageNumber: 16,
         status: 'completed'
       }
+    ],
+    quiz: [
+      {
+        question: "Combien de lettres en arabe ne s'attachent pas à la lettre qui suit ?",
+        choices: ["4", "5", "6", "7"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Quelle lettre est souvent confondue avec le Noun (ن) ?",
+        choices: ["Ba", "Ta", "Dhal (ذ)", "Ra"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Si une lettre avec un point au-dessus s'attache à la lettre suivante, quelle lettre est-ce ?",
+        choices: ["Dhal", "Noun", "Ba", "Ta"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Si une lettre avec un point au-dessus ne s'attache pas à la lettre suivante, quelle lettre est-ce probablement ?",
+        choices: ["Noun", "Ba", "Dhal", "Mim"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Pourquoi est-il important de connaître les lettres qui ne s'attachent pas ?",
+        choices: ["Pour écrire plus vite", "Pour éviter les erreurs de lecture", "Pour la calligraphie", "Pour la grammaire"],
+        correctAnswerIndex: 1
+      }
     ]
   },
   {
@@ -163,6 +305,33 @@ export const chapters: Chapter[] = [
         href: "/chapitres/5/17",
         pageNumber: 17,
         status: 'completed'
+      }
+    ],
+    quiz: [
+      {
+        question: "À ce stade de la méthode, quels éléments du Tachkil avez-vous déjà appris ?",
+        choices: ["Seulement les voyelles simples", "Les voyelles simples et doubles", "Tout le Tachkil", "Aucun élément"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Combien d'éléments du Tachkil reste-t-il à apprendre après ce chapitre ?",
+        choices: ["1", "2", "3", "4"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Qu'est-ce que le Tachkil ?",
+        choices: ["L'alphabet arabe", "Les signes qui indiquent la prononciation", "Les lettres emphatiques", "La calligraphie"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quels sont les trois éléments restants à apprendre ?",
+        choices: ["Fatha, Damma, Kasra", "Alif, Ba, Ta", "Madd, sukoun, shaddah", "Noun, Mim, Lam"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Que signifie 'madd' en arabe ?",
+        choices: ["Doublement", "Absence de voyelle", "Prolongation", "Voyelle simple"],
+        correctAnswerIndex: 2
       }
     ]
   },
@@ -189,6 +358,33 @@ export const chapters: Chapter[] = [
         pageNumber: 20,
         status: 'completed'
       }
+    ],
+    quiz: [
+      {
+        question: "Combien y a-t-il de lettres de prolongation en arabe ?",
+        choices: ["2", "3", "4", "5"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quelle voyelle doit porter la lettre précédente pour activer la prolongation Alif ?",
+        choices: ["Kasra", "Damma", "Fatha", "Sukoun"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Quelle voyelle doit porter la lettre précédente pour activer la prolongation Waw ?",
+        choices: ["Fatha", "Damma", "Kasra", "Tanwin"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quelles sont les deux lettres qui peuvent devenir des lettres douces (layyinah) ?",
+        choices: ["Alif et Waw", "Yaa et Alif", "Yaa et Waw", "Alif et Ba"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Que signifie 'saghīghah' en arabe ?",
+        choices: ["Grande", "Petite", "Longue", "Courte"],
+        correctAnswerIndex: 1
+      }
     ]
   },
   {
@@ -200,6 +396,33 @@ export const chapters: Chapter[] = [
         href: "/chapitres/7/21",
         pageNumber: 21,
         status: 'completed'
+      }
+    ],
+    quiz: [
+      {
+        question: "Quelle est la fonction principale des prolongations dans la lecture arabe ?",
+        choices: ["Raccourcir les sons", "Allonger les sons", "Supprimer les sons", "Changer les sons"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quand une lettre de prolongation devient-elle active ?",
+        choices: ["Toujours", "Jamais", "Quand elle correspond à la voyelle précédente", "Au début du mot seulement"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Qu'est-ce qu'une lettre douce (layyinah) ?",
+        choices: ["Une lettre emphatique", "Une lettre de prolongation non activée", "Une voyelle double", "Une lettre solaire"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Comment reconnaît-on une double voyelle dans un texte arabe ?",
+        choices: ["Par la présence d'un 'n' à la fin", "Par deux points", "Par un cercle", "Par une ligne"],
+        correctAnswerIndex: 0
+      },
+      {
+        question: "Quelle est la différence entre Alif et Alif Saghīghah ?",
+        choices: ["La couleur", "La prononciation", "La taille", "La position"],
+        correctAnswerIndex: 2
       }
     ]
   },
@@ -220,6 +443,33 @@ export const chapters: Chapter[] = [
         pageNumber: 23,
         status: 'completed'
       }
+    ],
+    quiz: [
+      {
+        question: "Qu'est-ce que la Soukoune ?",
+        choices: ["Une voyelle", "L'absence de voyelle", "Une double voyelle", "Une prolongation"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Une lettre qui porte une soukoune est dite :",
+        choices: ["Vocalisée", "Prolongée", "Sukūnée", "Doublée"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Quelles voyelles sont absentes quand il y a une soukoune ?",
+        choices: ["Seulement fatha", "Seulement kasra", "Fatha, kasra et damma", "Aucune"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Comment se représente graphiquement la soukoune ?",
+        choices: ["Un point", "Un trait", "Un petit cercle", "Deux points"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "La soukoune peut entraîner quels comportements spéciaux dans la lecture du Coran ?",
+        choices: ["Prolongation seulement", "Al-Qalqalah et Al-Hams", "Doublement", "Aucun comportement"],
+        correctAnswerIndex: 1
+      }
     ]
   },
   {
@@ -233,12 +483,39 @@ export const chapters: Chapter[] = [
         pageNumber: 24,
         status: 'completed'
       }
+    ],
+    quiz: [
+      {
+        question: "Combien y a-t-il de lettres solaires dans l'alphabet arabe ?",
+        choices: ["7", "14", "21", "28"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Combien y a-t-il de lettres lunaires dans l'alphabet arabe ?",
+        choices: ["7", "14", "21", "28"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Avec les lettres solaires, prononce-t-on le 'lâm' (ل) de l'article défini ?",
+        choices: ["Oui", "Non", "Parfois", "Seulement au début"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Dans le Coran, trouve-t-on des textes sans tashkîl (voyelles) ?",
+        choices: ["Oui, souvent", "Non, jamais", "Seulement dans certaines sourates", "Uniquement les titres"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Pourquoi est-il important de connaître les lettres solaires et lunaires ?",
+        choices: ["Pour la calligraphie", "Pour comprendre pourquoi on ne prononce pas toujours le lâm", "Pour écrire plus vite", "Pour la grammaire uniquement"],
+        correctAnswerIndex: 1
+      }
     ]
   },
   {
     title: "La shaddah",
     chapterNumber: 10,
-    introduction: "Félicitations et bienvenue au dernier chapitre de la méthode ! Avant de pouvoir enfin lire le Coran sans erreur, il reste bien sûr les règles du tajwid pour apprendre à lire comme un imam, avec une belle récitation. En effet, le mot tajwid signifie « embellissement ».\nAlhamdoulilah, la méthode a tenu sa promesse : tu sais maintenant décoder les bases du Coran.\nPassons directement au sujet : qu'est-ce que la shaddah ?\nLa shaddah est un signe indiquant qu'une lettre est doublée. Par exemple, la lettre « ta » avec la voyelle fatha (qui donne le son « a ») doublée. Au lieu de prononcer « ta-ta », on appuie sur la lettre, on la prononce de manière prolongée, en insistant sur elle sans pause, en maintenant la prononciation.",
+    introduction: "Félicitations et bienvenue au dernier chapitre de la méthode ! Avant de pouvoir enfin lire le Coran sans erreur, il reste bien sûr les règles du tajwid pour apprendre à lire comme un imam, avec une belle récitation. En effet, le mot tajwid signifie « embellissement ».\nAlhamdoulilah, la méthode a tenu sa promesse : tu sais maintenant décoder les bases du Coran.\nPassons directement au sujet : qu'est-ce que la shaddah ?\nLa shaddah est un signe indiquant qu'une lettre est doublée. Par exemple, la lettre « ta » avec la voyelle fatha (qui donne le son « a ») doublée. Au lieu de prononcer « ta-ta », on appuie sur la lettre c'est à dire en restant sur le point de sortie plus longtemps avant de la sortir avec le son de la voyelle, en maintenant la prononciation.",
     pages: [
       {
         title: "Leçon : shaddah",
@@ -270,6 +547,33 @@ export const chapters: Chapter[] = [
         pageNumber: 29,
         status: 'completed'
       }
+    ],
+    quiz: [
+      {
+        question: "Qu'est-ce que la shaddah ?",
+        choices: ["Une voyelle", "Un signe de doublement", "Une prolongation", "Une lettre"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Que signifie le mot 'tajwid' ?",
+        choices: ["Lecture", "Écriture", "Embellissement", "Grammaire"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Comment prononce-t-on une lettre avec shaddah ?",
+        choices: ["Rapidement", "En la sautant", "En appuyant et insistant", "Doucement"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "La shaddah indique que la lettre est :",
+        choices: ["Supprimée", "Doublée", "Prolongée", "Muette"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Comment se représente graphiquement la shaddah ?",
+        choices: ["Un point", "Un trait horizontal", "Un petit 'w' au-dessus de la lettre", "Un cercle"],
+        correctAnswerIndex: 2
+      }
     ]
   },
   {
@@ -281,6 +585,33 @@ export const chapters: Chapter[] = [
         href: "/chapitres/11/30",
         pageNumber: 30,
         status: 'completed'
+      }
+    ],
+    quiz: [
+      {
+        question: "Combien de lettres compose l'alphabet arabe de base ?",
+        choices: ["26", "28", "30", "32"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quels sont les trois éléments principaux du Tachkil étudiés dans les derniers chapitres ?",
+        choices: ["Fatha, Damma, Kasra", "Alif, Waw, Yaa", "Madd, sukoun, shaddah", "Solaire, lunaire, emphatique"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Combien de lettres ne s'attachent pas à la lettre suivante ?",
+        choices: ["4", "5", "6", "8"],
+        correctAnswerIndex: 2
+      },
+      {
+        question: "Qu'est-ce qui différencie les lettres solaires des lettres lunaires ?",
+        choices: ["Leur forme", "La prononciation du lâm de l'article", "Leur position", "Leur couleur"],
+        correctAnswerIndex: 1
+      },
+      {
+        question: "Quelles sont les trois lettres de prolongation en arabe ?",
+        choices: ["Ba, Ta, Tha", "Alif, Waw, Yaa", "Noun, Mim, Lam", "Dal, Dhal, Ra"],
+        correctAnswerIndex: 1
       }
     ]
   }

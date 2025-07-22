@@ -15,6 +15,7 @@ export default function SidebarContent() {
   const pathname = usePathname();
   const [open, setOpen] = useState<Record<number, boolean>>({});
   const [completedPages, setCompletedPages] = useState<Set<number>>(new Set());
+  const [completedQuizzes, setCompletedQuizzes] = useState<Set<number>>(new Set());
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -222,7 +223,32 @@ export default function SidebarContent() {
                     </Link>
                   </li>
                 );
+                
               })}
+              {chapter.quiz && chapter.quiz.length > 0 && (
+  <li key={`quiz-${chapter.chapterNumber}`}>
+    <Link
+      href={`/chapitres/${chapter.chapterNumber}/quiz`}
+      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+        pathname === `/chapitres/${chapter.chapterNumber}/quiz`
+          ? 'bg-blue-900/50 text-white border-l-2 border-blue-400'
+          : 'hover:bg-zinc-700/30 text-zinc-300'
+      }`}
+    >
+      <BookOpen size={14} className="text-yellow-400" />
+      <span className="text-zinc-200 font-semibold">Quiz</span>
+      <span className="ml-auto flex items-center gap-1">
+        {completedQuizzes.has(chapter.chapterNumber) && (
+          <CheckCircle className="text-green-400" size={14} />
+        )}
+        {pathname === `/chapitres/${chapter.chapterNumber}/quiz` && (
+          <span className="h-2 w-2 rounded-full bg-yellow-400"></span>
+        )}
+      </span>
+    </Link>
+  </li>
+)}
+              
             </ul>
           )}
         </li>
