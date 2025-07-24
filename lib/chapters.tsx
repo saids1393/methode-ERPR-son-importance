@@ -475,7 +475,9 @@ export const chapters: Chapter[] = [
   {
     title: "Lettres solaires et lunaires",
     chapterNumber: 9,
-    introduction: "Chapitre 9 : Les lettres solaires et lunaires\nLes lettres solaires et lunaires sont divisées en deux groupes. Sachant qu'il y a 28 lettres dans la langue arabe, 14 sont solaires et 14 sont lunaires. Mais que signifie cela exactement ?\nCela veut dire qu'avec les lettres solaires, on ne prononce pas le \"lâm\" (ل) qui est normalement marqué d'une sukûn (absence de voyelle). Le Coran a été facilité à cet égard : il n'y a pas de sukûn au-dessus du \"lâm\" dans ces cas-là. En revanche, avec les lettres lunaires, on prononce le \"lâm\" avec la sukûn, et la sukûn est bien visible.\nPourquoi est-il important de savoir cela ?\nC'est pour éviter la fameuse question : \"Pourquoi ne prononce-t-on pas le 'lâm' ?\" De plus, cela aide quand tu auras un niveau avancé en arabe, car tu liras des phrases sans voyelles (sans tashkîl). Je te rassure, ce cas n'apparaît pas dans le Coran, où les lettres sont toujours accompagnées de tashkîl pour éviter toute erreur. Tu rencontreras surtout cette absence de voyelles dans les livres des savants, une fois que tu auras un bon niveau de vocabulaire et de grammaire.\nDans le Coran, le tashkîl est toujours présent, car le texte est préservé de toute erreur et rendu accessible.",
+    introduction: "Chapitre 9 : Les lettres solaires et lunaires sont divisées en deux groupes. Sachant qu'il y a 28 lettres dans la langue arabe, 14 sont solaires et 14 sont lunaires. Mais que signifie cela exactement ?\n\nCela veut dire qu'avec les lettres solaires, on ne prononce pas le \"lâm\" (ل) qui est normalement marqué d'une sukûn (absence de voyelle). Le Coran a été facilité à cet égard : il n'y a pas de sukûn au-dessus du \"lâm\" dans ces cas-là. En revanche, avec les lettres lunaires, on prononce le \"lâm\" avec la sukûn, et la sukûn est bien visible.\n\nComment reconnait-on une lettre solaire ou lunaires ?\nLes lettres solaires sont marquées par une chaddah (ّ) sur la lettre qui suit le \"lâm\" dans le mot, ce qui indique une assimilation et la non-prononciation du \"lâm\". Tandis que les lettres lunaires ne portent pas cette chaddah sur la lettre qui suit le \"lâm\", et celui-ci est prononcé clairement avec sa sukûn.\n\nPourquoi est-il important de savoir cela ?\n\nC'est pour éviter la fameuse question : \"Pourquoi ne prononce-t-on pas le 'lâm' ?\" De plus, cela aide quand tu auras un niveau avancé en arabe, car tu liras des phrases sans voyelles (sans tashkîl). Je te rassure, ce cas n'apparaît pas dans le Coran, où les lettres sont toujours accompagnées de tashkîl pour éviter toute erreur. Tu rencontreras surtout cette absence de voyelles dans les livres des savants, une fois que tu auras un bon niveau de vocabulaire et de grammaire.\nDans le Coran, le tashkîl est toujours présent, car le texte est préservé de toute erreur et rendu accessible.",
+
+
     pages: [
       {
         title: "Leçon : exemples et compréhension des lettres solaires et lunaires",
@@ -536,7 +538,7 @@ export const chapters: Chapter[] = [
         status: 'completed'
       },
       {
-        title: "Exercice : Reconnaissance des mots avec la Chaddah, la soukoun et les prolongations",
+        title: "Exercice : reonnaissance des mots avec toutes les règles de la méthode",
         href: "/chapitres/10/28",
         pageNumber: 28,
         status: 'completed'
