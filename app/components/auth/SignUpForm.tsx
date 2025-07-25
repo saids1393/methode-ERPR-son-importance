@@ -1,4 +1,3 @@
-// components/auth/SignUpForm.tsx
 'use client'
 
 import { useState } from 'react'
@@ -37,7 +36,7 @@ export default function SignUpForm() {
       }
       
       toast.success('Inscription réussie!')
-      router.push('/chapitres')
+      router.push('/chapitres/0/0')
     } catch (error: any) {
       toast.error(error.message)
     } finally {
@@ -117,4 +116,3 @@ export default function SignUpForm() {
     </form>
   )
 }
-

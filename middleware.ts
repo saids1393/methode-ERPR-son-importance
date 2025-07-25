@@ -1,20 +1,26 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { verifyToken } from '@/lib/auth';
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get("token")?.value;
+  const token = req.cookies.get("auth-token")?.value;
 
-  if (!token) return NextResponse.redirect(new URL("/(auth)/signin", req.url));
+  if (!token) {
+    return NextResponse.redirect(new URL("/signin", req.url));
+  }
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET!);
+    verifyToken(token);
     return NextResponse.next();
-  } catch (err) {
-    return NextResponse.redirect(new URL("/(auth)/signin", req.url));
+  } catch (error) {
+    return NextResponse.redirect(new URL("/signin", req.url));
   }
 }
 
 export const config = {
-  matcher: ["/chapitres/:path*", "/api/chapters/:path*"], // à adapter selon les routes à protéger
+  matcher: [
+    "/chapitres/:path*", 
+    "/api/chapters/:path*",
+    "/api/auth/me"
+  ],
 };

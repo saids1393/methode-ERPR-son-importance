@@ -1,59 +1,61 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import { RegisterRequest, AuthResponse } from '@/types/auth';
+import { signUpSchema } from '@/lib/validation';
+import { createUser, generateToken, getUserByEmail } from '@/lib/auth';
+import { cookies } from 'next/headers';
 
 export async function POST(req: Request) {
   try {
-    const body: RegisterRequest = await req.json();
+    const body = await req.json();
     
-    // Validation
-    if (!body.email || !body.password) {
+    // Validation avec Zod
+    const validationResult = signUpSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: validationResult.error.errors[0].message },
         { status: 400 }
       );
     }
 
+    const { username, email, password } = validationResult.data;
+
     // Vérification si l'utilisateur existe déjà
-    const existingUser = await getUserByEmail(body.email);
+    const existingUser = await getUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User already exists' },
+        { error: 'Un utilisateur avec cet email existe déjà' },
         { status: 409 }
       );
     }
 
-    // Hash du mot de passe
-    const hashedPassword = await bcrypt.hash(body.password, 10);
+    // Création de l'utilisateur
+    const newUser = await createUser({
+      username,
+      email,
+      password
+    });
 
-    // Création de l'utilisateur (remplacez par votre logique réelle)
-    const newUser: User = {
-      id: generateId(),
-      email: body.email,
-      password: hashedPassword,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    // Génération du token
+    const token = generateToken({
+      userId: newUser.id,
+      email: newUser.email
+    });
 
-    // Sauvegarde de l'utilisateur
-    await createUser(newUser);
+    // Set cookie
+    cookies().set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60, // 7 jours
+      path: '/',
+    });
 
-    // Réponse (sans le mot de passe)
-    const response: AuthResponse = {
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        createdAt: newUser.createdAt,
-        updatedAt: newUser.updatedAt
-      },
-      token: generateToken(newUser) // Implémentez cette fonction
-    };
-
-    return NextResponse.json(response, { status: 201 });
+    return NextResponse.json({
+      user: newUser,
+      token
+    }, { status: 201 });
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Erreur interne du serveur' },
       { status: 500 }
     );
   }
