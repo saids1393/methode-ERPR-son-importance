@@ -1,46 +1,53 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { User } from '@/types/auth';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-08-16',
-});
+import { stripe } from '@/lib/stripe';
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/auth';
 
 export async function POST(req: Request) {
-  const payload = await req.text();
-  const sig = req.headers.get('stripe-signature')!;
-
-  let event: Stripe.Event;
-
   try {
-    event = stripe.webhooks.constructEvent(
-      payload,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-  } catch (err) {
+    // Vérifier l'authentification
+    const token = (await cookies()).get('auth-token')?.value;
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      );
+    }
+
+    const decoded = verifyToken(token);
+    const { priceId, successUrl, cancelUrl } = await req.json();
+
+    if (!priceId) {
+      return NextResponse.json(
+        { error: 'Price ID requis' },
+        { status: 400 }
+      );
+    }
+
+    // Créer la session de checkout Stripe
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription', // ou 'payment' pour un paiement unique
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: successUrl || `${process.env.NEXTAUTH_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/cancel`,
+      metadata: {
+        userId: decoded.userId,
+      },
+      customer_email: decoded.email,
+    });
+
+    return NextResponse.json({ sessionId: session.id });
+  } catch (error) {
+    console.error('Stripe checkout error:', error);
     return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
-      { status: 400 }
+      { error: 'Erreur lors de la création de la session de paiement' },
+      { status: 500 }
     );
-  }
-
-  // Gestion des différents événements Stripe
-  switch (event.type) {
-    case 'checkout.session.completed':
-      const session = event.data.object as Stripe.Checkout.Session;
-      await handleCheckoutSessionCompleted(session);
-      break;
-    // Ajoutez d'autres cas au besoin
-  }
-
-  return NextResponse.json({ received: true });
-}
-
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  // Mettez à jour votre utilisateur ici
-  const userId = session.metadata?.userId;
-  if (userId) {
-    await grantPremiumAccess(userId);
   }
 }

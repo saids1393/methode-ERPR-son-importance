@@ -27,3 +27,7 @@ export async function GET(
     );
   }
 }
+
+function getChapterById(chapterId: string): any {
+    throw new Error('Function not implemented.');
+}

@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import { Chapter } from '@/types/chapter';
+import { chapters } from '@/lib/chapters'; // Import the chapters array
 
 export async function GET() {
   try {
-    // Récupération des chapitres (remplacez par votre logique réelle)
-    const chapters: Chapter[] = await getChapters();
-    
+    // No need to await since chapters is already an array, not a function
     return NextResponse.json(chapters);
   } catch (error) {
     console.error('Get chapters error:', error);

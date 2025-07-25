@@ -1,43 +1,41 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
-import { User } from '@/types/auth';
+import { cookies } from 'next/headers';
+import { verifyToken, getUserById } from '@/lib/auth';
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const token = req.headers.get('Authorization')?.split(' ')[1];
+    const token = (await cookies()).get('auth-token')?.value;
     
     if (!token) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Non autorisé' },
         { status: 401 }
       );
     }
 
-    const decoded = await verifyToken(token);
-    if (!decoded) {
+    try {
+      const decoded = verifyToken(token);
+      
+      // Récupération de l'utilisateur
+      const user = await getUserById(decoded.userId);
+      if (!user) {
+        return NextResponse.json(
+          { error: 'Utilisateur non trouvé' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(user);
+    } catch (tokenError) {
       return NextResponse.json(
-        { error: 'Invalid token' },
+        { error: 'Token invalide' },
         { status: 401 }
       );
     }
-
-    // Récupération de l'utilisateur
-    const user = await getUserById(decoded.id);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    // Ne renvoyez jamais le mot de passe
-    const { password, ...safeUser } = user;
-    
-    return NextResponse.json(safeUser);
   } catch (error) {
-    console.error('Me error:', error);
+    console.error('Auth me error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Erreur interne du serveur' },
       { status: 500 }
     );
   }

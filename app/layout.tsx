@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import LayoutSwitcher from "@/app/components/layout/LayoutSwitcher";
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: "Méthode son importance",
@@ -14,6 +15,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LayoutSwitcher>
           {children}
         </LayoutSwitcher>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+          }}
+        />
       </body>
     </html>
   );
