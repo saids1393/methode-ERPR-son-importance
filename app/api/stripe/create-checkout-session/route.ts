@@ -1,45 +1,42 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
-    // Vérifier l'authentification
-    const token = cookies().get('auth-token')?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      );
-    }
+    const { email } = await req.json();
 
-    const decoded = verifyToken(token);
-    const { priceId, successUrl, cancelUrl } = await req.json();
-
-    if (!priceId) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'Price ID requis' },
+        { error: 'Email requis' },
         { status: 400 }
       );
     }
 
-    // Créer la session de checkout Stripe
+    // Créer la session Stripe Checkout
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription', // ou 'payment' pour un paiement unique
+      mode: 'payment',
       payment_method_types: ['card'],
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'Méthode "Son Importance" - Cours d\'arabe complet',
+              description: 'Apprenez à lire et écrire l\'arabe en 1 mois',
+              images: ['https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg'],
+            },
+            unit_amount: 9700, // 97€ en centimes
+          },
           quantity: 1,
         },
       ],
-      success_url: successUrl || `${process.env.NEXTAUTH_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl || `${process.env.NEXTAUTH_URL}/cancel`,
+      customer_email: email,
+      success_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/merci?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/checkout`,
       metadata: {
-        userId: decoded.userId,
+        email: email,
       },
-      customer_email: decoded.email,
+      expires_at: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes
     });
 
     return NextResponse.json({ sessionId: session.id });

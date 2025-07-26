@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import { cookies } from 'next/headers';
+import { NextRequest } from 'next/server';
 import { prisma } from './prisma';
 
 export interface JWTPayload {
@@ -7,24 +8,14 @@ export interface JWTPayload {
   email: string;
 }
 
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12);
-}
-
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword);
-}
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 export function generateToken(payload: JWTPayload): string {
-  return jwt.sign(
-    payload,
-    process.env.JWT_SECRET!,
-    { expiresIn: '7d' }
-  );
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
 }
 
 export function verifyToken(token: string): JWTPayload {
-  return jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
+  return jwt.verify(token, JWT_SECRET) as JWTPayload;
 }
 
 export async function getUserById(id: string) {
@@ -33,8 +24,8 @@ export async function getUserById(id: string) {
       where: { id },
       select: {
         id: true,
-        username: true,
         email: true,
+        isActive: true,
         createdAt: true
       }
     });
@@ -48,7 +39,15 @@ export async function getUserById(id: string) {
 export async function getUserByEmail(email: string) {
   try {
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        isActive: true,
+        stripeCustomerId: true,
+        stripeSessionId: true,
+        createdAt: true
+      }
     });
     return user;
   } catch (error) {
@@ -58,22 +57,22 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function createUser(userData: {
-  username: string;
   email: string;
-  password: string;
+  stripeCustomerId?: string;
+  stripeSessionId?: string;
 }) {
   try {
-    const hashedPassword = await hashPassword(userData.password);
     const user = await prisma.user.create({
       data: {
-        username: userData.username,
         email: userData.email,
-        password: hashedPassword
+        isActive: true,
+        stripeCustomerId: userData.stripeCustomerId,
+        stripeSessionId: userData.stripeSessionId,
       },
       select: {
         id: true,
-        username: true,
         email: true,
+        isActive: true,
         createdAt: true
       }
     });
@@ -82,4 +81,46 @@ export async function createUser(userData: {
     console.error('Error creating user:', error);
     throw error;
   }
+}
+
+export async function setAuthCookie(user: { id: string; email: string }) {
+  const token = generateToken({
+    userId: user.id,
+    email: user.email
+  });
+
+  cookies().set('auth-token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 30 * 24 * 60 * 60, // 30 jours
+    path: '/',
+    sameSite: 'lax'
+  });
+
+  return token;
+}
+
+export async function getAuthUser() {
+  try {
+    const token = cookies().get('auth-token')?.value;
+    
+    if (!token) {
+      return null;
+    }
+
+    const decoded = verifyToken(token);
+    const user = await getUserById(decoded.userId);
+    
+    if (!user || !user.isActive) {
+      return null;
+    }
+
+    return user;
+  } catch (error) {
+    return null;
+  }
+}
+
+export function clearAuthCookie() {
+  cookies().delete('auth-token');
 }

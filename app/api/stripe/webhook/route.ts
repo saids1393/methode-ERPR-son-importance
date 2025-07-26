@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/prisma";
+import { getUserByEmail, createUser } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -23,22 +23,7 @@ export async function POST(req: Request) {
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutSessionCompleted(session);
         break;
-      
-      case 'customer.subscription.created':
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionCreated(subscription);
-        break;
-      
-      case 'customer.subscription.updated':
-        const updatedSubscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionUpdated(updatedSubscription);
-        break;
-      
-      case 'customer.subscription.deleted':
-        const deletedSubscription = event.data.object as Stripe.Subscription;
-        await handleSubscriptionDeleted(deletedSubscription);
-        break;
-      
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -55,36 +40,38 @@ export async function POST(req: Request) {
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   try {
-    const userId = session.metadata?.userId;
-    if (!userId) {
-      console.error('No userId in session metadata');
+    const email = session.customer_email || session.metadata?.email;
+    if (!email) {
+      console.error('No email in session');
       return;
     }
 
-    // Mettre à jour l'utilisateur pour marquer comme premium
-    // Vous devrez ajouter un champ 'isPremium' à votre modèle User
-    console.log(`Paiement réussi pour l'utilisateur ${userId}`);
-    
-    // Exemple: await prisma.user.update({
-    //   where: { id: userId },
-    //   data: { isPremium: true }
-    // });
+    console.log(`Paiement réussi pour l'email ${email}`);
+
+    // Vérifier si l'utilisateur existe
+    let user = await getUserByEmail(email);
+
+    if (!user) {
+      // Créer un nouvel utilisateur
+      user = await createUser({
+        email: email,
+        stripeCustomerId: session.customer as string,
+        stripeSessionId: session.id,
+      });
+      console.log(`Nouvel utilisateur créé: ${user.id}`);
+    } else {
+      // Activer l'utilisateur existant
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          isActive: true,
+          stripeCustomerId: session.customer as string,
+          stripeSessionId: session.id,
+        }
+      });
+      console.log(`Utilisateur activé: ${user.id}`);
+    }
   } catch (error) {
     console.error('Error handling checkout session completed:', error);
   }
-}
-
-async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  console.log('Subscription created:', subscription.id);
-  // Logique pour gérer la création d'abonnement
-}
-
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log('Subscription updated:', subscription.id);
-  // Logique pour gérer la mise à jour d'abonnement
-}
-
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.log('Subscription deleted:', subscription.id);
-  // Logique pour gérer la suppression d'abonnement
 }
