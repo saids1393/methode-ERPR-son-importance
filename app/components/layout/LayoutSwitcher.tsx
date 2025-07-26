@@ -20,19 +20,22 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
   }, []);
 
   useEffect(() => {
-    // Afficher la sidebar seulement si on est dans les chapitres (pas sur dashboard ou introduction seule)
-    const shouldShowSidebar = pathname.startsWith('/chapitres/') && 
-                             !pathname.endsWith('/introduction') ||
-                             (pathname.startsWith('/chapitres/') && pathname.includes('/'));
+    // Vérifier si l'utilisateur a déjà commencé le cours
+    const hasStartedCourse = localStorage.getItem('courseStarted') === 'true';
+    
+    // Afficher la sidebar seulement si :
+    // 1. L'utilisateur a cliqué sur "Commencer maintenant" 
+    // 2. ET il est dans les chapitres
+    const shouldShowSidebar = hasStartedCourse && pathname.startsWith('/chapitres/');
     setShowSidebar(shouldShowSidebar);
   }, [pathname]);
 
-  // Si on est sur le dashboard ou une page sans sidebar, afficher le contenu directement
+  // Si pas de sidebar nécessaire, afficher le contenu directement
   if (!showSidebar) {
     return <div className="min-h-screen">{children}</div>;
   }
 
-  // Sinon, utiliser le layout avec sidebar
+  // Utiliser le layout avec sidebar
   return isMobile ? (
     <MobileLayout>{children}</MobileLayout>
   ) : (

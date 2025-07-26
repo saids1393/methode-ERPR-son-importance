@@ -57,11 +57,32 @@ export default async function DashboardPage() {
                   <p className="text-gray-600 mb-4">
                     Accédez à tous les chapitres de la méthode, des bases jusqu'à la lecture complète.
                   </p>
-                  <Link
-                    href="/chapitres/0/introduction"
+                  <button
+                    onClick={() => {
+                      // Marquer que l'utilisateur a commencé le cours
+                      localStorage.setItem('courseStarted', 'true');
+                      // Rediriger vers l'introduction
+                      window.location.href = '/chapitres/0/introduction';
+                    }}
                     className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
                   >
                     Commencer maintenant
+                  </button>
+                </div>
+
+                <div className="bg-white p-6 rounded-lg shadow">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    📖 Continuer le cours
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Reprenez là où vous vous êtes arrêté dans votre apprentissage.
+                  </p>
+                  <Link
+                    href="/chapitres/0/introduction"
+                    onClick={() => localStorage.setItem('courseStarted', 'true')}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    Accéder au cours
                   </Link>
                 </div>
 
