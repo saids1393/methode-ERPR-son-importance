@@ -69,7 +69,8 @@ export async function POST(req: Request) {
         id: user.id,
         email: user.email,
         isActive: user.isActive,
-      }
+      },
+      needsProfileCompletion: !user.username || !user.password
     });
 
     response.cookies.set({

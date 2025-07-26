@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Pages complètement publiques
-  const publicPaths = ['/', '/checkout', '/merci'];
+  const publicPaths = ['/', '/checkout', '/merci', '/login', '/complete-profile'];
   if (publicPaths.includes(pathname)) {
     return NextResponse.next();
   }
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
     
     if (!token) {
       console.log('No token found, redirecting to checkout');
-      return NextResponse.redirect(new URL('/checkout', request.url));
+      return NextResponse.redirect(new URL('/login', request.url));
     }
 
     const payload = await verifyJWTToken(token);
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
     if (!payload) {
       console.log('Invalid token, redirecting to checkout');
       // Supprimer le cookie invalide
-      const response = NextResponse.redirect(new URL('/checkout', request.url));
+      const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('auth-token');
       return response;
     }

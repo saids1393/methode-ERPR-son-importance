@@ -32,9 +32,13 @@ export default function MerciPage() {
           setStatus('success');
           setMessage('Paiement confirmé ! Redirection vers votre espace...');
           
-          // Attendre un peu pour que le cookie soit bien défini, puis rediriger
+          // Vérifier si l'utilisateur doit compléter son profil
           setTimeout(() => {
-            window.location.replace('/dashboard');
+            if (data.needsProfileCompletion) {
+              window.location.replace('/complete-profile');
+            } else {
+              window.location.replace('/dashboard');
+            }
           }, 1500);
         } else {
           setStatus('error');

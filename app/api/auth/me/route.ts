@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest, getUserById, verifyToken } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,10 +30,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Retourne uniquement les données publiques (pas le mot de passe etc)
-    const { id, email, username, isActive } = user;
+    // Vérifier si l'utilisateur a un mot de passe défini
+    const userWithPassword = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        isActive: true,
+        password: true,
+      },
+    });
 
-    return NextResponse.json({ id, email, username, isActive });
+    return NextResponse.json({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      isActive: user.isActive,
+      hasPassword: userWithPassword?.password !== null
+    });
   } catch (error) {
     console.error('Auth me error:', error);
     return NextResponse.json(

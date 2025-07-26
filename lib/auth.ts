@@ -3,22 +3,22 @@ import { prisma } from './prisma';
 import { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { cookies } from 'next/headers';
 
-// Types explicites basés sur votre schéma Prisma
+// Types basés sur le schéma Prisma
 export interface JWTPayload {
   userId: string;
   email: string;
-  username?: string | null; // Peut être null selon votre schéma
+  username?: string | null;
   iat?: number;
   exp?: number;
   [key: string]: any;
 }
 
-// Type pour les données utilisateur
 export interface UserData {
   id: string;
   email: string;
-  username: string | null; // Explicitement nullable
+  username: string | null;
   isActive: boolean;
   createdAt: Date;
 }
@@ -65,7 +65,7 @@ export async function getUserById(id: string): Promise<UserData | null> {
       select: {
         id: true,
         email: true,
-        username: true, // TypeScript sait maintenant que c'est string | null
+        username: true,
         isActive: true,
         createdAt: true,
       },
@@ -85,10 +85,10 @@ export async function getUserByEmail(email: string): Promise<UserWithStripe | nu
       select: {
         id: true,
         email: true,
-        username: true, // string | null
+        username: true,
         isActive: true,
-        stripeCustomerId: true, // string | null
-        stripeSessionId: true, // string | null
+        stripeCustomerId: true,
+        stripeSessionId: true,
         createdAt: true,
       },
     });
@@ -106,6 +106,7 @@ function isValidEmail(email: string): boolean {
 }
 
 export async function createUser(userData: {
+  [x: string]: any;
   email: string;
   stripeCustomerId?: string;
   stripeSessionId?: string;
@@ -120,13 +121,10 @@ export async function createUser(userData: {
       throw new Error('User already exists');
     }
 
-    const defaultPassword = crypto.randomBytes(16).toString('base64');
-    const hashedPassword = await bcrypt.hash(defaultPassword, 12);
-
     const user = await prisma.user.create({
       data: {
         email: userData.email,
-        password: hashedPassword,
+        password: userData.password,
         isActive: true,
         stripeCustomerId: userData.stripeCustomerId || null,
         stripeSessionId: userData.stripeSessionId || null,
@@ -157,7 +155,6 @@ export async function updateUserProfile(
   }
 ): Promise<UserData> {
   try {
-    // Type explicite pour les données de mise à jour
     const updateData: {
       username?: string;
       password?: string;
@@ -207,7 +204,16 @@ export async function updateUserProfile(
 
 export async function getAuthUserFromRequest(request: NextRequest): Promise<UserData | null> {
   try {
-    const token = request.cookies.get('auth-token')?.value;
+    let token: string | undefined;
+    
+    if (request.cookies) {
+      token = request.cookies.get('auth-token')?.value;
+    } else {
+      // Fallback pour les cas où request.cookies n'est pas disponible
+      const cookieStore = await cookies();
+      token = cookieStore.get('auth-token')?.value;
+    }
+    
     if (!token) return null;
 
     const decoded = await verifyToken(token);
@@ -231,7 +237,6 @@ export async function verifyPassword(plainPassword: string, hashedPassword: stri
   }
 }
 
-// Type pour le résultat de l'authentification
 export interface AuthResult {
   user: {
     id: string;
@@ -249,8 +254,8 @@ export async function authenticateUser(email: string, password: string): Promise
       select: {
         id: true,
         email: true,
-        username: true, // string | null
-        password: true, // string
+        username: true,
+        password: true,
         isActive: true,
       },
     });
@@ -267,7 +272,7 @@ export async function authenticateUser(email: string, password: string): Promise
     const token = await generateToken({
       userId: user.id,
       email: user.email,
-      username: user.username, // peut être null
+      username: user.username,
     });
 
     return {
