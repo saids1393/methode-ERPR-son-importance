@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import DesktopLayout from "./DesktopLayout";
 import MobileLayout from "./MobileLayout";
 
 export default function LayoutSwitcher({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
@@ -16,6 +19,20 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
     return () => mediaQuery.removeEventListener('change', handleResize);
   }, []);
 
+  useEffect(() => {
+    // Afficher la sidebar seulement si on est dans les chapitres (pas sur dashboard ou introduction seule)
+    const shouldShowSidebar = pathname.startsWith('/chapitres/') && 
+                             !pathname.endsWith('/introduction') ||
+                             (pathname.startsWith('/chapitres/') && pathname.includes('/'));
+    setShowSidebar(shouldShowSidebar);
+  }, [pathname]);
+
+  // Si on est sur le dashboard ou une page sans sidebar, afficher le contenu directement
+  if (!showSidebar) {
+    return <div className="min-h-screen">{children}</div>;
+  }
+
+  // Sinon, utiliser le layout avec sidebar
   return isMobile ? (
     <MobileLayout>{children}</MobileLayout>
   ) : (

@@ -58,8 +58,8 @@ export default async function DashboardPage() {
                     Accédez à tous les chapitres de la méthode, des bases jusqu'à la lecture complète.
                   </p>
                   <Link
-                    href="/chapitres/0/0"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
+                    href="/chapitres/0/introduction"
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
                   >
                     Commencer maintenant
                   </Link>
