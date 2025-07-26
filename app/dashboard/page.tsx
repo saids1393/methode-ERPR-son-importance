@@ -2,11 +2,32 @@ import { redirect } from 'next/navigation';
 import { getAuthUser, clearAuthCookie } from '@/lib/auth';
 import Link from 'next/link';
 
+import { redirect } from 'next/navigation';
+import { getAuthUser } from '@/lib/auth';
+import Link from 'next/link';
+
 export default async function DashboardPage() {
   const user = await getAuthUser();
 
   if (!user) {
-    redirect('/checkout');
+    // Vérifier côté client aussi pour les cas de cookies pas encore synchronisés
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p>Vérification de votre accès...</p>
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              setTimeout(() => {
+                fetch('/api/auth/me')
+                  .then(res => res.ok ? window.location.reload() : window.location.href = '/checkout')
+                  .catch(() => window.location.href = '/checkout');
+              }, 2000);
+            `
+          }} />
+        </div>
+      </div>
+    );
   }
 
   return (

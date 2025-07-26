@@ -58,7 +58,8 @@ export async function POST(req: Request) {
     // Connecter l'utilisateur
     await setAuthCookie(user);
 
-    return NextResponse.json({
+    // Forcer la réponse à attendre que le cookie soit défini
+    const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
@@ -66,6 +67,9 @@ export async function POST(req: Request) {
         isActive: user.isActive
       }
     });
+
+    // S'assurer que le cookie est bien défini dans la réponse
+    return response;
   } catch (error) {
     console.error('Payment verification error:', error);
     return NextResponse.json(

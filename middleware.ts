@@ -22,14 +22,23 @@ export async function middleware(request: NextRequest) {
       const user = await getAuthUser();
       
       if (!user || !user.isActive) {
-        // Rediriger vers checkout si pas authentifié ou pas actif
-        return NextResponse.redirect(new URL('/checkout', request.url));
+        // Pour les pages de chapitres, rediriger vers checkout
+        // Pour le dashboard, permettre le passage (la page se chargera de vérifier)
+        if (pathname.startsWith('/chapitres')) {
+          return NextResponse.redirect(new URL('/checkout', request.url));
+        }
+        // Pour /dashboard, laisser passer et laisser la page gérer la redirection
+        return NextResponse.next();
       }
 
       return NextResponse.next();
     } catch (error) {
       console.error('Middleware auth error:', error);
-      return NextResponse.redirect(new URL('/checkout', request.url));
+      // Même logique : ne rediriger que pour les chapitres
+      if (pathname.startsWith('/chapitres')) {
+        return NextResponse.redirect(new URL('/checkout', request.url));
+      }
+      return NextResponse.next();
     }
   }
 
