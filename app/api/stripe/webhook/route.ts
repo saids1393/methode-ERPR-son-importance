@@ -2,10 +2,8 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { getUserByEmail, createUser } from "@/lib/auth";
-<<<<<<< HEAD
 import { prisma } from '@/lib/prisma';
-=======
->>>>>>> 001b2e5bdf83197152604db114d687bc18639e55
+
 
 export async function POST(req: Request) {
   try {

@@ -40,8 +40,14 @@ export default function CheckoutPage() {
         });
 
         if (loginResponse.ok) {
-          window.location.replace('/dashboard');
-          return;
+          const loginData = await loginResponse.json();
+          if (loginData.success) {
+            // Attendre un peu pour que le cookie soit défini
+            setTimeout(() => {
+              window.location.replace('/dashboard');
+            }, 500);
+            return;
+          }
         }
       }
 

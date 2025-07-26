@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserByEmail, setAuthCookie } from '@/lib/auth';
+import { getUserByEmail, generateToken } from '@/lib/auth';
 
 export async function POST(req: Request) {
   try {
@@ -21,10 +21,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Connecter l'utilisateur
-    await setAuthCookie(user);
+    // Générer un token JWT
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+    });
 
-    return NextResponse.json({
+    // Créer la réponse avec le cookie
+    const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
@@ -32,6 +36,19 @@ export async function POST(req: Request) {
         isActive: user.isActive
       }
     });
+
+    // Définir le cookie d'authentification
+    response.cookies.set({
+      name: 'auth-token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 30 * 24 * 60 * 60, // 30 jours
+      path: '/',
+      sameSite: 'lax',
+    });
+
+    return response;
   } catch (error) {
     console.error('Login existing user error:', error);
     return NextResponse.json(

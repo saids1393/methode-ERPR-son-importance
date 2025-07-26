@@ -24,18 +24,18 @@ export default function DashboardPage() {
           setUser(userData);
         } else {
           // User not authenticated, redirect to checkout
-          router.push('/checkout');
+          window.location.replace('/checkout');
         }
       } catch (error) {
         console.error('Auth check error:', error);
-        router.push('/checkout');
+        window.location.replace('/checkout');
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, [router]);
+  }, []);
 
   if (loading) {
     return (

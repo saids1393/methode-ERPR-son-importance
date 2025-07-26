@@ -1,5 +1,3 @@
-// ✅ app/api/auth/me/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 
@@ -14,7 +12,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(user);
+    // Retourne uniquement les données publiques (pas le mot de passe etc)
+    const { id, email, isActive } = user;
+
+    return NextResponse.json({ id, email, isActive });
   } catch (error) {
     console.error('Auth me error:', error);
     return NextResponse.json(

@@ -101,33 +101,10 @@ export async function getAuthUserFromRequest(request: NextRequest) {
   }
 }
 
-// Définir cookie auth-token dans la réponse NextResponse
-export function setAuthCookie(response: NextResponse, user: { id: string; email: string }) {
-  const token = generateToken({
-    userId: user.id,
-    email: user.email,
-  });
-
-  response.cookies.set('auth-token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 30 * 24 * 60 * 60,
-    path: '/',
-    sameSite: 'lax',
-  });
-
-  return response;
-}
-
-// Supprimer cookie auth-token dans la réponse NextResponse
-export function clearAuthCookie(response: NextResponse) {
-  response.cookies.set('auth-token', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    expires: new Date(0),
-    path: '/',
-    sameSite: 'lax',
-  });
-
-  return response;
+// Supprimer cookie auth-token
+export function clearAuthCookie() {
+  // Cette fonction sera utilisée côté client si nécessaire
+  if (typeof document !== 'undefined') {
+    document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  }
 }
