@@ -30,9 +30,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Retourne uniquement les données publiques (pas le mot de passe etc)
-    const { id, email, isActive } = user;
+    const { id, email, username, isActive } = user;
 
-    return NextResponse.json({ id, email, isActive });
+    return NextResponse.json({ id, email, username, isActive });
   } catch (error) {
     console.error('Auth me error:', error);
     return NextResponse.json(

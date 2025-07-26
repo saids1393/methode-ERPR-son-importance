@@ -3,10 +3,12 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { prisma } from './prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
 
 export interface JWTPayload {
   userId: string;
   email: string;
+  username?: string;
   [key: string]: any;
 }
 
@@ -32,6 +34,7 @@ export async function getUserById(id: string) {
       select: {
         id: true,
         email: true,
+        username: true,
         isActive: true,
         createdAt: true,
       },
@@ -49,6 +52,7 @@ export async function getUserByEmail(email: string) {
       select: {
         id: true,
         email: true,
+        username: true,
         isActive: true,
         stripeCustomerId: true,
         stripeSessionId: true,
@@ -63,13 +67,19 @@ export async function getUserByEmail(email: string) {
 
 export async function createUser(userData: {
   email: string;
+  username?: string;
+  password?: string;
   stripeCustomerId?: string;
   stripeSessionId?: string;
 }) {
   try {
+    const hashedPassword = userData.password ? await bcrypt.hash(userData.password, 12) : null;
+    
     return await prisma.user.create({
       data: {
         email: userData.email,
+        username: userData.username,
+        password: hashedPassword,
         isActive: true,
         stripeCustomerId: userData.stripeCustomerId,
         stripeSessionId: userData.stripeSessionId,
@@ -77,6 +87,7 @@ export async function createUser(userData: {
       select: {
         id: true,
         email: true,
+        username: true,
         isActive: true,
         stripeCustomerId: true,
         stripeSessionId: true,
@@ -89,6 +100,37 @@ export async function createUser(userData: {
   }
 }
 
+export async function updateUserProfile(userId: string, data: {
+  username?: string;
+  password?: string;
+}) {
+  try {
+    const updateData: any = {};
+    
+    if (data.username) {
+      updateData.username = data.username;
+    }
+    
+    if (data.password) {
+      updateData.password = await bcrypt.hash(data.password, 12);
+    }
+    
+    return await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
+}
 // Récupérer utilisateur à partir du token dans la requête NextRequest
 export async function getAuthUserFromRequest(request: NextRequest) {
   try {
