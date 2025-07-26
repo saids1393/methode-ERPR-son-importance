@@ -5,6 +5,12 @@ import SidebarContent from "@/app/components/SidebarContent";
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [courseStarted, setCourseStarted] = useState(false);
+
+  useEffect(() => {
+    // Vérifier si le cours a été commencé
+    setCourseStarted(localStorage.getItem('courseStarted') === 'true');
+  }, []);
 
   // Bloquer le scroll du body quand la sidebar est ouverte
   useEffect(() => {
@@ -20,6 +26,10 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     };
   }, [sidebarOpen]);
 
+  // Si le cours n'a pas été commencé, ne pas afficher la sidebar
+  if (!courseStarted) {
+    return <div className="min-h-screen">{children}</div>;
+  }
   return (
     <div className="md:hidden flex flex-col h-screen w-full bg-zinc-950">
       {/* Header mobile */}

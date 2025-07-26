@@ -1,37 +1,18 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyToken, getUserById } from '@/lib/auth';
+import { getAuthUser } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const token = (await cookies()).get('auth-token')?.value;
+    const user = await getAuthUser();
     
-    if (!token) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Non autorisé' },
         { status: 401 }
       );
     }
 
-    try {
-      const decoded = verifyToken(token);
-      
-      // Récupération de l'utilisateur
-      const user = await getUserById(decoded.userId);
-      if (!user) {
-        return NextResponse.json(
-          { error: 'Utilisateur non trouvé' },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json(user);
-    } catch (tokenError) {
-      return NextResponse.json(
-        { error: 'Token invalide' },
-        { status: 401 }
-      );
-    }
+    return NextResponse.json(user);
   } catch (error) {
     console.error('Auth me error:', error);
     return NextResponse.json(
