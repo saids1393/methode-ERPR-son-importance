@@ -1,22 +1,28 @@
 // lib/auth.ts
 
-import jwt from 'jsonwebtoken';
+import { SignJWT, jwtVerify } from 'jose';
 import { prisma } from './prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
 export interface JWTPayload {
   userId: string;
   email: string;
+  [key: string]: any;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
 
-export function generateToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
+export async function generateToken(payload: JWTPayload): Promise<string> {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('30d')
+    .sign(JWT_SECRET);
 }
 
-export function verifyToken(token: string): JWTPayload {
-  return jwt.verify(token, JWT_SECRET) as JWTPayload;
+export async function verifyToken(token: string): Promise<JWTPayload> {
+  const { payload } = await jwtVerify(token, JWT_SECRET);
+  return payload as JWTPayload;
 }
 
 export async function getUserById(id: string) {
@@ -90,7 +96,7 @@ export async function getAuthUserFromRequest(request: NextRequest) {
 
     if (!token) return null;
 
-    const decoded = verifyToken(token);
+    const decoded = await verifyToken(token);
     const user = await getUserById(decoded.userId);
 
     if (!user || !user.isActive) return null;

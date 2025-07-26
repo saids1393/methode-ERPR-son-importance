@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     // Générer un token JWT
-    const token = generateToken({
+    const token = await generateToken({
       userId: user.id,
       email: user.email,
     });
