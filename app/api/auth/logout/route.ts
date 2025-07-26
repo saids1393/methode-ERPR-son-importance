@@ -4,7 +4,7 @@ import { clearAuthCookie } from '@/lib/auth';
 export async function POST() {
   try {
     clearAuthCookie();
-    return NextResponse.redirect(new URL('/checkout', process.env.NEXTAUTH_URL || 'http://localhost:3000'));
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Logout error:', error);
     return NextResponse.json(

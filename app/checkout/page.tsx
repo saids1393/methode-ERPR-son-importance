@@ -40,7 +40,7 @@ export default function CheckoutPage() {
         });
 
         if (loginResponse.ok) {
-          window.location.href = '/dashboard';
+          window.location.replace('/dashboard');
           return;
         }
       }

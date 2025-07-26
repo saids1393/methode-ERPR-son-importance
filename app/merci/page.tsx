@@ -32,10 +32,8 @@ export default function MerciPage() {
           setStatus('success');
           setMessage('Paiement confirmé ! Redirection vers votre espace...');
           
-          // Redirection automatique après 3 secondes
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 3000);
+          // Redirection immédiate vers le dashboard
+          window.location.replace('/dashboard');
         } else {
           setStatus('error');
           setMessage(data.error || 'Erreur lors de la vérification du paiement');
