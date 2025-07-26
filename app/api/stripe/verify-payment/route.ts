@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { getUserByEmail, setAuthCookie } from '@/lib/auth';
+import { getUserByEmail, createUser, generateToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
@@ -38,53 +38,51 @@ export async function POST(req: Request) {
 
     if (!user) {
       // Créer un nouvel utilisateur
-      user = await prisma.user.create({
-        data: { 
-          email,
-          isActive: true,
-          stripeCustomerId: session.customer as string,
-          stripeSessionId: sessionId,
-        },
-        select: {
-          id: true,
-          email: true,
-          isActive: true,
-          stripeCustomerId: true,
-          stripeSessionId: true,
-          createdAt: true
-        }
+      user = await createUser({
+        email: email,
+        stripeCustomerId: session.customer as string,
+        stripeSessionId: sessionId,
       });
-    } else {
-      // Mettre à jour l'utilisateur existant
-      user = await prisma.user.update({
+    } else if (!user.isActive) {
+      // Activer l'utilisateur existant
+      await prisma.user.update({
         where: { id: user.id },
         data: { 
           isActive: true,
           stripeCustomerId: session.customer as string,
           stripeSessionId: sessionId,
-        },
-        select: {
-          id: true,
-          email: true,
-          isActive: true,
-          stripeCustomerId: true,
-          stripeSessionId: true,
-          createdAt: true
         }
       });
+      user.isActive = true;
     }
 
-    // Connecter l'utilisateur
-    await setAuthCookie(user);
+    // Générer un token JWT
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+    });
 
-    return NextResponse.json({
+    // Créer la réponse et y attacher le cookie
+    const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
         email: user.email,
-        isActive: user.isActive
+        isActive: user.isActive,
       }
     });
+
+    response.cookies.set({
+      name: 'auth-token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 30 * 24 * 60 * 60, // 30 jours
+      path: '/',
+      sameSite: 'lax',
+    });
+
+    return response;
   } catch (error) {
     console.error('Payment verification error:', error);
     return NextResponse.json(

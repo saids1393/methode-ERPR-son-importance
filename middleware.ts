@@ -1,6 +1,27 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getAuthUser } from '@/lib/auth';
+import { verifyToken, getUserById } from '@/lib/auth';
+
+async function getAuthUserFromRequest(request: NextRequest) {
+  try {
+    const token = request.cookies.get('auth-token')?.value;
+    
+    if (!token) {
+      return null;
+    }
+
+    const decoded = verifyToken(token);
+    const user = await getUserById(decoded.userId);
+
+    if (!user || !user.isActive) {
+      return null;
+    }
+
+    return user;
+  } catch (error) {
+    return null;
+  }
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -19,17 +40,26 @@ export async function middleware(request: NextRequest) {
   // Vérifier l'authentification pour les pages protégées
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/chapitres')) {
     try {
-      const user = await getAuthUser();
+      const user = await getAuthUserFromRequest(request);
       
       if (!user || !user.isActive) {
-        // Rediriger vers checkout si pas authentifié ou pas actif
-        return NextResponse.redirect(new URL('/checkout', request.url));
+        // Pour les pages de chapitres, rediriger vers checkout
+        // Pour le dashboard, permettre le passage (la page se chargera de vérifier)
+        if (pathname.startsWith('/chapitres')) {
+          return NextResponse.redirect(new URL('/checkout', request.url));
+        }
+        // Pour /dashboard, laisser passer et laisser la page gérer la redirection
+        return NextResponse.next();
       }
 
       return NextResponse.next();
     } catch (error) {
       console.error('Middleware auth error:', error);
-      return NextResponse.redirect(new URL('/checkout', request.url));
+      // Même logique : ne rediriger que pour les chapitres
+      if (pathname.startsWith('/chapitres')) {
+        return NextResponse.redirect(new URL('/checkout', request.url));
+      }
+      return NextResponse.next();
     }
   }
 

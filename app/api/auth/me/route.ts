@@ -1,10 +1,12 @@
-import { NextResponse } from 'next/server';
-import { getAuthUser } from '@/lib/auth';
+// ✅ app/api/auth/me/route.ts
 
-export async function GET() {
+import { NextRequest, NextResponse } from 'next/server';
+import { getAuthUserFromRequest } from '@/lib/auth';
+
+export async function GET(request: NextRequest) {
   try {
-    const user = await getAuthUser();
-    
+    const user = await getAuthUserFromRequest(request);
+
     if (!user) {
       return NextResponse.json(
         { error: 'Non autorisé' },

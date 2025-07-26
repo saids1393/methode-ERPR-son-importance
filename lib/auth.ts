@@ -1,7 +1,8 @@
+// lib/auth.ts
+
 import jwt from 'jsonwebtoken';
-import { cookies } from 'next/headers';
-import { NextRequest } from 'next/server';
 import { prisma } from './prisma';
+import { NextRequest, NextResponse } from 'next/server';
 
 export interface JWTPayload {
   userId: string;
@@ -20,16 +21,15 @@ export function verifyToken(token: string): JWTPayload {
 
 export async function getUserById(id: string) {
   try {
-    const user = await prisma.user.findUnique({
+    return await prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
         email: true,
         isActive: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
-    return user;
   } catch (error) {
     console.error('Error fetching user:', error);
     return null;
@@ -38,7 +38,7 @@ export async function getUserById(id: string) {
 
 export async function getUserByEmail(email: string) {
   try {
-    const user = await prisma.user.findUnique({
+    return await prisma.user.findUnique({
       where: { email },
       select: {
         id: true,
@@ -46,10 +46,9 @@ export async function getUserByEmail(email: string) {
         isActive: true,
         stripeCustomerId: true,
         stripeSessionId: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
-    return user;
   } catch (error) {
     console.error('Error fetching user by email:', error);
     return null;
@@ -62,7 +61,7 @@ export async function createUser(userData: {
   stripeSessionId?: string;
 }) {
   try {
-    const user = await prisma.user.create({
+    return await prisma.user.create({
       data: {
         email: userData.email,
         isActive: true,
@@ -75,54 +74,60 @@ export async function createUser(userData: {
         isActive: true,
         stripeCustomerId: true,
         stripeSessionId: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
-    return user;
   } catch (error) {
     console.error('Error creating user:', error);
     throw error;
   }
 }
 
-export async function setAuthCookie(user: { id: string; email: string }) {
-  const token = generateToken({
-    userId: user.id,
-    email: user.email
-  });
-
-  (await cookies()).set('auth-token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 30 * 24 * 60 * 60, // 30 jours
-    path: '/',
-    sameSite: 'lax'
-  });
-
-  return token;
-}
-
-export async function getAuthUser() {
+// Récupérer utilisateur à partir du token dans la requête NextRequest
+export async function getAuthUserFromRequest(request: NextRequest) {
   try {
-    const token = (await cookies()).get('auth-token')?.value;
-    
-    if (!token) {
-      return null;
-    }
+    const token = request.cookies.get('auth-token')?.value;
+
+    if (!token) return null;
 
     const decoded = verifyToken(token);
     const user = await getUserById(decoded.userId);
-    
-    if (!user || !user.isActive) {
-      return null;
-    }
+
+    if (!user || !user.isActive) return null;
 
     return user;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
-export async function clearAuthCookie() {
-  (await cookies()).delete('auth-token');
+// Définir cookie auth-token dans la réponse NextResponse
+export function setAuthCookie(response: NextResponse, user: { id: string; email: string }) {
+  const token = generateToken({
+    userId: user.id,
+    email: user.email,
+  });
+
+  response.cookies.set('auth-token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 30 * 24 * 60 * 60,
+    path: '/',
+    sameSite: 'lax',
+  });
+
+  return response;
+}
+
+// Supprimer cookie auth-token dans la réponse NextResponse
+export function clearAuthCookie(response: NextResponse) {
+  response.cookies.set('auth-token', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    expires: new Date(0),
+    path: '/',
+    sameSite: 'lax',
+  });
+
+  return response;
 }

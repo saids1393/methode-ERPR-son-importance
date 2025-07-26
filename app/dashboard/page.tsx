@@ -1,12 +1,55 @@
-import { redirect } from 'next/navigation';
-import { getAuthUser, clearAuthCookie } from '@/lib/auth';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export default async function DashboardPage() {
-  const user = await getAuthUser();
+interface User {
+  id: string;
+  email: string;
+  isActive: boolean;
+}
+
+export default function DashboardPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else {
+          // User not authenticated, redirect to checkout
+          router.push('/checkout');
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        router.push('/checkout');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p>Vérification de votre accès...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
-    redirect('/checkout');
+    return null; // This shouldn't happen due to redirect in useEffect, but just in case
   }
 
   return (
