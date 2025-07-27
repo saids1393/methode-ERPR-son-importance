@@ -21,6 +21,8 @@ model User {
   isActive         Boolean  @default(false)
   stripeCustomerId String?
   stripeSessionId  String?
+  completedPages   Int[]    @default([])
+  completedQuizzes Int[]    @default([])
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }

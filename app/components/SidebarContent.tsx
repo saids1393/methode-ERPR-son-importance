@@ -2,86 +2,35 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Circle } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Circle, Home } from "lucide-react";
 import { chapters } from "@/lib/chapters";
+import { useUserProgress } from "@/hooks/useUserProgress";
 
-const calculateProgress = (completedPages: Set<number>) => {
+const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<number>) => {
   const totalPages = chapters.reduce((total, ch) => total + ch.pages.length, 0);
-  return Math.round((completedPages.size / totalPages) * 100);
+  const totalQuizzes = chapters.filter(ch => ch.quiz && ch.quiz.length > 0).length;
+  const totalItems = totalPages + totalQuizzes;
+  const completedItems = completedPages.size + completedQuizzes.size;
+  return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 };
 
 export default function SidebarContent() {
   const pathname = usePathname();
   const [open, setOpen] = useState<Record<number, boolean>>({});
-  const [completedPages, setCompletedPages] = useState<Set<number>>(new Set());
-  const [completedQuizzes, setCompletedQuizzes] = useState<Set<number>>(new Set());
-  const [isReady, setIsReady] = useState(false);
+  
+  const {
+    completedPages,
+    completedQuizzes,
+    isLoading,
+    togglePageCompletion,
+    toggleQuizCompletion,
+  } = useUserProgress();
 
-  useEffect(() => {
-    const initStorage = () => {
-      try {
-        const saved = window.localStorage?.getItem('completedPages') ||
-          sessionStorage.getItem('completedPages_mobile_fallback');
-        if (saved) {
-          setCompletedPages(new Set(JSON.parse(saved)));
-        }
-      } catch (e) {
-        console.error("Erreur d'accès au stockage:", e);
-      } finally {
-        setIsReady(true);
-      }
-    };
-
-    const timer = setTimeout(initStorage, 150);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!isReady) return;
-
-    const saveData = () => {
-      const data = JSON.stringify(Array.from(completedPages));
-      try {
-        localStorage.setItem('completedPages', data);
-        sessionStorage.setItem('completedPages_mobile_fallback', data);
-      } catch (e) {
-        console.error("Erreur de sauvegarde:", e);
-        try {
-          sessionStorage.setItem('completedPages', data);
-        } catch (err) {
-          console.error("Échec complet de sauvegarde:", err);
-        }
-      }
-    };
-
-    saveData();
-  }, [completedPages, isReady]);
-
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key?.startsWith('completedPages') && e.newValue) {
-        setCompletedPages(new Set(JSON.parse(e.newValue)));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  const togglePageCompletion = (pageNumber: number, e: React.MouseEvent) => {
+  const handleTogglePageCompletion = (pageNumber: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    setCompletedPages(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(pageNumber)) {
-        newSet.delete(pageNumber);
-      } else {
-        newSet.add(pageNumber);
-      }
-      return newSet;
-    });
+    togglePageCompletion(pageNumber);
   };
 
   useEffect(() => {
@@ -97,6 +46,26 @@ export default function SidebarContent() {
     return chapter.pages.every(page => completedPages.has(page.pageNumber));
   };
 
+  const progressPercentage = useMemo(() => 
+    calculateProgress(completedPages, completedQuizzes), 
+    [completedPages, completedQuizzes]
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full text-zinc-300">
+        <div className="px-6 py-5 border-b border-zinc-700 flex-shrink-0">
+          <div className="animate-pulse">
+            <div className="h-6 bg-zinc-700 rounded mb-3"></div>
+            <div className="h-4 bg-zinc-700 rounded w-3/4"></div>
+          </div>
+        </div>
+        <div className="flex-grow flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col h-full text-zinc-300">
       {/* Header */}
@@ -105,17 +74,26 @@ export default function SidebarContent() {
           <BookOpen className="text-blue-400" size={20} />
           <span>Sommaire du Cours</span>
         </h1>
+        <div className="mt-3">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-zinc-300 hover:bg-zinc-700/30 hover:text-white"
+          >
+            <Home size={16} className="text-blue-400" />
+            <span>Retour au tableau de bord</span>
+          </Link>
+        </div>
         <div className="mt-4">
           <div className="flex justify-between text-sm mb-1">
             <span className="text-zinc-300">Progression</span>
             <span className="font-medium text-blue-300">
-              {calculateProgress(completedPages)}%
+              {progressPercentage}%
             </span>
           </div>
           <div className="w-full bg-zinc-700 rounded-full h-2">
             <div
               className="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${calculateProgress(completedPages)}%` }}
+              style={{ width: `${progressPercentage}%` }}
             ></div>
           </div>
         </div>
@@ -199,7 +177,7 @@ export default function SidebarContent() {
                       }`}
                     >
                       <button
-                        onClick={(e) => togglePageCompletion(page.pageNumber, e)}
+                        onClick={(e) => handleTogglePageCompletion(page.pageNumber, e)}
                         className="flex-shrink-0"
                         aria-label={
                           isCompleted
@@ -235,12 +213,28 @@ export default function SidebarContent() {
           : 'hover:bg-zinc-700/30 text-zinc-300'
       }`}
     >
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleQuizCompletion(chapter.chapterNumber);
+        }}
+        className="flex-shrink-0"
+        aria-label={
+          completedQuizzes.has(chapter.chapterNumber)
+            ? 'Marquer le quiz comme non complété'
+            : 'Marquer le quiz comme complété'
+        }
+      >
+        {completedQuizzes.has(chapter.chapterNumber) ? (
+          <CheckCircle className="text-green-400" size={14} />
+        ) : (
+          <Circle className="text-zinc-500 hover:text-zinc-300" size={14} />
+        )}
+      </button>
       <BookOpen size={14} className="text-yellow-400" />
       <span className="text-zinc-200 font-semibold">Quiz</span>
       <span className="ml-auto flex items-center gap-1">
-        {completedQuizzes.has(chapter.chapterNumber) && (
-          <CheckCircle className="text-green-400" size={14} />
-        )}
         {pathname === `/chapitres/${chapter.chapterNumber}/quiz` && (
           <span className="h-2 w-2 rounded-full bg-yellow-400"></span>
         )}
