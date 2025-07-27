@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+
 
 // Configuration du transporteur email
 const transporter = nodemailer.createTransport({
@@ -20,6 +22,69 @@ interface PaymentData {
   customerName?: string;
   username?: string;
   isNewAccount: boolean;
+}
+
+// Fonction pour générer le PDF du reçu
+export async function generateReceiptPDF(data: PaymentData): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create();
+
+  // Page taille ticket environ 200 x 400 pts (largeur fixe)
+  const page = pdfDoc.addPage([200, 400]);
+  const { width, height } = page.getSize();
+
+  // Charger la police standard monospace (Courier)
+  const font = await pdfDoc.embedFont(StandardFonts.Courier);
+
+  const fontSize = 10;
+  const lineHeight = fontSize + 4;
+  const margin = 10;
+  const maxWidth = width - 2 * margin;
+
+  let y = height - margin;
+
+  // Fonction pour écrire texte avec saut à la ligne automatique
+  function drawWrappedText(text: string) {
+    const words = text.split(' ');
+    let line = '';
+    for (const word of words) {
+      const testLine = line ? line + ' ' + word : word;
+      const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+      if (testWidth > maxWidth) {
+        // écrire la ligne actuelle
+        page.drawText(line, { x: margin, y, size: fontSize, font });
+        y -= lineHeight;
+        line = word; // mot sur nouvelle ligne
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) {
+      page.drawText(line, { x: margin, y, size: fontSize, font });
+      y -= lineHeight;
+    }
+  }
+
+  drawWrappedText('===== REÇU DE PAIEMENT =====');
+  y -= lineHeight / 2;
+
+  drawWrappedText(`Email : ${data.email}`);
+
+  if (data.username) {
+    drawWrappedText(`Utilisateur : ${data.username}`);
+  }
+
+  drawWrappedText(`Montant payé : ${(data.amount / 100).toFixed(2)} ${data.currency.toUpperCase()}`);
+  drawWrappedText(`Date : ${new Date().toLocaleString('fr-FR')}`);
+  drawWrappedText(`Transaction : ${data.sessionId}`);
+
+  y -= lineHeight;
+
+  drawWrappedText('Merci pour votre achat !');
+  drawWrappedText('========================');
+
+  // Finaliser le PDF et retourner en Uint8Array (buffer)
+  const pdfBytes = await pdfDoc.save();
+  return pdfBytes;
 }
 
 // Template HTML pour le reçu de paiement
@@ -273,6 +338,9 @@ Professeur Soidroudine
 // Fonction pour envoyer l'email de reçu
 export async function sendPaymentReceiptEmail(data: PaymentData): Promise<boolean> {
   try {
+    // Générer le PDF du reçu
+    const pdfBytes: Uint8Array = await generateReceiptPDF(data);
+
     const mailOptions = {
       from: {
         name: 'Méthode "Son Importance"',
@@ -284,8 +352,8 @@ export async function sendPaymentReceiptEmail(data: PaymentData): Promise<boolea
       text: getReceiptTextTemplate(data),
       attachments: [
         {
-          filename: 'recu-paiement.pdf',
-          content: Buffer.from(''), // Vous pouvez générer un PDF ici si nécessaire
+          filename: `recu-paiement-${Date.now()}.pdf`,
+          content: Buffer.from(pdfBytes),  // Conversion correcte de Uint8Array en Buffer
           contentType: 'application/pdf'
         }
       ]
@@ -498,4 +566,8 @@ export async function testEmailConfiguration(): Promise<boolean> {
     console.error('❌ Erreur de configuration email:', error);
     return false;
   }
+}
+
+function generatePDF(data: PaymentData) {
+    throw new Error('Function not implemented.');
 }
