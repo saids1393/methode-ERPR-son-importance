@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAuthUserFromRequest, updateUserProfile } from '@/lib/auth';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -26,6 +27,13 @@ export async function POST(req: Request) {
       username,
       password
     });
+
+    // Envoyer un email de bienvenue personnalisé avec le nouveau pseudo
+    if (username && username !== user.username) {
+      sendWelcomeEmail(updatedUser.email, updatedUser.username || undefined).catch(error => {
+        console.error('❌ Erreur envoi email de bienvenue:', error);
+      });
+    }
 
     return NextResponse.json({
       success: true,

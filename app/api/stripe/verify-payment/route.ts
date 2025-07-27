@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getUserByEmail, createUser, generateToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sendPaymentReceiptEmail, sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
 
     // Vérifier si l'utilisateur existe déjà
     let user = await getUserByEmail(email);
+    let isNewAccount = false;
 
     if (!user) {
       // Créer un nouvel utilisateur
@@ -43,6 +45,7 @@ export async function POST(req: Request) {
         stripeCustomerId: session.customer as string,
         stripeSessionId: sessionId,
       });
+      isNewAccount = true;
     } else if (!user.isActive) {
       // Activer l'utilisateur existant
       await prisma.user.update({
@@ -54,12 +57,33 @@ export async function POST(req: Request) {
         }
       });
       user.isActive = true;
+      isNewAccount = false;
     }
 
     // Générer un token JWT
     const token = await generateToken({
       userId: user.id,
       email: user.email,
+    });
+
+    // Préparer les données pour l'email
+    const paymentData = {
+      email: user.email,
+      amount: session.amount_total || 9700, // 97€ en centimes
+      currency: session.currency || 'eur',
+      sessionId: sessionId,
+      username: user.username || undefined,
+      isNewAccount: isNewAccount
+    };
+
+    // Envoyer les emails en arrière-plan (ne pas bloquer la réponse)
+    Promise.all([
+      sendPaymentReceiptEmail(paymentData),
+      isNewAccount ? sendWelcomeEmail(user.email, user.username || undefined) : Promise.resolve(true)
+    ]).then(([receiptSent, welcomeSent]) => {
+      console.log('📧 Emails envoyés:', { receiptSent, welcomeSent });
+    }).catch(error => {
+      console.error('❌ Erreur envoi emails:', error);
     });
 
     // Créer la réponse et y attacher le cookie

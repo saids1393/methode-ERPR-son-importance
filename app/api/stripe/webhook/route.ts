@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { getUserByEmail, createUser } from "@/lib/auth";
 import { prisma } from '@/lib/prisma';
+import { sendPaymentReceiptEmail, sendWelcomeEmail } from '@/lib/email';
 
 
 export async function POST(req: Request) {
@@ -52,6 +53,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
     // Vérifier si l'utilisateur existe
     let user = await getUserByEmail(email);
+    let isNewAccount = false;
 
     if (!user) {
       // Créer un nouvel utilisateur
@@ -61,6 +63,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         stripeSessionId: session.id,
       });
       console.log(`Nouvel utilisateur créé: ${user.id}`);
+      isNewAccount = true;
     } else {
       // Activer l'utilisateur existant
       await prisma.user.update({
@@ -72,6 +75,33 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
         }
       });
       console.log(`Utilisateur activé: ${user.id}`);
+      isNewAccount = false;
+    }
+
+    // Préparer les données pour l'email
+    const paymentData = {
+      email: user.email,
+      amount: session.amount_total || 9700, // 97€ en centimes
+      currency: session.currency || 'eur',
+      sessionId: session.id,
+      username: user.username || undefined,
+      isNewAccount: isNewAccount
+    };
+
+    // Envoyer les emails en arrière-plan
+    try {
+    Promise.all([
+      sendPaymentReceiptEmail(paymentData),
+      isNewAccount ? sendWelcomeEmail(user.email, user.username || undefined) : Promise.resolve(true)
+    ]).then(([receiptSent, welcomeSent]) => {
+      console.log('📧 Emails envoyés:', { receiptSent, welcomeSent });
+    }).catch(error => {
+      console.error('❌ Erreur envoi emails:', error);
+    });
+      console.log('✅ Emails envoyés avec succès pour:', email);
+    } catch (emailError) {
+      console.error('❌ Erreur lors de l\'envoi des emails:', emailError);
+      // Ne pas faire échouer le webhook pour une erreur d'email
     }
   } catch (error) {
     console.error('Error handling checkout session completed:', error);

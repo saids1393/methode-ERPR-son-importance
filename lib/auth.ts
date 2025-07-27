@@ -24,6 +24,7 @@ export interface UserData {
 }
 
 export interface UserWithStripe extends UserData {
+  [x: string]: any;
   stripeCustomerId: string | null;
   stripeSessionId: string | null;
 }
