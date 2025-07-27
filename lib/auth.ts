@@ -264,6 +264,10 @@ export async function authenticateUser(email: string, password: string): Promise
       throw new Error('Invalid credentials');
     }
 
+    if (!user.password) {
+      throw new Error('Invalid credentials');
+    }
+
     const isValidPassword = await verifyPassword(password, user.password);
     if (!isValidPassword) {
       throw new Error('Invalid credentials');

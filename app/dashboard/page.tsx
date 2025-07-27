@@ -407,7 +407,7 @@ export default function DashboardPage() {
               <Clock className="h-6 w-6 text-blue-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-1">
-              {formattedTime || '0min'}
+              {formattedTime || '0s'}
             </h3>
             <p className="text-slate-400 text-sm">Temps d'étude</p>
           </div>

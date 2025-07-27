@@ -22,18 +22,37 @@ export function useTimeTracking() {
            !pathname.includes('/quiz');
   }, [pathname]);
 
-  // Sauvegarder le temps en localStorage
-  const saveTime = useCallback((timeToAdd: number) => {
-    const currentTotal = parseInt(localStorage.getItem('totalChapterTime') || '0');
-    const newTotal = currentTotal + timeToAdd;
-    localStorage.setItem('totalChapterTime', newTotal.toString());
-    setTotalTime(newTotal);
+  // Sauvegarder le temps en base de données
+  const saveTime = useCallback(async (timeToAdd: number) => {
+    if (timeToAdd <= 0) return;
+    
+    try {
+      const response = await fetch('/api/auth/time', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timeToAdd }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTotalTime(data.studyTimeSeconds);
+      }
+    } catch (error) {
+      console.error('Erreur de sauvegarde du temps:', error);
+    }
   }, []);
 
-  // Charger le temps depuis localStorage
-  const loadTime = useCallback(() => {
-    const savedTime = parseInt(localStorage.getItem('totalChapterTime') || '0');
-    setTotalTime(savedTime);
+  // Charger le temps depuis la base de données
+  const loadTime = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/time');
+      if (response.ok) {
+        const data = await response.json();
+        setTotalTime(data.studyTimeSeconds);
+      }
+    } catch (error) {
+      console.error('Erreur de chargement du temps:', error);
+    }
   }, []);
 
   // Réinitialiser l'activité
@@ -71,15 +90,19 @@ export function useTimeTracking() {
     resetActivity();
   }, [resetActivity]);
 
-  // Formater le temps en heures:minutes
+  // Formater le temps en heures:minutes:secondes
   const formatTime = useCallback((seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
     
     if (hours > 0) {
-      return `${hours}h ${minutes}min`;
+      return `${hours}h ${minutes}min ${remainingSeconds}s`;
     }
-    return `${minutes}min`;
+    if (minutes > 0) {
+      return `${minutes}min ${remainingSeconds}s`;
+    }
+    return `${remainingSeconds}s`;
   }, []);
 
   // Continuer l'activité (fermer l'avertissement)
@@ -106,7 +129,7 @@ export function useTimeTracking() {
             startTimeRef.current = now;
           }
         }
-      }, 30000); // Sauvegarder toutes les 30 secondes
+      }, 10000); // Sauvegarder toutes les 10 secondes
 
       // Ajouter les écouteurs d'événements
       const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];

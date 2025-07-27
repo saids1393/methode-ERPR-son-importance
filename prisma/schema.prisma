@@ -23,6 +23,7 @@ model User {
   stripeSessionId  String?
   completedPages   Int[]    @default([])
   completedQuizzes Int[]    @default([])
+  studyTimeSeconds Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
