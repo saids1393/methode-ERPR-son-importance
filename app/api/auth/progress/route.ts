@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    console.log('Progress loaded from DB:', userData);
     return NextResponse.json({
       completedPages: userData?.completedPages || [],
       completedQuizzes: userData?.completedQuizzes || [],
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
 
     const { pageNumber, quizNumber, action } = await request.json();
 
+    console.log('Progress update request:', { pageNumber, quizNumber, action, userId: user.id });
     if (pageNumber !== undefined) {
       const currentUser = await prisma.user.findUnique({
         where: { id: user.id },
@@ -61,6 +63,7 @@ export async function POST(request: NextRequest) {
         updatedPages = updatedPages.filter((p: any) => p !== pageNumber);
       }
 
+      console.log('Updating pages:', { before: currentUser?.completedPages, after: updatedPages });
       await prisma.user.update({
         where: { id: user.id },
         data: { completedPages: updatedPages },
@@ -86,6 +89,7 @@ export async function POST(request: NextRequest) {
         updatedQuizzes = updatedQuizzes.filter((q: any) => q !== quizNumber);
       }
 
+      console.log('Updating quizzes:', { before: currentUser?.completedQuizzes, after: updatedQuizzes });
       await prisma.user.update({
         where: { id: user.id },
         data: { completedQuizzes: updatedQuizzes },

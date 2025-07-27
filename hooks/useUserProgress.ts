@@ -48,50 +48,65 @@ export function useUserProgress() {
         if (data.completedQuizzes) {
           setCompletedQuizzes(new Set(data.completedQuizzes));
         }
+        return true;
       }
+      return false;
     } catch (error) {
       console.error('Erreur de sauvegarde de la progression:', error);
+      return false;
     }
   }, []);
 
   // Toggle page completion
   const togglePageCompletion = useCallback((pageNumber: number) => {
+    // Exclure la page 0 (chapitre 0) et le chapitre 11 de la progression
+    if (pageNumber === 0 || pageNumber === 30) {
+      return;
+    }
+    
     const isCompleted = completedPages.has(pageNumber);
     const action = isCompleted ? 'remove' : 'add';
     
-    // Mise à jour optimiste de l'UI
-    setCompletedPages(prev => {
-      const newSet = new Set(prev);
-      if (isCompleted) {
-        newSet.delete(pageNumber);
-      } else {
-        newSet.add(pageNumber);
+    // Sauvegarde en base puis mise à jour de l'UI
+    saveProgress(pageNumber, undefined, action).then((success) => {
+      if (success) {
+        setCompletedPages(prev => {
+          const newSet = new Set(prev);
+          if (isCompleted) {
+            newSet.delete(pageNumber);
+          } else {
+            newSet.add(pageNumber);
+          }
+          return newSet;
+        });
       }
-      return newSet;
     });
-
-    // Sauvegarde en base
-    saveProgress(pageNumber, undefined, action);
   }, [completedPages, saveProgress]);
 
   // Toggle quiz completion
   const toggleQuizCompletion = useCallback((quizNumber: number) => {
+    // Exclure le chapitre 11 de la progression
+    if (quizNumber === 11) {
+      return;
+    }
+    
     const isCompleted = completedQuizzes.has(quizNumber);
     const action = isCompleted ? 'remove' : 'add';
     
-    // Mise à jour optimiste de l'UI
-    setCompletedQuizzes(prev => {
-      const newSet = new Set(prev);
-      if (isCompleted) {
-        newSet.delete(quizNumber);
-      } else {
-        newSet.add(quizNumber);
+    // Sauvegarde en base puis mise à jour de l'UI
+    saveProgress(undefined, quizNumber, action).then((success) => {
+      if (success) {
+        setCompletedQuizzes(prev => {
+          const newSet = new Set(prev);
+          if (isCompleted) {
+            newSet.delete(quizNumber);
+          } else {
+            newSet.add(quizNumber);
+          }
+          return newSet;
+        });
       }
-      return newSet;
     });
-
-    // Sauvegarde en base
-    saveProgress(undefined, quizNumber, action);
   }, [completedQuizzes, saveProgress]);
 
   useEffect(() => {

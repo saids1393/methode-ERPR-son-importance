@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
+import { useTimeTracking } from '@/hooks/useTimeTracking';
+import InactivityWarning from '@/app/components/InactivityWarning';
 
 interface User {
   id: string;
@@ -50,16 +52,41 @@ export default function DashboardPage() {
     isLoading: progressLoading,
   } = useUserProgress();
 
+  const {
+    formattedTime,
+    showInactivityWarning,
+    continueActivity,
+    isInChapter
+  } = useTimeTracking();
+
   // Calculer la progression
   const calculateProgress = () => {
-    const totalPages = chapters.reduce((total, ch) => total + ch.pages.length, 0);
-    const totalQuizzes = chapters.filter(ch => ch.quiz && ch.quiz.length > 0).length;
+    const totalPages = chapters
+      .filter(ch => ch.chapterNumber !== 0 && ch.chapterNumber !== 11)
+      .reduce((total, ch) => total + ch.pages.length, 0);
+    const totalQuizzes = chapters
+      .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 11)
+      .length;
     const totalItems = totalPages + totalQuizzes;
-    const completedItems = completedPages.size + completedQuizzes.size;
+    // Exclure la page 0 et le chapitre 11 du décompte des pages complétées
+    const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30);
+    const completedItems = completedPagesFiltered.length + completedQuizzes.size;
     return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
   };
 
+  // Calculer les totaux
+  const getTotals = () => {
+    const totalPages = chapters
+      .filter(ch => ch.chapterNumber !== 0 && ch.chapterNumber !== 11)
+      .reduce((total, ch) => total + ch.pages.length, 0);
+    const totalQuizzes = chapters
+      .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 11)
+      .length;
+    return { totalPages, totalQuizzes };
+  };
+
   const progressPercentage = calculateProgress();
+  const { totalPages, totalQuizzes } = getTotals();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -379,16 +406,20 @@ export default function DashboardPage() {
             <div className="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Clock className="h-6 w-6 text-blue-400" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-1">30j</h3>
-            <p className="text-slate-400 text-sm">Durée totale</p>
+            <h3 className="text-2xl font-bold text-white mb-1">
+              {formattedTime || '0min'}
+            </h3>
+            <p className="text-slate-400 text-sm">Temps d'étude</p>
           </div>
           
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
             <div className="bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
               <BookOpen className="h-6 w-6 text-purple-400" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-1">11</h3>
-            <p className="text-slate-400 text-sm">Chapitres</p>
+            <h3 className="text-2xl font-bold text-white mb-1">
+              {progressLoading ? '...' : `${Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}/${totalPages}`}
+            </h3>
+            <p className="text-slate-400 text-sm">Pages complétées</p>
           </div>
           
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
@@ -396,9 +427,9 @@ export default function DashboardPage() {
               <Award className="h-6 w-6 text-yellow-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-1">
-              {progressLoading ? '...' : completedQuizzes.size}
+              {progressLoading ? '...' : `${completedQuizzes.size}/${totalQuizzes}`}
             </h3>
-            <p className="text-slate-400 text-sm">Quiz réussis</p>
+            <p className="text-slate-400 text-sm">Quiz complétés</p>
           </div>
         </div>
 
@@ -497,8 +528,8 @@ export default function DashboardPage() {
                   </p>
                 ) : (
                   <div className="text-slate-400 text-sm space-y-1">
-                    <p>📚 {completedPages.size} leçons terminées</p>
-                    <p>🏆 {completedQuizzes.size} quiz réussis</p>
+                    <p>📚 {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}/{totalPages} leçons terminées</p>
+                    <p>🏆 {completedQuizzes.size}/{totalQuizzes} quiz réussis</p>
                   </div>
                 )}
               </div>
@@ -555,9 +586,16 @@ export default function DashboardPage() {
           <p className="text-slate-300 text-lg leading-relaxed max-w-2xl mx-auto">
             Pour de meilleurs résultats, consacrez <span className="text-blue-400 font-semibold">30 minutes par jour</span> à votre apprentissage. 
             La régularité est la clé du succès ! Votre détermination d'aujourd\'hui sera votre fierté de demain.
+            <br />
+            <span className="text-slate-400 text-sm mt-2 block">Ce temps est indicatif et dépend de votre rythme.</span>
           </p>
         </div>
       </main>
+
+      {/* Modal d'avertissement d'inactivité */}
+      {showInactivityWarning && (
+        <InactivityWarning onContinue={continueActivity} />
+      )}
     </div>
   );
 }

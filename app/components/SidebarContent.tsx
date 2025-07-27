@@ -7,11 +7,28 @@ import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Circle, Home } from "
 import { chapters } from "@/lib/chapters";
 import { useUserProgress } from "@/hooks/useUserProgress";
 
+// Fonction de calcul de progression synchronisée avec le dashboard
 const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<number>) => {
-  const totalPages = chapters.reduce((total, ch) => total + ch.pages.length, 0);
-  const totalQuizzes = chapters.filter(ch => ch.quiz && ch.quiz.length > 0).length;
+  // Pages des chapitres 1-10 seulement (exclut chapitres 0 et 11)
+  const totalPages = chapters
+    .filter(ch => ch.chapterNumber !== 0 && ch.chapterNumber !== 11)
+    .reduce((total, ch) => total + ch.pages.length, 0);
+  
+  // Quiz des chapitres 0-10 (inclut chapitre 0, exclut chapitre 11)
+  const totalQuizzes = chapters
+    .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 11)
+    .length;
+  
   const totalItems = totalPages + totalQuizzes;
-  const completedItems = completedPages.size + completedQuizzes.size;
+  
+  // Pages complétées (exclut pages 0 et 30)
+  const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30);
+  
+  // Quiz complétés (exclut chapitre 11)
+  const completedQuizzesFiltered = Array.from(completedQuizzes).filter(quizNum => quizNum !== 11);
+  
+  const completedItems = completedPagesFiltered.length + completedQuizzesFiltered.length;
+  
   return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 };
 
@@ -176,21 +193,23 @@ export default function SidebarContent() {
                           : 'hover:bg-zinc-700/30 text-zinc-300'
                       }`}
                     >
-                      <button
-                        onClick={(e) => handleTogglePageCompletion(page.pageNumber, e)}
-                        className="flex-shrink-0"
-                        aria-label={
-                          isCompleted
-                            ? 'Marquer comme non complété'
-                            : 'Marquer comme complété'
-                        }
-                      >
-                        {isCompleted ? (
-                          <CheckCircle className="text-green-400" size={14} />
-                        ) : (
-                          <Circle className="text-zinc-500 hover:text-zinc-300" size={14} />
-                        )}
-                      </button>
+                      {chapter.chapterNumber !== 0 && chapter.chapterNumber !== 11 && (
+                        <button
+                          onClick={(e) => handleTogglePageCompletion(page.pageNumber, e)}
+                          className="flex-shrink-0"
+                          aria-label={
+                            isCompleted
+                              ? 'Marquer comme non complété'
+                              : 'Marquer comme complété'
+                          }
+                        >
+                          {isCompleted ? (
+                            <CheckCircle className="text-green-400" size={14} />
+                          ) : (
+                            <Circle className="text-zinc-500 hover:text-zinc-300" size={14} />
+                          )}
+                        </button>
+                      )}
                       <span>
                         <span className="font-medium text-zinc-200">{page.pageNumber}.</span>{' '}
                         {page.title}
@@ -213,25 +232,47 @@ export default function SidebarContent() {
           : 'hover:bg-zinc-700/30 text-zinc-300'
       }`}
     >
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleQuizCompletion(chapter.chapterNumber);
-        }}
-        className="flex-shrink-0"
-        aria-label={
-          completedQuizzes.has(chapter.chapterNumber)
-            ? 'Marquer le quiz comme non complété'
-            : 'Marquer le quiz comme complété'
-        }
-      >
-        {completedQuizzes.has(chapter.chapterNumber) ? (
-          <CheckCircle className="text-green-400" size={14} />
-        ) : (
-          <Circle className="text-zinc-500 hover:text-zinc-300" size={14} />
-        )}
-      </button>
+      {chapter.chapterNumber !== 11 && chapter.chapterNumber !== 0 ? (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleQuizCompletion(chapter.chapterNumber);
+          }}
+          className="flex-shrink-0"
+          aria-label={
+            completedQuizzes.has(chapter.chapterNumber)
+              ? 'Marquer le quiz comme non complété'
+              : 'Marquer le quiz comme complété'
+          }
+        >
+          {completedQuizzes.has(chapter.chapterNumber) ? (
+            <CheckCircle className="text-green-400" size={14} />
+          ) : (
+            <Circle className="text-zinc-500 hover:text-zinc-300" size={14} />
+          )}
+        </button>
+      ) : chapter.chapterNumber === 0 ? (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleQuizCompletion(chapter.chapterNumber);
+          }}
+          className="flex-shrink-0"
+          aria-label={
+            completedQuizzes.has(chapter.chapterNumber)
+              ? 'Marquer le quiz comme non complété'
+              : 'Marquer le quiz comme complété'
+          }
+        >
+          {completedQuizzes.has(chapter.chapterNumber) ? (
+            <CheckCircle className="text-green-400" size={14} />
+          ) : (
+            <Circle className="text-zinc-500 hover:text-zinc-300" size={14} />
+          )}
+        </button>
+      ) : null}
       <BookOpen size={14} className="text-yellow-400" />
       <span className="text-zinc-200 font-semibold">Quiz</span>
       <span className="ml-auto flex items-center gap-1">
@@ -264,7 +305,9 @@ export default function SidebarContent() {
                 <div className="flex items-center gap-1">
                   <BookOpen size={14} className="text-blue-400" />
                   <span>
-                    {chapters.reduce((total, ch) => total + ch.pages.length, 0)} leçons
+                    {chapters
+                      .filter(ch => ch.chapterNumber !== 0 && ch.chapterNumber !== 11)
+                      .reduce((total, ch) => total + ch.pages.length, 0)} leçons
                   </span>
                 </div>
               </div>
