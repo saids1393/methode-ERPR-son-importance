@@ -32,20 +32,21 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get('auth-token')?.value;
     
     if (!token) {
-      console.log('No token found, redirecting to checkout');
+      console.log('🔒 No token found for', pathname, ', redirecting to login');
       return NextResponse.redirect(new URL('/login', request.url));
     }
 
     const payload = await verifyJWTToken(token);
     
     if (!payload) {
-      console.log('Invalid token, redirecting to checkout');
+      console.log('🔒 Invalid token for', pathname, ', redirecting to login');
       // Supprimer le cookie invalide
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('auth-token');
       return response;
     }
 
+    console.log('✅ Valid token for user', payload.userId, 'accessing', pathname);
     // Token valide, laisser passer
     return NextResponse.next();
   }

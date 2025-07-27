@@ -20,13 +20,19 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
   }, []);
 
   useEffect(() => {
-    // Vérifier si l'utilisateur a déjà commencé le cours
-    const hasStartedCourse = localStorage.getItem('courseStarted') === 'true';
+    let hasStartedCourse = false;
+    
+    // Vérification côté client uniquement
+    if (typeof window !== 'undefined') {
+      hasStartedCourse = localStorage.getItem('courseStarted') === 'true';
+      console.log('🔍 Course started check:', hasStartedCourse, 'for path:', pathname);
+    }
     
     // Afficher la sidebar seulement si :
     // 1. L'utilisateur a cliqué sur "Commencer maintenant" 
     // 2. ET il est dans les chapitres
     const shouldShowSidebar = hasStartedCourse && pathname.startsWith('/chapitres/');
+    console.log('📱 Should show sidebar:', shouldShowSidebar);
     setShowSidebar(shouldShowSidebar);
   }, [pathname]);
 

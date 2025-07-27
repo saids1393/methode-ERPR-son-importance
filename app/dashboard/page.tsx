@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
-import { useTimeTracking } from '@/hooks/useTimeTracking';
+import { useSimpleTimer } from '@/hooks/useSimpleTimer';
 import InactivityWarning from '@/app/components/InactivityWarning';
 
 interface User {
@@ -53,11 +53,12 @@ export default function DashboardPage() {
   } = useUserProgress();
 
   const {
+    totalTime,
     formattedTime,
-    showInactivityWarning,
-    continueActivity,
-    isInChapter
-  } = useTimeTracking();
+    isRunning,
+    startTimer,
+    refreshTime
+  } = useSimpleTimer();
 
   // Calculer la progression
   const calculateProgress = () => {
@@ -110,6 +111,11 @@ export default function DashboardPage() {
     checkAuth();
   }, []);
 
+  // Charger le temps quand on arrive sur le dashboard
+  useEffect(() => {
+    console.log('📊 Dashboard monté - chargement du temps');
+    refreshTime();
+  }, [refreshTime]);
   // Fermer le menu quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -212,7 +218,7 @@ export default function DashboardPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
-                  Méthode "Son Importance"
+                  Méthode ERPR
                 </h1>
                 <p className="text-purple-200 text-xs sm:text-sm hidden sm:block">Votre parcours d'apprentissage</p>
               </div>
@@ -407,7 +413,7 @@ export default function DashboardPage() {
               <Clock className="h-6 w-6 text-blue-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-1">
-              {formattedTime || '0s'}
+              {totalTime > 0 ? formattedTime : '0s'}
             </h3>
             <p className="text-slate-400 text-sm">Temps d'étude</p>
           </div>
@@ -454,8 +460,23 @@ export default function DashboardPage() {
               
               <button
                 onClick={() => {
+                  console.log('🎯 ===== CLIC BOUTON COMMENCER =====');
                   localStorage.setItem('courseStarted', 'true');
-                  window.location.href = '/chapitres/0/introduction';
+                  
+                  // Démarrer le chrono DIRECTEMENT
+                  fetch('/api/auth/time/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                  }).then(response => {
+                    console.log('🚀 RÉPONSE START TIMER:', response.status);
+                    if (response.ok) {
+                      console.log('✅ CHRONO DÉMARRÉ EN DB');
+                      window.location.href = '/chapitres/0/introduction';
+                    }
+                  }).catch(error => {
+                    console.error('❌ ERREUR START TIMER:', error);
+                    window.location.href = '/chapitres/0/introduction';
+                  });
                 }}
                 className="group bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center space-x-3"
               >
@@ -484,7 +505,10 @@ export default function DashboardPage() {
               
               <Link
                 href="/chapitres/0/introduction"
-                onClick={() => localStorage.setItem('courseStarted', 'true')}
+                onClick={() => {
+                  console.log('🎯 Clic sur "Accéder au cours"');
+                  localStorage.setItem('courseStarted', 'true');
+                }}
                 className="group inline-flex items-center space-x-3 bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 border border-white/20 hover:border-white/30"
               >
                 <span>Accéder au cours</span>
@@ -592,10 +616,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Modal d'avertissement d'inactivité */}
-      {showInactivityWarning && (
-        <InactivityWarning onContinue={continueActivity} />
-      )}
     </div>
   );
 }

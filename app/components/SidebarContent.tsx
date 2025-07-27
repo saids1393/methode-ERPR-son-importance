@@ -94,6 +94,24 @@ export default function SidebarContent() {
         <div className="mt-3">
           <Link
             href="/dashboard"
+            onClick={() => {
+              console.log('🏠 ===== RETOUR AU DASHBOARD =====');
+              
+              // Arrêter le chrono quand on retourne au dashboard
+              fetch('/api/auth/time/stop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+              }).then(response => {
+                console.log('⏹️ RÉPONSE STOP TIMER:', response.status);
+                if (response.ok) {
+                  response.json().then(data => {
+                    console.log('✅ CHRONO ARRÊTÉ:', data);
+                  });
+                }
+              }).catch(error => {
+                console.error('❌ ERREUR STOP TIMER:', error);
+              });
+            }}
             className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-zinc-300 hover:bg-zinc-700/30 hover:text-white"
           >
             <Home size={16} className="text-blue-400" />
