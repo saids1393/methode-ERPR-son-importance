@@ -6,7 +6,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
-  const [identifier, setIdentifier] = useState(''); // pseudo ou email
+  const [identifier, setIdentifier] = useState(''); 
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
