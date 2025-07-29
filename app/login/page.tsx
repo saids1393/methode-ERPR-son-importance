@@ -51,7 +51,7 @@ export default function LoginPage() {
           Connexion à votre compte
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Méthode "Son Importance" - Cours d'arabe
+          Méthode ERPR - Cours d'arabe
         </p>
       </div>
 
@@ -122,7 +122,16 @@ export default function LoginPage() {
                 href="/checkout"
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-indigo-600 bg-white border-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                S'inscrire au cours - 97€
+                S'inscrire au cours
+              </Link>
+            </div>
+
+            <div className="mt-4 text-center">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-indigo-600 hover:text-indigo-500 transition-colors duration-200"
+              >
+                Mot de passe oublié ?
               </Link>
             </div>
           </div>

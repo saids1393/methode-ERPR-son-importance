@@ -4,7 +4,7 @@ import LayoutSwitcher from "@/app/components/layout/LayoutSwitcher";
 import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
-  title: "Méthode son importance",
+  title: "Méthode ERPR",
   description: "Cours de lecture arabe",
 };
 

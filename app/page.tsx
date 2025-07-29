@@ -25,7 +25,7 @@ export default function Home() {
       {/* En-tête */}
       <header className="max-w-xl mb-12">
         <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-gray-100 mb-3">
-          Apprentissage de la Lecture et Écriture en 1 mois
+          Apprentissage de la Lecture et Écriture à votre rythme.
         </h1>
       </header>
 
@@ -82,7 +82,7 @@ export default function Home() {
 
       {/* Pied de page */}
       <footer className="mt-20 max-w-md text-gray-500 dark:text-gray-400 text-sm">
-        <p>© {new Date().getFullYear()} Méthode "Son Importance" - Tous droits réservés</p>
+        <p>© {new Date().getFullYear()} Méthode ERPR - Tous droits réservés</p>
         <p className="text-md sm:text-lg text-gray-600 dark:text-gray-400 mt-1">
           Créé par <span className="font-semibold">Son Importance, Professeur Soidroudine</span>
         </p>

@@ -89,7 +89,7 @@ export default function CheckoutPage() {
           Accédez au cours d'arabe
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Méthode "Son Importance" - Apprentissage en 1 mois
+          Méthode ERPR – Apprenez à votre rythme et rapidement
         </p>
       </div>
 
@@ -127,7 +127,7 @@ export default function CheckoutPage() {
                 disabled={loading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Chargement...' : 'Commencer le cours - 97€'}
+                {loading ? 'Chargement...' : 'Paiement'}
               </button>
             </div>
           </form>
@@ -145,7 +145,7 @@ export default function CheckoutPage() {
 
           <div className="mt-6 text-center text-xs text-gray-500">
             <p>✓ Accès immédiat après paiement</p>
-            <p>✓ Méthode complète en 30 jours</p>
+            <p>✓ Méthode d'apprentissage de lecture et d'écriture</p>
             <p>✓ Support inclus</p>
           </div>
         </div>
@@ -153,3 +153,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

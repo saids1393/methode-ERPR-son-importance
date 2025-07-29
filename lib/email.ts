@@ -94,7 +94,7 @@ const getReceiptTemplate = (data: PaymentData) => `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reçu de paiement - Méthode "Son Importance"</title>
+    <title>Reçu de paiement - Méthode ERPR</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -192,7 +192,7 @@ const getReceiptTemplate = (data: PaymentData) => `
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">📚 Méthode "Son Importance"</div>
+            <div class="logo">📚 Méthode ERPR</div>
             <div class="success-badge">✅ Paiement confirmé</div>
         </div>
 
@@ -202,7 +202,7 @@ const getReceiptTemplate = (data: PaymentData) => `
 
         <p style="font-size: 16px; margin-bottom: 30px;">
             Bonjour,<br><br>
-            Nous avons bien reçu votre paiement pour la méthode "Son Importance". 
+            Nous avons bien reçu votre paiement pour la Méthode ERPR. 
             Voici les détails de votre transaction :
         </p>
 
@@ -210,7 +210,7 @@ const getReceiptTemplate = (data: PaymentData) => `
             <h3 style="margin-top: 0; color: #333;">📋 Détails de la commande</h3>
             <div class="detail-row">
                 <span>Produit :</span>
-                <span>Méthode "Son Importance" - Cours d'arabe complet</span>
+                <span>Méthode ERPR - Cours d'arabe complet</span>
             </div>
             <div class="detail-row">
                 <span>Email :</span>
@@ -252,7 +252,7 @@ const getReceiptTemplate = (data: PaymentData) => `
         <div class="account-info">
             <h3 style="margin-top: 0; color: white;">✅ Votre compte a été activé !</h3>
             <p style="margin: 0;">
-                Votre accès premium à la méthode "Son Importance" est maintenant actif.
+                Votre accès premium à la Méthode ERPR est maintenant actif.
             </p>
         </div>
         `}
@@ -284,8 +284,8 @@ const getReceiptTemplate = (data: PaymentData) => `
 
         <div class="footer">
             <p>
-                <strong>Méthode "Son Importance"</strong><br>
-                Apprenez à lire et écrire l'arabe en 1 mois<br>
+                <strong>Méthode ERPR</strong><br>
+                Apprenez à lire et écrire l'arabe à votre rythme<br>
                 Créé par Professeur Soidroudine
             </p>
             <p style="margin-top: 20px;">
@@ -300,13 +300,13 @@ const getReceiptTemplate = (data: PaymentData) => `
 
 // Template texte simple pour les clients qui ne supportent pas HTML
 const getReceiptTextTemplate = (data: PaymentData) => `
-REÇU DE PAIEMENT - Méthode "Son Importance"
+REÇU DE PAIEMENT - Méthode ERPR
 ==========================================
 
 Merci pour votre achat !
 
 DÉTAILS DE LA COMMANDE :
-- Produit : Méthode "Son Importance" - Cours d'arabe complet
+- Produit : Méthode ERPR - Cours d'arabe complet
 - Email : ${data.email}
 - Date : ${new Date().toLocaleDateString('fr-FR')}
 - ID de transaction : ${data.sessionId.substring(0, 20)}...
@@ -320,7 +320,7 @@ ${data.username ? `- Pseudo : ${data.username}` : ''}
 - Statut : Accès Premium Activé
 ` : `
 COMPTE ACTIVÉ !
-Votre accès premium à la méthode "Son Importance" est maintenant actif.
+Votre accès premium à la Méthode ERPR est maintenant actif.
 `}
 
 Commencez votre apprentissage : ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard
@@ -331,7 +331,7 @@ Réponse sous 24h maximum
 
 Conseil : Consacrez 30 minutes par jour pour de meilleurs résultats !
 
-© ${new Date().getFullYear()} Méthode "Son Importance" - Tous droits réservés
+© ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
 Professeur Soidroudine
 `;
 
@@ -343,11 +343,11 @@ export async function sendPaymentReceiptEmail(data: PaymentData): Promise<boolea
 
     const mailOptions = {
       from: {
-        name: 'Méthode "Son Importance"',
+        name: 'Méthode ERPR',
         address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
       },
       to: data.email,
-      subject: `✅ Reçu de paiement - Accès confirmé à la méthode "Son Importance"`,
+      subject: `✅ Reçu de paiement - Accès confirmé à la Méthode ERPR`,
       html: getReceiptTemplate(data),
       text: getReceiptTextTemplate(data),
       attachments: [
@@ -377,7 +377,7 @@ export async function sendWelcomeEmail(email: string, username?: string): Promis
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bienvenue dans la méthode "Son Importance"</title>
+        <title>Bienvenue dans la Méthode ERPR</title>
         <style>
             body {
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -449,7 +449,7 @@ export async function sendWelcomeEmail(email: string, username?: string): Promis
     <body>
         <div class="container">
             <div class="header">
-                <div class="logo">📚 Méthode "Son Importance"</div>
+                <div class="logo">📚 Méthode ERPR</div>
                 <div class="welcome-badge">🎉 Bienvenue !</div>
             </div>
 
@@ -500,8 +500,8 @@ export async function sendWelcomeEmail(email: string, username?: string): Promis
 
             <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px;">
                 <p>
-                    <strong>Méthode "Son Importance"</strong><br>
-                    Apprenez à lire et écrire l'arabe en 1 mois
+                    <strong>Méthode ERPR</strong><br>
+                    Apprenez à lire et écrire l'arabe à votre rythme
                 </p>
                 <p style="margin-top: 20px;">
                     Besoin d'aide ? Contactez-nous : support@sonimportance.com
@@ -514,14 +514,14 @@ export async function sendWelcomeEmail(email: string, username?: string): Promis
 
     const mailOptions = {
       from: {
-        name: 'Méthode "Son Importance"',
+        name: 'Méthode ERPR',
         address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
       },
       to: email,
-      subject: `🎉 Bienvenue dans la méthode "Son Importance" !`,
+      subject: `🎉 Bienvenue dans la Méthode ERPR !`,
       html: welcomeTemplate,
       text: `
-Bienvenue dans la méthode "Son Importance" !
+Bienvenue dans la Méthode ERPR !
 
 ${username ? `Bonjour ${username},` : 'Bonjour,'}
 
@@ -543,7 +543,7 @@ Consacrez 30 minutes par jour, et vous serez surpris de vos progrès !"
 
 Besoin d'aide ? Contactez-nous : support@sonimportance.com
 
-© ${new Date().getFullYear()} Méthode "Son Importance" - Tous droits réservés
+© ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
       `
     };
 
@@ -568,6 +568,181 @@ export async function testEmailConfiguration(): Promise<boolean> {
   }
 }
 
+// Fonction pour envoyer un email de réinitialisation de mot de passe
+export async function sendPasswordResetEmail(email: string, resetToken: string, username?: string): Promise<boolean> {
+  try {
+    const resetUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    
+    const resetTemplate = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Réinitialisation de votre mot de passe</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f8f9fa;
+            }
+            .container {
+                background: white;
+                border-radius: 12px;
+                padding: 40px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+            .logo {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 8px;
+                display: inline-block;
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+            .reset-badge {
+                background: #ffc107;
+                color: #212529;
+                padding: 8px 20px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 600;
+                display: inline-block;
+            }
+            .cta-button {
+                background: #dc3545;
+                color: white;
+                padding: 15px 30px;
+                text-decoration: none;
+                border-radius: 8px;
+                display: inline-block;
+                font-weight: bold;
+                margin: 20px 0;
+            }
+            .warning-box {
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 8px;
+                padding: 20px;
+                margin: 30px 0;
+            }
+            .security-info {
+                background: #e3f2fd;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+                border-left: 4px solid #2196f3;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">📚 Méthode ERPR</div>
+                <div class="reset-badge">🔐 Réinitialisation</div>
+            </div>
+
+            <h1 style="color: #333; text-align: center; margin-bottom: 30px;">
+                Réinitialisation de votre mot de passe
+            </h1>
+
+            <p style="font-size: 16px; margin-bottom: 30px;">
+                ${username ? `Bonjour ${username},` : 'Bonjour,'}<br><br>
+                Vous avez demandé la réinitialisation de votre mot de passe pour votre compte 
+                sur la Méthode ERPR.
+            </p>
+
+            <div class="warning-box">
+                <h4 style="margin-top: 0; color: #856404;">⚠️ Important</h4>
+                <p style="margin: 0; color: #856404;">
+                    Si vous n'avez pas demandé cette réinitialisation, ignorez cet email. 
+                    Votre mot de passe actuel restera inchangé.
+                </p>
+            </div>
+
+            <div style="text-align: center; margin: 40px 0;">
+                <a href="${resetUrl}" class="cta-button">
+                    🔑 Réinitialiser mon mot de passe
+                </a>
+            </div>
+
+            <div class="security-info">
+                <h4 style="margin-top: 0; color: #1976d2;">🔒 Informations de sécurité</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #1976d2;">
+                    <li>Ce lien est valide pendant <strong>1 heure</strong> seulement</li>
+                    <li>Il ne peut être utilisé qu'une seule fois</li>
+                    <li>Votre nouveau mot de passe doit contenir au moins 8 caractères</li>
+                </ul>
+            </div>
+
+            <p style="font-size: 14px; color: #6c757d; margin-top: 30px;">
+                Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :<br>
+                <a href="${resetUrl}" style="color: #007bff; word-break: break-all;">${resetUrl}</a>
+            </p>
+
+            <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px;">
+                <p>
+                    <strong>Méthode ERPR</strong><br>
+                    Apprenez à lire et écrire l'arabe à votre rythme
+                </p>
+                <p style="margin-top: 20px;">
+                    Besoin d'aide ? Contactez-nous : support@sonimportance.com
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    const mailOptions = {
+      from: {
+        name: 'Méthode ERPR',
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+      },
+      to: email,
+      subject: `🔐 Réinitialisation de votre mot de passe - Méthode ERPR`,
+      html: resetTemplate,
+      text: `
+Réinitialisation de votre mot de passe - Méthode ERPR
+
+${username ? `Bonjour ${username},` : 'Bonjour,'}
+
+Vous avez demandé la réinitialisation de votre mot de passe pour votre compte sur la Méthode ERPR.
+
+IMPORTANT : Si vous n'avez pas demandé cette réinitialisation, ignorez cet email. Votre mot de passe actuel restera inchangé.
+
+Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :
+${resetUrl}
+
+INFORMATIONS DE SÉCURITÉ :
+- Ce lien est valide pendant 1 heure seulement
+- Il ne peut être utilisé qu'une seule fois
+- Votre nouveau mot de passe doit contenir au moins 8 caractères
+
+Besoin d'aide ? Contactez-nous : support@sonimportance.com
+
+© ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email de réinitialisation envoyé avec succès:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'envoi de l\'email de réinitialisation:', error);
+    return false;
+  }
+}
 function generatePDF(data: PaymentData) {
     throw new Error('Function not implemented.');
 }

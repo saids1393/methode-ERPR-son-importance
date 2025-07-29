@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import { getSecurityHeaders } from '@/lib/security';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
 
@@ -16,15 +17,23 @@ async function verifyJWTToken(token: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Ajouter les headers de sécurité à toutes les réponses
+  const response = NextResponse.next();
+  const securityHeaders = getSecurityHeaders();
+  
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+
   // Pages complètement publiques
   const publicPaths = ['/', '/checkout', '/merci', '/login', '/complete-profile'];
   if (publicPaths.includes(pathname)) {
-    return NextResponse.next();
+    return response;
   }
 
   // API routes publiques
   if (pathname.startsWith('/api/stripe') || pathname.startsWith('/api/auth')) {
-    return NextResponse.next();
+    return response;
   }
 
   // Pour les pages protégées (dashboard et chapitres)
@@ -33,7 +42,11 @@ export async function middleware(request: NextRequest) {
     
     if (!token) {
       console.log('🔒 No token found for', pathname, ', redirecting to login');
-      return NextResponse.redirect(new URL('/login', request.url));
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        redirectResponse.headers.set(key, value);
+      });
+      return redirectResponse;
     }
 
     const payload = await verifyJWTToken(token);
@@ -41,17 +54,20 @@ export async function middleware(request: NextRequest) {
     if (!payload) {
       console.log('🔒 Invalid token for', pathname, ', redirecting to login');
       // Supprimer le cookie invalide
-      const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.delete('auth-token');
-      return response;
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      redirectResponse.cookies.delete('auth-token');
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        redirectResponse.headers.set(key, value);
+      });
+      return redirectResponse;
     }
 
     console.log('✅ Valid token for user', payload.userId, 'accessing', pathname);
     // Token valide, laisser passer
-    return NextResponse.next();
+    return response;
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

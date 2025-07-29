@@ -237,7 +237,7 @@ export default function DashboardPage() {
                   <p className="text-white font-semibold text-xs sm:text-sm">
                     {user.username || user.email}
                   </p>
-                  <p className="text-purple-200 text-xs hidden lg:block">Étudiant actif</p>
+                  <p className="text-purple-200 text-xs hidden lg:block">Étudiant(e) connecté(e)</p>
                 </div>
                 <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 text-purple-200 transition-transform duration-200 ${showProfileMenu ? 'rotate-180' : ''} hidden sm:block`} />
               </button>
@@ -272,7 +272,7 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <p className="text-white font-medium">Modifier le profil</p>
-                        <p className="text-slate-400 text-xs hidden sm:block">Pseudo et mot de passe</p>
+                        <p className="text-slate-400 text-xs hidden sm:block">Pseudo ou mot de passe</p>
                       </div>
                     </button>
                     
@@ -328,10 +328,10 @@ export default function DashboardPage() {
               
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Nouveau mot de passe (optionnel)
+                 Mot de passe actuel ou nouveau
                 </label>
-                <input
-                  type="password"
+                <input 
+                  type="password" 
                   value={editForm.newPassword}
                   onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
                   className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
@@ -342,7 +342,7 @@ export default function DashboardPage() {
               {editForm.newPassword && (
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Confirmer le mot de passe
+                    Confirmer le mot de passe actuel ou le nouveau
                   </label>
                   <input
                     type="password"
@@ -380,7 +380,7 @@ export default function DashboardPage() {
         <div className="text-center mb-16">
           <div className="inline-flex items-center space-x-2 bg-purple-500/20 text-purple-300 px-4 py-2 rounded-full mb-6 border border-purple-500/30">
             <Star className="h-4 w-4" />
-            <span className="text-sm font-medium">Accès Premium Activé</span>
+            <span className="text-sm font-medium">Accès permanent et illimité</span>
           </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
@@ -391,8 +391,7 @@ export default function DashboardPage() {
           </h2>
           
           <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed px-4">
-            Félicitations ! Vous avez maintenant accès à la méthode complète pour apprendre 
-            à lire et écrire l'arabe en seulement 1 mois. Votre voyage commence ici.
+         Dans cet espace, vous pourrez suivre votre progression, consulter le temps que vous avez passé sur chaque module, voir les pages complétées ainsi que les quiz terminés. Vous avez également accès à toutes les ressources pédagogiques, ainsi qu’au support en cas de besoin.
           </p>
         </div>
 
@@ -454,8 +453,7 @@ export default function DashboardPage() {
               </h3>
               
               <p className="text-slate-300 mb-8 leading-relaxed">
-                Accédez à tous les chapitres de la méthode, des bases jusqu'à la lecture complète. 
-                Votre parcours personnalisé vous attend.
+                Accédez à tous les chapitres de la méthode, des bases jusqu'à la lecture complète.
               </p>
               
               <button
@@ -608,8 +606,7 @@ export default function DashboardPage() {
           </h3>
           
           <p className="text-slate-300 text-lg leading-relaxed max-w-2xl mx-auto">
-            Pour de meilleurs résultats, consacrez <span className="text-blue-400 font-semibold">30 minutes par jour</span> à votre apprentissage. 
-            La régularité est la clé du succès ! Votre détermination d'aujourd\'hui sera votre fierté de demain.
+   <span className="text-blue-400 font-semibold">30 minutes par jour</span> à votre apprentissage. Cela vous permettra de laisser à votre cerveau le temps de s’adapter et d’assimiler les notions.
             <br />
             <span className="text-slate-400 text-sm mt-2 block">Ce temps est indicatif et dépend de votre rythme.</span>
           </p>

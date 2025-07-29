@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
+import { sendPasswordResetEmail } from './email';
 
 // Types basés sur le schéma Prisma
 export interface JWTPayload {
@@ -307,5 +308,115 @@ export function setAuthCookie(token: string): void {
     expires.setDate(expires.getDate() + 30);
     
     document.cookie = `auth-token=${token}; expires=${expires.toUTCString()}; path=/; secure; samesite=strict`;
+  }
+}
+// Générer un token de réinitialisation de mot de passe
+export function generateResetToken(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+// Créer une demande de réinitialisation de mot de passe
+export async function createPasswordResetRequest(email: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const user = await getUserByEmail(email);
+    
+    if (!user || !user.isActive) {
+      // Pour des raisons de sécurité, on ne révèle pas si l'email existe ou non
+      return {
+        success: true,
+        message: 'Si cet email existe dans notre système, vous recevrez un lien de réinitialisation.'
+      };
+    }
+
+    const resetToken = generateResetToken();
+    const resetExpires = new Date();
+    resetExpires.setHours(resetExpires.getHours() + 1); // Expire dans 1 heure
+
+    // Sauvegarder le token dans la base de données
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken,
+        resetTokenExpires: resetExpires,
+      },
+    });
+
+    // Envoyer l'email de réinitialisation
+    const emailSent = await sendPasswordResetEmail(user.email, resetToken, user.username || undefined);
+    
+    if (!emailSent) {
+      console.error('Erreur lors de l\'envoi de l\'email de réinitialisation');
+    }
+
+    return {
+      success: true,
+      message: 'Si cet email existe dans notre système, vous recevrez un lien de réinitialisation.'
+    };
+  } catch (error) {
+    console.error('Erreur lors de la création de la demande de réinitialisation:', error);
+    return {
+      success: false,
+      message: 'Une erreur est survenue. Veuillez réessayer.'
+    };
+  }
+}
+
+// Vérifier et réinitialiser le mot de passe
+export async function resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  try {
+    if (!token || !newPassword) {
+      return {
+        success: false,
+        message: 'Token et nouveau mot de passe requis.'
+      };
+    }
+
+    if (newPassword.length < 8) {
+      return {
+        success: false,
+        message: 'Le mot de passe doit contenir au moins 8 caractères.'
+      };
+    }
+
+    // Trouver l'utilisateur avec ce token
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpires: {
+          gt: new Date(), // Token non expiré
+        },
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        message: 'Token invalide ou expiré.'
+      };
+    }
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Mettre à jour le mot de passe et supprimer le token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpires: null,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Votre mot de passe a été réinitialisé avec succès.'
+    };
+  } catch (error) {
+    console.error('Erreur lors de la réinitialisation du mot de passe:', error);
+    return {
+      success: false,
+      message: 'Une erreur est survenue. Veuillez réessayer.'
+    };
   }
 }
