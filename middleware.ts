@@ -67,6 +67,52 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Pages admin - vérification supplémentaire
+  if (pathname.startsWith('/admin')) {
+    const token = request.cookies.get('auth-token')?.value;
+    
+    if (!token) {
+      console.log('🔒 No token found for admin area, redirecting to login');
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        redirectResponse.headers.set(key, value);
+      });
+      return redirectResponse;
+    }
+
+    const payload = await verifyJWTToken(token);
+    
+    if (!payload) {
+      console.log('🔒 Invalid token for admin area, redirecting to login');
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      redirectResponse.cookies.delete('auth-token');
+      Object.entries(securityHeaders).forEach(([key, value]) => {
+        redirectResponse.headers.set(key, value);
+      });
+      return redirectResponse;
+    }
+
+const ADMIN_EMAILS = [process.env.ADMIN_EMAIL || 'soidroudinesaid51@gmail.com'];
+
+if (typeof payload.email !== 'string') {
+  console.warn('❌ Invalid payload.email type:', typeof payload.email);
+  return NextResponse.redirect(new URL('/dashboard', request.url));
+}
+
+if (!ADMIN_EMAILS.includes(payload.email)) {
+  console.log('🔒 Non-admin user trying to access admin area:', payload.email);
+  const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    redirectResponse.headers.set(key, value);
+  });
+  return redirectResponse;
+}
+
+
+    console.log('✅ Admin user', payload.email, 'accessing', pathname);
+    return response;
+  }
+
   return response;
 }
 

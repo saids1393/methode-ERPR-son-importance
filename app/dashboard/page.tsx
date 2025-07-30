@@ -18,7 +18,8 @@ import {
   LogOut,
   Settings,
   ChevronDown,
-  Edit3
+  Edit3,
+  BarChart3
 } from 'lucide-react';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
