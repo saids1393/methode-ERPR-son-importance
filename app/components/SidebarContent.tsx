@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
-import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Circle, Home } from "lucide-react";
+import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Circle, Home, Play } from "lucide-react";
 import { chapters } from "@/lib/chapters";
 import { useUserProgress } from "@/hooks/useUserProgress";
+import { useChapterVideos } from "@/hooks/useChapterVideos";
 
 // Fonction de calcul de progression synchronisée avec le dashboard
 const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<number>) => {
@@ -43,6 +44,8 @@ export default function SidebarContent() {
     togglePageCompletion,
     toggleQuizCompletion,
   } = useUserProgress();
+
+  const { getVideoByChapter } = useChapterVideos();
 
   const handleTogglePageCompletion = (pageNumber: number, e: React.MouseEvent) => {
     e.preventDefault();
@@ -180,6 +183,26 @@ export default function SidebarContent() {
 
           {open[chapter.chapterNumber] && (
             <ul className="ml-8 mt-1 space-y-1 py-1 border-l-2 border-zinc-700">
+              {/* Vidéo du chapitre */}
+              {getVideoByChapter(chapter.chapterNumber) && (
+                <li key={`video-${chapter.chapterNumber}`}>
+                  <Link
+                    href={`/chapitres/${chapter.chapterNumber}/video`}
+                    className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                      pathname === `/chapitres/${chapter.chapterNumber}/video`
+                        ? 'bg-purple-900/50 text-white border-l-2 border-purple-400'
+                        : 'hover:bg-zinc-700/30 text-zinc-300'
+                    }`}
+                  >
+                    <Play size={14} className="text-purple-400" />
+                    <span className="text-zinc-200 font-semibold">Vidéo du chapitre</span>
+                    {pathname === `/chapitres/${chapter.chapterNumber}/video` && (
+                      <span className="ml-auto h-2 w-2 rounded-full bg-purple-400"></span>
+                    )}
+                  </Link>
+                </li>
+              )}
+
               {chapter.introduction && (
                 <li key={`intro-${chapter.chapterNumber}`}>
                   <Link

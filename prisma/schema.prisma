@@ -30,5 +30,14 @@ model User {
   updatedAt        DateTime @updatedAt
 }
 
-
-
+model ChapterVideo {
+  id                String   @id @default(cuid())
+  chapterNumber     Int      @unique
+  title             String
+  cloudflareVideoId String   @unique
+  thumbnailUrl      String?
+  duration          Int?     // durée en secondes
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
