@@ -16,6 +16,7 @@ export async function GET(
         id: true,
         email: true,
         username: true,
+        gender: true,
         isActive: true,
         stripeCustomerId: true,
         stripeSessionId: true,
@@ -35,8 +36,8 @@ export async function GET(
     }
 
     // Enrichir les données
-    const completedPagesCount = user.completedPages.filter(p => p !== 0 && p !== 30).length;
-    const completedQuizzesCount = user.completedQuizzes.filter(q => q !== 11).length;
+    const completedPagesCount = user.completedPages.filter((p: number) => p !== 0 && p !== 30).length;
+    const completedQuizzesCount = user.completedQuizzes.filter((q: number) => q !== 11).length;
     const totalPossibleItems = 29 + 11;
     const progressPercentage = Math.round(
       ((completedPagesCount + completedQuizzesCount) / totalPossibleItems) * 100
@@ -84,6 +85,7 @@ export async function PATCH(
         id: true,
         email: true,
         username: true,
+        gender: true,
         isActive: true,
         stripeCustomerId: true,
         completedPages: true,

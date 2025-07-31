@@ -8,6 +8,7 @@ export default function CompleteProfilePage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [gender, setGender] = useState<'HOMME' | 'FEMME' | ''>('');
   const [loading, setLoading] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function CompleteProfilePage() {
   const handleCompleteProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !password || !confirmPassword) {
+    if (!username || !password || !confirmPassword || !gender) {
       toast.error('Veuillez remplir tous les champs');
       return;
     }
@@ -67,7 +68,7 @@ export default function CompleteProfilePage() {
       const response = await fetch('/api/auth/complete-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, gender })
       });
 
       const data = await response.json();
@@ -124,6 +125,26 @@ export default function CompleteProfilePage() {
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   placeholder="Votre pseudo (min. 3 caractères)"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+                Genre
+              </label>
+              <div className="mt-1">
+                <select
+                  id="gender"
+                  name="gender"
+                  required
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value as 'HOMME' | 'FEMME')}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                >
+                  <option value="">Sélectionnez votre genre</option>
+                  <option value="HOMME">Homme</option>
+                  <option value="FEMME">Femme</option>
+                </select>
               </div>
             </div>
 

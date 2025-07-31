@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     let totalStudyTime = 0;
     let usersWithFullCompletion = 0;
 
-    usersWithProgress.forEach(user => {
+    usersWithProgress.forEach((user: { completedPages: { filter: (arg0: (p: any) => boolean) => { (): any; new(): any; length: any; }; }; completedQuizzes: { filter: (arg0: (q: any) => boolean) => { (): any; new(): any; length: any; }; }; studyTimeSeconds: number; }) => {
       const completedPages = user.completedPages.filter(p => p !== 0 && p !== 30).length;
       const completedQuizzes = user.completedQuizzes.filter(q => q !== 11).length;
       
@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
       select: {
         email: true,
         username: true,
+        gender: true,
         studyTimeSeconds: true,
         completedPages: true,
         completedQuizzes: true,
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
         totalPossiblePages,
         totalPossibleQuizzes
       },
-      topUsers: topStudyUsers.map(user => ({
+      topUsers: topStudyUsers.map((user: { email: any; username: any; studyTimeSeconds: any; completedPages: { filter: (arg0: { (p: any): boolean; (p: any): boolean; }) => { (): any; new(): any; length: any; }; }; completedQuizzes: { filter: (arg0: { (q: any): boolean; (q: any): boolean; }) => { (): any; new(): any; length: any; }; }; }) => ({
         email: user.email,
         username: user.username,
         studyTimeSeconds: user.studyTimeSeconds,

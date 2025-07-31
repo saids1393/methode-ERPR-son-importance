@@ -23,12 +23,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const { username, password } = await req.json();
+    const { username, password, gender } = await req.json();
 
-    if (!username || !password) {
+    if (!username || !password || !gender) {
       secureLog('COMPLETE_PROFILE_MISSING_FIELDS', { ip: clientIP });
       return NextResponse.json(
-        { error: 'Pseudo et mot de passe requis' },
+        { error: 'Pseudo, mot de passe et genre requis' },
         { status: 400 }
       );
     }
@@ -54,6 +54,15 @@ export async function POST(req: Request) {
       );
     }
 
+    // Valider le genre
+    if (!['HOMME', 'FEMME'].includes(gender)) {
+      secureLog('COMPLETE_PROFILE_INVALID_GENDER', { ip: clientIP });
+      return NextResponse.json(
+        { error: 'Genre invalide' },
+        { status: 400 }
+      );
+    }
+
     // Vérifier que l'utilisateur est connecté
     const user = await getAuthUserFromRequest(req as any);
     if (!user) {
@@ -69,7 +78,8 @@ export async function POST(req: Request) {
     // Mettre à jour le profil
     const updatedUser = await updateUserProfile(user.id, {
       username: cleanUsername,
-      password
+      password,
+      gender
     });
 
     // Envoyer un email de bienvenue personnalisé avec le nouveau pseudo

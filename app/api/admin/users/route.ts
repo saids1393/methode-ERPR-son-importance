@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
           id: true,
           email: true,
           username: true,
+          gender: true,
           isActive: true,
           stripeCustomerId: true,
           completedPages: true,
@@ -51,9 +52,9 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Enrichir les données utilisateur
-    const enrichedUsers = users.map(user => {
-      const completedPagesCount = user.completedPages.filter(p => p !== 0 && p !== 30).length;
-      const completedQuizzesCount = user.completedQuizzes.filter(q => q !== 11).length;
+    const enrichedUsers = users.map((user: { completedPages: { filter: (arg0: (p: any) => boolean) => { (): any; new(): any; length: any; }; }; completedQuizzes: { filter: (arg0: (q: any) => boolean) => { (): any; new(): any; length: any; }; }; stripeCustomerId: any; studyTimeSeconds: number; }) => {
+      const completedPagesCount = user.completedPages.filter((p: number) => p !== 0 && p !== 30).length;
+      const completedQuizzesCount = user.completedQuizzes.filter((q: number) => q !== 11).length;
       const totalPossibleItems = 29 + 11; // 29 pages + 11 quiz
       const progressPercentage = Math.round(
         ((completedPagesCount + completedQuizzesCount) / totalPossibleItems) * 100

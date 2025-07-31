@@ -13,11 +13,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  HOMME
+  FEMME
+}
+
 model User {
   id               String   @id @default(cuid())
   email            String   @unique
   username         String?  @unique
   password         String?
+  gender           Gender?
   isActive         Boolean  @default(false)
   stripeCustomerId String?
   stripeSessionId  String?

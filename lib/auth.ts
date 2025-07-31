@@ -154,12 +154,14 @@ export async function updateUserProfile(
   data: {
     username?: string;
     password?: string;
+    gender?: 'HOMME' | 'FEMME';
   }
 ): Promise<UserData> {
   try {
     const updateData: {
       username?: string;
       password?: string;
+      gender?: 'HOMME' | 'FEMME';
     } = {};
 
     if (data.username !== undefined) {
@@ -183,6 +185,13 @@ export async function updateUserProfile(
         throw new Error('Password must be at least 8 characters long');
       }
       updateData.password = await bcrypt.hash(data.password, 12);
+    }
+
+    if (data.gender !== undefined) {
+      if (!['HOMME', 'FEMME'].includes(data.gender)) {
+        throw new Error('Invalid gender value');
+      }
+      updateData.gender = data.gender;
     }
 
     const user = await prisma.user.update({

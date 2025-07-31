@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 
 interface UserDetail {
+  gender: any;
   id: string;
   email: string;
   username: string | null;
@@ -229,6 +230,20 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                       {user.username || 'Aucun pseudo'}
                     </div>
                   )}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">Genre</label>
+                  <div className="bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-3 text-white flex items-center gap-2">
+                    {user.gender ? (
+                      <>
+                        <span>{user.gender === 'HOMME' ? '👨' : '👩'}</span>
+                        <span>{user.gender}</span>
+                      </>
+                    ) : (
+                      <span className="text-zinc-400">Non spécifié</span>
+                    )}
+                  </div>
                 </div>
                 
                 <div>

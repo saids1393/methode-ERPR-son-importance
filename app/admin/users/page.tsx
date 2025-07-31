@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 interface User {
+  gender: any;
   id: string;
   email: string;
   username: string | null;
@@ -241,6 +242,11 @@ export default function AdminUsersPage() {
                           {user.username || 'Sans pseudo'}
                         </div>
                         <div className="text-sm text-zinc-400">{user.email}</div>
+                        {user.gender && (
+                          <div className="inline-flex items-center gap-1 bg-blue-900/30 text-blue-400 px-2 py-1 rounded-full text-xs mt-1">
+                            {user.gender === 'HOMME' ? '👨' : '👩'} {user.gender}
+                          </div>
+                        )}
                         {user.isPaid && (
                           <div className="inline-flex items-center gap-1 bg-green-900/30 text-green-400 px-2 py-1 rounded-full text-xs mt-1">
                             <DollarSign className="h-3 w-3" />
