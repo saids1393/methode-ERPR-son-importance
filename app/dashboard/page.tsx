@@ -194,9 +194,9 @@ export default function DashboardPage() {
   };
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-400 mx-auto mb-6"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400 mx-auto mb-6"></div>
           <p className="text-white text-lg font-medium">Chargement de votre espace...</p>
         </div>
       </div>
@@ -208,20 +208,20 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Header moderne */}
       <header className="bg-black/20 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center py-4 sm:py-6">
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-3 rounded-xl">
+              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-3 rounded-xl">
                 <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
                   Méthode ERPR
                 </h1>
-                <p className="text-purple-200 text-xs sm:text-sm hidden sm:block">Votre parcours d'apprentissage</p>
+                <p className="text-blue-200 text-xs sm:text-sm hidden sm:block">Votre parcours d'apprentissage</p>
               </div>
             </div>
             
@@ -231,16 +231,16 @@ export default function DashboardPage() {
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center space-x-2 sm:space-x-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-white/30 px-2 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl transition-all duration-300 group"
               >
-                <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-xl">
+                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-xl">
                   <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
                 <div className="text-left hidden sm:block">
                   <p className="text-white font-semibold text-xs sm:text-sm">
                     {user.username || user.email}
                   </p>
-                  <p className="text-purple-200 text-xs hidden lg:block">Étudiant(e) connecté(e)</p>
+                  <p className="text-blue-200 text-xs hidden lg:block">Étudiant(e) connecté(e)</p>
                 </div>
-                <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 text-purple-200 transition-transform duration-200 ${showProfileMenu ? 'rotate-180' : ''} hidden sm:block`} />
+                <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 text-blue-200 transition-transform duration-200 ${showProfileMenu ? 'rotate-180' : ''} hidden sm:block`} />
               </button>
 
               {/* Dropdown Menu */}
@@ -248,7 +248,7 @@ export default function DashboardPage() {
                 <div className="absolute right-0 top-full mt-2 w-56 sm:w-64 bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden z-50">
                   <div className="p-4 border-b border-white/10">
                     <div className="flex items-center space-x-3">
-                      <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-2 rounded-xl">
+                      <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-2 rounded-xl">
                         <User className="h-5 w-5 text-white" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -322,7 +322,7 @@ export default function DashboardPage() {
                   type="text"
                   value={editForm.username}
                   onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Votre pseudo"
                 />
               </div>
@@ -335,7 +335,7 @@ export default function DashboardPage() {
                   type="password" 
                   value={editForm.newPassword}
                   onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Nouveau mot de passe"
                 />
               </div>
@@ -349,7 +349,7 @@ export default function DashboardPage() {
                     type="password"
                     value={editForm.confirmPassword}
                     onChange={(e) => setEditForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Confirmer le mot de passe"
                   />
                 </div>
@@ -366,7 +366,7 @@ export default function DashboardPage() {
                 <button
                   type="submit"
                   disabled={editLoading}
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   {editLoading ? 'Mise à jour...' : 'Sauvegarder'}
                 </button>
@@ -379,14 +379,14 @@ export default function DashboardPage() {
       <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         {/* Section de bienvenue */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center space-x-2 bg-purple-500/20 text-purple-300 px-4 py-2 rounded-full mb-6 border border-purple-500/30">
+          <div className="inline-flex items-center space-x-2 bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full mb-6 border border-blue-500/30">
             <Star className="h-4 w-4" />
             <span className="text-sm font-medium">Accès permanent et illimité</span>
           </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
             Bienvenue dans votre
-            <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent block">
+            <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent block">
               espace d'apprentissage
             </span>
           </h2>
@@ -419,8 +419,8 @@ export default function DashboardPage() {
           </div>
           
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-            <div className="bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="h-6 w-6 text-purple-400" />
+            <div className="bg-cyan-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="h-6 w-6 text-cyan-400" />
             </div>
             <h3 className="text-2xl font-bold text-white mb-1">
               {progressLoading ? '...' : `${Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}/${totalPages}`}
@@ -442,11 +442,11 @@ export default function DashboardPage() {
         {/* Actions principales */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Commencer le cours */}
-          <div className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur-xl border border-purple-500/30 rounded-3xl p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-xl border border-blue-500/30 rounded-3xl p-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="relative z-10">
-              <div className="bg-purple-500/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                <Play className="h-8 w-8 text-purple-300" />
+              <div className="bg-blue-500/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                <Play className="h-8 w-8 text-blue-300" />
               </div>
               
               <h3 className="text-2xl font-bold text-white mb-4">
@@ -477,7 +477,7 @@ export default function DashboardPage() {
                     window.location.href = '/chapitres/0/introduction';
                   });
                 }}
-                className="group bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center space-x-3"
+                className="group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center space-x-3"
               >
                 <span>Commencer maintenant</span>
                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -487,10 +487,10 @@ export default function DashboardPage() {
 
           {/* Continuer le cours */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="relative z-10">
-              <div className="bg-blue-500/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
-                <TrendingUp className="h-8 w-8 text-blue-300" />
+              <div className="bg-cyan-500/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                <TrendingUp className="h-8 w-8 text-cyan-300" />
               </div>
               
               <h3 className="text-2xl font-bold text-white mb-4">
@@ -538,7 +538,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="w-full bg-slate-700 rounded-full h-2">
                   <div 
-                    className="bg-gradient-to-r from-green-400 to-blue-400 h-2 rounded-full transition-all duration-500" 
+                    className="bg-gradient-to-r from-green-400 to-cyan-400 h-2 rounded-full transition-all duration-500" 
                     style={{ width: `${progressPercentage}%` }}
                   ></div>
                 </div>
@@ -597,7 +597,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Conseil motivationnel */}
-        <div className="mt-12 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-8 text-center">
+        <div className="mt-12 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-8 text-center">
           <div className="bg-blue-500/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Star className="h-8 w-8 text-blue-400" />
           </div>
