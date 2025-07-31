@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
         id: true,
         email: true,
         username: true,
+        gender: true,
         isActive: true,
         password: true,
       },
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
       id: user.id,
       email: user.email,
       username: user.username,
+      gender: userWithPassword?.gender,
       isActive: user.isActive,
       hasPassword: userWithPassword?.password !== null
     });

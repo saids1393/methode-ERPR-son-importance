@@ -41,7 +41,6 @@ export default function DashboardPage() {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editForm, setEditForm] = useState({
     username: '',
-    gender: '' as 'HOMME' | 'FEMME' | '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -142,8 +141,7 @@ export default function DashboardPage() {
           setUser(userData);
           setEditForm(prev => ({ 
             ...prev, 
-            username: userData.username || '',
-            gender: userData.gender || ''
+            username: userData.username || ''
           }));
         } else {
           window.location.replace('/checkout');
@@ -164,6 +162,7 @@ export default function DashboardPage() {
     console.log('📊 Dashboard monté - chargement du temps');
     refreshTime();
   }, [refreshTime]);
+  
   // Fermer le menu quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -176,6 +175,7 @@ export default function DashboardPage() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+  
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
@@ -207,10 +207,6 @@ export default function DashboardPage() {
         updateData.username = editForm.username;
       }
       
-      if (editForm.gender !== user?.gender) {
-        updateData.gender = editForm.gender;
-      }
-      
       if (editForm.newPassword) {
         updateData.password = editForm.newPassword;
       }
@@ -226,13 +222,11 @@ export default function DashboardPage() {
       if (response.ok && data.success) {
         setUser(prev => prev ? { 
           ...prev, 
-          username: data.user.username,
-          gender: data.user.gender 
+          username: data.user.username
         } : null);
         setShowEditProfile(false);
         setEditForm(prev => ({ 
           ...prev, 
-          gender: data.user.gender || '',
           currentPassword: '', 
           newPassword: '', 
           confirmPassword: '' 
@@ -248,6 +242,7 @@ export default function DashboardPage() {
       setEditLoading(false);
     }
   };
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
@@ -277,7 +272,7 @@ export default function DashboardPage() {
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
                   Méthode ERPR
                 </h1>
-                <p className={`${genderConfig.primaryText.replace('400', '200')} text-xs sm:text-sm hidden sm:block`}>Votre parcours d'apprentissage</p>
+                <p className={`${genderConfig.primaryText.replace('400', '200')} text-xs sm:text-sm hidden sm:block`}>Écoute, Répétition, Pratique et Régularité</p>
               </div>
             </div>
             
@@ -285,7 +280,7 @@ export default function DashboardPage() {
             <div className="relative profile-menu">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className={`flex items-center space-x-2 sm:space-x-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:${genderConfig.primaryBorder} px-2 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl transition-all duration-300 group`}
+                className={`flex items-center space-x-2 sm:space-x-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-purple-500/30 px-2 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl transition-all duration-300 group`}
               >
                 <div className={`bg-gradient-to-r ${genderConfig.primaryColor} p-2 rounded-xl`}>
                   <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
@@ -294,9 +289,9 @@ export default function DashboardPage() {
                   <p className="text-white font-semibold text-xs sm:text-sm">
                     {user.username || user.email}
                   </p>
-                  <p className={`${genderConfig.primaryText.replace('400', '200')} text-xs hidden lg:block`}>{genderConfig.profileText}</p>
+                  <p className="text-purple-200 text-xs hidden lg:block">{genderConfig.profileText}</p>
                 </div>
-                <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 ${genderConfig.primaryText.replace('400', '200')} transition-transform duration-200 ${showProfileMenu ? 'rotate-180' : ''} hidden sm:block`} />
+                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-purple-200 transition-transform duration-200 rotate-180 hidden sm:block" />
               </button>
 
               {/* Dropdown Menu */}
@@ -324,7 +319,7 @@ export default function DashboardPage() {
                       }}
                       className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-white/10 rounded-xl transition-colors duration-200 group"
                     >
-                      <div className={`${genderConfig.primaryGlow} p-2 rounded-lg group-hover:${genderConfig.primaryGlowHover} transition-colors`}>
+                      <div className={`${genderConfig.primaryGlow} group-hover:${genderConfig.primaryGlowHover} p-2 rounded-lg transition-colors`}>
                         <Edit3 className={`h-4 w-4 ${genderConfig.primaryText}`} />
                       </div>
                       <div>
@@ -378,35 +373,20 @@ export default function DashboardPage() {
                   type="text"
                   value={editForm.username}
                   onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className={`w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 ${user?.gender === 'FEMME' ? 'focus:ring-purple-500' : 'focus:ring-blue-500'} focus:border-transparent transition-all`}
                   placeholder="Votre pseudo"
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Genre
-                </label>
-                <select
-                  value={editForm.gender}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, gender: e.target.value as 'HOMME' | 'FEMME' | '' }))}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                >
-                  <option value="" className="bg-slate-800">Sélectionnez votre genre</option>
-                  <option value="HOMME" className="bg-slate-800">Homme</option>
-                  <option value="FEMME" className="bg-slate-800">Femme</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                 Mot de passe actuel ou nouveau
+                  Nouveau mot de passe
                 </label>
                 <input 
                   type="password" 
                   value={editForm.newPassword}
                   onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className={`w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 ${user?.gender === 'FEMME' ? 'focus:ring-purple-500' : 'focus:ring-blue-500'} focus:border-transparent transition-all`}
                   placeholder="Nouveau mot de passe"
                 />
               </div>
@@ -414,13 +394,13 @@ export default function DashboardPage() {
               {editForm.newPassword && (
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Confirmer le mot de passe actuel ou le nouveau
+                    Confirmer le nouveau mot de passe
                   </label>
                   <input
                     type="password"
                     value={editForm.confirmPassword}
                     onChange={(e) => setEditForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className={`w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 ${user?.gender === 'FEMME' ? 'focus:ring-purple-500' : 'focus:ring-blue-500'} focus:border-transparent transition-all`}
                     placeholder="Confirmer le mot de passe"
                   />
                 </div>
@@ -437,7 +417,7 @@ export default function DashboardPage() {
                 <button
                   type="submit"
                   disabled={editLoading}
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                  className={`flex-1 bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base`}
                 >
                   {editLoading ? 'Mise à jour...' : 'Sauvegarder'}
                 </button>
@@ -446,13 +426,14 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      
       {/* Contenu principal */}
       <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         {/* Section de bienvenue */}
         <div className="text-center mb-16">
-          <div className={`inline-flex items-center space-x-2 ${genderConfig.primaryGlow} ${genderConfig.primaryText.replace('400', '300')} px-4 py-2 rounded-full mb-6 border ${genderConfig.primaryBorder}`}>
+          <div className={`inline-flex items-center space-x-2 ${genderConfig.primaryGlow} px-4 py-2 rounded-full mb-6 border ${genderConfig.primaryBorder}`}>
             <Star className="h-4 w-4" />
-            <span className="text-sm font-medium">Accès permanent et illimité</span>
+            <span className={`text-sm font-medium ${genderConfig.primaryText.replace('400', '300')}`}>Accès permanent et illimité</span>
           </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
@@ -513,11 +494,11 @@ export default function DashboardPage() {
         {/* Actions principales */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Commencer le cours */}
-          <div className={`bg-gradient-to-br ${genderConfig.primaryGlow} to-${genderConfig.primaryColor.split(' ')[2]}/20 backdrop-blur-xl border ${genderConfig.primaryBorder} rounded-3xl p-8 relative overflow-hidden`}>
-            <div className={`absolute top-0 right-0 w-32 h-32 ${genderConfig.primaryGlow.replace('20', '10')} rounded-full -translate-y-16 translate-x-16`}></div>
+          <div className={`bg-gradient-to-br ${user?.gender === 'FEMME' ? 'from-purple-500/20 to-pink-500/20' : 'from-blue-500/20 to-cyan-500/20'} backdrop-blur-xl border ${user?.gender === 'FEMME' ? 'border-purple-500/30' : 'border-blue-500/30'} rounded-3xl p-8 relative overflow-hidden`}>
+            <div className={`absolute top-0 right-0 w-32 h-32 ${user?.gender === 'FEMME' ? 'bg-purple-500/10' : 'bg-blue-500/10'} rounded-full -translate-y-16 translate-x-16`}></div>
             <div className="relative z-10">
-              <div className={`${genderConfig.primaryGlowHover} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
-                <Play className={`h-8 w-8 ${genderConfig.primaryText.replace('400', '300')}`} />
+              <div className={`${user?.gender === 'FEMME' ? 'bg-purple-500/30' : 'bg-blue-500/30'} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
+                <Play className={`h-8 w-8 ${user?.gender === 'FEMME' ? 'text-purple-300' : 'text-blue-300'}`} />
               </div>
               
               <h3 className="text-2xl font-bold text-white mb-4">
@@ -548,7 +529,7 @@ export default function DashboardPage() {
                     window.location.href = '/chapitres/0/introduction';
                   });
                 }}
-                className={`group bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center space-x-3`}
+                className={`group bg-gradient-to-r ${user?.gender === 'FEMME' ? 'from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' : 'from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'} text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center space-x-3`}
               >
                 <span>Commencer maintenant</span>
                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -558,10 +539,10 @@ export default function DashboardPage() {
 
           {/* Continuer le cours */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className={`absolute top-0 right-0 w-32 h-32 ${user?.gender === 'FEMME' ? 'bg-pink-500/10' : 'bg-cyan-500/10'} rounded-full -translate-y-16 translate-x-16`}></div>
             <div className="relative z-10">
-              <div className={`${genderConfig.primaryGlowHover} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
-                <TrendingUp className={`h-8 w-8 ${genderConfig.primaryText.replace('400', '300')}`} />
+              <div className={`${user?.gender === 'FEMME' ? 'bg-purple-500/30' : 'bg-blue-500/30'} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
+                <TrendingUp className={`h-8 w-8 ${user?.gender === 'FEMME' ? 'text-purple-300' : 'text-blue-300'}`} />
               </div>
               
               <h3 className="text-2xl font-bold text-white mb-4">
@@ -668,7 +649,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Conseil motivationnel */}
-        <div className="mt-12 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 backdrop-blur-xl border border-blue-500/20 rounded-2xl p-8 text-center">
+        <div className={`mt-12 bg-gradient-to-r ${user?.gender === 'FEMME' ? 'from-purple-500/10 to-pink-500/10' : 'from-blue-500/10 to-cyan-500/10'} backdrop-blur-xl border ${user?.gender === 'FEMME' ? 'border-purple-500/20' : 'border-blue-500/20'} rounded-2xl p-8 text-center`}>
           <div className={`${genderConfig.primaryGlow} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6`}>
             <Star className={`h-8 w-8 ${genderConfig.primaryText}`} />
           </div>
@@ -684,7 +665,6 @@ export default function DashboardPage() {
           </p>
         </div>
       </main>
-
     </div>
   );
 }

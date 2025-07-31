@@ -9,6 +9,7 @@ import {
   Filter,
   Eye,
   Edit,
+  Trash2,
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
@@ -17,14 +18,17 @@ import {
   CheckCircle,
   XCircle,
   BarChart3,
-  DollarSign
+  DollarSign,
+  UserPlus,
+  Download,
+  MoreVertical
 } from 'lucide-react';
 
 interface User {
-  gender: any;
   id: string;
   email: string;
   username: string | null;
+  gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
   stripeCustomerId: string | null;
   completedPagesCount: number;
@@ -57,6 +61,8 @@ export default function AdminUsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [showBulkActions, setShowBulkActions] = useState(false);
   const router = useRouter();
 
   const fetchUsers = async () => {
@@ -108,6 +114,79 @@ export default function AdminUsersPage() {
     fetchUsers();
   };
 
+  const handleSelectUser = (userId: string) => {
+    const newSelected = new Set(selectedUsers);
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId);
+    } else {
+      newSelected.add(userId);
+    }
+    setSelectedUsers(newSelected);
+    setShowBulkActions(newSelected.size > 0);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedUsers.size === data?.users.length) {
+      setSelectedUsers(new Set());
+      setShowBulkActions(false);
+    } else {
+      const allIds = new Set(data?.users.map(user => user.id) || []);
+      setSelectedUsers(allIds);
+      setShowBulkActions(true);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedUsers.size} utilisateur(s) ?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/users/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userIds: Array.from(selectedUsers) })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`${result.deletedCount} utilisateur(s) supprimé(s) avec succès`);
+        setSelectedUsers(new Set());
+        setShowBulkActions(false);
+        fetchUsers();
+      } else {
+        alert('Erreur lors de la suppression');
+      }
+    } catch (error) {
+      alert('Erreur de connexion');
+      console.error('Bulk delete error:', error);
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const params = new URLSearchParams({ search, format: 'csv' });
+      const response = await fetch(`/api/admin/users/export?${params}`);
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `utilisateurs-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        alert('Erreur lors de l\'export');
+      }
+    } catch (error) {
+      alert('Erreur de connexion');
+      console.error('Export error:', error);
+    }
+  };
+
   if (loading && !data) {
     return (
       <div className="min-h-screen bg-zinc-900 text-white p-8">
@@ -155,34 +234,70 @@ export default function AdminUsersPage() {
               </p>
             </div>
             
-            <Link
-              href="/admin"
-              className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-            >
-              <BarChart3 size={20} />
-              Retour au monitoring
-            </Link>
+            <div className="flex gap-3">
+              <button
+                onClick={handleExport}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <Download size={20} />
+                Exporter CSV
+              </button>
+              
+              <Link
+                href="/admin/users/create"
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <UserPlus size={20} />
+                Ajouter
+              </Link>
+              
+              <Link
+                href="/admin"
+                className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <BarChart3 size={20} />
+                Retour au monitoring
+              </Link>
+            </div>
           </div>
 
-          {/* Barre de recherche */}
-          <form onSubmit={handleSearch} className="flex gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 h-5 w-5" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher par email ou pseudo..."
-                className="w-full bg-zinc-700 border border-zinc-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
-            >
-              Rechercher
-            </button>
-          </form>
+          {/* Barre de recherche et actions en masse */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <form onSubmit={handleSearch} className="flex gap-4 flex-1">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 h-5 w-5" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Rechercher par email ou pseudo..."
+                  className="w-full bg-zinc-700 border border-zinc-600 rounded-lg pl-10 pr-4 py-3 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+              >
+                Rechercher
+              </button>
+            </form>
+
+            {/* Actions en masse */}
+            {showBulkActions && (
+              <div className="flex gap-2">
+                <span className="bg-purple-600 text-white px-3 py-2 rounded-lg text-sm">
+                  {selectedUsers.size} sélectionné(s)
+                </span>
+                <button
+                  onClick={handleBulkDelete}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                >
+                  <Trash2 size={16} />
+                  Supprimer
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -193,6 +308,14 @@ export default function AdminUsersPage() {
             <table className="w-full">
               <thead className="bg-zinc-700">
                 <tr>
+                  <th className="text-left py-4 px-6">
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.size === data?.users.length && data?.users.length > 0}
+                      onChange={handleSelectAll}
+                      className="w-4 h-4 text-purple-600 bg-zinc-600 border-zinc-500 rounded focus:ring-purple-500"
+                    />
+                  </th>
                   <th className="text-left py-4 px-6">
                     <button
                       onClick={() => handleSort('email')}
@@ -237,22 +360,32 @@ export default function AdminUsersPage() {
                 {data?.users.map((user) => (
                   <tr key={user.id} className="border-b border-zinc-700 hover:bg-zinc-700/50">
                     <td className="py-4 px-6">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.has(user.id)}
+                        onChange={() => handleSelectUser(user.id)}
+                        className="w-4 h-4 text-purple-600 bg-zinc-600 border-zinc-500 rounded focus:ring-purple-500"
+                      />
+                    </td>
+                    <td className="py-4 px-6">
                       <div>
                         <div className="font-semibold text-white">
                           {user.username || 'Sans pseudo'}
                         </div>
                         <div className="text-sm text-zinc-400">{user.email}</div>
-                        {user.gender && (
-                          <div className="inline-flex items-center gap-1 bg-blue-900/30 text-blue-400 px-2 py-1 rounded-full text-xs mt-1">
-                            {user.gender === 'HOMME' ? '👨' : '👩'} {user.gender}
-                          </div>
-                        )}
-                        {user.isPaid && (
-                          <div className="inline-flex items-center gap-1 bg-green-900/30 text-green-400 px-2 py-1 rounded-full text-xs mt-1">
-                            <DollarSign className="h-3 w-3" />
-                            Payant
-                          </div>
-                        )}
+                        <div className="flex gap-2 mt-1">
+                          {user.gender && (
+                            <div className="inline-flex items-center gap-1 bg-blue-900/30 text-blue-400 px-2 py-1 rounded-full text-xs">
+                              {user.gender === 'HOMME' ? '👨' : '👩'} {user.gender}
+                            </div>
+                          )}
+                          {user.isPaid && (
+                            <div className="inline-flex items-center gap-1 bg-green-900/30 text-green-400 px-2 py-1 rounded-full text-xs">
+                              <DollarSign className="h-3 w-3" />
+                              Payant
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="py-4 px-6">
@@ -295,13 +428,27 @@ export default function AdminUsersPage() {
                       {new Date(user.createdAt).toLocaleDateString('fr-FR')}
                     </td>
                     <td className="py-4 px-6">
-                      <Link
-                        href={`/admin/users/${user.id}`}
-                        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors inline-flex items-center gap-1"
-                        title="Voir les détails"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Link>
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/admin/users/${user.id}`}
+                          className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
+                          title="Voir les détails"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                        <button
+                          onClick={() => {
+                            if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                              // Logique de suppression individuelle
+                              handleBulkDelete();
+                            }
+                          }}
+                          className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -337,6 +484,27 @@ export default function AdminUsersPage() {
             </div>
           )}
         </div>
+
+        {/* État vide */}
+        {data?.users.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">👥</div>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              Aucun utilisateur trouvé
+            </h3>
+            <p className="text-zinc-400 mb-6">
+              {search ? 'Aucun résultat pour votre recherche.' : 'Commencez par ajouter des utilisateurs.'}
+            </p>
+            {!search && (
+              <Link
+                href="/admin/users/create"
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors"
+              >
+                Ajouter le premier utilisateur
+              </Link>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
