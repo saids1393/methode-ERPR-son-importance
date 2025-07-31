@@ -82,8 +82,12 @@ export async function POST(request: NextRequest) {
 
     // Si isPaid est true, simuler un paiement Stripe
     if (isPaid) {
-      userData.stripeCustomerId = `cus_admin_${Date.now()}`;
-      userData.stripeSessionId = `cs_admin_${Date.now()}`;
+      userData.stripeCustomerId = `manual_${Date.now()}`;
+      userData.stripeSessionId = `manual_session_${Date.now()}`;
+    } else {
+      // Si gratuit, pas de données de paiement
+      userData.stripeCustomerId = null;
+      userData.stripeSessionId = null;
     }
 
     const user = await prisma.user.create({

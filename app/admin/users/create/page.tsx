@@ -196,8 +196,8 @@ export default function CreateUserPage() {
                 onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value as 'HOMME' | 'FEMME' | '' }))}
                 className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="">Sélectionnez le genre</option>
                 <option value="HOMME">Homme</option>
+                <option value="free">Gratuit</option>
                 <option value="FEMME">Femme</option>
               </select>
             </div>
@@ -217,17 +217,36 @@ export default function CreateUserPage() {
                 </label>
               </div>
 
-              <div className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  id="isPaid"
-                  checked={formData.isPaid}
-                  onChange={(e) => setFormData(prev => ({ ...prev, isPaid: e.target.checked }))}
-                  className="w-4 h-4 text-green-600 bg-zinc-700 border-zinc-600 rounded focus:ring-green-500"
-                />
-                <label htmlFor="isPaid" className="text-zinc-300">
-                  Accès payant (simuler un paiement)
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  Statut de paiement
                 </label>
+                <select
+                  value={formData.isPaid ? 'paid' : 'free'}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isPaid: e.target.value === 'paid' }))}
+                  className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value="free">Gratuit</option>
+                  <option value="paid">Payé</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="bg-zinc-700 border border-zinc-600 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-zinc-300 mb-3">💡 Information :</h4>
+              <div className="space-y-2 text-sm text-zinc-400">
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400">💰</span>
+                  <span><strong>Payé :</strong> Compté dans les revenus (64.99€) - Stripe, liquide, chèque, etc.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-blue-400">🆓</span>
+                  <span><strong>Gratuit :</strong> Accès libre, n'impacte pas les revenus (0€)</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-yellow-400">ℹ️</span>
+                  <span><strong>Note :</strong> Les inscriptions normales sont automatiquement "Payé"</span>
+                </div>
               </div>
             </div>
 

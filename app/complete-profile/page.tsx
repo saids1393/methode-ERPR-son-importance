@@ -75,7 +75,10 @@ export default function CompleteProfilePage() {
 
       if (response.ok && data.success) {
         toast.success('Profil complété avec succès !');
-        router.push('/dashboard');
+        // Attendre un peu pour que le cookie soit défini puis rediriger
+        setTimeout(() => {
+          window.location.replace('/dashboard');
+        }, 500);
       } else {
         toast.error(data.error || 'Erreur lors de la completion du profil');
       }

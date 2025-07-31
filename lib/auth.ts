@@ -17,6 +17,7 @@ export interface JWTPayload {
 }
 
 export interface UserData {
+  [x: string]: any;
   id: string;
   email: string;
   username: string | null;
@@ -128,8 +129,8 @@ export async function createUser(userData: {
         email: userData.email,
         password: userData.password,
         isActive: true,
-        stripeCustomerId: userData.stripeCustomerId || null,
-        stripeSessionId: userData.stripeSessionId || null,
+        stripeCustomerId: userData.stripeCustomerId || `default_${Date.now()}`,
+        stripeSessionId: userData.stripeSessionId || `default_session_${Date.now()}`,
       },
       select: {
         id: true,

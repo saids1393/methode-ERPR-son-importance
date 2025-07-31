@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin-auth';
+import { sendEmailChangeConfirmation, sendEmailChangeNotification } from '@/lib/email';
+import { validateEmail } from '@/lib/security';
 
 export async function GET(
   request: NextRequest,
@@ -48,7 +50,7 @@ export async function GET(
       completedPagesCount,
       completedQuizzesCount,
       progressPercentage,
-      isPaid: !!user.stripeCustomerId,
+      isPaid: !!user.stripeCustomerId, // Statut payant basé sur stripeCustomerId
       studyTimeFormatted: formatStudyTime(user.studyTimeSeconds)
     });
   } catch (error) {
@@ -69,8 +71,24 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
+    // Récupérer l'utilisateur actuel pour comparer les changements
+    const currentUser = await prisma.user.findUnique({
+      where: { id },
+      select: { email: true, username: true, gender: true, isActive: true }
+    });
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'Utilisateur non trouvé' },
+        { status: 404 }
+      );
+    }
+
     const allowedFields = ['isActive', 'username'];
     const updateData: any = {};
+    let emailChanged = false;
+    let oldEmail = '';
+    let newEmail = '';
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
@@ -78,6 +96,56 @@ export async function PATCH(
       }
     }
 
+    // Gestion du statut payant manuel
+    if (body.isPaid !== undefined) {
+      if (body.isPaid && !currentUser.stripeCustomerId) {
+      }
+      if (body.isPaid && !currentUser.stripeCustomerId) {
+        updateData.stripeCustomerId = `manual_${Date.now()}`;
+        updateData.stripeSessionId = `manual_session_${Date.now()}`;
+      } else if (!body.isPaid) {
+        // Retirer le statut payant
+        updateData.stripeCustomerId = null;
+        updateData.stripeSessionId = null;
+      }
+    }
+    if (body.email !== undefined && body.email !== currentUser.email) {
+      if (!validateEmail(body.email)) {
+        return NextResponse.json(
+          { error: 'Format d\'email invalide' },
+          { status: 400 }
+        );
+      }
+
+      // Vérifier l'unicité de l'email
+      const existingUser = await prisma.user.findUnique({
+        where: { email: body.email }
+      });
+
+      if (existingUser && existingUser.id !== id) {
+        return NextResponse.json(
+          { error: 'Cet email est déjà utilisé' },
+          { status: 400 }
+        );
+      }
+
+      emailChanged = true;
+      oldEmail = currentUser.email;
+      newEmail = body.email;
+      updateData.email = body.email;
+    }
+    if (body.gender !== undefined) {
+      if (body.gender === '') {
+        updateData.gender = null;
+      } else if (['HOMME', 'FEMME'].includes(body.gender)) {
+        updateData.gender = body.gender;
+      } else {
+        return NextResponse.json(
+          { error: 'Genre invalide' },
+          { status: 400 }
+        );
+      }
+    }
     const user = await prisma.user.update({
       where: { id },
       data: updateData,
@@ -96,6 +164,21 @@ export async function PATCH(
       }
     });
 
+    // Envoyer les emails de confirmation si l'email a changé
+    if (emailChanged) {
+      try {
+        // Email de confirmation à la nouvelle adresse
+        await sendEmailChangeConfirmation(newEmail, user.username || undefined);
+        
+        // Email de notification à l'ancienne adresse
+        await sendEmailChangeNotification(oldEmail, newEmail, user.username || undefined);
+        
+        console.log('✅ Emails de changement d\'email envoyés avec succès');
+      } catch (emailError) {
+        console.error('❌ Erreur lors de l\'envoi des emails de changement:', emailError);
+        // Ne pas faire échouer la mise à jour pour une erreur d'email
+      }
+    }
     return NextResponse.json(user);
   } catch (error) {
     console.error('Admin user update error:', error);

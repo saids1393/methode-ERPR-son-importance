@@ -50,7 +50,7 @@ export async function GET(
       completedPagesCount,
       completedQuizzesCount,
       progressPercentage,
-      isPaid: !!user.stripeCustomerId,
+      isPaid: user.isActive, // Tous les utilisateurs actifs sont considérés comme payants
       studyTimeFormatted: formatStudyTime(user.studyTimeSeconds)
     });
   } catch (error) {
@@ -196,7 +196,7 @@ export async function PATCH(
       completedPagesCount,
       completedQuizzesCount,
       progressPercentage,
-      isPaid: !!user.stripeCustomerId,
+      isPaid: user.isActive, // Tous les utilisateurs actifs sont considérés comme payants
       studyTimeFormatted: formatStudyTime(user.studyTimeSeconds)
     });
   } catch (error) {

@@ -19,8 +19,8 @@ export async function GET(request: NextRequest) {
         where: { 
           isActive: true,
           stripeCustomerId: { not: null }
-        }
-      }),
+        } 
+      }), // Seulement les utilisateurs avec stripeCustomerId
       prisma.user.count({
         where: {
           createdAt: { 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     let totalCompletedQuizzes = 0;
     let totalStudyTime = 0;
     let usersWithFullCompletion = 0;
-    let totalRevenue = 0;
+    let totalRevenue = paidUsers * 64.99; // Seulement les utilisateurs payants
 
     const userStats = usersWithProgress.map((user: { completedPages: { filter: (arg0: (p: any) => boolean) => { (): any; new(): any; length: any; }; }; completedQuizzes: { filter: (arg0: (q: any) => boolean) => { (): any; new(): any; length: any; }; }; studyTimeSeconds: number; stripeCustomerId: any; id: any; email: any; username: any; gender: any; createdAt: any; }) => {
       const completedPages = user.completedPages.filter((p: number) => p !== 0 && p !== 30).length;
@@ -72,9 +72,6 @@ export async function GET(request: NextRequest) {
         usersWithFullCompletion++;
       }
 
-      if (user.stripeCustomerId) {
-        totalRevenue += 64.99; // Prix du cours
-      }
 
       return {
         id: user.id,
@@ -85,7 +82,7 @@ export async function GET(request: NextRequest) {
         completedQuizzes,
         progressPercentage,
         studyTimeSeconds: user.studyTimeSeconds,
-        isPaid: !!user.stripeCustomerId,
+        isPaid: !!user.stripeCustomerId, // Seulement si stripeCustomerId existe
         createdAt: user.createdAt
       };
     });
@@ -161,7 +158,7 @@ export async function GET(request: NextRequest) {
         }
       },
       topUsers: {
-        byStudyTime: topStudyUsers.map((user: { id: any; email: any; username: any; gender: any; studyTimeSeconds: number; completedPages: any; completedQuizzes: any; progressPercentage: any; isPaid: any; }) => ({
+        byStudyTime: topStudyUsers.map((user: { id: any; email: any; username: any; gender: any; studyTimeSeconds: number; completedPages: any; completedQuizzes: any; progressPercentage: any; stripeCustomerId: any; }) => ({
           id: user.id,
           email: user.email,
           username: user.username,
@@ -171,9 +168,9 @@ export async function GET(request: NextRequest) {
           completedPages: user.completedPages,
           completedQuizzes: user.completedQuizzes,
           progressPercentage: user.progressPercentage,
-          isPaid: user.isPaid
+          isPaid: !!user.stripeCustomerId
         })),
-        byProgress: topProgressUsers.map((user: { id: any; email: any; username: any; gender: any; progressPercentage: any; completedPages: any; completedQuizzes: any; studyTimeSeconds: any; isPaid: any; }) => ({
+        byProgress: topProgressUsers.map((user: { id: any; email: any; username: any; gender: any; progressPercentage: any; completedPages: any; completedQuizzes: any; studyTimeSeconds: any; stripeCustomerId: any; }) => ({
           id: user.id,
           email: user.email,
           username: user.username,
@@ -182,7 +179,7 @@ export async function GET(request: NextRequest) {
           completedPages: user.completedPages,
           completedQuizzes: user.completedQuizzes,
           studyTimeSeconds: user.studyTimeSeconds,
-          isPaid: user.isPaid
+          isPaid: !!user.stripeCustomerId
         }))
       },
       chartData: {
@@ -191,7 +188,7 @@ export async function GET(request: NextRequest) {
       },
       financial: {
         totalRevenue,
-        averageRevenuePerUser: paidUsers > 0 ? Math.round((totalRevenue / paidUsers) * 100) / 100 : 0,
+        averageRevenuePerUser: paidUsers > 0 ? Math.round((totalRevenue / paidUsers) * 100) / 100 : 64.99,
         conversionRate,
         paidUsersPercentage: totalUsers > 0 ? Math.round((paidUsers / totalUsers) * 100) : 0
       }
@@ -229,8 +226,7 @@ async function generateDailyStats(startDate: Date) {
           createdAt: {
             gte: date,
             lt: nextDate
-          },
-          stripeCustomerId: { not: null }
+          }
         }
       })
     ]);
@@ -272,7 +268,7 @@ async function generateWeeklyStats() {
             gte: weekStart,
             lt: weekEnd
           },
-          stripeCustomerId: { not: null }
+          stripeCustomerId: { not: null } // Seulement les payants
         }
       })
     ]);
@@ -281,7 +277,6 @@ async function generateWeeklyStats() {
 
     stats.push({
       week: `S${weekNumber}`,
-      weekStart: weekStart.toISOString().split('T')[0],
       weekEnd: weekEnd.toISOString().split('T')[0],
       users: newUsers,
       paidUsers: newPaidUsers,

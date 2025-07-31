@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         completedPagesCount,
         completedQuizzesCount,
         progressPercentage,
-        isPaid: !!user.stripeCustomerId,
+        isPaid: !!user.stripeCustomerId, // Seulement si stripeCustomerId existe
         studyTimeFormatted: formatStudyTime(user.studyTimeSeconds)
       };
     });

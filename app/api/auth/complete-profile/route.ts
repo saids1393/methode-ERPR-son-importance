@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getAuthUserFromRequest, updateUserProfile } from '@/lib/auth';
 import { sendWelcomeEmail } from '@/lib/email';
 import { rateLimit, getClientIP, sanitizeInput, validateUsername, validatePassword, secureLog, getSecurityHeaders } from '@/lib/security';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
@@ -75,12 +76,28 @@ export async function POST(req: Request) {
 
     secureLog('COMPLETE_PROFILE_ATTEMPT', { ip: clientIP, userId: user.id });
 
-    // Mettre à jour le profil
+    // Mettre à jour le profil et s'assurer qu'il est marqué comme payant
     const updatedUser = await updateUserProfile(user.id, {
       username: cleanUsername,
       password,
       gender
     });
+
+    // S'assurer que l'utilisateur a des données de paiement (par défaut payant)
+    const userWithStripe = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { stripeCustomerId: true }
+    });
+
+    if (!userWithStripe?.stripeCustomerId) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          stripeCustomerId: `profile_complete_${Date.now()}`,
+          stripeSessionId: `profile_session_${Date.now()}`,
+        }
+      });
+    }
 
     // Envoyer un email de bienvenue personnalisé avec le nouveau pseudo
     if (username && username !== user.username) {

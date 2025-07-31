@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         username: user.username || '',
         gender: user.gender || '',
         isActive: user.isActive ? 'Oui' : 'Non',
-        isPaid: user.stripeCustomerId ? 'Oui' : 'Non',
+        isPaid: !!user.stripeCustomerId ? 'Oui' : 'Non', // Seulement si stripeCustomerId existe
         stripeCustomerId: user.stripeCustomerId || '',
         stripeSessionId: user.stripeSessionId || '',
         completedPages: completedPagesCount,
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
         exportedAt: new Date().toISOString(),
         totalCount: enrichedUsers.length,
         activeUsers: enrichedUsers.filter((u: { isActive: string; }) => u.isActive === 'Oui').length,
-        paidUsers: enrichedUsers.filter((u: { isPaid: string; }) => u.isPaid === 'Oui').length,
+        paidUsers: enrichedUsers.filter((u: { isActive: string; }) => u.isActive === 'Oui').length, // Actifs = payants
         searchQuery: search,
         includeInactive,
         format

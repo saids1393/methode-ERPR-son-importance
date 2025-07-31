@@ -743,6 +743,353 @@ Besoin d'aide ? Contactez-nous : support@sonimportance.com
     return false;
   }
 }
+
+// Fonction pour envoyer un email de confirmation de changement d'email
+export async function sendEmailChangeConfirmation(newEmail: string, username?: string): Promise<boolean> {
+  try {
+    const confirmationTemplate = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Confirmation de changement d'email - Méthode ERPR</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f8f9fa;
+            }
+            .container {
+                background: white;
+                border-radius: 12px;
+                padding: 40px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 40px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #e9ecef;
+            }
+            .logo {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 8px;
+                display: inline-block;
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+            .success-badge {
+                background: #28a745;
+                color: white;
+                padding: 8px 20px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 600;
+                display: inline-block;
+            }
+            .info-box {
+                background: #e3f2fd;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+                border-left: 4px solid #2196f3;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #e9ecef;
+                color: #6c757d;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">📚 Méthode ERPR</div>
+                <div class="success-badge">✅ Email modifié</div>
+            </div>
+
+            <h1 style="color: #333; text-align: center; margin-bottom: 30px;">
+                Votre email a été modifié avec succès
+            </h1>
+
+            <p style="font-size: 16px; margin-bottom: 30px;">
+                ${username ? `Bonjour ${username},` : 'Bonjour,'}
+            </p>
+
+            <p style="font-size: 16px; margin-bottom: 30px;">
+                Nous vous confirmons que l'adresse email de votre compte Méthode ERPR a été modifiée avec succès.
+            </p>
+
+            <div class="info-box">
+                <h4 style="margin-top: 0; color: #1976d2;">📧 Nouvelle adresse email</h4>
+                <p style="margin: 0;">
+                    <strong>${newEmail}</strong>
+                </p>
+            </div>
+
+            <p style="font-size: 16px; margin: 30px 0;">
+                Cette modification a été effectuée le <strong>${new Date().toLocaleDateString('fr-FR', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}</strong>.
+            </p>
+
+            <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                <h4 style="margin-top: 0; color: #856404;">🔒 Sécurité</h4>
+                <p style="margin: 0; color: #856404;">
+                    Si vous n'avez pas effectué cette modification, contactez immédiatement notre support à 
+                    <strong>support@sonimportance.com</strong>
+                </p>
+            </div>
+
+            <div class="footer">
+                <p>
+                    <strong>Méthode ERPR</strong><br>
+                    Apprenez à lire et écrire l'arabe à votre rythme<br>
+                    Créé par Professeur Soidroudine
+                </p>
+                <p style="margin-top: 20px;">
+                    © ${new Date().getFullYear()} Tous droits réservés
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    const mailOptions = {
+      from: {
+        name: 'Méthode ERPR',
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+      },
+      to: newEmail,
+      subject: `✅ Confirmation de changement d'email - Méthode ERPR`,
+      html: confirmationTemplate,
+      text: `
+Confirmation de changement d'email - Méthode ERPR
+
+${username ? `Bonjour ${username},` : 'Bonjour,'}
+
+Nous vous confirmons que l'adresse email de votre compte Méthode ERPR a été modifiée avec succès.
+
+Nouvelle adresse email : ${newEmail}
+
+Cette modification a été effectuée le ${new Date().toLocaleDateString('fr-FR')}.
+
+SÉCURITÉ : Si vous n'avez pas effectué cette modification, contactez immédiatement notre support à support@sonimportance.com
+
+© ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email de confirmation de changement envoyé avec succès:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'envoi de l\'email de confirmation de changement:', error);
+    return false;
+  }
+}
+
+// Fonction pour envoyer un email de notification de changement d'email à l'ancienne adresse
+export async function sendEmailChangeNotification(oldEmail: string, newEmail: string, username?: string): Promise<boolean> {
+  try {
+    const notificationTemplate = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Notification de changement d'email - Méthode ERPR</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f8f9fa;
+            }
+            .container {
+                background: white;
+                border-radius: 12px;
+                padding: 40px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 40px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #e9ecef;
+            }
+            .logo {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 8px;
+                display: inline-block;
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+            .warning-badge {
+                background: #ffc107;
+                color: #212529;
+                padding: 8px 20px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: 600;
+                display: inline-block;
+            }
+            .info-box {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+                border-left: 4px solid #6c757d;
+            }
+            .alert-box {
+                background: #f8d7da;
+                padding: 20px;
+                border-radius: 8px;
+                margin: 20px 0;
+                border-left: 4px solid #dc3545;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #e9ecef;
+                color: #6c757d;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div class="logo">📚 Méthode ERPR</div>
+                <div class="warning-badge">⚠️ Notification de sécurité</div>
+            </div>
+
+            <h1 style="color: #333; text-align: center; margin-bottom: 30px;">
+                Changement d'email sur votre compte
+            </h1>
+
+            <p style="font-size: 16px; margin-bottom: 30px;">
+                ${username ? `Bonjour ${username},` : 'Bonjour,'}
+            </p>
+
+            <p style="font-size: 16px; margin-bottom: 30px;">
+                Nous vous informons que l'adresse email associée à votre compte Méthode ERPR a été modifiée.
+            </p>
+
+            <div class="info-box">
+                <h4 style="margin-top: 0; color: #495057;">📧 Détails du changement</h4>
+                <p style="margin-bottom: 10px;">
+                    <strong>Ancienne adresse :</strong> ${oldEmail}
+                </p>
+                <p style="margin: 0;">
+                    <strong>Nouvelle adresse :</strong> ${newEmail}
+                </p>
+            </div>
+
+            <p style="font-size: 16px; margin: 30px 0;">
+                Cette modification a été effectuée le <strong>${new Date().toLocaleDateString('fr-FR', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}</strong>.
+            </p>
+
+            <div class="alert-box">
+                <h4 style="margin-top: 0; color: #721c24;">🚨 Action requise si ce n'est pas vous</h4>
+                <p style="margin: 0; color: #721c24;">
+                    Si vous n'avez pas effectué cette modification, votre compte pourrait être compromis. 
+                    Contactez <strong>immédiatement</strong> notre support à <strong>support@sonimportance.com</strong>
+                </p>
+            </div>
+
+            <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2196f3;">
+                <h4 style="margin-top: 0; color: #1976d2;">📞 Support</h4>
+                <p style="margin: 0; color: #1976d2;">
+                    <strong>Email :</strong> support@sonimportance.com<br>
+                    <strong>Réponse :</strong> Sous 24h maximum
+                </p>
+            </div>
+
+            <div class="footer">
+                <p>
+                    <strong>Méthode ERPR</strong><br>
+                    Apprenez à lire et écrire l'arabe à votre rythme<br>
+                    Créé par Professeur Soidroudine
+                </p>
+                <p style="margin-top: 20px;">
+                    © ${new Date().getFullYear()} Tous droits réservés<br>
+                    Cet email a été envoyé à ${oldEmail}
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    const mailOptions = {
+      from: {
+        name: 'Méthode ERPR',
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+      },
+      to: oldEmail,
+      subject: `⚠️ Notification de changement d'email - Méthode ERPR`,
+      html: notificationTemplate,
+      text: `
+Notification de changement d'email - Méthode ERPR
+
+${username ? `Bonjour ${username},` : 'Bonjour,'}
+
+Nous vous informons que l'adresse email associée à votre compte Méthode ERPR a été modifiée.
+
+DÉTAILS DU CHANGEMENT :
+- Ancienne adresse : ${oldEmail}
+- Nouvelle adresse : ${newEmail}
+- Date : ${new Date().toLocaleDateString('fr-FR')}
+
+ACTION REQUISE : Si vous n'avez pas effectué cette modification, votre compte pourrait être compromis. 
+Contactez IMMÉDIATEMENT notre support à support@sonimportance.com
+
+Support : support@sonimportance.com (Réponse sous 24h maximum)
+
+© ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email de notification de changement envoyé avec succès:', info.messageId);
+    return true;
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'envoi de l\'email de notification de changement:', error);
+    return false;
+  }
+}
+
 function generatePDF(data: PaymentData) {
     throw new Error('Function not implemented.');
 }
+
