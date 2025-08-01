@@ -1,7 +1,11 @@
 // components/chapitres/chapitre1/Page0.tsx 
+"use client";
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page0 = () => {
+  const { playLetter } = useAudio();
+
   const associations: { [key: string]: { mot: string; emoji?: string } } = {
     'ا': { mot: 'Abeille', emoji: '🐝' },
     'ب': { mot: 'Bateau', emoji: '🚤' },
@@ -70,6 +74,9 @@ const Page0 = () => {
 
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
 
+  const handleLetterClick = (letter: string) => {
+       playLetter(letter);
+  };
   return (
     <div className="font-arabic min-h-screen bg-zinc-900 text-white p-6 space-y-6">
       <div className="text-center mb-4">
@@ -83,7 +90,8 @@ const Page0 = () => {
           return (
             <div
               key={index}
-              className="flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 transition-all p-6 rounded-xl shadow-lg"
+              className="flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 transition-all p-6 rounded-xl shadow-lg cursor-pointer"
+              onClick={() => handleLetterClick(item.letter)}
             >
               {/* Lettre arabe */}
               <div

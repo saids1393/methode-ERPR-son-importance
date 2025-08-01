@@ -1,7 +1,13 @@
 // components/chapitres/chapitre1/Page2.tsx
+
+"use client";
+
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page2 = () => {
+  const { playLetter } = useAudio();
+
   const letters = [
     // Row 1
     { letter: 'ا', emphatic: false, violet: false },
@@ -44,6 +50,11 @@ const Page2 = () => {
 
   ];
 
+  const handleLetterClick = (letter: string) => {
+    // Nettoyer la lettre pour le nom de fichier (enlever les diacritiques et attachements)
+    const cleanLetter = letter.replace(/[ـَُِ]/g, '');
+      playLetter(letter);
+  };
   return (
     <div 
       className="font-arabic min-h-screen"
@@ -64,6 +75,7 @@ const Page2 = () => {
                 letter={item.letter} 
                 emphatic={item.emphatic}
                 violet={item.violet}
+                onClick={() => handleLetterClick(item.letter)}
               />
             ))}
           </div>
@@ -92,12 +104,16 @@ const Page2 = () => {
 };
 
 // Cell Component adapté pour le thème sombre
-const Cell = ({ letter, emphatic, violet }: { 
+const Cell = ({ letter, emphatic, violet, onClick }: { 
   letter: string; 
   emphatic?: boolean;
   violet?: boolean;
+  onClick?: () => void;
 }) => (
-  <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer">
+  <div 
+    className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+    onClick={onClick}
+  >
     <div className={`text-3xl md:text-4xl font-bold transition-colors ${
       emphatic ? 'text-red-400' : 
       violet ? 'text-purple-400' : 

@@ -1,6 +1,10 @@
+"use client";
+
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page1 = () => {
+  const { playLetter } = useAudio();
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
 
   const allLetters = [
@@ -39,6 +43,9 @@ const Page1 = () => {
   // Indices des lettres spéciales : les 3 dernières
   const specialStartIndex = allLetters.length - 2;
 
+  const handleLetterClick = (letter: string) => {
+      playLetter(letter);
+  };
   return (
     <div 
       className="font-arabic min-h-screen"
@@ -61,6 +68,7 @@ const Page1 = () => {
                 letter={item.letter}
                 emphatic={emphaticLetters.includes(item.letter)}
                 special={index >= specialStartIndex}
+                onClick={() => handleLetterClick(item.letter)}
               />
             ))}
           </div>
@@ -91,13 +99,21 @@ const Page1 = () => {
 };
 
 // Cell Component adapté pour thème sombre + emphatique + spéciale
-const Cell = ({ letter, emphatic, special }: { letter: string; emphatic?: boolean; special?: boolean }) => {
+const Cell = ({ letter, emphatic, special, onClick }: { 
+  letter: string; 
+  emphatic?: boolean; 
+  special?: boolean;
+  onClick?: () => void;
+}) => {
   let textColor = 'text-white';
   if (emphatic) textColor = 'text-red-400';
   else if (special) textColor = 'text-purple-400';
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer">
+    <div 
+      className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+      onClick={onClick}
+    >
       <div className={`text-3xl md:text-4xl font-bold ${textColor} transition-colors`}>
         {letter}
       </div>
