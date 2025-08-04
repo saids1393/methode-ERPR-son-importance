@@ -14,7 +14,8 @@ import {
   BookOpen,
   Award,
   Users,
-  Zap
+  Zap,
+  X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -22,6 +23,17 @@ interface SessionData {
   id: string;
   scheduledAt: string;
   status: string;
+  availabilityId?: string;
+  cancellation?: {
+    id: string;
+    cancelledBy: string;
+    reason: {
+      reason: string;
+      category: string;
+    };
+    customReason?: string;
+    cancelledAt: string;
+  };
   professor: {
     name: string;
     gender: string;
@@ -29,11 +41,27 @@ interface SessionData {
   zoomLink?: string;
 }
 
-interface Professor {
+interface AvailableSlot {
   id: string;
-  name: string;
-  email: string;
-  gender: string;
+  availabilityId: string;
+  professor: {
+    id: string;
+    name: string;
+    email: string;
+    gender: string;
+  };
+  date: string;
+  startTime: string;
+  endTime: string;
+  dayOfWeek: number;
+  scheduledAt: string;
+  isSpecific?: boolean;
+}
+
+interface CancellationReason {
+  id: string;
+  reason: string;
+  category: string;
 }
 
 interface SessionsResponse {
@@ -43,22 +71,28 @@ interface SessionsResponse {
     nextUnlockPage?: number;
   };
   sessions: SessionData[];
-  availableProfessors: Professor[];
   bookedSessionsCount: number;
 }
 
 export default function AccompagnementPage() {
   const [data, setData] = useState<SessionsResponse | null>(null);
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
+  const [cancellationReasons, setCancellationReasons] = useState<CancellationReason[]>([]);
   const [loading, setLoading] = useState(true);
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [selectedProfessor, setSelectedProfessor] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [sessionToCancel, setSessionToCancel] = useState<SessionData | null>(null);
+  const [selectedReason, setSelectedReason] = useState('');
+  const [customReason, setCustomReason] = useState('');
+  const [cancelLoading, setCancelLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     fetchSessions();
+    fetchAvailableSlots();
+    fetchCancellationReasons();
   }, []);
 
   const fetchSessions = async () => {
@@ -80,25 +114,47 @@ export default function AccompagnementPage() {
     }
   };
 
+  const fetchAvailableSlots = async () => {
+    try {
+      const response = await fetch('/api/sessions/available');
+      if (response.ok) {
+        const slotsData = await response.json();
+        setAvailableSlots(slotsData.availableSlots || []);
+      }
+    } catch (error) {
+      console.error('Error fetching available slots:', error);
+    }
+  };
+
+  const fetchCancellationReasons = async () => {
+    try {
+      const response = await fetch('/api/sessions/cancellation-reasons?category=STUDENT');
+      if (response.ok) {
+        const reasonsData = await response.json();
+        setCancellationReasons(reasonsData.reasons || []);
+      }
+    } catch (error) {
+      console.error('Error fetching cancellation reasons:', error);
+    }
+  };
+
   const handleBookSession = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedProfessor || !selectedDate || !selectedTime) {
-      toast.error('Veuillez remplir tous les champs');
+    if (!selectedSlot) {
+      toast.error('Veuillez sélectionner un créneau');
       return;
     }
 
     setBookingLoading(true);
 
     try {
-      const scheduledAt = new Date(`${selectedDate}T${selectedTime}`);
-      
       const response = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          professorId: selectedProfessor,
-          scheduledAt: scheduledAt.toISOString()
+          slotId: selectedSlot.id,
+          availabilityId: selectedSlot.availabilityId
         })
       });
 
@@ -107,10 +163,9 @@ export default function AccompagnementPage() {
       if (response.ok && result.success) {
         toast.success('Séance réservée avec succès !');
         setShowBookingForm(false);
-        setSelectedProfessor('');
-        setSelectedDate('');
-        setSelectedTime('');
+        setSelectedSlot(null);
         fetchSessions(); // Recharger les données
+        fetchAvailableSlots(); // Recharger les créneaux
       } else {
         toast.error(result.error || 'Erreur lors de la réservation');
       }
@@ -122,16 +177,77 @@ export default function AccompagnementPage() {
     }
   };
 
-  const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+  const handleCancelSession = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!sessionToCancel || !selectedReason) {
+      toast.error('Veuillez sélectionner un motif');
+      return;
+    }
+
+    // Vérifier si un motif personnalisé est requis
+    const reason = cancellationReasons.find(r => r.id === selectedReason);
+    if (reason?.reason.includes('Autre') && !customReason.trim()) {
+      toast.error('Veuillez préciser le motif');
+      return;
+    }
+
+    setCancelLoading(true);
+
+    try {
+      const response = await fetch('/api/sessions/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: sessionToCancel.id,
+          reasonId: selectedReason,
+          customReason: customReason.trim() || null,
+          cancelledBy: 'STUDENT'
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast.success('Séance annulée avec succès');
+        setShowCancelForm(false);
+        setSessionToCancel(null);
+        setSelectedReason('');
+        setCustomReason('');
+        fetchSessions();
+        fetchAvailableSlots();
+      } else {
+        toast.error(result.error || 'Erreur lors de l\'annulation');
+      }
+    } catch (error) {
+      toast.error('Erreur de connexion');
+      console.error('Cancel error:', error);
+    } finally {
+      setCancelLoading(false);
+    }
   };
 
-  const getMaxDate = () => {
-    const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 30); // 30 jours à l'avance
-    return maxDate.toISOString().split('T')[0];
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (timeString: string) => {
+    return timeString.substring(0, 5); // HH:MM
+  };
+
+  const canCancelSession = (session: SessionData) => {
+    if (session.status !== 'SCHEDULED') return false;
+    
+    const sessionTime = new Date(session.scheduledAt);
+    const now = new Date();
+    const hoursUntil = (sessionTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    return hoursUntil >= 24; // 24h minimum
   };
 
   if (loading) {
@@ -158,7 +274,11 @@ export default function AccompagnementPage() {
     );
   }
 
-  const canBookMore = data.bookedSessionsCount < data.progress.unlockedSessions;
+  // Variables calculées après vérification de data
+  const unlockedSessions = data.progress?.unlockedSessions ?? 0;
+  const canBookMore = data.progress?.unlockedSessions !== undefined
+    ? data.bookedSessionsCount < data.progress.unlockedSessions
+    : false;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
@@ -203,12 +323,12 @@ export default function AccompagnementPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Séance 1 */}
             <div className={`p-6 rounded-2xl border-2 ${
-              data.progress.unlockedSessions >= 1 
-                ? 'bg-green-500/20 border-green-500/30' 
+              unlockedSessions >= 1
+                ? 'bg-green-500/20 border-green-500/30'
                 : 'bg-zinc-800/50 border-zinc-700'
             }`}>
               <div className="flex items-center gap-3 mb-4">
-                {data.progress.unlockedSessions >= 1 ? (
+                {unlockedSessions >= 1 ? (
                   <CheckCircle className="h-6 w-6 text-green-400" />
                 ) : (
                   <Lock className="h-6 w-6 text-zinc-400" />
@@ -218,7 +338,7 @@ export default function AccompagnementPage() {
               <p className="text-slate-300 mb-2">
                 Débloquée à la page 7
               </p>
-              {data.progress.unlockedSessions >= 1 ? (
+              {unlockedSessions >= 1 ? (
                 <span className="text-green-400 font-semibold">✓ Disponible</span>
               ) : (
                 <span className="text-zinc-400">🔒 Verrouillée</span>
@@ -227,12 +347,12 @@ export default function AccompagnementPage() {
 
             {/* Séance 2 */}
             <div className={`p-6 rounded-2xl border-2 ${
-              data.progress.unlockedSessions >= 2 
+              unlockedSessions >= 2 
                 ? 'bg-green-500/20 border-green-500/30' 
                 : 'bg-zinc-800/50 border-zinc-700'
             }`}>
               <div className="flex items-center gap-3 mb-4">
-                {data.progress.unlockedSessions >= 2 ? (
+                {unlockedSessions >= 2 ? (
                   <CheckCircle className="h-6 w-6 text-green-400" />
                 ) : (
                   <Lock className="h-6 w-6 text-zinc-400" />
@@ -242,7 +362,7 @@ export default function AccompagnementPage() {
               <p className="text-slate-300 mb-2">
                 Débloquée à la page 17
               </p>
-              {data.progress.unlockedSessions >= 2 ? (
+              {unlockedSessions >= 2 ? (
                 <span className="text-green-400 font-semibold">✓ Disponible</span>
               ) : (
                 <span className="text-zinc-400">🔒 Verrouillée</span>
@@ -251,12 +371,12 @@ export default function AccompagnementPage() {
 
             {/* Séance 3 */}
             <div className={`p-6 rounded-2xl border-2 ${
-              data.progress.unlockedSessions >= 3 
+              unlockedSessions >= 3 
                 ? 'bg-green-500/20 border-green-500/30' 
                 : 'bg-zinc-800/50 border-zinc-700'
             }`}>
               <div className="flex items-center gap-3 mb-4">
-                {data.progress.unlockedSessions >= 3 ? (
+                {unlockedSessions >= 3 ? (
                   <CheckCircle className="h-6 w-6 text-green-400" />
                 ) : (
                   <Lock className="h-6 w-6 text-zinc-400" />
@@ -266,7 +386,7 @@ export default function AccompagnementPage() {
               <p className="text-slate-300 mb-2">
                 Débloquée à la page 27
               </p>
-              {data.progress.unlockedSessions >= 3 ? (
+              {unlockedSessions >= 3 ? (
                 <span className="text-green-400 font-semibold">✓ Disponible</span>
               ) : (
                 <span className="text-zinc-400">🔒 Verrouillée</span>
@@ -275,7 +395,7 @@ export default function AccompagnementPage() {
           </div>
 
           {/* Message de progression */}
-          {!data.progress.canBookSession && (
+          {!data.progress?.canBookSession && (
             <div className="mt-8 bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6 text-center">
               <Zap className="h-8 w-8 text-blue-400 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">
@@ -296,7 +416,7 @@ export default function AccompagnementPage() {
           )}
 
           {/* Bouton de réservation */}
-          {data.progress.canBookSession && canBookMore && (
+          {data.progress?.canBookSession && canBookMore && (
             <div className="mt-8 text-center">
               <button
                 onClick={() => setShowBookingForm(true)}
@@ -311,7 +431,7 @@ export default function AccompagnementPage() {
         </div>
 
         {/* Séances réservées */}
-        {data.sessions.length > 0 && (
+        {data.sessions?.length > 0 && (
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 mb-12">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
               <Calendar className="h-6 w-6 text-blue-400" />
@@ -319,7 +439,7 @@ export default function AccompagnementPage() {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data.sessions.map((session) => (
+              {data.sessions?.map((session) => (
                 <div key={session.id} className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <User className="h-5 w-5 text-blue-400" />
@@ -339,10 +459,31 @@ export default function AccompagnementPage() {
                       <div className={`w-2 h-2 rounded-full ${
                         session.status === 'COMPLETED' ? 'bg-green-400' :
                         session.status === 'SCHEDULED' ? 'bg-blue-400' :
+                        session.status === 'CANCELLED' ? 'bg-red-400' :
                         'bg-red-400'
                       }`}></div>
-                      <span className="capitalize">{session.status.toLowerCase()}</span>
+                      <span className="capitalize">
+                        {session.status === 'SCHEDULED' ? 'Programmée' :
+                         session.status === 'COMPLETED' ? 'Terminée' :
+                         session.status === 'CANCELLED' ? 'Annulée' :
+                         session.status.toLowerCase()}
+                      </span>
                     </div>
+                    
+                    {/* Afficher le motif d'annulation si applicable */}
+                    {session.status === 'CANCELLED' && session.cancellation && (
+                      <div className="mt-3 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                        <div className="text-red-400 text-xs font-medium mb-1">
+                          Annulée par {session.cancellation.cancelledBy === 'STUDENT' ? 'vous' : 'le professeur'}
+                        </div>
+                        <div className="text-red-300 text-xs">
+                          Motif : {session.cancellation.reason.reason}
+                          {session.cancellation.customReason && (
+                            <span> - {session.cancellation.customReason}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {session.zoomLink && session.status === 'SCHEDULED' && (
@@ -356,6 +497,22 @@ export default function AccompagnementPage() {
                         <Video className="h-4 w-4" />
                         Rejoindre la séance Zoom
                       </a>
+                    </div>
+                  )}
+                  
+                  {/* Bouton d'annulation */}
+                  {canCancelSession(session) && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => {
+                          setSessionToCancel(session);
+                          setShowCancelForm(true);
+                        }}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors w-full justify-center"
+                      >
+                        <X className="h-4 w-4" />
+                        Annuler la séance
+                      </button>
                     </div>
                   )}
                   
@@ -375,7 +532,7 @@ export default function AccompagnementPage() {
         {/* Modal de réservation */}
         {showBookingForm && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-3xl p-8 w-full max-w-md">
+            <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-3xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-white">Réserver une séance</h3>
                 <button
@@ -389,63 +546,58 @@ export default function AccompagnementPage() {
               </div>
               
               <form onSubmit={handleBookSession} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Professeur
-                  </label>
-                  <select
-                    value={selectedProfessor}
-                    onChange={(e) => setSelectedProfessor(e.target.value)}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="">Sélectionnez un professeur</option>
-                    {data.availableProfessors.map((prof) => (
-                      <option key={prof.id} value={prof.id} className="bg-slate-800">
-                        {prof.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    min={getMinDate()}
-                    max={getMaxDate()}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Heure
-                  </label>
-                  <select
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="">Sélectionnez une heure</option>
-                    <option value="09:00">09:00</option>
-                    <option value="10:00">10:00</option>
-                    <option value="11:00">11:00</option>
-                    <option value="14:00">14:00</option>
-                    <option value="15:00">15:00</option>
-                    <option value="16:00">16:00</option>
-                    <option value="17:00">17:00</option>
-                    <option value="18:00">18:00</option>
-                    <option value="19:00">19:00</option>
-                    <option value="20:00">20:00</option>
-                  </select>
-                </div>
+                {availableSlots.length > 0 ? (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-4">
+                      Créneaux disponibles
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                      {availableSlots.map((slot) => (
+                        <div
+                          key={slot.id}
+                          onClick={() => setSelectedSlot(slot)}
+                          className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                            selectedSlot?.id === slot.id
+                              ? 'border-blue-500 bg-blue-500/20'
+                              : 'border-white/20 bg-white/5 hover:border-white/40'
+                          }`}
+                        >
+                          <div className="text-white font-semibold mb-2">
+                            {slot.professor.name}
+                          </div>
+                          <div className="text-slate-300 text-sm">
+                            {formatDate(slot.date)}
+                          </div>
+                          <div className="text-slate-300 text-sm">
+                            {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                          </div>
+                          <div className="text-blue-400 text-xs mt-1">
+                            ⏱️ {(() => {
+                              const [startHour, startMin] = slot.startTime.split(':').map(Number);
+                              const [endHour, endMin] = slot.endTime.split(':').map(Number);
+                              const duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                              return `${Math.floor(duration / 60)}h${duration % 60 > 0 ? (duration % 60).toString().padStart(2, '0') : ''}`;
+                            })()}
+                          </div>
+                          {slot.isSpecific && (
+                            <div className="text-yellow-400 text-xs mt-1">
+                              📅 Créneau ponctuel
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-slate-400 mb-4">
+                      Aucun créneau disponible pour le moment
+                    </div>
+                    <div className="text-slate-500 text-sm">
+                      Les professeurs ajoutent régulièrement de nouveaux créneaux
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex space-x-4 pt-4">
                   <button
@@ -457,10 +609,110 @@ export default function AccompagnementPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={bookingLoading}
+                    disabled={bookingLoading || !selectedSlot}
                     className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50"
                   >
                     {bookingLoading ? 'Réservation...' : 'Réserver'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal d'annulation */}
+        {showCancelForm && sessionToCancel && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-3xl p-8 w-full max-w-md">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-white">Annuler la séance</h3>
+                <button
+                  onClick={() => setShowCancelForm(false)}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="mb-6 p-4 bg-white/5 rounded-xl">
+                <div className="text-white font-semibold mb-2">
+                  Séance avec {sessionToCancel.professor.name}
+                </div>
+                <div className="text-slate-300 text-sm">
+                  {new Date(sessionToCancel.scheduledAt).toLocaleDateString('fr-FR')} à{' '}
+                  {new Date(sessionToCancel.scheduledAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+              
+              <form onSubmit={handleCancelSession} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Motif d'annulation *
+                  </label>
+                  <select
+                    value={selectedReason}
+                    onChange={(e) => setSelectedReason(e.target.value)}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required
+                  >
+                    <option value="">Sélectionnez un motif</option>
+                    {cancellationReasons.map((reason) => (
+                      <option key={reason.id} value={reason.id} className="bg-slate-800">
+                        {reason.reason}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* Champ personnalisé si "Autre" est sélectionné */}
+                {selectedReason && cancellationReasons.find(r => r.id === selectedReason)?.reason.includes('Autre') && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Précisez le motif *
+                    </label>
+                    <textarea
+                      value={customReason}
+                      onChange={(e) => setCustomReason(e.target.value)}
+                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+                      placeholder="Décrivez brièvement le motif..."
+                      rows={3}
+                      required
+                    />
+                  </div>
+                )}
+                
+                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="text-yellow-400 text-lg">⚠️</div>
+                    <div>
+                      <h4 className="text-yellow-400 font-semibold text-sm mb-1">
+                        Conditions d'annulation
+                      </h4>
+                      <p className="text-yellow-300 text-xs leading-relaxed">
+                        • Annulation possible jusqu'à 24h avant la séance<br/>
+                        • Le créneau sera remis à disposition<br/>
+                        • Vous pourrez réserver un nouveau créneau
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCancelForm(false)}
+                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 border border-white/20"
+                  >
+                    Garder la séance
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={cancelLoading}
+                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50"
+                  >
+                    {cancelLoading ? 'Annulation...' : 'Confirmer l\'annulation'}
                   </button>
                 </div>
               </form>
@@ -508,6 +760,10 @@ export default function AccompagnementPage() {
                 <li className="flex items-start gap-3">
                   <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
                   <span>Professeur assigné selon votre genre</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+                  <span>Annulation possible jusqu'à 24h avant</span>
                 </li>
               </ul>
             </div>

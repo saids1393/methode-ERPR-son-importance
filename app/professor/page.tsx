@@ -13,9 +13,11 @@ import {
   LogOut,
   UserPlus,
   Lock,
-  Settings
+  Settings,
+  Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 interface StudentSession {
   id: string;
@@ -459,6 +461,15 @@ export default function ProfessorPage() {
             </div>
             
             <div className="flex items-center space-x-3">
+              <Link
+                href="/professor/availability"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition-colors text-sm sm:text-base"
+              >
+                <Clock className="h-4 w-4" />
+                <span className="hidden sm:inline">Mes disponibilités</span>
+                <span className="sm:hidden">Créneaux</span>
+              </Link>
+              
               <button
                 onClick={() => setShowProfileSettings(true)}
                 className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-xl transition-all duration-300 text-white"
@@ -482,6 +493,17 @@ export default function ProfessorPage() {
       <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         {/* Statistiques rapides */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
+            <div className="bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Clock className="h-6 w-6 text-purple-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-1">
+              {/* TODO: Compter les créneaux disponibles */}
+              -
+            </h3>
+            <p className="text-slate-400 text-sm">Créneaux disponibles</p>
+          </div>
+          
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
             <div className="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Users className="h-6 w-6 text-blue-400" />
@@ -513,16 +535,60 @@ export default function ProfessorPage() {
             </h3>
             <p className="text-slate-400 text-sm">Séances totales</p>
           </div>
-          
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-            <div className="bg-purple-500/20 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Clock className="h-6 w-6 text-purple-400" />
+        </div>
+
+        {/* Actions rapides */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Link
+            href="/professor/availability"
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <Clock className="h-8 w-8" />
+              <div>
+                <h4 className="font-bold text-lg">Mes Disponibilités</h4>
+                <p className="text-purple-200 text-sm">Gérer mes créneaux</p>
+              </div>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-1">
-              {formatTime(studentsData.students.reduce((sum, s) => sum + s.studyTimeMinutes, 0))}
-            </h3>
-            <p className="text-slate-400 text-sm">Temps d'étude total</p>
-          </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Ajouter/Modifier</span>
+              <div className="bg-white/20 p-1 rounded-full group-hover:translate-x-1 transition-transform">
+                <Plus className="h-4 w-4" />
+              </div>
+            </div>
+          </Link>
+
+          <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group">
+            <div className="flex items-center gap-4 mb-4">
+              <Calendar className="h-8 w-8" />
+              <div>
+                <h4 className="font-bold text-lg">Planning</h4>
+                <p className="text-blue-200 text-sm">Vue d'ensemble</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Voir le planning</span>
+              <div className="bg-white/20 p-1 rounded-full group-hover:translate-x-1 transition-transform">
+                <Calendar className="h-4 w-4" />
+              </div>
+            </div>
+          </button>
+
+          <button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group">
+            <div className="flex items-center gap-4 mb-4">
+              <Users className="h-8 w-8" />
+              <div>
+                <h4 className="font-bold text-lg">Mes Élèves</h4>
+                <p className="text-green-200 text-sm">Suivi détaillé</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Voir les détails</span>
+              <div className="bg-white/20 p-1 rounded-full group-hover:translate-x-1 transition-transform">
+                <Users className="h-4 w-4" />
+              </div>
+            </div>
+          </button>
         </div>
 
         {/* Barre de recherche */}

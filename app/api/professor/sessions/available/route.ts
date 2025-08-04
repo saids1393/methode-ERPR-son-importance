@@ -59,6 +59,15 @@ export async function GET(request: NextRequest) {
             gender: true,
           }
         },
+        _count: {
+          select: {
+            sessions: {
+              where: {
+                status: 'SCHEDULED'
+              }
+            }
+          }
+        }
       }
     });
 
@@ -68,15 +77,23 @@ export async function GET(request: NextRequest) {
     const endDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     for (const availability of availabilities) {
+      // Vérifier si le créneau n'est pas complet
+      if (availability._count.sessions >= availability.maxSessions) {
+        continue;
+      }
+
       if (availability.isRecurring) {
         // Créneaux récurrents
         for (let date = new Date(today); date <= endDate; date.setDate(date.getDate() + 1)) {
           if (date.getDay() === availability.dayOfWeek && date > today) {
-            // Vérifier qu'il n'y a pas déjà une séance réservée à cette date/heure exacte
+            // Vérifier qu'il n'y a pas déjà une séance réservée à cette date/heure
             const existingSession = await prisma.session.findFirst({
               where: {
                 professorId: availability.professorId,
-                scheduledAt: new Date(date.toDateString() + ' ' + availability.startTime),
+                scheduledAt: {
+                  gte: new Date(date.toDateString() + ' ' + availability.startTime),
+                  lt: new Date(date.toDateString() + ' ' + availability.endTime)
+                },
                 status: 'SCHEDULED'
               }
             });
@@ -102,7 +119,10 @@ export async function GET(request: NextRequest) {
           const existingSession = await prisma.session.findFirst({
             where: {
               professorId: availability.professorId,
-              scheduledAt: new Date(specificDate.toDateString() + ' ' + availability.startTime),
+              scheduledAt: {
+                gte: new Date(specificDate.toDateString() + ' ' + availability.startTime),
+                lt: new Date(specificDate.toDateString() + ' ' + availability.endTime)
+              },
               status: 'SCHEDULED'
             }
           });
