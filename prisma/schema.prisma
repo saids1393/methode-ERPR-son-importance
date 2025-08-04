@@ -32,8 +32,53 @@ model User {
   studyTimeSeconds Int      @default(0)
   resetToken       String?
   resetTokenExpires DateTime?
+  professorId      String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  // Relations
+  professor        Professor? @relation(fields: [professorId], references: [id])
+  sessions         Session[]
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model Professor {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  password      String?
+  gender        Gender
+  zoomMeetingId String?
+  zoomPassword  String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  students      User[]
+  sessions      Session[]
+}
+
+model Session {
+  id          String        @id @default(cuid())
+  userId      String
+  professorId String
+  scheduledAt DateTime
+  status      SessionStatus @default(SCHEDULED)
+  zoomLink    String?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  professor   Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
 }
 
 model ChapterVideo {

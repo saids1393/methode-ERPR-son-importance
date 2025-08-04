@@ -19,7 +19,8 @@ import {
   Settings,
   ChevronDown,
   Edit3,
-  BarChart3
+  BarChart3,
+  Users
 } from 'lucide-react';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
@@ -546,23 +547,19 @@ export default function DashboardPage() {
               </div>
               
               <h3 className="text-2xl font-bold text-white mb-4">
-                Continuer le cours
+                Accompagnement individuel
               </h3>
               
               <p className="text-slate-300 mb-8 leading-relaxed">
-                Reprenez là où vous vous êtes arrêté{user?.gender === 'FEMME' ? 'e' : ''} dans votre apprentissage. 
-                Votre progression est automatiquement sauvegardée.
+                Réservez des séances personnalisées avec votre professeur{user?.gender === 'FEMME' ? 'e' : ''}. 
+                Débloquez des créneaux en progressant dans le cours.
               </p>
               
               <Link
-                href="/chapitres/0/introduction"
-                onClick={() => {
-                  console.log('🎯 Clic sur "Accéder au cours"');
-                  localStorage.setItem('courseStarted', 'true');
-                }}
+                href="/accompagnement"
                 className="group inline-flex items-center space-x-3 bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 border border-white/20 hover:border-white/30"
               >
-                <span>Accéder au cours</span>
+                <span>Voir mes accompagnements</span>
                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
