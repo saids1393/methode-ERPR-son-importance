@@ -1,7 +1,12 @@
+"use client";
+
 // components/chapitres/chapitre10/Page26.tsx
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page26 = () => {
+  const { playWord } = useAudio();
+
   const introWords = [
     { word: 'دَرَّسَ', description: 'mot de 3 lettres' },
     { word: 'مُسَمَّىٰ', description: 'mot de 4 lettres' }
@@ -41,6 +46,10 @@ const Page26 = () => {
 
   const verse = 'إِنَّ اللَّهَ غَفُورٌ رَحِيمٌ';
 
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
+
   return (
     <div 
       className="font-arabic min-h-screen"
@@ -65,6 +74,7 @@ const Page26 = () => {
                   <WordCard 
                     key={index} 
                     word={word}
+                    onClick={() => handleWordClick(word)}
                   />
                 ))}
               </div>
@@ -72,7 +82,10 @@ const Page26 = () => {
             
             {/* Verse Section */}
             <div className="mb-8">
-              <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-xl p-8 text-center">
+              <div 
+                className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-xl p-8 text-center cursor-pointer hover:bg-blue-900/30 transition-colors"
+                onClick={() => handleWordClick(verse)}
+              >
                 <div className="text-blue-400 text-3xl md:text-4xl font-bold leading-relaxed">
                   {verse}
                 </div>
@@ -93,15 +106,18 @@ const Page26 = () => {
 };
 
 // WordCard Component simplifié sans couleurs
-const WordCard = ({ word }: { 
+const WordCard = ({ word, onClick }: { 
   word: string;
+  onClick?: () => void;
 }) => {
   return (
     <div className="
-      bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center 
+      bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center cursor-pointer
       hover:bg-zinc-700 transition-all duration-300 group 
       min-h-[90px] flex items-center justify-center
-    ">
+    "
+    onClick={onClick}
+    >
       <div className="text-xl md:text-2xl font-bold text-white leading-relaxed group-hover:scale-105 transition-transform duration-300">
         {word}
       </div>

@@ -1,8 +1,13 @@
+"use client";
+
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const noConnect = ['ا', 'د', 'ذ', 'ر', 'ز', 'و'];
 
 const Page19 = () => {
+  const { playWord } = useAudio();
+
   // Toutes les combinaisons déjà fusionnées (base + prolongation)
   const words = [
     'بَـا', 'بُـو', 'بِـي',
@@ -25,6 +30,10 @@ const Page19 = () => {
     'غَـا', 'غُـو', 'غِـي',
   ];
 
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
+
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
@@ -40,7 +49,7 @@ const Page19 = () => {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
               {words.map((word, index) => (
-                <ProlongationCard key={index} word={word} />
+                <ProlongationCard key={index} word={word} onClick={() => handleWordClick(word)} />
               ))}
             </div>
           </div>
@@ -57,7 +66,7 @@ const Page19 = () => {
 };
 
 // Composant carte affichant un mot arabe
-const ProlongationCard = ({ word }: { word: string }) => {
+const ProlongationCard = ({ word, onClick }: { word: string; onClick?: () => void }) => {
   // Extraire les caractères arabes sans les diacritiques (juste pour détecter la base et la prolongation)
   const arabicLetters = [...word.replace(/[^\u0600-\u06FF]/g, '')];
 
@@ -71,7 +80,10 @@ const ProlongationCard = ({ word }: { word: string }) => {
   const displayWord = isNoConnect ? word.replace(/ـ/g, '') : word;
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center">
+    <div 
+      className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer"
+      onClick={onClick}
+    >
       <div
         className="text-2xl md:text-3xl font-bold leading-relaxed text-white group-hover:scale-105 transition-transform duration-300 break-keep"
         dir="rtl"

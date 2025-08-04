@@ -14,7 +14,7 @@ const Page0 = () => {
     'ج': { mot: 'Jean', emoji: '👖' },
     'ح': { mot: 'Le prénom Mohammad ou le début de la sourate al fatiha Al Hamdou' },
     'خ': { mot: 'Rateau', emoji: '🧹' },
-    'د': { mot: 'Dalmatien', emoji: '🐶' },
+    'د': { mot: 'Dell', emoji: '💻' },
     'ذ': { mot: 'That (pronom démonstratif: ce/cette/cela)' },
     'ر': { mot: 'Escobar (R roulé en Espagnol)' },
     'ز': { mot: 'Zara', emoji: '👗' },
@@ -75,7 +75,7 @@ const Page0 = () => {
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
 
   const handleLetterClick = (letter: string) => {
-       playLetter(letter);
+    playLetter(letter);
   };
   return (
     <div className="font-arabic min-h-screen bg-zinc-900 text-white p-6 space-y-6">

@@ -49,7 +49,7 @@ const Page3 = () => {
 
   const handleLetterClick = (letter: string) => {
     const cleanLetter = letter.replace(/[ـَُِ]/g, '');
-      playLetter(letter);
+    playLetter(cleanLetter);
   };
   return (
     <div 

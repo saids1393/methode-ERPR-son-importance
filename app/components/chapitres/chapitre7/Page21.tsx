@@ -1,7 +1,12 @@
+"use client";
+
 // components/chapitres/chapitre7/Page21.tsx
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page21 = () => {
+  const { playWord } = useAudio();
+
   const words = [
     'بَيْتٌ', 'قَوْمٌ', 
     'نَوْمٌ', 
@@ -12,6 +17,10 @@ const Page21 = () => {
     'زَيْتٌ', 'طَيْرٌ',
     'بَيْتٌ', 'سَوْفٌ'
   ];
+
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
 
   return (
     <div 
@@ -36,6 +45,7 @@ const Page21 = () => {
                   key={index} 
                   word={word}
                   index={index}
+                  onClick={() => handleWordClick(word)}
                 />
               ))}
             </div>
@@ -53,12 +63,16 @@ const Page21 = () => {
 };
 
 // VariousWordCard Component mis à jour au style de DiphthongCard
-const VariousWordCard = ({ word, index }: { 
+const VariousWordCard = ({ word, index, onClick }: { 
   word: string;
   index: number;
+  onClick?: () => void;
 }) => {
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center">
+    <div 
+      className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer"
+      onClick={onClick}
+    >
       <div className="text-2xl md:text-3xl font-bold leading-relaxed group-hover:scale-105 transition-transform duration-300 text-white">
         {word}
       </div>

@@ -1,7 +1,12 @@
+"use client";
+
 // components/chapitres/chapitre8/Page23.tsx
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page23 = () => {
+  const { playWord } = useAudio();
+
   const quranicItems = [
     // Mots simples
     'قُلْ', 'كَلْبٌ', 'يَوْمٍ', 'حَسْبُ', 'رَبْعُ', 'مَسْجِدٌ',
@@ -15,6 +20,10 @@ const Page23 = () => {
     { text: 'وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ', color: 'text-blue-400' },
     { text: 'لَكُمْ دِينُكُمْ وَلِيَ دِينِ', color: 'text-violet-400' }
   ];
+
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -43,6 +52,7 @@ const Page23 = () => {
                       word={isVerse ? item.text : item}
                       color={isVerse ? item.color : undefined}
                       index={index}
+                      onClick={() => handleWordClick(isVerse ? item.text : item)}
                     />
                   </div>
                 );
@@ -66,13 +76,18 @@ const QuranicWordCard = ({
   word,
   index,
   color,
+  onClick,
 }: {
   word: string;
   index: number;
   color?: string;
+  onClick?: () => void;
 }) => {
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center">
+    <div 
+      className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer"
+      onClick={onClick}
+    >
       <div
         className={`text-xl md:text-2xl font-bold leading-relaxed group-hover:scale-105 transition-transform duration-300 ${
           color ?? 'text-white'

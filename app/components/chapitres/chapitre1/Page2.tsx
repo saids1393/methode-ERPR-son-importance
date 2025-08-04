@@ -53,7 +53,7 @@ const Page2 = () => {
   const handleLetterClick = (letter: string) => {
     // Nettoyer la lettre pour le nom de fichier (enlever les diacritiques et attachements)
     const cleanLetter = letter.replace(/[ـَُِ]/g, '');
-      playLetter(letter);
+    playLetter(cleanLetter);
   };
   return (
     <div 

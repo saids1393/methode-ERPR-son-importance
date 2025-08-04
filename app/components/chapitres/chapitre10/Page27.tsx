@@ -1,7 +1,12 @@
+"use client";
+
 // components/chapitres/chapitre10/Page27.tsx
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page27 = () => {
+  const { playWord } = useAudio();
+
   const introWords = [
     { word: 'أَبَّ', description: 'Mot de 3 lettres avec soukoun + shadda' },
     { word: 'أَبَّى', description: 'Mot de 4 lettres' }
@@ -30,6 +35,10 @@ const Page27 = () => {
   const allWords = mixedWords.flat();
   const verse = 'تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ';
 
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
+
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
@@ -48,14 +57,17 @@ const Page27 = () => {
             <div className="mb-8">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {allWords.map((word, index) => (
-                  <WordCard key={index} word={word} />
+                  <WordCard key={index} word={word} onClick={() => handleWordClick(word)} />
                 ))}
               </div>
             </div>
 
             {/* Section de la verset */}
             <div className="mb-8">
-              <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-xl p-8 text-center">
+              <div 
+                className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-xl p-8 text-center cursor-pointer hover:bg-blue-900/30 transition-colors"
+                onClick={() => handleWordClick(verse)}
+              >
                 <div className="text-blue-400 text-3xl md:text-4xl font-bold leading-relaxed">
                   {verse}
                 </div>
@@ -76,14 +88,15 @@ const Page27 = () => {
 };
 
 // Composant WordCard simplifié
-const WordCard = ({ word }: { word: string }) => {
+const WordCard = ({ word, onClick }: { word: string; onClick?: () => void }) => {
   return (
     <div
       className="
-        bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center 
+        bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center cursor-pointer
         hover:bg-zinc-700 transition-all duration-300 group 
         min-h-[90px] flex items-center justify-center
       "
+      onClick={onClick}
     >
       <div className="text-xl md:text-2xl font-bold text-white leading-relaxed group-hover:scale-105 transition-transform duration-300">
         {word}

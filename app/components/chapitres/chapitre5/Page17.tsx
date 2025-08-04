@@ -1,6 +1,11 @@
+"use client";
+
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page17 = () => {
+  const { playWord } = useAudio();
+
   const words = [
     'وَرَقٌ',
     'قَلَمٌ',
@@ -22,6 +27,10 @@ const Page17 = () => {
     
   ];
 
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
+
   return (
     <div className="min-h-screen bg-zinc-900 text-white font-serif font-amiri" dir="rtl">
       <div className="bg-arabic-gradient text-white p-6 text-center">
@@ -33,7 +42,7 @@ const Page17 = () => {
       {/* Main grid */}
       <main className="max-w-6xl mx-auto p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {words.map((word, index) => (
-          <WordCard key={index} word={word} />
+          <WordCard key={index} word={word} onClick={() => handleWordClick(word)} />
         ))}
       </main>
 
@@ -46,9 +55,12 @@ const Page17 = () => {
   );
 };
 
-const WordCard = ({ word }: { word: string }) => {
+const WordCard = ({ word, onClick }: { word: string; onClick?: () => void }) => {
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 min-h-[100px] flex items-center justify-center cursor-default select-none hover:bg-zinc-700 transition-colors duration-300">
+    <div 
+      className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 min-h-[100px] flex items-center justify-center cursor-pointer select-none hover:bg-zinc-700 transition-colors duration-300"
+      onClick={onClick}
+    >
       <div className="text-2xl font-bold leading-relaxed text-white">
         {word}
       </div>

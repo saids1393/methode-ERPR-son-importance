@@ -44,7 +44,7 @@ const Page1 = () => {
   const specialStartIndex = allLetters.length - 2;
 
   const handleLetterClick = (letter: string) => {
-      playLetter(letter);
+    playLetter(letter);
   };
   return (
     <div 

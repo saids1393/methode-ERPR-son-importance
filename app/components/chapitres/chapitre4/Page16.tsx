@@ -1,7 +1,12 @@
+"use client";
+
 // components/chapitres/chapitre4/Page16.tsx
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page16 = () => {
+  const { playWord } = useAudio();
+
   const disconnectedLetters = [
     { letter: 'ا', example: 'قَالَ', meaning: 'il a dit' },
     { letter: 'د', example: 'عُدْنَ', meaning: 'revenez !' },
@@ -10,6 +15,10 @@ const Page16 = () => {
     { letter: 'ز', example: 'تَزَكَّىٰ', meaning: 'il s’est purifié' },
     { letter: 'و', example: 'خَوْفٌ', meaning: 'peur' }
   ];
+
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -32,6 +41,7 @@ const Page16 = () => {
                   letter={item.letter}
                   example={item.example}
                   meaning={item.meaning}
+                  onWordClick={handleWordClick}
                 />
               ))}
             </div>
@@ -63,10 +73,11 @@ const Page16 = () => {
 };
 
 // DisconnectedLetterCard Component
-const DisconnectedLetterCard = ({ letter, example, meaning }: {
+const DisconnectedLetterCard = ({ letter, example, meaning, onWordClick }: {
   letter: string;
   example: string;
   meaning: string;
+  onWordClick?: (word: string) => void;
 }) => (
   <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 text-center hover:bg-zinc-700 transition-all duration-300 group">
     {/* Lettre */}
@@ -78,7 +89,10 @@ const DisconnectedLetterCard = ({ letter, example, meaning }: {
     <div className="w-full h-px bg-zinc-600 mb-4"></div>
 
     {/* Exemple : mot entier surligné */}
-    <div className="text-3xl md:text-4xl font-bold text-white mb-3 leading-relaxed">
+    <div 
+      className="text-3xl md:text-4xl font-bold text-white mb-3 leading-relaxed cursor-pointer hover:text-blue-300 transition-colors"
+      onClick={() => onWordClick?.(example)}
+    >
       {example}
     </div>
 

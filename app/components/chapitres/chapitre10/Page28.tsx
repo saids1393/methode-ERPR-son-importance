@@ -1,6 +1,11 @@
+"use client";
+
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page28 = () => {
+  const { playWord } = useAudio();
+
 const quranicWords = [
     // Sourate Al-Fatiha (existant)
     ['بِسْمِ', 'ٱللَّهِ', 'ٱلرَّحْمَٰنِ', 'ٱلرَّحِيمِ', 'ٱلْحَمْدُ', 'لِلَّهِ'],
@@ -41,6 +46,10 @@ const quranicWords = [
     { text: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', color: 'violet' }     // verset 1 :contentReference[oaicite:1]{index=1}     // verset 6 :contentReference[oaicite:3]{index=3}
   ];
 
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
+
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
@@ -55,7 +64,7 @@ const quranicWords = [
           <div className="max-w-6xl mx-auto mb-8">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
               {allWords.map((word, idx) => (
-                <WordCard key={idx} word={word} />
+                <WordCard key={idx} word={word} onClick={() => handleWordClick(word)} />
               ))}
             </div>
           </div>
@@ -63,7 +72,7 @@ const quranicWords = [
           <div className="max-w-3xl mx-auto mb-8">
             <div className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-xl p-8 text-center">
               {verseSegments.map((seg, i) => (
-                <div key={i} className="mb-4">
+                <div key={i} className="mb-4 cursor-pointer" onClick={() => handleWordClick(seg.text)}>
                   <span
                     className={`
                       text-3xl md:text-4xl font-bold
@@ -93,8 +102,11 @@ const quranicWords = [
   );
 };
 
-const WordCard = ({ word }: { word: string }) => (
-  <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 min-h-[90px] flex items-center justify-center hover:bg-zinc-700 transition-all duration-300">
+const WordCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
+  <div 
+    className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 min-h-[90px] flex items-center justify-center hover:bg-zinc-700 transition-all duration-300 cursor-pointer"
+    onClick={onClick}
+  >
     <div className="text-2xl md:text-3xl font-extrabold text-white leading-snug">
       {word}
     </div>

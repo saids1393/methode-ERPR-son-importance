@@ -1,7 +1,12 @@
+"use client";
+
 // components/chapitres/chapitre2/Page8.tsx
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page8 = () => {
+  const { playLetter } = useAudio();
+
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
   
   const letterGroups = [
@@ -39,6 +44,10 @@ const Page8 = () => {
 
   const vowelNames = ['Fathah ( son : a )', 'Dammah ( son : ou )', 'Kassrah ( son : i )'];
 
+  const handleLetterClick = (vowelLetter: string) => {
+    playLetter(vowelLetter);
+  };
+
   return (
     <div 
       className="font-arabic min-h-screen"
@@ -62,6 +71,7 @@ const Page8 = () => {
                 vowels={group.vowels}
                 vowelNames={vowelNames}
                 emphatic={emphaticLetters.includes(group.letter)}
+                onLetterClick={handleLetterClick}
               />
             ))}
           </div>
@@ -78,11 +88,12 @@ const Page8 = () => {
 };
 
 // LetterGroup Component
-const LetterGroup = ({ letter, vowels, vowelNames, emphatic }: { 
+const LetterGroup = ({ letter, vowels, vowelNames, emphatic, onLetterClick }: { 
   letter: string; 
   vowels: string[];
   vowelNames: string[];
   emphatic?: boolean;
+  onLetterClick?: (vowelLetter: string) => void;
 }) => (
   <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4">
     <div className="text-center font-bold text-3xl text-white mb-4">
@@ -90,7 +101,11 @@ const LetterGroup = ({ letter, vowels, vowelNames, emphatic }: {
     </div>
     <div className="grid grid-cols-3 gap-3">
       {vowels.map((vowelLetter, index) => (
-        <div key={index} className="bg-zinc-700 border border-zinc-600 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300">
+        <div 
+          key={index} 
+          className="bg-zinc-700 border border-zinc-600 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 cursor-pointer"
+          onClick={() => onLetterClick?.(vowelLetter)}
+        >
           <div className={`text-2xl md:text-3xl font-bold mb-2 ${
             emphatic ? 'text-red-400' : 'text-white'
           }`}>

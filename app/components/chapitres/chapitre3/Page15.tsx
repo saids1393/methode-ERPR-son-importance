@@ -1,7 +1,12 @@
+"use client";
+
 // components/chapitres/chapitre3/Page15.tsx
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page15 = () => {
+  const { playLetter } = useAudio();
+
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
   const nonConnectingLetters = ['ا', 'د', 'ذ', 'ر', 'ز', 'و']; // Lettres qui ne se connectent pas après elles
   
@@ -38,6 +43,10 @@ const Page15 = () => {
 
   const vowelNames = ['Fathatane ( son : ane )', 'Dammatane ( son : oune)', 'Kassratane ( son : in)'];
 
+  const handleLetterClick = (vowelLetter: string) => {
+    playLetter(vowelLetter);
+  };
+
   return (
     <div 
       className="font-arabic min-h-screen"
@@ -62,6 +71,7 @@ const Page15 = () => {
                 vowelNames={vowelNames}
                 emphatic={emphaticLetters.includes(group.letter)}
                 nonConnecting={nonConnectingLetters.includes(group.letter)}
+                onLetterClick={handleLetterClick}
               />
             ))}
 
@@ -82,11 +92,13 @@ const LetterGroup = ({
   vowelNames,
   emphatic,
   nonConnecting,
+  onLetterClick,
 }: {
   vowels: string[];
   vowelNames: string[];
   emphatic?: boolean;
   nonConnecting?: boolean;
+  onLetterClick?: (vowelLetter: string) => void;
 }) => {
   // Extraire la forme initiale sans voyelle
   const baseForm = vowels[0].replace(/[َُِ]/g, '');
@@ -100,7 +112,8 @@ const LetterGroup = ({
         {vowels.map((vowelLetter, index) => (
           <div
             key={index}
-            className="bg-zinc-700 border border-zinc-600 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 relative"
+            className="bg-zinc-700 border border-zinc-600 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 relative cursor-pointer"
+            onClick={() => onLetterClick?.(vowelLetter)}
           >
             <div
               className={`text-2xl md:text-3xl font-bold mb-2 ${

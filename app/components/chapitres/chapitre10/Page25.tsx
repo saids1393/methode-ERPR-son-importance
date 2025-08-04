@@ -1,7 +1,12 @@
+"use client";
+
 // components/chapitres/chapitre10/Page25.tsx
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page25 = () => {
+  const { playWord } = useAudio();
+
   const shaddaWords = [
     // Rangée 1
     ['مَدَّ', 'حَقَّ', 'فُرَّ', 'وَدَّ', 'رُدَّ', 'عَضَّ'],
@@ -25,6 +30,10 @@ const Page25 = () => {
 
   // Aplatir toutes les rangées en un seul tableau
   const allWords = shaddaWords.flat();
+
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
 
   return (
     <div 
@@ -50,6 +59,7 @@ const Page25 = () => {
                   key={index} 
                   word={word}
                   index={index}
+                  onClick={() => handleWordClick(word)}
                 />
               ))}
             </div>
@@ -70,16 +80,19 @@ const Page25 = () => {
 };
 
 // ShaddaWordCard Component pour chaque mot avec shadda
-const ShaddaWordCard = ({ word, index }: { 
+const ShaddaWordCard = ({ word, index, onClick }: { 
   word: string;
   index: number;
+  onClick?: () => void;
 }) => {
   return (
     <div className="
-      bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center 
+      bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center cursor-pointer
       hover:bg-zinc-700 transition-all duration-300 group 
       min-h-[90px] flex items-center justify-center
-    ">
+    "
+    onClick={onClick}
+    >
       <div className="text-2xl md:text-3xl font-bold text-white leading-relaxed group-hover:scale-105 transition-transform duration-300">
         {word}
       </div>

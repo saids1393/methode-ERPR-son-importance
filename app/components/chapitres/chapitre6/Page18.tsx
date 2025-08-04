@@ -1,7 +1,12 @@
 // components/chapitres/chapitre6/Page18.tsx
+"use client";
+
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page18 = () => {
+  const { playLetter } = useAudio();
+
   const letterData = [
     { letter: 'بَ', specialSign: 'ٰ', signType: 'alif', position: 'top', letterStyle: '' },
     { letter: 'جِ', specialSign: 'ۦ', signType: 'ya', position: 'bottom', letterStyle: 'relative top-[-8px] right-[-5px]' },
@@ -46,6 +51,11 @@ const Page18 = () => {
     { letter: 'زُ', specialSign: 'ۥ', signType: 'waw', position: 'bottom', letterStyle: '' }
   ];
 
+  const handleLetterClick = (letter: string) => {
+    const cleanLetter = letter.replace(/[َُِ]/g, '');
+    playLetter(cleanLetter);
+  };
+
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
@@ -66,6 +76,7 @@ const Page18 = () => {
                   signType={item.signType}
                   position={item.position}
                   letterStyle={item.letterStyle}
+                  onClick={() => handleLetterClick(item.letter)}
                 />
               ))}
             </div>
@@ -89,12 +100,14 @@ const SpecialLetterCard = ({
   signType,
   position,
   letterStyle,
+  onClick,
 }: {
   letter: string;
   specialSign: string;
   signType: string;
   position: string;
   letterStyle?: string;
+  onClick?: () => void;
 }) => {
   const getSignColor = (type: string) => {
     switch (type) {
@@ -135,7 +148,10 @@ const SpecialLetterCard = ({
   };
 
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[110px] flex items-center justify-center relative">
+    <div 
+      className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[110px] flex items-center justify-center relative cursor-pointer"
+      onClick={onClick}
+    >
       <div className="relative">
         {/* Lettre principale */}
         <div

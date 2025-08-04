@@ -1,6 +1,12 @@
-import React from 'react';
+"use client";
+
+import React, { use } from 'react';
+
+import { useAudio } from '@/hooks/useAudio';
 
 const Page6 = () => {
+  const { playWord } = useAudio();
+
   const words = [
     'في', 'من', 'ق', 'قد', 'ل', 'هو',
     'ما', 'أن', 'لم', 'كل', 'ثم', 'هل',
@@ -18,6 +24,10 @@ const Page6 = () => {
     return word;
   };
 
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
+
   return (
     <div
       className="font-arabic min-h-screen"
@@ -33,7 +43,7 @@ const Page6 = () => {
         <div className="p-8 bg-zinc-900">
           <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6">
             {words.map((word, index) => (
-              <WordCell key={index} word={word} renderWordWithColors={renderWordWithColors} />
+              <WordCell key={index} word={word} renderWordWithColors={renderWordWithColors} onClick={() => handleWordClick(word)} />
             ))}
           </div>
         </div>
@@ -52,12 +62,14 @@ const Page6 = () => {
 const WordCell = ({
   word,
   renderWordWithColors,
+  onClick,
 }: {
   word: string;
   renderWordWithColors: (word: string) => React.ReactNode;
+  onClick?: () => void;
 }) => {
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[80px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer">
+    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[80px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer" onClick={onClick}>
       <div className="text-3xl md:text-4xl font-bold text-white">
         {renderWordWithColors(word)}
       </div>

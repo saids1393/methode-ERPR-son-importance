@@ -1,6 +1,11 @@
+"use client";
+
 import React from 'react';
+import { useAudio } from '@/hooks/useAudio';
 
 const Page20 = () => {
+  const { playWord } = useAudio();
+
   // Prépare les mots complets
   const words = [
     'بَوْ', 'بَيْ',
@@ -23,6 +28,10 @@ const Page20 = () => {
     'غَوْ', 'غَيْ',
   ];
 
+  const handleWordClick = (word: string) => {
+    playWord(word);
+  };
+
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
       <div className="w-full h-full bg-zinc-900 overflow-hidden">
@@ -37,7 +46,7 @@ const Page20 = () => {
         <div className="p-8 bg-zinc-900">
           <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
             {words.map((word, index) => (
-              <DiphthongCard key={index} word={word} />
+              <DiphthongCard key={index} word={word} onClick={() => handleWordClick(word)} />
             ))}
           </div>
         </div>
@@ -53,8 +62,11 @@ const Page20 = () => {
 };
 
 // Carte pour chaque mot doux (lettre + fatha + lettre douce)
-const DiphthongCard = ({ word }: { word: string }) => (
-  <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center">
+const DiphthongCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
+  <div 
+    className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer"
+    onClick={onClick}
+  >
     <div
       className="text-2xl md:text-3xl font-bold leading-relaxed text-white group-hover:scale-105 transition-transform duration-300 break-keep"
       dir="rtl"
