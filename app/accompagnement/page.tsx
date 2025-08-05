@@ -100,6 +100,7 @@ export default function AccompagnementPage() {
       const response = await fetch('/api/sessions');
       if (response.ok) {
         const sessionData = await response.json();
+        console.log('📊 Données de session reçues:', sessionData);
         setData(sessionData);
       } else if (response.status === 401) {
         router.push('/login');
@@ -276,6 +277,8 @@ export default function AccompagnementPage() {
 
   // Variables calculées après vérification de data
   const unlockedSessions = data.progress?.unlockedSessions ?? 0;
+  console.log('🔓 Séances débloquées calculées:', unlockedSessions);
+  console.log('📈 Progression complète:', data.progress);
   const canBookMore = data.progress?.unlockedSessions !== undefined
     ? data.bookedSessionsCount < data.progress.unlockedSessions
     : false;

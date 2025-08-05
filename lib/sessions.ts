@@ -37,8 +37,12 @@ export interface StudentProgress {
 
 // Calculer les séances débloquées selon la progression
 export function calculateUnlockedSessions(completedPages: number[]): StudentProgress {
-  const filteredPages = completedPages.filter(p => p !== 0 && p !== 30);
+  // Filtrer les pages valides (exclure page 0 et 30)
+  const filteredPages = completedPages.filter(p => p > 0 && p < 30);
   const maxPage = Math.max(...filteredPages, 0);
+  
+  console.log('📚 Pages complétées filtrées:', filteredPages);
+  console.log('📈 Page maximale atteinte:', maxPage);
   
   let unlockedSessions = 0;
   let nextUnlockPage: number | undefined;
@@ -46,15 +50,20 @@ export function calculateUnlockedSessions(completedPages: number[]): StudentProg
   // Règles de déblocage
   if (maxPage >= 7) {
     unlockedSessions = 1;
+    console.log('✅ 1ère séance débloquée (page 7 atteinte)');
     if (maxPage < 17) nextUnlockPage = 17;
   }
   if (maxPage >= 17) {
     unlockedSessions = 2;
+    console.log('✅ 2ème séance débloquée (page 17 atteinte)');
     if (maxPage < 27) nextUnlockPage = 27;
   }
   if (maxPage >= 27) {
     unlockedSessions = 3;
+    console.log('✅ 3ème séance débloquée (page 27 atteinte)');
   }
+
+  console.log('🎯 Résultat final - Séances débloquées:', unlockedSessions);
 
   return {
     completedPages: filteredPages,
