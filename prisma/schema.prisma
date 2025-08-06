@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,55 +7,55 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Gender {
-  HOMME
-  FEMME
-}
-
 model User {
-  id               String   @id @default(cuid())
-  email            String   @unique
-  username         String?  @unique
-  password         String?
-  gender           Gender?
-  isActive         Boolean  @default(false)
-  stripeCustomerId String?
-  stripeSessionId  String?
-  completedPages   Int[]    @default([])
-  completedQuizzes Int[]    @default([])
-  studyTimeSeconds Int      @default(0)
-  resetToken       String?
+  id                String     @id @default(cuid())
+  email             String     @unique
+  username          String?    @unique
+  password          String?
+  isActive          Boolean    @default(false)
+  stripeCustomerId  String?
+  stripeSessionId   String?
+  completedPages    Int[]      @default([])
+  completedQuizzes  Int[]      @default([])
+  studyTimeSeconds  Int        @default(0)
+  resetToken        String?
   resetTokenExpires DateTime?
-  professorId      String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  // Relations
-  professor        Professor? @relation(fields: [professorId], references: [id])
-  sessions         Session[]
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  gender            Gender?
+  professorId       String?
+  sessions          Session[]
+  professor         Professor? @relation(fields: [professorId], references: [id])
 }
 
-enum SessionStatus {
-  SCHEDULED
-  COMPLETED
-  CANCELLED
-  NO_SHOW
+model Professor {
+  id             String         @id @default(cuid())
+  email          String         @unique
+  name           String
+  gender         Gender
+  zoomMeetingId  String?
+  zoomPassword   String?
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  password       String?
+  availabilities Availability[]
+  sessions       Session[]
+  students       User[]
 }
 
 model Availability {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   professorId  String
-  dayOfWeek    Int      // 0=Dimanche, 1=Lundi, ..., 6=Samedi
-  startTime    String   // Format "HH:MM"
-  endTime      String   // Format "HH:MM"
-  isRecurring  Boolean  @default(true) // Récurrent chaque semaine
-  specificDate DateTime? // Pour des créneaux ponctuels
-  maxSessions  Int      @default(1) // Nombre max de séances sur ce créneau
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relations
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  isRecurring  Boolean   @default(true)
+  specificDate DateTime?
+  maxSessions  Int       @default(1)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   professor    Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
   sessions     Session[]
 
@@ -69,70 +63,46 @@ model Availability {
   @@index([dayOfWeek])
 }
 
-model CancellationReason {
-  id          String   @id @default(cuid())
-  reason      String
-  category    String   // 'STUDENT', 'PROFESSOR', 'SYSTEM'
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+model Session {
+  id             String               @id @default(cuid())
+  userId         String
+  professorId    String
+  scheduledAt    DateTime
+  status         SessionStatus        @default(SCHEDULED)
+  zoomLink       String?
+  notes          String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  availabilityId String?
+  cancellationId String?
+  availability   Availability?        @relation(fields: [availabilityId], references: [id])
+  professor      Professor            @relation(fields: [professorId], references: [id], onDelete: Cascade)
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cancellation   SessionCancellation?
 
-  // Relations
+  @@index([availabilityId])
+}
+
+model CancellationReason {
+  id            String                @id @default(cuid())
+  reason        String
+  category      String
+  isActive      Boolean               @default(true)
+  createdAt     DateTime              @default(now())
   cancellations SessionCancellation[]
 }
 
 model SessionCancellation {
-  id           String   @id @default(cuid())
-  sessionId    String   @unique
-  cancelledBy  String   // 'STUDENT' ou 'PROFESSOR'
+  id           String             @id @default(cuid())
+  sessionId    String             @unique
+  cancelledBy  String
   reasonId     String
-  customReason String?  // Motif personnalisé si nécessaire
-  cancelledAt  DateTime @default(now())
-
-  // Relations
-  session      Session           @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  reason       CancellationReason @relation(fields: [reasonId], references: [id], onDelete: Restrict)
+  customReason String?
+  cancelledAt  DateTime           @default(now())
+  reason       CancellationReason @relation(fields: [reasonId], references: [id])
+  session      Session            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
-}
-
-model Professor {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String
-  password      String?
-  gender        Gender
-  zoomMeetingId String?
-  zoomPassword  String?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  students      User[]
-  sessions      Session[]
-  availabilities Availability[]
-}
-
-model Session {
-  id          String        @id @default(cuid())
-  userId      String
-  professorId String
-  availabilityId String?
-  scheduledAt DateTime
-  status      SessionStatus @default(SCHEDULED)
-  zoomLink    String?
-  notes       String?
-  cancellationId String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  // Relations
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  professor   Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
-  availability Availability? @relation(fields: [availabilityId], references: [id], onDelete: SetNull)
-  cancellation SessionCancellation?
-
-  @@index([availabilityId])
 }
 
 model ChapterVideo {
@@ -141,8 +111,20 @@ model ChapterVideo {
   title             String
   cloudflareVideoId String   @unique
   thumbnailUrl      String?
-  duration          Int?     // durée en secondes
+  duration          Int?
   isActive          Boolean  @default(true)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+}
+
+enum Gender {
+  HOMME
+  FEMME
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }

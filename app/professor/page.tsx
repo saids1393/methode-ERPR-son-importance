@@ -558,7 +558,10 @@ export default function ProfessorPage() {
             </div>
           </Link>
 
-          <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group">
+          <Link
+            href="/professor/planning"
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group block"
+          >
             <div className="flex items-center gap-4 mb-4">
               <Calendar className="h-8 w-8" />
               <div>
@@ -572,7 +575,7 @@ export default function ProfessorPage() {
                 <Calendar className="h-4 w-4" />
               </div>
             </div>
-          </button>
+          </Link>
 
           <button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group">
             <div className="flex items-center gap-4 mb-4">

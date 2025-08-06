@@ -181,15 +181,13 @@ export default function AccompagnementPage() {
   const handleCancelSession = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!sessionToCancel || !selectedReason) {
-      toast.error('Veuillez sélectionner un motif');
+    if (!sessionToCancel || !customReason.trim()) {
+      toast.error('Veuillez saisir un motif d\'annulation');
       return;
     }
 
-    // Vérifier si un motif personnalisé est requis
-    const reason = cancellationReasons.find(r => r.id === selectedReason);
-    if (reason?.reason.includes('Autre') && !customReason.trim()) {
-      toast.error('Veuillez préciser le motif');
+    if (customReason.trim().length < 10) {
+      toast.error('Le motif doit contenir au moins 10 caractères');
       return;
     }
 
@@ -201,8 +199,7 @@ export default function AccompagnementPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: sessionToCancel.id,
-          reasonId: selectedReason,
-          customReason: customReason.trim() || null,
+          customReason: customReason.trim(),
           cancelledBy: 'STUDENT'
         })
       });
@@ -213,7 +210,6 @@ export default function AccompagnementPage() {
         toast.success('Séance annulée avec succès');
         setShowCancelForm(false);
         setSessionToCancel(null);
-        setSelectedReason('');
         setCustomReason('');
         fetchSessions();
         fetchAvailableSlots();
@@ -654,37 +650,15 @@ export default function AccompagnementPage() {
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Motif d'annulation *
                   </label>
-                  <select
-                    value={selectedReason}
-                    onChange={(e) => setSelectedReason(e.target.value)}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                  <textarea
+                    value={customReason}
+                    onChange={(e) => setCustomReason(e.target.value)}
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    placeholder="Décrivez le motif de votre annulation..."
+                    rows={4}
                     required
-                  >
-                    <option value="">Sélectionnez un motif</option>
-                    {cancellationReasons.map((reason) => (
-                      <option key={reason.id} value={reason.id} className="bg-slate-800">
-                        {reason.reason}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
-                
-                {/* Champ personnalisé si "Autre" est sélectionné */}
-                {selectedReason && cancellationReasons.find(r => r.id === selectedReason)?.reason.includes('Autre') && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Précisez le motif *
-                    </label>
-                    <textarea
-                      value={customReason}
-                      onChange={(e) => setCustomReason(e.target.value)}
-                      className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                      placeholder="Décrivez brièvement le motif..."
-                      rows={3}
-                      required
-                    />
-                  </div>
-                )}
                 
                 <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
                   <div className="flex items-start gap-3">

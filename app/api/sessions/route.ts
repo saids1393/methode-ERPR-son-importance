@@ -151,6 +151,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('👤 Utilisateur connecté:', user.id);
+    console.log('📅 Réservation - slotId:', slotId, 'availabilityId:', availabilityId);
 
     // Récupérer les données complètes de l'utilisateur
     const userData = await prisma.user.findUnique({
@@ -161,23 +162,9 @@ export async function POST(request: NextRequest) {
         username: true,
         gender: true,
         completedPages: true,
-        completedQuizzes: true,
-        studyTimeSeconds: true,
         sessions: {
-          include: {
-            professor: {
-              select: {
-                name: true,
-                gender: true,
-              }
-            },
-            cancellation: {
-              include: {
-                reason: true
-              }
-            }
-          },
-          orderBy: { scheduledAt: 'desc' }
+          where: { status: { not: 'CANCELLED' } },
+          select: { id: true }
         }
       }
     });
@@ -186,6 +173,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Utilisateur non trouvé' },
         { status: 404 }
+      );
+    }
+
+    if (!userData.gender) {
+      return NextResponse.json(
+        { error: 'Genre non défini dans le profil' },
+        { status: 400 }
       );
     }
 
@@ -249,84 +243,128 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('📚 Pages complétées par l\'utilisateur:', userData.completedPages);
+    if (professor.gender !== userData.gender) {
+      return NextResponse.json(
+        { error: 'Genre du professeur incompatible' },
+        { status: 400 }
+      );
+    }
 
-    // Calculer la progression et les séances débloquées
-    const completedPages2 = userData.completedPages || [];
-    const filteredPages2 = completedPages2.filter(p => p > 0 && p < 30);
-    const maxPage2 = Math.max(...filteredPages2, 0);
+    // Extraire la date du slotId
+    const datePart = slotId.split('_')[1];
+    if (!datePart) {
+      return NextResponse.json(
+        { error: 'Format de créneau invalide' },
+        { status: 400 }
+      );
+    }
+
+    // Construire la date/heure complète
+    const scheduledAt = new Date(`${datePart}T${availability.startTime}:00`);
     
-    console.log('📊 Pages filtrées:', filteredPages2);
-    console.log('📈 Page maximale atteinte:', maxPage2);
+    console.log('📅 Date programmée calculée:', scheduledAt);
 
-    // Logique de déblocage des séances
-    let unlockedSessions = 0;
-    let nextUnlockPage: number | undefined;
+    // Vérifier que la date est dans le futur
+    if (scheduledAt <= new Date()) {
+      return NextResponse.json(
+        { error: 'Ce créneau n\'est plus disponible' },
+        { status: 400 }
+      );
+    }
 
-    // Règles de déblocage corrigées
-    if (maxPage2 >= 7) {
-      unlockedSessions = 1;
-      console.log('✅ 1ère séance débloquée (page 7 atteinte)');
-      if (maxPage2 < 17) {
-        nextUnlockPage = 17;
+    // Vérifier que le créneau n'est pas déjà réservé
+    const existingSession = await prisma.session.findFirst({
+      where: {
+        professorId: professor.id,
+        scheduledAt: scheduledAt,
+        status: 'SCHEDULED'
+      }
+    });
+
+    if (existingSession) {
+      return NextResponse.json(
+        { error: 'Ce créneau vient d\'être réservé par un autre élève' },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier l'espacement de 2 jours
+    const twoDaysAgo = new Date(scheduledAt.getTime() - 2 * 24 * 60 * 60 * 1000);
+    const twoDaysLater = new Date(scheduledAt.getTime() + 2 * 24 * 60 * 60 * 1000);
+
+    const conflictingSessions = await prisma.session.count({
+      where: {
+        userId: user.id,
+        scheduledAt: {
+          gte: twoDaysAgo,
+          lte: twoDaysLater
+        },
+        status: { not: 'CANCELLED' }
+      }
+    });
+
+    if (conflictingSessions > 0) {
+      return NextResponse.json(
+        { error: 'Les séances doivent être espacées d\'au moins 2 jours' },
+        { status: 400 }
+      );
+    }
+
+    // Générer le lien Zoom
+    let zoomLink: string | null = null;
+    if (professor.zoomMeetingId) {
+      zoomLink = `https://zoom.us/j/${professor.zoomMeetingId}`;
+      if (professor.zoomPassword) {
+        zoomLink += `?pwd=${professor.zoomPassword}`;
       }
     }
-    if (maxPage2 >= 17) {
-      unlockedSessions = 2;
-      console.log('✅ 2ème séance débloquée (page 17 atteinte)');
-      if (maxPage2 < 27) {
-        nextUnlockPage = 27;
+    
+    console.log('🔗 Lien Zoom généré:', zoomLink);
+
+    // Créer la séance
+    const session = await prisma.session.create({
+      data: {
+        userId: user.id,
+        professorId: professor.id,
+        availabilityId,
+        scheduledAt,
+        zoomLink: zoomLink,
+        status: 'SCHEDULED'
+      },
+      include: {
+        professor: {
+          select: {
+            name: true,
+            gender: true,
+          }
+        }
       }
-    }
-    if (maxPage2 >= 27) {
-      unlockedSessions = 3;
-      console.log('✅ 3ème séance débloquée (page 27 atteinte)');
-    }
+    });
 
-    console.log('🎯 Séances débloquées calculées:', unlockedSessions);
-    console.log('🎯 Prochaine page de déblocage:', nextUnlockPage);
+    console.log('✅ Séance créée avec succès:', session.id);
 
-    const progress = {
-      unlockedSessions,
-      canBookSession: unlockedSessions > 0,
-      nextUnlockPage
-    };
+    // Associer l'utilisateur au professeur si pas déjà fait
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { professorId: professor.id }
+    });
 
-    // Formater les séances
-    const formattedSessions = userData.sessions.map(session => ({
-      id: session.id,
-      scheduledAt: session.scheduledAt.toISOString(),
-      status: session.status,
-      availabilityId: session.availabilityId,
-      professor: session.professor,
-      zoomLink: session.zoomLink,
-      cancellation: session.cancellation ? {
-        id: session.cancellation.id,
-        cancelledBy: session.cancellation.cancelledBy,
-        reason: session.cancellation.reason,
-        customReason: session.cancellation.customReason,
-        cancelledAt: session.cancellation.cancelledAt.toISOString(),
-      } : undefined
-    }));
+    console.log('🔗 Utilisateur associé au professeur');
 
-    const responseData = {
-      progress,
-      sessions: formattedSessions,
-      bookedSessionsCount: userData.sessions.filter(s => s.status !== 'CANCELLED').length,
+    return NextResponse.json({
       success: true,
       session: {
-        id: 'session.id',
-        scheduledAt: 'session.scheduledAt.toISOString()',
-        status: 'session.status',
-        professor: 'session.professor',
-      }
-    };
-
-    console.log('📤 Données de réponse:', responseData);
-
-    return NextResponse.json(responseData);
+        id: session.id,
+        scheduledAt: session.scheduledAt.toISOString(),
+        status: session.status,
+        professor: session.professor,
+        zoomLink: session.zoomLink,
+        availabilityId: session.availabilityId
+      },
+      message: 'Séance réservée avec succès'
+    });
   } catch (error) {
-    console.error('Get user sessions error:', error);
+    console.error('Book session error:', error);
     return NextResponse.json(
       { error: 'Erreur lors de la réservation' },
       { status: 500 }
