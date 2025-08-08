@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { validateEmail, sanitizeInput } from '@/lib/security';
+import { validateEmail, sanitizeInput, validatePassword } from '@/lib/security';
+import bcrypt from 'bcryptjs';
 
 // GET - Récupérer le profil du professeur
 export async function GET(request: NextRequest) {
@@ -60,7 +61,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const decoded = await verifyToken(token);
-    const { name, zoomMeetingId, zoomPassword } = await request.json();
+    const { name, zoomMeetingId, zoomPassword, password } = await request.json();
 
     const updateData: any = {};
 
@@ -75,6 +76,16 @@ export async function PATCH(request: NextRequest) {
       updateData.name = cleanName;
     }
 
+    if (password !== undefined && password !== '') {
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.valid) {
+        return NextResponse.json(
+          { error: passwordValidation.errors[0] },
+          { status: 400 }
+        );
+      }
+      updateData.password = await bcrypt.hash(password, 12);
+    }
     if (zoomMeetingId !== undefined) {
       updateData.zoomMeetingId = sanitizeInput(zoomMeetingId);
     }
