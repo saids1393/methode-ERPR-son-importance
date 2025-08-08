@@ -6,9 +6,31 @@ export function useUserProgress() {
   const [completedPages, setCompletedPages] = useState<Set<number>>(new Set());
   const [completedQuizzes, setCompletedQuizzes] = useState<Set<number>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [isProfessorMode, setIsProfessorMode] = useState(false);
+
+  // Détecter si on est en mode professeur
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Vérifier spécifiquement le cookie professor-course-token
+      const cookies = document.cookie.split(';');
+      const professorCookie = cookies.find(cookie => 
+        cookie.trim().startsWith('professor-course-token=') && 
+        cookie.trim() !== 'professor-course-token='
+      );
+      const isProfessor = !!professorCookie;
+      console.log('🎓 PROGRESS HOOK - Mode professeur détecté:', isProfessor);
+      setIsProfessorMode(isProfessor);
+    }
+  }, []);
 
   // Charger la progression depuis la base de données
   const loadProgress = useCallback(async () => {
+    // Si c'est un professeur, ne pas charger la progression
+    if (isProfessorMode) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('/api/auth/progress');
       if (response.ok) {
@@ -29,6 +51,11 @@ export function useUserProgress() {
     quizNumber?: number, 
     action: 'add' | 'remove' = 'add'
   ) => {
+    // Si c'est un professeur, ne pas sauvegarder la progression
+    if (isProfessorMode) {
+      return false;
+    }
+
     try {
       const body: any = { action };
       if (pageNumber !== undefined) body.pageNumber = pageNumber;
@@ -55,10 +82,15 @@ export function useUserProgress() {
       console.error('Erreur de sauvegarde de la progression:', error);
       return false;
     }
-  }, []);
+  }, [isProfessorMode]);
 
   // Toggle page completion
   const togglePageCompletion = useCallback((pageNumber: number) => {
+    // Si c'est un professeur, ne rien faire
+    if (isProfessorMode) {
+      return;
+    }
+
     // Exclure la page 0 (chapitre 0) et le chapitre 11 de la progression
     if (pageNumber === 0 || pageNumber === 30) {
       return;
@@ -81,10 +113,15 @@ export function useUserProgress() {
         });
       }
     });
-  }, [completedPages, saveProgress]);
+  }, [completedPages, saveProgress, isProfessorMode]);
 
   // Toggle quiz completion
   const toggleQuizCompletion = useCallback((quizNumber: number) => {
+    // Si c'est un professeur, ne rien faire
+    if (isProfessorMode) {
+      return;
+    }
+
     // Exclure le chapitre 11 de la progression
     if (quizNumber === 11) {
       return;
@@ -107,7 +144,7 @@ export function useUserProgress() {
         });
       }
     });
-  }, [completedQuizzes, saveProgress]);
+  }, [completedQuizzes, saveProgress, isProfessorMode]);
 
   useEffect(() => {
     loadProgress();
@@ -120,5 +157,6 @@ export function useUserProgress() {
     togglePageCompletion,
     toggleQuizCompletion,
     refreshProgress: loadProgress,
+    isProfessorMode,
   };
 }

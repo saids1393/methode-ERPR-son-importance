@@ -21,18 +21,34 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
 
   useEffect(() => {
     let hasStartedCourse = false;
+    let isProfessorAccess = false;
     
     // Vérification côté client uniquement
     if (typeof window !== 'undefined') {
       hasStartedCourse = localStorage.getItem('courseStarted') === 'true';
-      console.log('🔍 Course started check:', hasStartedCourse, 'for path:', pathname);
+      isProfessorAccess = document.cookie.includes('professor-course-token');
+      console.log('🔍 LAYOUT - Course started check:', hasStartedCourse, 'for path:', pathname);
+      console.log('👨‍🏫 LAYOUT - Professor access check:', isProfessorAccess);
     }
     
-    // Afficher la sidebar seulement si :
-    // 1. L'utilisateur a cliqué sur "Commencer maintenant" 
-    // 2. ET il est dans les chapitres
-    const shouldShowSidebar = hasStartedCourse && pathname.startsWith('/chapitres/');
-    console.log('📱 Should show sidebar:', shouldShowSidebar);
+    // LOGIQUE SÉPARÉE pour sidebar :
+    let shouldShowSidebar = false;
+    
+    if (pathname.startsWith('/chapitres/')) {
+      if (isProfessorAccess) {
+        // Professeur : toujours afficher la sidebar dans les chapitres
+        shouldShowSidebar = true;
+        console.log('📱 SIDEBAR PROFESSEUR activée');
+      } else if (hasStartedCourse) {
+        // Élève : afficher seulement si le cours a été commencé
+        shouldShowSidebar = true;
+        console.log('📱 SIDEBAR ÉLÈVE activée');
+      } else {
+        console.log('📱 SIDEBAR DÉSACTIVÉE - cours non commencé par élève');
+      }
+    }
+    
+    console.log('📱 DÉCISION FINALE - Show sidebar:', shouldShowSidebar);
     setShowSidebar(shouldShowSidebar);
   }, [pathname]);
 

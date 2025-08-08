@@ -6,13 +6,33 @@ export function useSimpleTimer() {
   const [totalTime, setTotalTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [currentSession, setCurrentSession] = useState(0);
+  const [isProfessorMode, setIsProfessorMode] = useState(false);
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
 
+  // Détecter si on est en mode professeur
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Vérifier spécifiquement le cookie professor-course-token
+      const cookies = document.cookie.split(';');
+      const professorCookie = cookies.find(cookie => 
+        cookie.trim().startsWith('professor-course-token=') && 
+        cookie.trim() !== 'professor-course-token='
+      );
+      const isProfessor = !!professorCookie;
+      console.log('⏱️ TIMER HOOK - Mode professeur détecté:', isProfessor);
+      setIsProfessorMode(isProfessor);
+    }
+  }, []);
   // Charger le temps total depuis la DB
   const loadTotalTime = async () => {
+    // Si c'est un professeur, ne pas charger le temps
+    if (isProfessorMode) {
+      return 0;
+    }
+
     console.log('📥 Chargement du temps total...');
     try {
       const response = await fetch('/api/auth/time');
@@ -30,6 +50,11 @@ export function useSimpleTimer() {
 
   // Sauvegarder le temps en DB
   const saveTime = async (timeToAdd: number) => {
+    // Si c'est un professeur, ne pas sauvegarder le temps
+    if (isProfessorMode) {
+      return true;
+    }
+
     if (timeToAdd <= 0) return;
     
     console.log('💾 ===== DÉBUT SAUVEGARDE =====');
@@ -64,6 +89,12 @@ export function useSimpleTimer() {
 
   // Démarrer le chrono
   const startTimer = () => {
+    // Si c'est un professeur, ne pas démarrer le chrono
+    if (isProfessorMode) {
+      console.log('👨‍🏫 Mode professeur détecté - chrono désactivé');
+      return;
+    }
+
     console.log('🚀 ===== DÉMARRAGE DU CHRONO =====');
     console.log('📊 État actuel - isRunning:', isRunning);
     console.log('📊 currentSession:', currentSession);
@@ -117,6 +148,11 @@ export function useSimpleTimer() {
 
   // Arrêter le chrono
   const stopTimer = async () => {
+    // Si c'est un professeur, ne rien faire
+    if (isProfessorMode) {
+      return;
+    }
+
     console.log('⏹️ ARRÊT DU CHRONO');
     
     if (!isRunning) return;
@@ -168,6 +204,7 @@ export function useSimpleTimer() {
     isRunning,
     startTimer,
     stopTimer,
-    refreshTime: loadTotalTime
+    refreshTime: loadTotalTime,
+    isProfessorMode
   };
 }
