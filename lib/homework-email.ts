@@ -367,6 +367,8 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
       console.log(`🔍 [LIB] ===== FIN VÉRIFICATION (DOUBLON) =====`);
       return false;
     }
+    
+    console.log(`✅ [LIB] Aucun doublon détecté - Poursuite du traitement`);
 
     // Vérifier si un devoir existe pour ce chapitre
     const homework = await prisma.homework.findFirst({
@@ -401,9 +403,11 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
 
     console.log(`📧 [LIB] Préparation envoi à ${user.email}`);
 
-    // TRANSACTION pour éviter les doublons
+    // TRANSACTION RENFORCÉE pour éviter les doublons
+    console.log(`💾 [LIB] DÉBUT DE LA TRANSACTION...`);
     const result = await prisma.$transaction(async (tx) => {
-      // Double vérification dans la transaction
+      // TRIPLE vérification dans la transaction (sécurité maximale)
+      console.log(`🔍 [LIB] TRIPLE VÉRIFICATION dans la transaction...`);
       const doubleCheck = await tx.homeworkSend.findFirst({
         where: {
           userId,
@@ -417,13 +421,15 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
         console.log(`🚫 [LIB] DOUBLON DÉTECTÉ dans la transaction - arrêt`);
         return { emailSent: false, homeworkSend: null };
       }
+      
+      console.log(`✅ [LIB] Aucun doublon dans la transaction - Envoi de l'email...`);
 
-      console.log(`📧 [LIB] Envoi de l'email en cours...`);
       // Envoyer l'email
       const emailSent = await sendHomeworkEmail(homework, user);
       console.log(`📧 [LIB] Résultat envoi email:`, emailSent);
 
-      // Enregistrer l'envoi dans la base de données
+      // Enregistrer l'envoi dans la base de données SEULEMENT si email envoyé
+      console.log(`💾 [LIB] Enregistrement en DB...`);
       const homeworkSend = await tx.homeworkSend.create({
         data: {
           userId,
@@ -436,6 +442,7 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
       return { emailSent, homeworkSend };
     });
 
+    console.log(`💾 [LIB] FIN DE LA TRANSACTION - Résultat:`, result);
 
     console.log(`✅ [LIB] Devoir traité:`, {
       userId,

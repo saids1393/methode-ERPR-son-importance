@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`📝 [API] Demande d'envoi de devoir pour utilisateur ${user.id}, chapitre ${chapterNumber}`);
 
-    // VÉRIFICATION PRÉALABLE : Éviter les appels multiples
+    // VÉRIFICATION PRÉALABLE RENFORCÉE : Éviter les appels multiples
+    console.log(`🔍 [API] VÉRIFICATION PRÉALABLE - Recherche envoi existant...`);
     const existingCheck = await prisma.homeworkSend.findFirst({
       where: {
         userId: user.id,
@@ -41,12 +42,15 @@ export async function POST(request: NextRequest) {
 
     if (existingCheck) {
       console.log(`🚫 [API] Devoir déjà envoyé - ID: ${existingCheck.id}`);
+      console.log(`📝 [API] ===== FIN ENVOI DEVOIR (DOUBLON DÉTECTÉ) =====`);
       return NextResponse.json({
         success: true,
         sent: false,
         message: `Devoir du chapitre ${chapterNumber} déjà envoyé`
       });
     }
+    
+    console.log(`✅ [API] Aucun envoi existant trouvé - Poursuite du traitement`);
 
     // Vérifier et envoyer le devoir
     const sent = await checkAndSendHomework(user.id, chapterNumber);

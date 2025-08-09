@@ -57,6 +57,7 @@ export function useUserProgress() {
     if (isProfessorMode) return; // Pas d'envoi pour les professeurs
     
     console.log(`🚀 [HOOK] ===== DÉCLENCHEMENT ENVOI DEVOIR CHAPITRE ${chapterNumber} =====`);
+    console.log(`🚀 [HOOK] Utilisateur: ${chapterNumber}, Mode professeur: ${isProfessorMode}`);
     
     try {
       const response = await fetch('/api/homework/send', {
@@ -77,6 +78,8 @@ export function useUserProgress() {
         }
       } else {
         console.log(`❌ [HOOK] Erreur API:`, response.status);
+        const errorText = await response.text();
+        console.log(`❌ [HOOK] Détails erreur:`, errorText);
       }
     } catch (error) {
       console.error('❌ [HOOK] Erreur lors de l\'envoi du devoir:', error);
@@ -211,12 +214,17 @@ export function useUserProgress() {
             console.log(`➕ [HOOK] Ajout quiz ${quizNumber}`);
             newSet.add(quizNumber);
             
-            // Vérifier si le chapitre est complété APRÈS la mise à jour du state
-            console.log(`⏰ [HOOK] Programmation vérification chapitre dans 100ms...`);
-            setTimeout(() => {
-              console.log(`🔍 [HOOK] DÉBUT vérification completion chapitre ${quizNumber}`);
-              checkChapterCompletion(quizNumber);
-            }, 100);
+            // VÉRIFICATION IMMÉDIATE avec le nouveau state
+            console.log(`🔍 [HOOK] VÉRIFICATION IMMÉDIATE - Quiz ${quizNumber} ajouté`);
+            
+            // Créer un Set temporaire avec le nouveau quiz pour la vérification
+            const tempQuizSet = new Set(prev);
+            tempQuizSet.add(quizNumber);
+            
+            console.log(`🔍 [HOOK] État temporaire quiz pour vérification:`, Array.from(tempQuizSet));
+            
+            // Vérifier immédiatement avec l'état temporaire
+            checkChapterCompletionWithState(quizNumber, completedPages, tempQuizSet);
           }
           return newSet;
         });
@@ -224,8 +232,12 @@ export function useUserProgress() {
     });
   }, [completedQuizzes, saveProgress, isProfessorMode, completedPages]);
 
-  // Fonction séparée pour vérifier la completion d'un chapitre
-  const checkChapterCompletion = useCallback((chapterNumber: number) => {
+  // Fonction séparée pour vérifier la completion d'un chapitre avec état spécifique
+  const checkChapterCompletionWithState = useCallback((
+    chapterNumber: number, 
+    pagesSet: Set<number>, 
+    quizzesSet: Set<number>
+  ) => {
     console.log(`🔍 [HOOK] ===== VÉRIFICATION COMPLETION CHAPITRE ${chapterNumber} =====`);
     
     const chapterPages: { [key: number]: number[] } = {
@@ -248,18 +260,18 @@ export function useUserProgress() {
     }
     
     console.log(`📚 [HOOK] Pages requises pour chapitre ${chapterNumber}:`, requiredPages);
-    console.log(`📊 [HOOK] Pages actuellement complétées:`, Array.from(completedPages));
-    console.log(`🏆 [HOOK] Quiz actuellement complétés:`, Array.from(completedQuizzes));
+    console.log(`📊 [HOOK] Pages actuellement complétées:`, Array.from(pagesSet));
+    console.log(`🏆 [HOOK] Quiz actuellement complétés:`, Array.from(quizzesSet));
     
-    const allPagesCompleted = requiredPages.every(pageNum => completedPages.has(pageNum));
-    const quizCompleted = completedQuizzes.has(chapterNumber);
+    const allPagesCompleted = requiredPages.every(pageNum => pagesSet.has(pageNum));
+    const quizCompleted = quizzesSet.has(chapterNumber);
     
     console.log(`📚 [HOOK] Chapitre ${chapterNumber} - Pages complétées:`, allPagesCompleted, requiredPages);
     console.log(`🏆 [HOOK] Chapitre ${chapterNumber} - Quiz complété:`, quizCompleted);
     
     // Vérification détaillée page par page
     requiredPages.forEach(pageNum => {
-      const hasPage = completedPages.has(pageNum);
+      const hasPage = pagesSet.has(pageNum);
       console.log(`📄 [HOOK] Page ${pageNum}: ${hasPage ? '✅' : '❌'}`);
     });
     
@@ -273,7 +285,12 @@ export function useUserProgress() {
     }
     
     console.log(`🔍 [HOOK] ===== FIN VÉRIFICATION COMPLETION =====`);
-  }, [completedPages, completedQuizzes, triggerHomeworkSend]);
+  }, [triggerHomeworkSend]);
+
+  // Fonction de vérification avec l'état actuel (pour compatibilité)
+  const checkChapterCompletion = useCallback((chapterNumber: number) => {
+    checkChapterCompletionWithState(chapterNumber, completedPages, completedQuizzes);
+  }, [completedPages, completedQuizzes, checkChapterCompletionWithState]);
 
   useEffect(() => {
     loadProgress();
