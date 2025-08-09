@@ -168,17 +168,32 @@ export function useUserProgress() {
     const isCompleted = completedPages.has(pageNumber);
     const action = isCompleted ? 'remove' : 'add';
     
+    // MISE À JOUR IMMÉDIATE DE L'UI AVANT LA SAUVEGARDE
+    setCompletedPages(prev => {
+      const newSet = new Set(prev);
+      if (isCompleted) {
+        console.log(`➖ [HOOK] Suppression immédiate page ${pageNumber} de l'UI`);
+        newSet.delete(pageNumber);
+      } else {
+        console.log(`➕ [HOOK] Ajout immédiat page ${pageNumber} à l'UI`);
+        newSet.add(pageNumber);
+      }
+      return newSet;
+    });
+    
     // Sauvegarde en base puis mise à jour de l'UI
     saveProgress(pageNumber, undefined, action).then((success) => {
-      if (success) {
+      if (!success) {
+        // En cas d'échec de sauvegarde, revenir à l'état précédent
+        console.log(`❌ [HOOK] Échec sauvegarde page ${pageNumber} - restauration état précédent`);
         setCompletedPages(prev => {
-          const newSet = new Set(prev);
+          const revertSet = new Set(prev);
           if (isCompleted) {
-            newSet.delete(pageNumber);
+            revertSet.add(pageNumber); // Remettre si c'était supprimé
           } else {
-            newSet.add(pageNumber);
+            revertSet.delete(pageNumber); // Enlever si c'était ajouté
           }
-          return newSet;
+          return revertSet;
         });
       }
     });
@@ -206,32 +221,47 @@ export function useUserProgress() {
     console.log(`🔍 [HOOK] Quiz ${quizNumber} déjà complété:`, isCompleted);
     const action = isCompleted ? 'remove' : 'add';
     
+    // MISE À JOUR IMMÉDIATE DE L'UI AVANT LA SAUVEGARDE
+    setCompletedQuizzes(prev => {
+      const newSet = new Set(prev);
+      if (isCompleted) {
+        console.log(`➖ [HOOK] Suppression immédiate quiz ${quizNumber} de l'UI`);
+        newSet.delete(quizNumber);
+      } else {
+        console.log(`➕ [HOOK] Ajout immédiat quiz ${quizNumber} à l'UI`);
+        newSet.add(quizNumber);
+        
+        // VÉRIFICATION IMMÉDIATE avec le nouveau state
+        console.log(`🔍 [HOOK] VÉRIFICATION IMMÉDIATE - Quiz ${quizNumber} ajouté`);
+        
+        // Créer un Set temporaire avec le nouveau quiz pour la vérification
+        const tempQuizSet = new Set(prev);
+        tempQuizSet.add(quizNumber);
+        
+        console.log(`🔍 [HOOK] État temporaire quiz pour vérification:`, Array.from(tempQuizSet));
+        
+        // Vérifier immédiatement avec l'état temporaire
+        setTimeout(() => {
+          checkChapterCompletionWithState(quizNumber, completedPages, tempQuizSet);
+        }, 100);
+      }
+      return newSet;
+    });
+    
     // Sauvegarde en base puis mise à jour de l'UI
     saveProgress(undefined, quizNumber, action).then((success) => {
       console.log(`💾 [HOOK] Sauvegarde quiz ${quizNumber} réussie:`, success);
-      if (success) {
+      if (!success) {
+        // En cas d'échec de sauvegarde, revenir à l'état précédent
+        console.log(`❌ [HOOK] Échec sauvegarde - restauration état précédent`);
         setCompletedQuizzes(prev => {
-          const newSet = new Set(prev);
+          const revertSet = new Set(prev);
           if (isCompleted) {
-            console.log(`➖ [HOOK] Suppression quiz ${quizNumber}`);
-            newSet.delete(quizNumber);
+            revertSet.add(quizNumber); // Remettre si c'était supprimé
           } else {
-            console.log(`➕ [HOOK] Ajout quiz ${quizNumber}`);
-            newSet.add(quizNumber);
-            
-            // VÉRIFICATION IMMÉDIATE avec le nouveau state
-            console.log(`🔍 [HOOK] VÉRIFICATION IMMÉDIATE - Quiz ${quizNumber} ajouté`);
-            
-            // Créer un Set temporaire avec le nouveau quiz pour la vérification
-            const tempQuizSet = new Set(prev);
-            tempQuizSet.add(quizNumber);
-            
-            console.log(`🔍 [HOOK] État temporaire quiz pour vérification:`, Array.from(tempQuizSet));
-            
-            // Vérifier immédiatement avec l'état temporaire
-            checkChapterCompletionWithState(quizNumber, completedPages, tempQuizSet);
+            revertSet.delete(quizNumber); // Enlever si c'était ajouté
           }
-          return newSet;
+          return revertSet;
         });
       }
     });
