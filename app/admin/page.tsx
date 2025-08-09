@@ -24,7 +24,9 @@ import {
   Shield,
   Bell,
   Search,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  BookOpen
 } from 'lucide-react';
 import AdminSidebar from '@/app/admin/AdminSideBar';
 import StatsChart from '@/app/admin/StartsChart';
@@ -551,6 +553,24 @@ export default function AdminDashboard() {
               </div>
             </Link>
 
+            <Link
+              href="/admin/homework"
+              className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white p-4 sm:p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group"
+            >
+              <div className="flex items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                <FileText className="h-6 w-6 sm:h-8 sm:w-8" />
+                <div>
+                  <h4 className="font-bold text-sm sm:text-base">Gestion Devoirs</h4>
+                  <p className="text-orange-200 text-xs sm:text-sm hidden sm:block">Par chapitre</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm">Gérer les devoirs</span>
+                <div className="bg-white/20 p-1 rounded-full group-hover:translate-x-1 transition-transform">
+                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                </div>
+              </div>
+            </Link>
             <button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white p-4 sm:p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group">
               <div className="flex items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
                 <Database className="h-6 w-6 sm:h-8 sm:w-8" />
