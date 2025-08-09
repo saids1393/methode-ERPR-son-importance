@@ -349,7 +349,24 @@ Besoin d'aide ? Contactez-nous : support@sonimportance.com
 // Fonction pour vérifier et envoyer un devoir si nécessaire
 export async function checkAndSendHomework(userId: string, chapterNumber: number): Promise<boolean> {
   try {
-    console.log(`🔍 Vérification devoir pour utilisateur ${userId}, chapitre ${chapterNumber}`);
+    console.log(`🔍 [LIB] ===== DÉBUT VÉRIFICATION DEVOIR =====`);
+    console.log(`📝 [LIB] Utilisateur: ${userId}, Chapitre: ${chapterNumber}`);
+
+    // VÉRIFICATION ANTI-DOUBLON : Vérifier d'abord si déjà envoyé
+    const existingSendCheck = await prisma.homeworkSend.findFirst({
+      where: {
+        userId,
+        homework: {
+          chapterId: chapterNumber
+        }
+      }
+    });
+
+    if (existingSendCheck) {
+      console.log(`🚫 [LIB] DOUBLON DÉTECTÉ - Devoir déjà envoyé (ID: ${existingSendCheck.id})`);
+      console.log(`🔍 [LIB] ===== FIN VÉRIFICATION (DOUBLON) =====`);
+      return false;
+    }
 
     // Vérifier si un devoir existe pour ce chapitre
     const homework = await prisma.homework.findFirst({
@@ -357,27 +374,13 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
     });
 
     if (!homework) {
-      console.log(`📝 Aucun devoir trouvé pour le chapitre ${chapterNumber}`);
+      console.log(`📝 [LIB] Aucun devoir trouvé pour le chapitre ${chapterNumber}`);
+      console.log(`🔍 [LIB] ===== FIN VÉRIFICATION (PAS DE DEVOIR) =====`);
       return false;
     }
 
-    console.log(`📝 Devoir trouvé pour le chapitre ${chapterNumber}:`, homework.title);
-    // Vérifier si le devoir a déjà été envoyé à cet utilisateur
-    const existingSend = await prisma.homeworkSend.findUnique({
-      where: {
-        userId_homeworkId: {
-          userId,
-          homeworkId: homework.id
-        }
-      }
-    });
+    console.log(`📝 [LIB] Devoir trouvé:`, homework.title);
 
-    if (existingSend) {
-      console.log(`📝 Devoir déjà envoyé à l'utilisateur ${userId} pour le chapitre ${chapterNumber}`);
-      return false;
-    }
-
-    console.log(`📝 Nouveau devoir à envoyer pour l'utilisateur ${userId}, chapitre ${chapterNumber}`);
     // Récupérer les données de l'utilisateur
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -391,35 +394,60 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
     });
 
     if (!user || !user.isActive) {
-      console.log(`❌ Utilisateur ${userId} non trouvé ou inactif`);
+      console.log(`❌ [LIB] Utilisateur ${userId} non trouvé ou inactif`);
+      console.log(`🔍 [LIB] ===== FIN VÉRIFICATION (USER INACTIF) =====`);
       return false;
     }
 
-    console.log(`📧 Envoi du devoir "${homework.title}" à ${user.email}`);
+    console.log(`📧 [LIB] Préparation envoi à ${user.email}`);
 
-    // Envoyer l'email
-    const emailSent = await sendHomeworkEmail(homework, user);
+    // TRANSACTION pour éviter les doublons
+    const result = await prisma.$transaction(async (tx) => {
+      // Double vérification dans la transaction
+      const doubleCheck = await tx.homeworkSend.findFirst({
+        where: {
+          userId,
+          homework: {
+            chapterId: chapterNumber
+          }
+        }
+      });
 
-    console.log(`📧 Résultat envoi email:`, emailSent);
-    // Enregistrer l'envoi dans la base de données
-    const homeworkSend = await prisma.homeworkSend.create({
-      data: {
-        userId,
-        homeworkId: homework.id,
-        emailSent
+      if (doubleCheck) {
+        console.log(`🚫 [LIB] DOUBLON DÉTECTÉ dans la transaction - arrêt`);
+        return { emailSent: false, homeworkSend: null };
       }
+
+      console.log(`📧 [LIB] Envoi de l'email en cours...`);
+      // Envoyer l'email
+      const emailSent = await sendHomeworkEmail(homework, user);
+      console.log(`📧 [LIB] Résultat envoi email:`, emailSent);
+
+      // Enregistrer l'envoi dans la base de données
+      const homeworkSend = await tx.homeworkSend.create({
+        data: {
+          userId,
+          homeworkId: homework.id,
+          emailSent
+        }
+      });
+
+      console.log(`💾 [LIB] Enregistrement en DB créé:`, homeworkSend.id);
+      return { emailSent, homeworkSend };
     });
 
-    console.log(`✅ Devoir envoyé et enregistré:`, {
+
+    console.log(`✅ [LIB] Devoir traité:`, {
       userId,
       chapterNumber,
-      emailSent,
-      homeworkSendId: homeworkSend.id
+      emailSent: result.emailSent,
+      homeworkSendId: result.homeworkSend?.id
     });
     
-    return emailSent;
+    console.log(`🔍 [LIB] ===== FIN VÉRIFICATION DEVOIR =====`);
+    return result.emailSent;
   } catch (error) {
-    console.error('❌ Erreur lors de la vérification/envoi du devoir:', error);
+    console.error('❌ [LIB] Erreur lors de la vérification/envoi du devoir:', error);
     return false;
   }
 }

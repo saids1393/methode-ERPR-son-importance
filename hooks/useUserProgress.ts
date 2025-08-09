@@ -56,6 +56,8 @@ export function useUserProgress() {
   const triggerHomeworkSend = useCallback(async (chapterNumber: number) => {
     if (isProfessorMode) return; // Pas d'envoi pour les professeurs
     
+    console.log(`🚀 [HOOK] ===== DÉCLENCHEMENT ENVOI DEVOIR CHAPITRE ${chapterNumber} =====`);
+    
     try {
       const response = await fetch('/api/homework/send', {
         method: 'POST',
@@ -63,15 +65,24 @@ export function useUserProgress() {
         body: JSON.stringify({ chapterNumber }),
       });
 
+      console.log(`📡 [HOOK] Réponse API:`, response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log(`📧 [HOOK] Données reçues:`, data);
         if (data.sent) {
-          console.log(`✅ Devoir envoyé pour le chapitre ${chapterNumber}`);
+          console.log(`✅ [HOOK] Devoir envoyé pour le chapitre ${chapterNumber}`);
+        } else {
+          console.log(`ℹ️ [HOOK] Devoir non envoyé:`, data.message);
         }
+      } else {
+        console.log(`❌ [HOOK] Erreur API:`, response.status);
       }
     } catch (error) {
-      console.error('Erreur lors de l\'envoi du devoir:', error);
+      console.error('❌ [HOOK] Erreur lors de l\'envoi du devoir:', error);
     }
+    
+    console.log(`🚀 [HOOK] ===== FIN DÉCLENCHEMENT ENVOI DEVOIR =====`);
   }, [isProfessorMode]);
   // Charger la progression depuis la base de données
   const loadProgress = useCallback(async () => {
@@ -190,48 +201,57 @@ export function useUserProgress() {
           } else {
             newSet.add(quizNumber);
             
-            // Vérifier immédiatement si le chapitre est complété avec les nouvelles données
-            console.log(`🎯 Quiz ${quizNumber} complété ! Vérification du chapitre...`);
-            
-            // Créer un Set temporaire avec la nouvelle valeur pour la vérification
-            const tempQuizSet = new Set(prev);
-            tempQuizSet.add(quizNumber);
-            
-            // Vérifier si toutes les pages du chapitre sont complétées
-            const chapterPages: { [key: number]: number[] } = {
-              1: [1, 2, 3, 4, 5, 6, 7],
-              2: [8, 9, 10, 11],
-              3: [12, 13, 14, 15],
-              4: [16],
-              5: [17],
-              6: [18, 19, 20],
-              7: [21],
-              8: [22, 23],
-              9: [24],
-              10: [25, 26, 27, 28, 29]
-            };
-            
-            const requiredPages = chapterPages[quizNumber];
-            if (requiredPages) {
-              const allPagesCompleted = requiredPages.every(pageNum => completedPages.has(pageNum));
-              const quizCompleted = tempQuizSet.has(quizNumber);
-              
-              console.log(`📚 Chapitre ${quizNumber} - Pages complétées:`, allPagesCompleted);
-              console.log(`🏆 Chapitre ${quizNumber} - Quiz complété:`, quizCompleted);
-              
-              if (allPagesCompleted && quizCompleted) {
-                console.log(`🎉 CHAPITRE ${quizNumber} TERMINÉ ! Envoi du devoir...`);
-                triggerHomeworkSend(quizNumber);
-              } else {
-                console.log(`⏳ Chapitre ${quizNumber} pas encore terminé`);
-              }
-            }
+            // Vérifier si le chapitre est complété APRÈS la mise à jour du state
+            setTimeout(() => {
+              checkChapterCompletion(quizNumber);
+            }, 100);
           }
           return newSet;
         });
       }
     });
-  }, [completedQuizzes, saveProgress, isProfessorMode]);
+  }, [completedQuizzes, saveProgress, isProfessorMode, completedPages]);
+
+  // Fonction séparée pour vérifier la completion d'un chapitre
+  const checkChapterCompletion = useCallback((chapterNumber: number) => {
+    console.log(`🔍 [HOOK] ===== VÉRIFICATION COMPLETION CHAPITRE ${chapterNumber} =====`);
+    
+    const chapterPages: { [key: number]: number[] } = {
+      1: [1, 2, 3, 4, 5, 6, 7],
+      2: [8, 9, 10, 11],
+      3: [12, 13, 14, 15],
+      4: [16],
+      5: [17],
+      6: [18, 19, 20],
+      7: [21],
+      8: [22, 23],
+      9: [24],
+      10: [25, 26, 27, 28, 29]
+    };
+    
+    const requiredPages = chapterPages[chapterNumber];
+    if (!requiredPages) {
+      console.log(`❌ [HOOK] Chapitre ${chapterNumber} non trouvé dans la configuration`);
+      return;
+    }
+    
+    const allPagesCompleted = requiredPages.every(pageNum => completedPages.has(pageNum));
+    const quizCompleted = completedQuizzes.has(chapterNumber);
+    
+    console.log(`📚 [HOOK] Chapitre ${chapterNumber} - Pages complétées:`, allPagesCompleted, requiredPages);
+    console.log(`🏆 [HOOK] Chapitre ${chapterNumber} - Quiz complété:`, quizCompleted);
+    console.log(`📊 [HOOK] Pages actuelles:`, Array.from(completedPages));
+    console.log(`🎯 [HOOK] Quiz actuels:`, Array.from(completedQuizzes));
+    
+    if (allPagesCompleted && quizCompleted) {
+      console.log(`🎉 [HOOK] CHAPITRE ${chapterNumber} TERMINÉ ! Envoi du devoir...`);
+      triggerHomeworkSend(chapterNumber);
+    } else {
+      console.log(`⏳ [HOOK] Chapitre ${chapterNumber} pas encore terminé`);
+    }
+    
+    console.log(`🔍 [HOOK] ===== FIN VÉRIFICATION COMPLETION =====`);
+  }, [completedPages, completedQuizzes, triggerHomeworkSend]);
 
   useEffect(() => {
     loadProgress();

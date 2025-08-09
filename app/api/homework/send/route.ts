@@ -5,9 +5,12 @@ import { checkAndSendHomework } from '@/lib/homework-email';
 // POST - Déclencher l'envoi d'un devoir pour un chapitre
 export async function POST(request: NextRequest) {
   try {
+    console.log(`📝 [API] ===== DÉBUT ENVOI DEVOIR =====`);
+    
     const user = await getAuthUserFromRequest(request);
     
     if (!user) {
+      console.log(`❌ [API] Utilisateur non authentifié`);
       return NextResponse.json(
         { error: 'Non autorisé' },
         { status: 401 }
@@ -17,18 +20,40 @@ export async function POST(request: NextRequest) {
     const { chapterNumber } = await request.json();
 
     if (typeof chapterNumber !== 'number' || chapterNumber < 0 || chapterNumber > 11) {
+      console.log(`❌ [API] Numéro de chapitre invalide:`, chapterNumber);
       return NextResponse.json(
         { error: 'Numéro de chapitre invalide' },
         { status: 400 }
       );
     }
 
-    console.log(`📝 Demande d'envoi de devoir pour utilisateur ${user.id}, chapitre ${chapterNumber}`);
+    console.log(`📝 [API] Demande d'envoi de devoir pour utilisateur ${user.id}, chapitre ${chapterNumber}`);
+
+    // VÉRIFICATION PRÉALABLE : Éviter les appels multiples
+    const existingCheck = await prisma.homeworkSend.findFirst({
+      where: {
+        userId: user.id,
+        homework: {
+          chapterId: chapterNumber
+        }
+      }
+    });
+
+    if (existingCheck) {
+      console.log(`🚫 [API] Devoir déjà envoyé - ID: ${existingCheck.id}`);
+      return NextResponse.json({
+        success: true,
+        sent: false,
+        message: `Devoir du chapitre ${chapterNumber} déjà envoyé`
+      });
+    }
 
     // Vérifier et envoyer le devoir
     const sent = await checkAndSendHomework(user.id, chapterNumber);
 
-    console.log(`📧 Résultat envoi devoir chapitre ${chapterNumber}:`, sent);
+    console.log(`📧 [API] Résultat envoi devoir chapitre ${chapterNumber}:`, sent);
+    console.log(`📝 [API] ===== FIN ENVOI DEVOIR =====`);
+    
     return NextResponse.json({
       success: true,
       sent,
