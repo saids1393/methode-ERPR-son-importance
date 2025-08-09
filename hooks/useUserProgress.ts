@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { checkAndSendHomework } from '@/lib/homework-email';
 
 export function useUserProgress() {
   const [completedPages, setCompletedPages] = useState<Set<number>>(new Set());
@@ -23,6 +24,55 @@ export function useUserProgress() {
     }
   }, []);
 
+  // Fonction pour vérifier si un chapitre est complété
+  const isChapterCompleted = useCallback((chapterNumber: number): boolean => {
+    // Définir les pages par chapitre selon la structure existante
+    const chapterPages: { [key: number]: number[] } = {
+      1: [1, 2, 3, 4, 5, 6, 7],
+      2: [8, 9, 10, 11],
+      3: [12, 13, 14, 15],
+      4: [16],
+      5: [17],
+      6: [18, 19, 20],
+      7: [21],
+      8: [22, 23],
+      9: [24],
+      10: [25, 26, 27, 28, 29]
+    };
+
+    const requiredPages = chapterPages[chapterNumber];
+    if (!requiredPages) return false;
+
+    // Vérifier que toutes les pages du chapitre sont complétées
+    const allPagesCompleted = requiredPages.every(pageNum => completedPages.has(pageNum));
+    
+    // Vérifier que le quiz du chapitre est complété (si applicable)
+    const quizCompleted = completedQuizzes.has(chapterNumber);
+    
+    return allPagesCompleted && quizCompleted;
+  }, [completedPages, completedQuizzes]);
+
+  // Fonction pour déclencher l'envoi de devoir
+  const triggerHomeworkSend = useCallback(async (chapterNumber: number) => {
+    if (isProfessorMode) return; // Pas d'envoi pour les professeurs
+    
+    try {
+      const response = await fetch('/api/homework/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chapterNumber }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.sent) {
+          console.log(`✅ Devoir envoyé pour le chapitre ${chapterNumber}`);
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du devoir:', error);
+    }
+  }, [isProfessorMode]);
   // Charger la progression depuis la base de données
   const loadProgress = useCallback(async () => {
     // Si c'est un professeur, ne pas charger la progression
@@ -139,6 +189,13 @@ export function useUserProgress() {
             newSet.delete(quizNumber);
           } else {
             newSet.add(quizNumber);
+          // Vérifier si le chapitre est maintenant complété
+          setTimeout(() => {
+            if (isChapterCompleted(quizNumber)) {
+              console.log(`🎉 Chapitre ${quizNumber} terminé ! Vérification du devoir...`);
+              triggerHomeworkSend(quizNumber);
+            }
+          }, 1000); // Délai pour s'assurer que l'état est mis à jour
           }
           return newSet;
         });
@@ -158,5 +215,6 @@ export function useUserProgress() {
     toggleQuizCompletion,
     refreshProgress: loadProgress,
     isProfessorMode,
+    isChapterCompleted,
   };
 }

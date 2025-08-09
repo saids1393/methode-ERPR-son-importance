@@ -16,7 +16,11 @@ import {
   Download,
   Eye,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Mail,
+  Users,
+  TrendingUp,
+  BarChart3
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -27,6 +31,7 @@ interface Homework {
   content: string;
   createdAt: string;
   updatedAt: string;
+  sentCount?: number;
 }
 
 interface HomeworkForm {
@@ -35,9 +40,36 @@ interface HomeworkForm {
   content: string;
 }
 
+interface HomeworkStats {
+  overview: {
+    totalHomeworks: number;
+    totalSends: number;
+    uniqueUsersWithHomework: number;
+    recentSends: number;
+    averageSendsPerHomework: number;
+  };
+  homeworkStats: Array<{
+    id: string;
+    chapterId: number;
+    title: string;
+    sentCount: number;
+  }>;
+  topUsers: Array<{
+    id: string;
+    email: string;
+    username: string | null;
+    homeworkCount: number;
+  }>;
+  dailyStats: Array<{
+    date: string;
+    sends: number;
+  }>;
+}
 export default function AdminHomeworkPage() {
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
+  const [stats, setStats] = useState<HomeworkStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingHomework, setEditingHomework] = useState<Homework | null>(null);
   const [formData, setFormData] = useState<HomeworkForm>({
@@ -47,10 +79,12 @@ export default function AdminHomeworkPage() {
   });
   const [formLoading, setFormLoading] = useState(false);
   const [expandedHomework, setExpandedHomework] = useState<string | null>(null);
+  const [showStats, setShowStats] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     fetchHomeworks();
+    fetchStats();
   }, []);
 
   const fetchHomeworks = async () => {
@@ -74,6 +108,19 @@ export default function AdminHomeworkPage() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/admin/homework/stats');
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching homework stats:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -106,6 +153,7 @@ export default function AdminHomeworkPage() {
         setShowForm(false);
         resetForm();
         fetchHomeworks();
+        fetchStats(); // Recharger les stats
       } else {
         toast.error(result.error || 'Erreur lors de la sauvegarde');
       }
@@ -142,6 +190,7 @@ export default function AdminHomeworkPage() {
       if (response.ok) {
         toast.success('Devoir supprimé avec succès !');
         fetchHomeworks();
+        fetchStats(); // Recharger les stats
       } else {
         toast.error(result.error || 'Erreur lors de la suppression');
       }
@@ -223,11 +272,20 @@ export default function AdminHomeworkPage() {
                 </h1>
                 <p className="text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
                   {homeworks.length} devoir(s) configuré(s)
+                  {stats && ` • ${stats.overview.totalSends} envoi(s) effectué(s)`}
                 </p>
               </div>
             </div>
             
             <div className="flex flex-wrap gap-2 sm:gap-3">
+              <button
+                onClick={() => setShowStats(!showStats)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition-colors text-sm sm:text-base"
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Statistiques</span>
+                <span className="sm:hidden">Stats</span>
+              </button>
               <button
                 onClick={() => setShowForm(true)}
                 className="bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition-colors text-sm sm:text-base"
@@ -242,6 +300,77 @@ export default function AdminHomeworkPage() {
       </div>
 
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        {/* Statistiques des envois */}
+        {showStats && stats && !statsLoading && (
+          <div className="mb-8 space-y-6">
+            {/* Vue d'ensemble */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">{stats.overview.totalHomeworks}</div>
+                <div className="text-zinc-400 text-sm">Devoirs créés</div>
+              </div>
+              <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-green-400">{stats.overview.totalSends}</div>
+                <div className="text-zinc-400 text-sm">Envois réussis</div>
+              </div>
+              <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-blue-400">{stats.overview.uniqueUsersWithHomework}</div>
+                <div className="text-zinc-400 text-sm">Utilisateurs touchés</div>
+              </div>
+              <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-purple-400">{stats.overview.recentSends}</div>
+                <div className="text-zinc-400 text-sm">Envois (30j)</div>
+              </div>
+              <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-400">{stats.overview.averageSendsPerHomework}</div>
+                <div className="text-zinc-400 text-sm">Moyenne/devoir</div>
+              </div>
+            </div>
+
+            {/* Statistiques par chapitre */}
+            <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-green-400" />
+                Envois par chapitre
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {stats.homeworkStats.map((hw) => (
+                  <div key={hw.id} className="bg-zinc-700 rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-white font-medium">Chapitre {hw.chapterId}</span>
+                      <span className="text-green-400 font-bold">{hw.sentCount}</span>
+                    </div>
+                    <div className="text-zinc-300 text-sm truncate">{hw.title}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Top utilisateurs */}
+            <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-400" />
+                Top utilisateurs (devoirs reçus)
+              </h3>
+              <div className="space-y-2">
+                {stats.topUsers.slice(0, 5).map((user, index) => (
+                  <div key={user.id} className="flex items-center justify-between bg-zinc-700 rounded-lg p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <div className="text-white font-medium">{user.username || 'Sans pseudo'}</div>
+                        <div className="text-zinc-400 text-sm">{user.email}</div>
+                      </div>
+                    </div>
+                    <div className="text-green-400 font-bold">{user.homeworkCount} devoirs</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         {/* Liste des devoirs */}
         {homeworks.length > 0 ? (
           <div className="space-y-4">
@@ -266,6 +395,12 @@ export default function AdminHomeworkPage() {
                           Créé le {new Date(homework.createdAt).toLocaleDateString('fr-FR')}
                         </p>
                       </div>
+                          {stats && (
+                            <div className="flex items-center gap-1 text-green-400 text-sm">
+                              <Mail className="h-3 w-3" />
+                              <span>{stats.homeworkStats.find(s => s.id === homework.id)?.sentCount || 0} envoi(s)</span>
+                            </div>
+                          )}
                     </div>
 
                     <div className="flex items-center space-x-4">
@@ -498,6 +633,14 @@ export default function AdminHomeworkPage() {
                 </div>
               )}
               
+                            {stats && (
+                              <div className="flex justify-between items-center pt-2 border-t border-zinc-600">
+                                <span className="text-zinc-400 text-sm">Envois réussis</span>
+                                <span className="text-green-400 font-bold">
+                                  {stats.homeworkStats.find(s => s.id === homework.id)?.sentCount || 0}
+                                </span>
+                              </div>
+                            )}
               <div className="flex space-x-4 pt-4">
                 <button
                   type="button"
