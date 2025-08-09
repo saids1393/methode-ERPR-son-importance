@@ -3,16 +3,28 @@
 import { useState, useEffect } from "react";
 import SidebarContent from "@/app/components/SidebarContent";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useAutoProgress } from "@/hooks/useAutoProgress";
 
 export default function DesktopLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [courseStarted, setCourseStarted] = useState(false);
+  
+  // Activer l'auto-progression avec 6 secondes de délai
+  const { isEnabled } = useAutoProgress({ 
+    delay: 6000, // 6 secondes
+    enabled: true 
+  });
 
   useEffect(() => {
     // Vérifier si le cours a été commencé
     setCourseStarted(localStorage.getItem('courseStarted') === 'true');
   }, []);
 
+  useEffect(() => {
+    if (isEnabled) {
+      console.log('🎯 [DESKTOP-LAYOUT] Auto-progression activée (6 secondes)');
+    }
+  }, [isEnabled]);
   // Si le cours n'a pas été commencé, ne pas afficher la sidebar
   if (!courseStarted) {
     return <div className="min-h-screen">{children}</div>;

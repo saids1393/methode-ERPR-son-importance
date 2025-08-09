@@ -2,16 +2,28 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, Menu, X } from 'lucide-react';
 import SidebarContent from "@/app/components/SidebarContent";
+import { useAutoProgress } from "@/hooks/useAutoProgress";
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [courseStarted, setCourseStarted] = useState(false);
+  
+  // Activer l'auto-progression avec 6 secondes de délai
+  const { isEnabled } = useAutoProgress({ 
+    delay: 6000, // 6 secondes
+    enabled: true 
+  });
 
   useEffect(() => {
     // Vérifier si le cours a été commencé
     setCourseStarted(localStorage.getItem('courseStarted') === 'true');
   }, []);
 
+  useEffect(() => {
+    if (isEnabled) {
+      console.log('🎯 [MOBILE-LAYOUT] Auto-progression activée (6 secondes)');
+    }
+  }, [isEnabled]);
   // Bloquer le scroll du body quand la sidebar est ouverte
   useEffect(() => {
     if (sidebarOpen) {

@@ -7,6 +7,7 @@ import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Circle, Home, Play } 
 import { chapters } from "@/lib/chapters";
 import { useUserProgress } from "@/hooks/useUserProgress";
 import { useChapterVideos } from "@/hooks/useChapterVideos";
+import { useAutoProgress } from "@/hooks/useAutoProgress";
 
 // Fonction de calcul de progression synchronisée avec le dashboard
 const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<number>) => {
@@ -47,6 +48,12 @@ export default function SidebarContent() {
   } = useUserProgress();
 
   const { getVideoByChapter } = useChapterVideos();
+
+  // Hook d'auto-progression
+  const { isEnabled: autoProgressEnabled, currentPageInfo } = useAutoProgress({
+    delay: 6000, // 6 secondes
+    enabled: true
+  });
 
   const handleTogglePageCompletion = (pageNumber: number, e: React.MouseEvent) => {
     e.preventDefault();
@@ -163,6 +170,25 @@ export default function SidebarContent() {
               <Home size={12} />
               Retour à l'espace professeur
             </Link>
+          </div>
+        )}
+        
+        {/* Indicateur auto-progression pour les élèves */}
+        {!isProfessorMode && autoProgressEnabled && currentPageInfo && !currentPageInfo.isCompleted && (
+          <div className="mt-4 bg-green-500/20 border border-green-500/30 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-green-300">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium">Auto-progression activée</span>
+            </div>
+            <p className="text-green-200 text-xs mt-1">
+              {currentPageInfo.type === 'page' 
+                ? `Page ${currentPageInfo.pageNumber} sera marquée complétée dans 6s`
+                : `Quiz chapitre ${currentPageInfo.chapterNumber} sera marqué complété dans 6s`
+              }
+            </p>
+            <div className="mt-2 w-full bg-green-900/30 rounded-full h-1">
+              <div className="bg-green-400 h-1 rounded-full animate-pulse"></div>
+            </div>
           </div>
         )}
       </div>

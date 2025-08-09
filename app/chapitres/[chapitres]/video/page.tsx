@@ -5,6 +5,7 @@ import { getChapterByNumber } from "@/lib/chapters";
 import { useChapterVideo } from "@/hooks/useChapterVideos";
 import CloudflareVideoPlayer from "@/app/components/CloudflareVideoPlayer";
 import { notFound } from "next/navigation";
+import { useAutoProgress } from "@/hooks/useAutoProgress";
 
 interface VideoPageProps {
   params: Promise<{
@@ -18,6 +19,12 @@ export default function VideoPage({ params }: VideoPageProps) {
   
   const chapter = getChapterByNumber(chapterNumber);
   const { video, isLoading, error } = useChapterVideo(chapterNumber);
+  
+  // Activer l'auto-progression pour les vidéos
+  useAutoProgress({ 
+    delay: 6000, // 6 secondes
+    enabled: true 
+  });
 
   if (!chapter) {
     return notFound();

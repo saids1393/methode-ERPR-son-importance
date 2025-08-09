@@ -91,23 +91,28 @@ export function useUserProgress() {
   const loadProgress = useCallback(async () => {
     // Si c'est un professeur, ne pas charger la progression
     if (isProfessorMode) {
+      console.log('👨‍🏫 [PROGRESS] Mode professeur détecté - pas de chargement de progression');
       setIsLoading(false);
       return;
     }
 
+    console.log('📥 [PROGRESS] Chargement de la progression depuis la DB...');
     try {
       const response = await fetch('/api/auth/progress');
       if (response.ok) {
         const data = await response.json();
+        console.log('📊 [PROGRESS] Progression chargée:', data);
         setCompletedPages(new Set(data.completedPages || []));
         setCompletedQuizzes(new Set(data.completedQuizzes || []));
+      } else {
+        console.error('❌ [PROGRESS] Erreur HTTP lors du chargement:', response.status);
       }
     } catch (error) {
       console.error('Erreur de chargement de la progression:', error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isProfessorMode]);
 
   // Sauvegarder la progression en base de données
   const saveProgress = useCallback(async (
