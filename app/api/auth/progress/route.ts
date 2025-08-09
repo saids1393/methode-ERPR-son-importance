@@ -37,18 +37,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getAuthUserFromRequest(request);
+    console.log('💾 [API] POST /api/auth/progress - Sauvegarde de la progression');
     
     if (!user) {
       return NextResponse.json(
         { error: 'Non autorisé' },
-        { status: 401 }
+      console.log('❌ [API] PROGRESS - Utilisateur non authentifié');
       );
     }
 
-    const { pageNumber, quizNumber, action } = await request.json();
+    console.log('👤 [API] PROGRESS - Utilisateur authentifié:', user.id);
 
-    console.log('Progress update request:', { pageNumber, quizNumber, action, userId: user.id });
+    console.log('📊 [API] PROGRESS - Demande de mise à jour:', { pageNumber, quizNumber, action, userId: user.id });
+    
     if (pageNumber !== undefined) {
       const currentUser = await prisma.user.findUnique({
         where: { id: user.id },
@@ -59,11 +60,19 @@ export async function POST(request: NextRequest) {
 
       if (action === 'add' && !updatedPages.includes(pageNumber)) {
         updatedPages.push(pageNumber);
+        console.log(`➕ [API] PROGRESS - Ajout page ${pageNumber}`);
       } else if (action === 'remove') {
         updatedPages = updatedPages.filter((p: any) => p !== pageNumber);
+        console.log(`➖ [API] PROGRESS - Suppression page ${pageNumber}`);
       }
 
-      console.log('Updating pages:', { before: currentUser?.completedPages, after: updatedPages });
+      console.log('📚 [API] PROGRESS - Mise à jour pages:', { 
+        before: currentUser?.completedPages, 
+        after: updatedPages,
+        pageNumber,
+        action 
+      });
+      
       await prisma.user.update({
         where: { id: user.id },
         data: { completedPages: updatedPages },
@@ -85,11 +94,19 @@ export async function POST(request: NextRequest) {
 
       if (action === 'add' && !updatedQuizzes.includes(quizNumber)) {
         updatedQuizzes.push(quizNumber);
+        console.log(`➕ [API] PROGRESS - Ajout quiz ${quizNumber}`);
       } else if (action === 'remove') {
         updatedQuizzes = updatedQuizzes.filter((q: any) => q !== quizNumber);
+        console.log(`➖ [API] PROGRESS - Suppression quiz ${quizNumber}`);
       }
 
-      console.log('Updating quizzes:', { before: currentUser?.completedQuizzes, after: updatedQuizzes });
+      console.log('🏆 [API] PROGRESS - Mise à jour quiz:', { 
+        before: currentUser?.completedQuizzes, 
+        after: updatedQuizzes,
+        quizNumber,
+        action 
+      });
+      
       await prisma.user.update({
         where: { id: user.id },
         data: { completedQuizzes: updatedQuizzes },
@@ -106,7 +123,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Update progress error:', error);
+    console.error('❌ [API] PROGRESS - Erreur mise à jour:', error);
     return NextResponse.json(
       { error: 'Erreur interne du serveur' },
       { status: 500 }

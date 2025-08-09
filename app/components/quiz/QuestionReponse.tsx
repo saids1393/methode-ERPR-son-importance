@@ -39,11 +39,14 @@ const Quiz: React.FC<QuizProps> = ({ quiz, chapterNumber }) => {
         const score = getScore();
         const percentage = Math.round((score / quiz.length) * 100);
         
+        console.log(`🎯 [QUIZ] Quiz terminé - Score: ${score}/${quiz.length} (${percentage}%)`);
+        console.log(`🎯 [QUIZ] Chapitre: ${chapterNumber}, Seuil: 75%`);
+        
         if (percentage >= 75 && chapterNumber !== undefined) {
           console.log(`🏆 Quiz réussi (${percentage}%) - Marquage du chapitre ${chapterNumber} comme complété`);
           toggleQuizCompletion(chapterNumber);
         } else {
-          console.log(`📊 Quiz terminé avec ${percentage}% - Pas de marquage automatique`);
+          console.log(`📊 [QUIZ] Quiz terminé avec ${percentage}% - Pas de marquage automatique (seuil non atteint)`);
         }
       }
     }, 400);
@@ -65,7 +68,7 @@ const Quiz: React.FC<QuizProps> = ({ quiz, chapterNumber }) => {
 
   const handleManualComplete = () => {
     if (chapterNumber !== undefined) {
-      console.log(`✅ Marquage manuel du chapitre ${chapterNumber} comme complété`);
+      console.log(`✅ [QUIZ] Marquage manuel du chapitre ${chapterNumber} comme complété`);
       toggleQuizCompletion(chapterNumber);
     }
   };

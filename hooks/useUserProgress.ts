@@ -180,29 +180,41 @@ export function useUserProgress() {
   const toggleQuizCompletion = useCallback((quizNumber: number) => {
     // Si c'est un professeur, ne rien faire
     if (isProfessorMode) {
+      console.log('👨‍🏫 [HOOK] Mode professeur - pas de sauvegarde quiz');
       return;
     }
 
     // Exclure le chapitre 11 de la progression
     if (quizNumber === 11) {
+      console.log('🚫 [HOOK] Chapitre 11 exclu de la progression');
       return;
     }
     
+    console.log(`🎯 [HOOK] ===== TOGGLE QUIZ ${quizNumber} =====`);
+    console.log(`📊 [HOOK] État actuel - Pages:`, Array.from(completedPages));
+    console.log(`🏆 [HOOK] État actuel - Quiz:`, Array.from(completedQuizzes));
+    
     const isCompleted = completedQuizzes.has(quizNumber);
+    console.log(`🔍 [HOOK] Quiz ${quizNumber} déjà complété:`, isCompleted);
     const action = isCompleted ? 'remove' : 'add';
     
     // Sauvegarde en base puis mise à jour de l'UI
     saveProgress(undefined, quizNumber, action).then((success) => {
+      console.log(`💾 [HOOK] Sauvegarde quiz ${quizNumber} réussie:`, success);
       if (success) {
         setCompletedQuizzes(prev => {
           const newSet = new Set(prev);
           if (isCompleted) {
+            console.log(`➖ [HOOK] Suppression quiz ${quizNumber}`);
             newSet.delete(quizNumber);
           } else {
+            console.log(`➕ [HOOK] Ajout quiz ${quizNumber}`);
             newSet.add(quizNumber);
             
             // Vérifier si le chapitre est complété APRÈS la mise à jour du state
+            console.log(`⏰ [HOOK] Programmation vérification chapitre dans 100ms...`);
             setTimeout(() => {
+              console.log(`🔍 [HOOK] DÉBUT vérification completion chapitre ${quizNumber}`);
               checkChapterCompletion(quizNumber);
             }, 100);
           }
@@ -235,19 +247,29 @@ export function useUserProgress() {
       return;
     }
     
+    console.log(`📚 [HOOK] Pages requises pour chapitre ${chapterNumber}:`, requiredPages);
+    console.log(`📊 [HOOK] Pages actuellement complétées:`, Array.from(completedPages));
+    console.log(`🏆 [HOOK] Quiz actuellement complétés:`, Array.from(completedQuizzes));
+    
     const allPagesCompleted = requiredPages.every(pageNum => completedPages.has(pageNum));
     const quizCompleted = completedQuizzes.has(chapterNumber);
     
     console.log(`📚 [HOOK] Chapitre ${chapterNumber} - Pages complétées:`, allPagesCompleted, requiredPages);
     console.log(`🏆 [HOOK] Chapitre ${chapterNumber} - Quiz complété:`, quizCompleted);
-    console.log(`📊 [HOOK] Pages actuelles:`, Array.from(completedPages));
-    console.log(`🎯 [HOOK] Quiz actuels:`, Array.from(completedQuizzes));
+    
+    // Vérification détaillée page par page
+    requiredPages.forEach(pageNum => {
+      const hasPage = completedPages.has(pageNum);
+      console.log(`📄 [HOOK] Page ${pageNum}: ${hasPage ? '✅' : '❌'}`);
+    });
     
     if (allPagesCompleted && quizCompleted) {
       console.log(`🎉 [HOOK] CHAPITRE ${chapterNumber} TERMINÉ ! Envoi du devoir...`);
       triggerHomeworkSend(chapterNumber);
     } else {
-      console.log(`⏳ [HOOK] Chapitre ${chapterNumber} pas encore terminé`);
+      console.log(`⏳ [HOOK] Chapitre ${chapterNumber} pas encore terminé:`);
+      console.log(`   - Pages: ${allPagesCompleted ? '✅' : '❌'} (${requiredPages.filter(p => completedPages.has(p)).length}/${requiredPages.length})`);
+      console.log(`   - Quiz: ${quizCompleted ? '✅' : '❌'}`);
     }
     
     console.log(`🔍 [HOOK] ===== FIN VÉRIFICATION COMPLETION =====`);
