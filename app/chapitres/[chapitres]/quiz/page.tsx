@@ -24,7 +24,7 @@ export default function QuizPage({ params }: QuizPageProps) {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-4">Quiz – {chapter.title}</h1>
-      <Quiz quiz={chapter.quiz} />
+      <Quiz quiz={chapter.quiz} chapterNumber={chapterNumber} />
     </div>
   );
 }

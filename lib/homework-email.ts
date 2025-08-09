@@ -3,7 +3,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { prisma } from './prisma';
 
 // Configuration du transporteur email (réutilise la config existante)
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false,
@@ -361,6 +361,7 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
       return false;
     }
 
+    console.log(`📝 Devoir trouvé pour le chapitre ${chapterNumber}:`, homework.title);
     // Vérifier si le devoir a déjà été envoyé à cet utilisateur
     const existingSend = await prisma.homeworkSend.findUnique({
       where: {
@@ -376,6 +377,7 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
       return false;
     }
 
+    console.log(`📝 Nouveau devoir à envoyer pour l'utilisateur ${userId}, chapitre ${chapterNumber}`);
     // Récupérer les données de l'utilisateur
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -398,8 +400,9 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
     // Envoyer l'email
     const emailSent = await sendHomeworkEmail(homework, user);
 
+    console.log(`📧 Résultat envoi email:`, emailSent);
     // Enregistrer l'envoi dans la base de données
-    await prisma.homeworkSend.create({
+    const homeworkSend = await prisma.homeworkSend.create({
       data: {
         userId,
         homeworkId: homework.id,
@@ -407,7 +410,13 @@ export async function checkAndSendHomework(userId: string, chapterNumber: number
       }
     });
 
-    console.log(`✅ Devoir envoyé et enregistré pour l'utilisateur ${userId}, chapitre ${chapterNumber}`);
+    console.log(`✅ Devoir envoyé et enregistré:`, {
+      userId,
+      chapterNumber,
+      emailSent,
+      homeworkSendId: homeworkSend.id
+    });
+    
     return emailSent;
   } catch (error) {
     console.error('❌ Erreur lors de la vérification/envoi du devoir:', error);

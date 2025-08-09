@@ -189,13 +189,43 @@ export function useUserProgress() {
             newSet.delete(quizNumber);
           } else {
             newSet.add(quizNumber);
-          // Vérifier si le chapitre est maintenant complété
-          setTimeout(() => {
-            if (isChapterCompleted(quizNumber)) {
-              console.log(`🎉 Chapitre ${quizNumber} terminé ! Vérification du devoir...`);
-              triggerHomeworkSend(quizNumber);
+            
+            // Vérifier immédiatement si le chapitre est complété avec les nouvelles données
+            console.log(`🎯 Quiz ${quizNumber} complété ! Vérification du chapitre...`);
+            
+            // Créer un Set temporaire avec la nouvelle valeur pour la vérification
+            const tempQuizSet = new Set(prev);
+            tempQuizSet.add(quizNumber);
+            
+            // Vérifier si toutes les pages du chapitre sont complétées
+            const chapterPages: { [key: number]: number[] } = {
+              1: [1, 2, 3, 4, 5, 6, 7],
+              2: [8, 9, 10, 11],
+              3: [12, 13, 14, 15],
+              4: [16],
+              5: [17],
+              6: [18, 19, 20],
+              7: [21],
+              8: [22, 23],
+              9: [24],
+              10: [25, 26, 27, 28, 29]
+            };
+            
+            const requiredPages = chapterPages[quizNumber];
+            if (requiredPages) {
+              const allPagesCompleted = requiredPages.every(pageNum => completedPages.has(pageNum));
+              const quizCompleted = tempQuizSet.has(quizNumber);
+              
+              console.log(`📚 Chapitre ${quizNumber} - Pages complétées:`, allPagesCompleted);
+              console.log(`🏆 Chapitre ${quizNumber} - Quiz complété:`, quizCompleted);
+              
+              if (allPagesCompleted && quizCompleted) {
+                console.log(`🎉 CHAPITRE ${quizNumber} TERMINÉ ! Envoi du devoir...`);
+                triggerHomeworkSend(quizNumber);
+              } else {
+                console.log(`⏳ Chapitre ${quizNumber} pas encore terminé`);
+              }
             }
-          }, 1000); // Délai pour s'assurer que l'état est mis à jour
           }
           return newSet;
         });

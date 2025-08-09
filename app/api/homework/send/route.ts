@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
     // Vérifier et envoyer le devoir
     const sent = await checkAndSendHomework(user.id, chapterNumber);
 
+    console.log(`📧 Résultat envoi devoir chapitre ${chapterNumber}:`, sent);
     return NextResponse.json({
       success: true,
       sent,

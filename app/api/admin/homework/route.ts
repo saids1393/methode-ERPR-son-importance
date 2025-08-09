@@ -27,10 +27,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tous les champs sont requis" }, { status: 400 });
     }
 
+    // Vérifier si un devoir existe déjà pour ce chapitre
+    const existingHomework = await prisma.homework.findFirst({
+      where: { chapterId }
+    });
+
+    if (existingHomework) {
+      return NextResponse.json({ 
+        error: `Un devoir existe déjà pour le chapitre ${chapterId}. Utilisez la modification pour le mettre à jour.` 
+      }, { status: 400 });
+    }
     const homework = await prisma.homework.create({
       data: { chapterId, title, content },
     });
 
+    console.log(`✅ Nouveau devoir créé pour le chapitre ${chapterId}:`, homework.title);
     return NextResponse.json(homework, { status: 201 });
   } catch (error) {
     console.error("Erreur POST /admin/homework:", error);
