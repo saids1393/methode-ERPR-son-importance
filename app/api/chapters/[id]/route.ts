@@ -9,6 +9,7 @@ export async function GET(
   try {
     const chapterId = context.params.id;
 
+    // Remplace cette ligne par ta logique réelle de récupération
     const chapter: Chapter | null = await getChapterById(chapterId);
 
     if (!chapter) {
