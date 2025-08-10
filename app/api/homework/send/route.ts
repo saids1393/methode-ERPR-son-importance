@@ -1,15 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUserFromRequest } from '@/lib/auth';
-import { checkAndSendHomework } from '@/lib/homework-email';
-import { prisma } from '@/lib/prisma'; // AJOUT DE L'IMPORT MANQUANT
-
-// Variable pour stocker les requêtes en cours par utilisateur
-const processingRequests = new Map<string, boolean>();
-
-// POST - Déclencher l'envoi d'un devoir pour un chapitre
 export async function POST(request: NextRequest) {
   let userId: string | null = null;
-  
+  let chapterNumber: number | null = null; 
+
   try {
     console.log(`📝 [API] ===== DÉBUT ENVOI DEVOIR =====`);
     
@@ -25,7 +17,8 @@ export async function POST(request: NextRequest) {
     
     userId = user.id;
     
-    const { chapterNumber } = await request.json();
+    const body = await request.json();
+    chapterNumber = body.chapterNumber;
     
     if (typeof chapterNumber !== 'number' || chapterNumber < 0 || chapterNumber > 11) {
       console.log(`❌ [API] Numéro de chapitre invalide:`, chapterNumber);
@@ -103,7 +96,7 @@ export async function POST(request: NextRequest) {
     console.error('❌ [API] Send homework error:', error);
     
     // Libérer le verrou en cas d'erreur
-    if (userId) {
+    if (userId !== null && chapterNumber !== null) {
       const requestKey = `${userId}-${chapterNumber}`;
       processingRequests.delete(requestKey);
     }
