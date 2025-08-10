@@ -20,9 +20,9 @@ export default function QuizPage({ params }: QuizPageProps) {
   const chapterNumber = Number(chapitre);
   const chapter = getChapterByNumber(chapterNumber);
   
-  // Activer l'auto-progression pour les quiz
+  // Activer l'auto-progression pour les quiz avec interval (et non delay)
   useAutoProgress({ 
-    delay: 6000, // 6 secondes
+    interval: 6000, // 6 secondes
     enabled: true 
   });
 
