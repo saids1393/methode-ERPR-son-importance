@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Récupérer le devoir
     const homework = await prisma.homework.findUnique({
       where: { id: homeworkId }
     });
@@ -28,14 +27,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Générer le PDF
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]); // A4
+    const page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
-    
+
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    
+
     const fontSize = 12;
     const titleFontSize = 18;
     const margin = 50;
@@ -60,7 +58,7 @@ export async function POST(request: NextRequest) {
     });
     y -= 40;
 
-    // Titre du devoir
+    // Titre
     page.drawText(homework.title, {
       x: margin,
       y,
@@ -70,11 +68,10 @@ export async function POST(request: NextRequest) {
     });
     y -= 40;
 
-    // Contenu du devoir
+    // Contenu
     const lines = homework.content.split('\n');
     for (const line of lines) {
       if (y < 100) {
-        // Nouvelle page si nécessaire
         pdfDoc.addPage([595, 842]);
         y = height - margin;
       }
@@ -126,10 +123,12 @@ export async function POST(request: NextRequest) {
       color: rgb(0.5, 0.5, 0.5)
     });
 
-    // Sauvegarde en ArrayBuffer pour compatibilité Vercel
     const pdfBytes = await pdfDoc.save();
 
-    return new NextResponse(pdfBytes.buffer, {
+    // ✅ Conversion en Buffer pour éviter l'erreur ArrayBufferLike
+    const pdfBuffer = Buffer.from(pdfBytes);
+
+    return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="devoir-chapitre-${homework.chapterId}.pdf"`,
