@@ -27,13 +27,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!homework.title || !homework.content || !homework.chapterId) {
-      return NextResponse.json(
-        { error: 'Devoir incomplet' },
-        { status: 400 }
-      );
-    }
-
     const pdfDoc = await PDFDocument.create();
     let page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
@@ -79,7 +72,7 @@ export async function POST(request: NextRequest) {
     const lines = homework.content.split('\n');
     for (const line of lines) {
       if (y < 100) {
-        page = pdfDoc.addPage([595, 842]);  // <-- réaffectation importante
+        page = pdfDoc.addPage([595, 842]); // Créer une nouvelle page et mettre à jour la variable
         y = height - margin;
       }
 
@@ -87,11 +80,11 @@ export async function POST(request: NextRequest) {
         const maxWidth = width - 2 * margin;
         const words = line.split(' ');
         let currentLine = '';
-        
+
         for (const word of words) {
           const testLine = currentLine ? `${currentLine} ${word}` : word;
           const textWidth = font.widthOfTextAtSize(testLine, fontSize);
-          
+
           if (textWidth > maxWidth && currentLine) {
             page.drawText(currentLine, {
               x: margin,
@@ -105,7 +98,7 @@ export async function POST(request: NextRequest) {
             currentLine = testLine;
           }
         }
-        
+
         if (currentLine) {
           page.drawText(currentLine, {
             x: margin,
@@ -131,8 +124,6 @@ export async function POST(request: NextRequest) {
     });
 
     const pdfBytes = await pdfDoc.save();
-
-    // Conversion en Buffer pour éviter l'erreur ArrayBufferLike
     const pdfBuffer = Buffer.from(pdfBytes);
 
     return new NextResponse(pdfBuffer, {
