@@ -27,8 +27,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!homework.title || !homework.content || !homework.chapterId) {
+      return NextResponse.json(
+        { error: 'Devoir incomplet' },
+        { status: 400 }
+      );
+    }
+
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]);
+    let page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
 
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -72,7 +79,7 @@ export async function POST(request: NextRequest) {
     const lines = homework.content.split('\n');
     for (const line of lines) {
       if (y < 100) {
-        pdfDoc.addPage([595, 842]);
+        page = pdfDoc.addPage([595, 842]);  // <-- réaffectation importante
         y = height - margin;
       }
 
@@ -125,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     const pdfBytes = await pdfDoc.save();
 
-    // ✅ Conversion en Buffer pour éviter l'erreur ArrayBufferLike
+    // Conversion en Buffer pour éviter l'erreur ArrayBufferLike
     const pdfBuffer = Buffer.from(pdfBytes);
 
     return new NextResponse(pdfBuffer, {
