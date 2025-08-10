@@ -160,7 +160,7 @@ export async function updateUserProfile(
 ): Promise<UserData> {
   try {
     const updateData: {
-      username?: string;
+      username?: string | null;  // <-- ici autorisation null
       password?: string;
       gender?: 'HOMME' | 'FEMME';
     } = {};
@@ -170,19 +170,19 @@ export async function updateUserProfile(
         // Permettre de vider le username
         updateData.username = null;
       } else {
-      if (data.username.length < 3 || data.username.length > 30) {
-        throw new Error('Username must be between 3 and 30 characters');
-      }
-      
-      const existingUser = await prisma.user.findUnique({
-        where: { username: data.username }
-      });
-      
-      if (existingUser && existingUser.id !== userId) {
-        throw new Error('Username already taken');
-      }
-      
-      updateData.username = data.username;
+        if (data.username.length < 3 || data.username.length > 30) {
+          throw new Error('Username must be between 3 and 30 characters');
+        }
+        
+        const existingUser = await prisma.user.findUnique({
+          where: { username: data.username }
+        });
+        
+        if (existingUser && existingUser.id !== userId) {
+          throw new Error('Username already taken');
+        }
+        
+        updateData.username = data.username;
       }
     }
 
@@ -204,6 +204,7 @@ export async function updateUserProfile(
     if (Object.keys(updateData).length === 0) {
       throw new Error('No data to update');
     }
+
     const user = await prisma.user.update({
       where: { id: userId },
       data: updateData,
@@ -329,6 +330,7 @@ export function setAuthCookie(token: string): void {
     document.cookie = `auth-token=${token}; expires=${expires.toUTCString()}; path=/; secure; samesite=strict`;
   }
 }
+
 // Générer un token de réinitialisation de mot de passe
 export function generateResetToken(): string {
   return crypto.randomBytes(32).toString('hex');
@@ -417,7 +419,7 @@ export async function resetPassword(token: string, newPassword: string): Promise
     // Hasher le nouveau mot de passe
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Mettre à jour le mot de passe et supprimer le token
+    // Mettre à jour le mot de passe et supprimer le token de réinitialisation
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -429,7 +431,7 @@ export async function resetPassword(token: string, newPassword: string): Promise
 
     return {
       success: true,
-      message: 'Votre mot de passe a été réinitialisé avec succès.'
+      message: 'Mot de passe réinitialisé avec succès.'
     };
   } catch (error) {
     console.error('Erreur lors de la réinitialisation du mot de passe:', error);
