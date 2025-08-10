@@ -74,7 +74,13 @@ export async function PATCH(
     // Récupérer l'utilisateur actuel pour comparer les changements
     const currentUser = await prisma.user.findUnique({
       where: { id },
-      select: { email: true, username: true, gender: true, isActive: true }
+      select: { 
+        email: true, 
+        username: true, 
+        gender: true, 
+        isActive: true,
+        stripeCustomerId: true // Ajouté ici pour corriger l'erreur
+      }
     });
 
     if (!currentUser) {
@@ -99,8 +105,6 @@ export async function PATCH(
     // Gestion du statut payant manuel
     if (body.isPaid !== undefined) {
       if (body.isPaid && !currentUser.stripeCustomerId) {
-      }
-      if (body.isPaid && !currentUser.stripeCustomerId) {
         updateData.stripeCustomerId = `manual_${Date.now()}`;
         updateData.stripeSessionId = `manual_session_${Date.now()}`;
       } else if (!body.isPaid) {
@@ -109,6 +113,7 @@ export async function PATCH(
         updateData.stripeSessionId = null;
       }
     }
+
     if (body.email !== undefined && body.email !== currentUser.email) {
       if (!validateEmail(body.email)) {
         return NextResponse.json(
@@ -134,6 +139,7 @@ export async function PATCH(
       newEmail = body.email;
       updateData.email = body.email;
     }
+
     if (body.gender !== undefined) {
       if (body.gender === '') {
         updateData.gender = null;
@@ -146,6 +152,7 @@ export async function PATCH(
         );
       }
     }
+
     const user = await prisma.user.update({
       where: { id },
       data: updateData,
@@ -179,6 +186,7 @@ export async function PATCH(
         // Ne pas faire échouer la mise à jour pour une erreur d'email
       }
     }
+
     return NextResponse.json(user);
   } catch (error) {
     console.error('Admin user update error:', error);
