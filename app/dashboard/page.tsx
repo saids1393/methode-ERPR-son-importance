@@ -255,6 +255,9 @@ const handleContactSubmit = async (e: React.FormEvent) => {
         updateData.password = editForm.newPassword;
       }
 
+      // Ne pas inclure le genre dans les modifications depuis l'espace élève
+      // Le genre est défini une seule fois lors de la création du compte
+
       const response = await fetch('/api/auth/complete-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

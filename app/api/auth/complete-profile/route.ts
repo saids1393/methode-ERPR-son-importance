@@ -26,37 +26,42 @@ export async function POST(req: Request) {
 
     const { username, password, gender } = await req.json();
 
-    if (!username || !password || !gender) {
+    // Pour les mises à jour depuis l'espace élève, le genre n'est pas requis
+    if (!username && !password && !gender) {
       secureLog('COMPLETE_PROFILE_MISSING_FIELDS', { ip: clientIP });
       return NextResponse.json(
-        { error: 'Pseudo, mot de passe et genre requis' },
+        { error: 'Au moins un champ doit être fourni pour la mise à jour' },
         { status: 400 }
       );
     }
 
     // Sanitiser et valider les entrées
-    const cleanUsername = sanitizeInput(username);
+    const cleanUsername = username ? sanitizeInput(username) : null;
     
-    const usernameValidation = validateUsername(cleanUsername);
-    if (!usernameValidation.valid) {
-      secureLog('COMPLETE_PROFILE_INVALID_USERNAME', { ip: clientIP, errors: usernameValidation.errors });
-      return NextResponse.json(
-        { error: usernameValidation.errors[0] },
-        { status: 400 }
-      );
+    if (cleanUsername) {
+      const usernameValidation = validateUsername(cleanUsername);
+      if (!usernameValidation.valid) {
+        secureLog('COMPLETE_PROFILE_INVALID_USERNAME', { ip: clientIP, errors: usernameValidation.errors });
+        return NextResponse.json(
+          { error: usernameValidation.errors[0] },
+          { status: 400 }
+        );
+      }
     }
 
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.valid) {
-      secureLog('COMPLETE_PROFILE_WEAK_PASSWORD', { ip: clientIP, errors: passwordValidation.errors });
-      return NextResponse.json(
-        { error: passwordValidation.errors[0] },
-        { status: 400 }
-      );
+    if (password) {
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.valid) {
+        secureLog('COMPLETE_PROFILE_WEAK_PASSWORD', { ip: clientIP, errors: passwordValidation.errors });
+        return NextResponse.json(
+          { error: passwordValidation.errors[0] },
+          { status: 400 }
+        );
+      }
     }
 
     // Valider le genre
-    if (!['HOMME', 'FEMME'].includes(gender)) {
+    if (gender && !['HOMME', 'FEMME'].includes(gender)) {
       secureLog('COMPLETE_PROFILE_INVALID_GENDER', { ip: clientIP });
       return NextResponse.json(
         { error: 'Genre invalide' },
@@ -76,12 +81,14 @@ export async function POST(req: Request) {
 
     secureLog('COMPLETE_PROFILE_ATTEMPT', { ip: clientIP, userId: user.id });
 
-    // Mettre à jour le profil et s'assurer qu'il est marqué comme payant
-    const updatedUser = await updateUserProfile(user.id, {
-      username: cleanUsername,
-      password,
-      gender
-    });
+    // Préparer les données de mise à jour
+    const updateData: any = {};
+    if (cleanUsername) updateData.username = cleanUsername;
+    if (password) updateData.password = password;
+    if (gender) updateData.gender = gender;
+
+    // Mettre à jour le profil
+    const updatedUser = await updateUserProfile(user.id, updateData);
 
     // S'assurer que l'utilisateur a des données de paiement (par défaut payant)
     const userWithStripe = await prisma.user.findUnique({

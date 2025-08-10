@@ -166,6 +166,10 @@ export async function updateUserProfile(
     } = {};
 
     if (data.username !== undefined) {
+      if (data.username === '') {
+        // Permettre de vider le username
+        updateData.username = null;
+      } else {
       if (data.username.length < 3 || data.username.length > 30) {
         throw new Error('Username must be between 3 and 30 characters');
       }
@@ -179,6 +183,7 @@ export async function updateUserProfile(
       }
       
       updateData.username = data.username;
+      }
     }
 
     if (data.password !== undefined) {
@@ -195,6 +200,10 @@ export async function updateUserProfile(
       updateData.gender = data.gender;
     }
 
+    // Vérifier qu'il y a au moins une donnée à mettre à jour
+    if (Object.keys(updateData).length === 0) {
+      throw new Error('No data to update');
+    }
     const user = await prisma.user.update({
       where: { id: userId },
       data: updateData,

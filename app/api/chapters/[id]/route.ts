@@ -1,23 +1,23 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { Chapter } from '@/types/chapter';
 
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
-    const chapterId = params.id;
-    
-    // Récupération du chapitre (remplacez par votre logique réelle)
+    const chapterId = context.params.id;
+
     const chapter: Chapter | null = await getChapterById(chapterId);
-    
+
     if (!chapter) {
       return NextResponse.json(
         { error: 'Chapter not found' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json(chapter);
   } catch (error) {
     console.error('Get chapter error:', error);
@@ -29,5 +29,5 @@ export async function GET(
 }
 
 function getChapterById(chapterId: string): any {
-    throw new Error('Function not implemented.');
+  throw new Error('Function not implemented.');
 }
