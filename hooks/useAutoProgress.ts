@@ -5,8 +5,8 @@ import { useUserProgress } from './useUserProgress';
 import { usePathname } from 'next/navigation';
 
 interface UseAutoProgressOptions {
-  minTimeOnPage?: number; // Temps minimum en millisecondes (défaut: 6000ms = 6s)
-  enabled?: boolean; // Activer/désactiver l'auto-progression
+  minTimeOnPage?: number; // Temps minimum en ms (par défaut 6000)
+  enabled?: boolean;      // Activer/désactiver l’auto-progression
 }
 
 export function useAutoProgress(options: UseAutoProgressOptions = {}) {
@@ -14,7 +14,7 @@ export function useAutoProgress(options: UseAutoProgressOptions = {}) {
   const pathname = usePathname();
   const pageStartTimeRef = useRef<number>(0);
   const hasValidatedRef = useRef<boolean>(false);
-  
+
   const { 
     completedPages, 
     completedQuizzes, 
@@ -24,22 +24,22 @@ export function useAutoProgress(options: UseAutoProgressOptions = {}) {
     forceUpdate
   } = useUserProgress();
 
-  // Fonction pour extraire les informations de la page actuelle
+  // Récupérer les infos de la page actuelle
   const getCurrentPageInfo = useCallback(() => {
     const pathParts = pathname.split('/');
-    
+
     if (pathParts[1] === 'chapitres') {
       const chapterNumber = parseInt(pathParts[2], 10);
-      
+
       if (pathParts[3] === 'quiz') {
         return {
           type: 'quiz' as const,
           chapterNumber,
           pageNumber: null,
-          isCompleted: completedQuizzes.has(chapterNumber)
+          isCompleted: completedQuizzes.has(chapterNumber),
         };
       } else if (pathParts[3] === 'introduction' || pathParts[3] === 'video') {
-        // Pour les introductions et vidéos, pas de validation automatique
+        // Pas d’auto-validation pour intro/vidéo
         return null;
       } else {
         const pageNumber = parseInt(pathParts[3], 10);
@@ -47,90 +47,65 @@ export function useAutoProgress(options: UseAutoProgressOptions = {}) {
           type: 'page' as const,
           chapterNumber,
           pageNumber,
-          isCompleted: completedPages.has(pageNumber)
+          isCompleted: completedPages.has(pageNumber),
         };
       }
     }
-    
+
     return null;
   }, [pathname, completedPages, completedQuizzes]);
 
-  // Fonction pour valider la page courante si le temps minimum est écoulé
+  // Valider la page si temps minimum écoulé
   const validateCurrentPageIfTimeElapsed = useCallback(async () => {
     if (!enabled || isProfessorMode || hasValidatedRef.current) return false;
-    
+
     const currentTime = Date.now();
     const timeOnPage = currentTime - pageStartTimeRef.current;
-    
-    console.log('🕐 [AUTO-PROGRESS] Vérification temps écoulé:', {
-      timeOnPage,
-      minTimeRequired: minTimeOnPage,
-      canValidate: timeOnPage >= minTimeOnPage
-    });
-    
-    if (timeOnPage < minTimeOnPage) {
-      console.log('⏱️ [AUTO-PROGRESS] Temps insuffisant sur la page');
-      return false;
-    }
-    
-    const pageInfo = getCurrentPageInfo();
-    if (!pageInfo || pageInfo.isCompleted) {
-      console.log('🚫 [AUTO-PROGRESS] Page non éligible ou déjà complétée');
-      return false;
-    }
 
-    console.log('🎯 [AUTO-PROGRESS] ===== VALIDATION AUTOMATIQUE =====');
-    console.log('📍 [AUTO-PROGRESS] Page actuelle:', pageInfo);
-    console.log('⏱️ [AUTO-PROGRESS] Temps passé:', timeOnPage, 'ms');
+    if (timeOnPage < minTimeOnPage) return false;
+
+    const pageInfo = getCurrentPageInfo();
+    if (!pageInfo || pageInfo.isCompleted) return false;
 
     hasValidatedRef.current = true;
 
     try {
       if (pageInfo.type === 'page' && pageInfo.pageNumber !== null) {
-        // Exclure les pages spéciales
-        if (pageInfo.pageNumber === 0 || pageInfo.pageNumber === 30 || 
-            pageInfo.chapterNumber === 0 || pageInfo.chapterNumber === 11) {
-          console.log('🚫 [AUTO-PROGRESS] Page exclue de l\'auto-progression');
+        // Exclure certaines pages spécifiques
+        if (
+          pageInfo.pageNumber === 0 ||
+          pageInfo.pageNumber === 30 ||
+          pageInfo.chapterNumber === 0 ||
+          pageInfo.chapterNumber === 11
+        ) {
           return false;
         }
-        
-        console.log('📄 [AUTO-PROGRESS] Validation page:', pageInfo.pageNumber);
+
         await togglePageCompletion(pageInfo.pageNumber);
       } else if (pageInfo.type === 'quiz') {
-        // Exclure le chapitre 11
-        if (pageInfo.chapterNumber === 11) {
-          console.log('🚫 [AUTO-PROGRESS] Quiz chapitre 11 exclu');
-          return false;
-        }
-        
-        console.log('🎯 [AUTO-PROGRESS] Validation quiz:', pageInfo.chapterNumber);
+        if (pageInfo.chapterNumber === 11) return false;
         await toggleQuizCompletion(pageInfo.chapterNumber);
       }
-      
-      console.log('✅ [AUTO-PROGRESS] Validation réussie');
+
       return true;
     } catch (error) {
-      console.error('❌ [AUTO-PROGRESS] Erreur lors de la validation:', error);
       hasValidatedRef.current = false;
       return false;
     }
   }, [enabled, isProfessorMode, minTimeOnPage, getCurrentPageInfo, togglePageCompletion, toggleQuizCompletion]);
 
-  // Réinitialiser le timer quand on arrive sur une nouvelle page
+  // Démarrer le timer à chaque changement de page
   useEffect(() => {
-    console.log('🔄 [AUTO-PROGRESS] Nouvelle page détectée:', pathname);
     pageStartTimeRef.current = Date.now();
     hasValidatedRef.current = false;
-    
-    console.log('⏰ [AUTO-PROGRESS] Timer démarré à:', new Date(pageStartTimeRef.current).toLocaleTimeString());
   }, [pathname]);
 
-  // Fonction exposée pour valider manuellement (appelée lors de la navigation)
+  // Validation manuelle exposée
   const validateIfTimeElapsed = useCallback(() => {
     return validateCurrentPageIfTimeElapsed();
   }, [validateCurrentPageIfTimeElapsed]);
 
-  // Fonction pour obtenir le temps passé sur la page courante
+  // Temps passé sur la page actuelle
   const getTimeOnCurrentPage = useCallback(() => {
     return Date.now() - pageStartTimeRef.current;
   }, []);
@@ -140,6 +115,6 @@ export function useAutoProgress(options: UseAutoProgressOptions = {}) {
     currentPageInfo: getCurrentPageInfo(),
     validateIfTimeElapsed,
     getTimeOnCurrentPage,
-    hasValidated: hasValidatedRef.current
+    hasValidated: hasValidatedRef.current,
   };
 }
