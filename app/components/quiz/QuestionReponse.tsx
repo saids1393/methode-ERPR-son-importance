@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUserProgress } from "@/hooks/useUserProgress";
+import { useRouter } from "next/navigation";
 
 type QuizQuestion = {
   question: string;
@@ -11,13 +13,16 @@ type QuizQuestion = {
 
 type QuizProps = {
   quiz: QuizQuestion[];
+  chapterNumber?: number;
 };
 
-const Quiz: React.FC<QuizProps> = ({ quiz }) => {
+const Quiz: React.FC<QuizProps> = ({ quiz, chapterNumber }) => {
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [showRecap, setShowRecap] = useState(false);
+  const { toggleQuizCompletion } = useUserProgress();
+  const router = useRouter();
 
   const handleAnswerSelect = (answerIndex: number) => {
     const updatedAnswers = [...selectedAnswers];
@@ -29,6 +34,20 @@ const Quiz: React.FC<QuizProps> = ({ quiz }) => {
         setCurrentQuestion(currentQuestion + 1);
       } else {
         setSubmitted(true);
+        
+        // Marquer le quiz comme complété si le score est suffisant
+        const score = getScore();
+        const percentage = Math.round((score / quiz.length) * 100);
+        
+        console.log(`🎯 [QUIZ] Quiz terminé - Score: ${score}/${quiz.length} (${percentage}%)`);
+        console.log(`🎯 [QUIZ] Chapitre: ${chapterNumber}, Seuil: 75%`);
+        
+        if (percentage >= 75 && chapterNumber !== undefined) {
+          console.log(`🏆 Quiz réussi (${percentage}%) - Marquage du chapitre ${chapterNumber} comme complété`);
+          toggleQuizCompletion(chapterNumber);
+        } else {
+          console.log(`📊 [QUIZ] Quiz terminé avec ${percentage}% - Pas de marquage automatique (seuil non atteint)`);
+        }
       }
     }, 400);
   };
@@ -47,6 +66,12 @@ const Quiz: React.FC<QuizProps> = ({ quiz }) => {
     setShowRecap(false);
   };
 
+  const handleManualComplete = () => {
+    if (chapterNumber !== undefined) {
+      console.log(`✅ [QUIZ] Marquage manuel du chapitre ${chapterNumber} comme complété`);
+      toggleQuizCompletion(chapterNumber);
+    }
+  };
   const score = getScore();
   const percentage = Math.round((score / quiz.length) * 100);
   const isSuccess = percentage >= 75;
@@ -135,6 +160,16 @@ const Quiz: React.FC<QuizProps> = ({ quiz }) => {
               </p>
             )}
 
+            {/* Bouton de marquage manuel si le score n'est pas suffisant */}
+            {!isSuccess && chapterNumber !== undefined && (
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleManualComplete}
+                className="mt-4 mr-4 inline-block px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all"
+              >
+                Marquer comme complété quand même
+              </motion.button>
+            )}
             {hasErrors && (
               <motion.button
                 whileTap={{ scale: 0.95 }}

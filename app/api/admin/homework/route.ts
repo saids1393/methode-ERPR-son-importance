@@ -1,21 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthUserFromRequest } from "@/lib/auth";
+import { requireAdmin } from "@/lib/admin-auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getAuthUserFromRequest(req);
-    if (!user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
-    // 🔹 Vérifier si l'utilisateur est professeur (optionnel)
-    const isProfessor = await prisma.professor.findUnique({
-      where: { id: user.id },
-    });
-    if (!isProfessor) {
-      return NextResponse.json({ error: "Accès réservé à l'admin" }, { status: 403 });
-    }
+    await requireAdmin(req);
 
     const homeworks = await prisma.homework.findMany({
       orderBy: { chapterId: "asc" },
@@ -24,23 +13,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(homeworks);
   } catch (error) {
     console.error("Erreur GET /admin/homework:", error);
-    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+    return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getAuthUserFromRequest(req);
-    if (!user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
-    const isProfessor = await prisma.professor.findUnique({
-      where: { id: user.id },
-    });
-    if (!isProfessor) {
-      return NextResponse.json({ error: "Accès réservé à l'admin" }, { status: 403 });
-    }
+    await requireAdmin(req);
 
     const { chapterId, title, content } = await req.json();
 
@@ -59,19 +38,30 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
-    const user = await getAuthUserFromRequest(req);
-    if (!user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    await requireAdmin(req);
+
+    const { id, chapterId, title, content } = await req.json();
+
+    if (!id || !chapterId || !title || !content) {
+      return NextResponse.json({ error: "Tous les champs sont requis" }, { status: 400 });
     }
 
-    const isProfessor = await prisma.professor.findUnique({
-      where: { id: user.id },
+    const homework = await prisma.homework.update({
+      where: { id },
+      data: { chapterId, title, content },
     });
-    if (!isProfessor) {
-      return NextResponse.json({ error: "Accès réservé à l'admin" }, { status: 403 });
-    }
+
+    return NextResponse.json(homework);
+  } catch (error) {
+    console.error("Erreur PUT /admin/homework:", error);
+    return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 });
+  }
+}
+export async function DELETE(req: NextRequest) {
+  try {
+    await requireAdmin(req);
 
     const { id } = await req.json();
     if (!id) {

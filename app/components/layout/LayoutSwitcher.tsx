@@ -54,7 +54,11 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
 
   // Si pas de sidebar nécessaire, afficher le contenu directement
   if (!showSidebar) {
-    return <div className="min-h-screen">{children}</div>;
+    return (
+      <div className="min-h-screen">
+        {children}
+      </div>
+    );
   }
 
   // Utiliser le layout avec sidebar

@@ -66,3 +66,13 @@ body {
 .font-arabic {
   font-family: 'Cairo', serif;
 }
+
+/* Animation pour la barre de progression auto */
+@keyframes progress-bar {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-progress-bar {
+  animation: progress-bar 6s linear forwards;
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { generateAllStaticParams, getPageByNumbers } from '@/lib/chapters';
+import AutoProgressWrapper from '@/app/components/AutoProgressWrapper';
 
 type ParamsType = {
   chapitres: string;
@@ -86,7 +87,12 @@ async function getComponent(chapitres: string, page: string) {
 export default async function Page({ params }: Props) {
   const { chapitres, page } = await params;
   const Component = await getComponent(chapitres, page);
-  return <Component />;
+  
+  return (
+    <AutoProgressWrapper>
+      <Component />
+    </AutoProgressWrapper>
+  );
 }
 
 export async function generateStaticParams() {

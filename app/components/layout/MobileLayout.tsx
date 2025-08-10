@@ -6,7 +6,7 @@ import SidebarContent from "@/app/components/SidebarContent";
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [courseStarted, setCourseStarted] = useState(false);
-
+  
   useEffect(() => {
     // Vérifier si le cours a été commencé
     setCourseStarted(localStorage.getItem('courseStarted') === 'true');
