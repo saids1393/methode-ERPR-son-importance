@@ -22,7 +22,7 @@ export default function VideoPage({ params }: VideoPageProps) {
   
   // Activer l'auto-progression pour les vidéos
   useAutoProgress({ 
-    delay: 6000, // 6 secondes
+    minTimeOnPage: 6000, // 6 secondes
     enabled: true 
   });
 
