@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin-auth';
 
+interface User {
+  id: string;
+  email: string;
+  username: string | null;
+  gender: string | null;
+  isActive: boolean;
+  stripeCustomerId: string | null;
+  stripeSessionId: string | null;
+  completedPages: number[];
+  completedQuizzes: number[];
+  studyTimeSeconds: number;
+  resetToken: string | null;
+  resetTokenExpires: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export async function GET(request: NextRequest) {
   try {
     await requireAdmin(request);
@@ -47,9 +64,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Enrichir les données utilisateur
-    const enrichedUsers = users.map((user: { completedPages: { filter: (arg0: (p: number) => boolean) => { (): any; new(): any; length: any; }; }; completedQuizzes: { filter: (arg0: (q: number) => boolean) => { (): any; new(): any; length: any; }; }; id: any; email: any; username: any; gender: any; isActive: any; stripeCustomerId: any; stripeSessionId: any; studyTimeSeconds: number; resetToken: any; resetTokenExpires: { toISOString: () => any; }; createdAt: { toISOString: () => any; toLocaleDateString: (arg0: string) => any; }; updatedAt: { toISOString: () => any; toLocaleDateString: (arg0: string) => any; }; }) => {
-      const completedPagesCount = user.completedPages.filter((p: number) => p !== 0 && p !== 30).length;
-      const completedQuizzesCount = user.completedQuizzes.filter((q: number) => q !== 11).length;
+    const enrichedUsers = users.map((user: User) => {
+      const completedPagesCount = user.completedPages.filter(p => p !== 0 && p !== 30).length;
+      const completedQuizzesCount = user.completedQuizzes.filter(q => q !== 11).length;
       const totalPossibleItems = 29 + 11; // 29 pages + 11 quiz
       const progressPercentage = Math.round(
         ((completedPagesCount + completedQuizzesCount) / totalPossibleItems) * 100
@@ -61,7 +78,7 @@ export async function GET(request: NextRequest) {
         username: user.username || '',
         gender: user.gender || '',
         isActive: user.isActive ? 'Oui' : 'Non',
-        isPaid: !!user.stripeCustomerId ? 'Oui' : 'Non', // Seulement si stripeCustomerId existe
+        isPaid: !!user.stripeCustomerId ? 'Oui' : 'Non',
         stripeCustomerId: user.stripeCustomerId || '',
         stripeSessionId: user.stripeSessionId || '',
         completedPages: completedPagesCount,
@@ -81,7 +98,6 @@ export async function GET(request: NextRequest) {
     });
 
     if (format === 'csv') {
-      // Générer CSV avec toutes les données
       const headers = [
         'ID',
         'Email',
@@ -108,7 +124,7 @@ export async function GET(request: NextRequest) {
 
       const csvContent = [
         headers.join(','),
-        ...enrichedUsers.map((user: { id: any; email: any; username: any; gender: any; isActive: any; isPaid: any; stripeCustomerId: any; stripeSessionId: any; completedPages: any; totalPages: any; completedQuizzes: any; totalQuizzes: any; progressPercentage: any; studyTimeFormatted: any; studyTimeSeconds: any; hasResetToken: any; resetTokenExpires: any; createdAt: any; updatedAt: any; createdAtFormatted: any; updatedAtFormatted: any; }) => [
+        ...enrichedUsers.map(user => [
           `"${user.id}"`,
           `"${user.email}"`,
           `"${user.username}"`,
@@ -150,20 +166,20 @@ export async function GET(request: NextRequest) {
       metadata: {
         exportedAt: new Date().toISOString(),
         totalCount: enrichedUsers.length,
-        activeUsers: enrichedUsers.filter((u: { isActive: string; }) => u.isActive === 'Oui').length,
-        paidUsers: enrichedUsers.filter((u: { isActive: string; }) => u.isActive === 'Oui').length, // Actifs = payants
+        activeUsers: enrichedUsers.filter(u => u.isActive === 'Oui').length,
+        paidUsers: enrichedUsers.filter(u => u.isPaid === 'Oui').length,
         searchQuery: search,
         includeInactive,
         format
       },
       summary: {
         totalUsers: enrichedUsers.length,
-        activeUsers: enrichedUsers.filter((u: { isActive: string; }) => u.isActive === 'Oui').length,
-        paidUsers: enrichedUsers.filter((u: { isPaid: string; }) => u.isPaid === 'Oui').length,
+        activeUsers: enrichedUsers.filter(u => u.isActive === 'Oui').length,
+        paidUsers: enrichedUsers.filter(u => u.isPaid === 'Oui').length,
         averageProgress: Math.round(
-          enrichedUsers.reduce((sum: any, u: { progressPercentage: any; }) => sum + u.progressPercentage, 0) / enrichedUsers.length
+          enrichedUsers.reduce((sum, u) => sum + u.progressPercentage, 0) / enrichedUsers.length
         ),
-        totalStudyTime: enrichedUsers.reduce((sum: any, u: { studyTimeSeconds: any; }) => sum + u.studyTimeSeconds, 0)
+        totalStudyTime: enrichedUsers.reduce((sum, u) => sum + u.studyTimeSeconds, 0)
       }
     });
   } catch (error) {
