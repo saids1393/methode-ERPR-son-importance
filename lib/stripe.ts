@@ -1,21 +1,16 @@
-
 // lib/stripe.ts
 
 import Stripe from 'stripe';
-
-
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not defined');
 }
 
-
 // 🔧 Utiliser la version d’API attendue par les types (corrige l'erreur)
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-06-30.basil',
+  apiVersion: '2025-07-30.basil',
   typescript: true,
 });
-
 
 export const getStripe = () => {
   if (typeof window !== 'undefined') {
@@ -24,4 +19,3 @@ export const getStripe = () => {
   }
   return null;
 };
-
