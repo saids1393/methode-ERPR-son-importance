@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Générer le PDF
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([595, 842]); // Format A4
+    const page = pdfDoc.addPage([595, 842]); // A4
     const { width, height } = page.getSize();
     
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -70,17 +70,16 @@ export async function POST(request: NextRequest) {
     });
     y -= 40;
 
-    // Contenu
+    // Contenu du devoir
     const lines = homework.content.split('\n');
     for (const line of lines) {
       if (y < 100) {
         // Nouvelle page si nécessaire
-        const newPage = pdfDoc.addPage([595, 842]);
+        pdfDoc.addPage([595, 842]);
         y = height - margin;
       }
 
       if (line.trim()) {
-        // Découper les lignes trop longues
         const maxWidth = width - 2 * margin;
         const words = line.split(' ');
         let currentLine = '';
@@ -90,7 +89,6 @@ export async function POST(request: NextRequest) {
           const textWidth = font.widthOfTextAtSize(testLine, fontSize);
           
           if (textWidth > maxWidth && currentLine) {
-            // Écrire la ligne actuelle
             page.drawText(currentLine, {
               x: margin,
               y,
@@ -104,7 +102,6 @@ export async function POST(request: NextRequest) {
           }
         }
         
-        // Écrire la dernière ligne
         if (currentLine) {
           page.drawText(currentLine, {
             x: margin,
@@ -115,7 +112,6 @@ export async function POST(request: NextRequest) {
           y -= 20;
         }
       } else {
-        // Ligne vide
         y -= 15;
       }
     }
@@ -130,9 +126,10 @@ export async function POST(request: NextRequest) {
       color: rgb(0.5, 0.5, 0.5)
     });
 
+    // Sauvegarde en ArrayBuffer pour compatibilité Vercel
     const pdfBytes = await pdfDoc.save();
 
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(pdfBytes.buffer, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="devoir-chapitre-${homework.chapterId}.pdf"`,
