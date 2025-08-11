@@ -8,17 +8,17 @@ function getSecurityHeaders() {
   return {
     'Content-Security-Policy':
       "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-      "style-src 'self' 'unsafe-inline'; " +
-      "img-src 'self' data: blob: https:; " +
-      "connect-src 'self' https: wss: ws:; " +
-      "font-src 'self' data:; " +
-      "frame-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://checkout.stripe.com; " +
+      "style-src 'self' 'unsafe-inline' https://checkout.stripe.com https://fonts.googleapis.com; " +
+      "img-src 'self' data: blob: https: https://*.stripe.com; " +
+      "connect-src 'self' https: wss: ws: https://api.stripe.com https://checkout.stripe.com; " +
+      "font-src 'self' data: https://fonts.gstatic.com; " +
+      "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://hooks.stripe.com; " +
       "frame-ancestors 'none'; " +
       "media-src 'self' blob:; " +
       "object-src 'none'; " +
       "base-uri 'self'; " +
-      "form-action 'self'; " +
+      "form-action 'self' https://checkout.stripe.com; " +
       "manifest-src 'self';",
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
