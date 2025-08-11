@@ -7,11 +7,19 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/(.*)", 
+        source: "/(.*)",
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self';",
+            value: `
+              default-src 'self';
+              script-src 'self' 'unsafe-eval';
+              worker-src 'self' blob:;
+              style-src 'self' 'unsafe-inline';
+              img-src 'self' data:;
+              connect-src 'self';
+              font-src 'self';
+            `.replace(/\n/g, '').replace(/\s+/g, ' ').trim(),
           },
         ],
       },
