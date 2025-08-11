@@ -11,15 +11,15 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: `
-              default-src 'self';
-              script-src 'self' 'unsafe-eval';
-              worker-src 'self' blob:;
-              style-src 'self' 'unsafe-inline';
-              img-src 'self' data:;
-              connect-src 'self';
-              font-src 'self';
-            `.replace(/\n/g, '').replace(/\s+/g, ' ').trim(),
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:",
+              "worker-src 'self' blob:",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data:",
+              "connect-src 'self' https://o4509746446270464.ingest.sentry.io", // autorise Sentry
+              "font-src 'self'",
+            ].join("; "),
           },
         ],
       },
