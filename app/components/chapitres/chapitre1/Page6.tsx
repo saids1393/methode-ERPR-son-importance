@@ -5,7 +5,7 @@ import React, { use } from 'react';
 
 
 const Page6 = () => {
-  const { playWord } = useAudio();
+  
 
   const words = [
     'في', 'من', 'ق', 'قد', 'ل', 'هو',
@@ -24,9 +24,11 @@ const Page6 = () => {
     return word;
   };
 
-  const handleWordClick = (word: string) => {
-    playWord(word);
-  };
+
+
+  function handleWordClick(word: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div
