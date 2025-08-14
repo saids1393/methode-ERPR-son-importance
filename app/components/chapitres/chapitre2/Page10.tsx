@@ -2,7 +2,7 @@
 
 // components/chapitres/chapitre2/Page10.tsx
 import React from 'react';
-import { useAudio } from '@/';
+
 
 // Mapping audio pour le Chapitre 2, Page 10
 const chapter2Page10AudioMappings: { [key: string]: string } = {

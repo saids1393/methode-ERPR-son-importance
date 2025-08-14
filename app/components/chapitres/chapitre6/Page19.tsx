@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { useAudio } from '@/';
+
 
 const chapter6Page19AudioMappings: { [key: string]: string } = {
   // Alif saghirah

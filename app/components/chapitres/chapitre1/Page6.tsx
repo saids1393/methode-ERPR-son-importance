@@ -2,7 +2,7 @@
 
 import React, { use } from 'react';
 
-import { useAudio } from '@/';
+
 
 const Page6 = () => {
   const { playWord } = useAudio();

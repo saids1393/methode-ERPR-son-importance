@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useAudio } from '@/';
+
 
 const chapter10Page28AudioMappings: { [key: string]: string } = {
   // Sourate Al-Fatiha

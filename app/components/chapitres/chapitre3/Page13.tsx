@@ -2,7 +2,7 @@
 
 // components/chapitres/chapitre3/Page13.tsx
 import React from 'react';
-import { useAudio } from '@/';
+
 
 // Mapping audio pour le Chapitre 3, Page 13 (voyelles doubles en début de mot)
 const chapter3Page13AudioMappings: { [key: string]: string } = {

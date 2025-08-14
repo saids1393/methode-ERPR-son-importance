@@ -1,7 +1,7 @@
 // components/chapitres/chapitre0/Page0.tsx 
 "use client";
 import React from 'react';
-import { useAudio } from '@/';
+
 
 // Mapping audio pour le Chapitre 0, Page 0
 const chapter0Page0AudioMappings: { [key: string]: string } = {

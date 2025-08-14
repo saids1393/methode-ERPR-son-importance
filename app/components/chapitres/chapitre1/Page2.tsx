@@ -3,7 +3,7 @@
 "use client";
 
 import React from 'react';
-import { useAudio } from '@/';
+
 
 // Mapping audio pour le Chapitre 1, Page 2
 const chapter1Page2AudioMappings: { [key: string]: string } = {
