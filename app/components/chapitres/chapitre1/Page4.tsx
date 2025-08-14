@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudio } from '@/';
 
 
 // Mapping audio pour le Chapitre 1, Page 4

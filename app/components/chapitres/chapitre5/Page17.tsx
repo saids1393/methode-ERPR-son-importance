@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudio } from '@/';
 
 // Mapping audio pour le Chapitre 5, Page 17 (mots avec voyelles)
 const chapter5Page17AudioMappings: { [key: string]: string } = {

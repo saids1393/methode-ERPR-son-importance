@@ -2,7 +2,7 @@
 
 // components/chapitres/chapitre2/Page9.tsx
 import React from 'react';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudio } from '@/';
 
 // Mapping audio pour le Chapitre 2, Page 9
 const chapter2Page9AudioMappings: { [key: string]: string } = {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useAudio } from '@/hooks/useAudio';
+import { useAudio } from '@/';
 
 const chapterPage7AudioMappings: { [key: string]: string } = {
   // Row 1

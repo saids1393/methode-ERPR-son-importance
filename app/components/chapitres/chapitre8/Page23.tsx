@@ -2,7 +2,7 @@
 
 // components/chapitres/chapitre8/Page23.tsx
 import React from 'react';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudio } from '@/';
 
 const chapter8Page23AudioMappings: { [key: string]: string } = {
   // Mots simples

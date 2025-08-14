@@ -2,7 +2,7 @@
 
 // components/chapitres/chapitre7/Page21.tsx
 import React from "react";
-import { useAudio } from "@/hooks/useAudio";
+import { useAudio } from "@/";
 
 // Interface pour le type de mot
 interface WordItem {

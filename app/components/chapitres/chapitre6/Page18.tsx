@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudio } from '@/';
 
 const noConnect = ['ا', 'د', 'ذ', 'ر', 'ز', 'و'];
 // Mapping audio pour le Chapitre 6, Page 18 (lettres de prolongation)

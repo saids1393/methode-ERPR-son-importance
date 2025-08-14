@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudio } from '@/';
 
 const chapter6Page20AudioMappings: { [key: string]: string } = {
   // Ba

@@ -2,7 +2,7 @@
 
 // components/chapitres/chapitre10/Page26.tsx
 import React from 'react';
-import { useAudio } from '@/hooks/useAudio';
+import { useAudio } from '@/';
 
 const chapter10Page26AudioMappings: { [key: string]: string } = {
   // Mots d'introduction
