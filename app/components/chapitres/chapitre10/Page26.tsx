@@ -4,8 +4,65 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+const chapter10Page26AudioMappings: { [key: string]: string } = {
+  // Mots d'introduction
+  'دَرَّسَ': 'chap10_pg26_intro1',
+  'مُسَمَّىٰ': 'chap10_pg26_intro2',
+
+  // Rangée 1
+  'إِنَّ': 'chap10_pg26_case1',
+  'اللَّهَ': 'chap10_pg26_case2',
+  'مُصَدِّقٌ': 'chap10_pg26_case3',
+  'الرَّحْمَٰنِ': 'chap10_pg26_case4',
+  'الرَّحِيمِ': 'chap10_pg26_case5',
+  'الصَّبِرِ': 'chap10_pg26_case6',
+
+  // Rangée 2
+  'الظَّالِمِينَ': 'chap10_pg26_case7',
+  'تَبَّتْ': 'chap10_pg26_case8',
+  'شَدِّدْ': 'chap10_pg26_case9',
+
+  // Rangée 3
+  'جَنَّاتٍ': 'chap10_pg26_case10',
+  'السَّلَامُ': 'chap10_pg26_case11',
+
+  // Rangée 4
+  'الْمُؤْمِنِينَ': 'chap10_pg26_case12',
+  'ضَرَّ': 'chap10_pg26_case13',
+  'تُبِّ': 'chap10_pg26_case14',
+
+  // Rangée 5
+  'النَّاسِ': 'chap10_pg26_case15',
+
+  // Rangée 6
+  'الشَّيْطَانُ': 'chap10_pg26_case16',
+
+  // Rangée 7
+  'الصَّالِحِينَ': 'chap10_pg26_case17',
+  'مُصَدَّقِينَ': 'chap10_pg26_case18',
+  'وَصَّىٰ': 'chap10_pg26_case19',
+
+  // Rangée 9
+  'نَذَّرْتُكُمْ': 'chap10_pg26_case20',
+  'قَدَّرْنَا': 'chap10_pg26_case21',
+  'تَذَكَّرُوا': 'chap10_pg26_case22',
+
+  // Verset final
+  'إِنَّ اللَّهَ غَفُورٌ رَحِيمٌ': 'chap10_pg26_verse1',
+};
+
+
 const Page26 = () => {
-  const { playWord } = useAudio();
+ // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter10Page26AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   const introWords = [
     { word: 'دَرَّسَ', description: 'mot de 3 lettres' },
@@ -46,9 +103,14 @@ const Page26 = () => {
 
   const verse = 'إِنَّ اللَّهَ غَفُورٌ رَحِيمٌ';
 
-  const handleWordClick = (word: string) => {
-    playWord(word);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
+
+  function handleWordClick(word: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div 

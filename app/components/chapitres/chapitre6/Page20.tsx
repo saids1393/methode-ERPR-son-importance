@@ -3,8 +3,91 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+const chapter6Page20AudioMappings: { [key: string]: string } = {
+  // Ba
+  'بَوْ': 'chap6_pg20_case1',
+  'بَيْ': 'chap6_pg20_case2',
+
+  // Ta
+  'تَوْ': 'chap6_pg20_case3',
+  'تَيْ': 'chap6_pg20_case4',
+
+  // Tha
+  'ثَوْ': 'chap6_pg20_case5',
+  'ثَيْ': 'chap6_pg20_case6',
+
+  // Jim
+  'جَوْ': 'chap6_pg20_case7',
+  'جَيْ': 'chap6_pg20_case8',
+
+  // Ha
+  'حَوْ': 'chap6_pg20_case9',
+  'حَيْ': 'chap6_pg20_case10',
+
+  // Kha
+  'خَوْ': 'chap6_pg20_case11',
+  'خَيْ': 'chap6_pg20_case12',
+
+  // Dal
+  'دَوْ': 'chap6_pg20_case13',
+  'دَيْ': 'chap6_pg20_case14',
+
+  // Dhal
+  'ذَوْ': 'chap6_pg20_case15',
+  'ذَيْ': 'chap6_pg20_case16',
+
+  // Ra
+  'رَوْ': 'chap6_pg20_case17',
+  'رَيْ': 'chap6_pg20_case18',
+
+  // Zay
+  'زَوْ': 'chap6_pg20_case19',
+  'زَيْ': 'chap6_pg20_case20',
+
+  // Sin
+  'سَوْ': 'chap6_pg20_case21',
+  'سَيْ': 'chap6_pg20_case22',
+
+  // Shin
+  'شَوْ': 'chap6_pg20_case23',
+  'شَيْ': 'chap6_pg20_case24',
+
+  // Sad
+  'صَوْ': 'chap6_pg20_case25',
+  'صَيْ': 'chap6_pg20_case26',
+
+  // Dad
+  'ضَوْ': 'chap6_pg20_case27',
+  'ضَيْ': 'chap6_pg20_case28',
+
+  // Ta emphatic
+  'طَوْ': 'chap6_pg20_case29',
+  'طَيْ': 'chap6_pg20_case30',
+
+  // Dha emphatic
+  'ظَوْ': 'chap6_pg20_case31',
+  'ظَيْ': 'chap6_pg20_case32',
+
+  // Ayn
+  'عَوْ': 'chap6_pg20_case33',
+  'عَيْ': 'chap6_pg20_case34',
+
+  // Ghayn
+  'غَوْ': 'chap6_pg20_case35',
+  'غَيْ': 'chap6_pg20_case36',
+};
+
 const Page20 = () => {
-  const { playWord } = useAudio();
+  // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter6Page20AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   // Prépare les mots complets
   const words = [
@@ -28,9 +111,14 @@ const Page20 = () => {
     'غَوْ', 'غَيْ',
   ];
 
-  const handleWordClick = (word: string) => {
-    playWord(word);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
+
+  function handleWordClick(word: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>

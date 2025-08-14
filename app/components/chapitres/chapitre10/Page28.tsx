@@ -3,8 +3,80 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+const chapter10Page28AudioMappings: { [key: string]: string } = {
+  // Sourate Al-Fatiha
+  'بِسْمِ': 'chap10_pg28_fatiha1',
+  'ٱللَّهِ': 'chap10_pg28_fatiha2',
+  'ٱلرَّحْمَٰنِ': 'chap10_pg28_fatiha3',
+  'ٱلرَّحِيمِ': 'chap10_pg28_fatiha4',
+  'ٱلْحَمْدُ': 'chap10_pg28_fatiha5',
+  'لِلَّهِ': 'chap10_pg28_fatiha6',
+  'رَبِّ': 'chap10_pg28_fatiha7',
+  'ٱلْعَالَمِينَ': 'chap10_pg28_fatiha8',
+  'ٱلدِّينِ': 'chap10_pg28_fatiha9',
+  'إِيَّاكَ': 'chap10_pg28_fatiha10',
+  'نَعْبُدُ': 'chap10_pg28_fatiha11',
+  'وَإِيَّاكَ': 'chap10_pg28_fatiha12',
+  'نَسْتَعِينُ': 'chap10_pg28_fatiha13',
+  'ٱهْدِنَا': 'chap10_pg28_fatiha14',
+  'ٱلصِّرَٰطَ': 'chap10_pg28_fatiha15',
+  'ٱلْمُسْتَقِيمَ': 'chap10_pg28_fatiha16',
+  'غَيْرِ': 'chap10_pg28_fatiha17',
+  'ٱلْمَغْضُوبِ': 'chap10_pg28_fatiha18',
+  'وَلَا': 'chap10_pg28_fatiha19',
+  'ٱلضَّالِّينَ': 'chap10_pg28_fatiha20',
+
+  // Tanwin (doubles voyelles)
+  'أَحَدٌ': 'chap10_pg28_tanwin1',
+  'صَمَدٌ': 'chap10_pg28_tanwin2',
+  'كُفُوًا': 'chap10_pg28_tanwin3',
+
+  // Lettres emphatiques
+  'قُلْ': 'chap10_pg28_emphatic1',
+  'أَعُوذُ': 'chap10_pg28_emphatic2',
+  'بِرَبِّ': 'chap10_pg28_emphatic3',
+  'ٱلصَّمَدُ': 'chap10_pg28_emphatic4',
+  'مِنْ': 'chap10_pg28_emphatic5',
+  'شَرِّ': 'chap10_pg28_emphatic6',
+  'غَاسِقٍ': 'chap10_pg28_emphatic7',
+  'إِذَا': 'chap10_pg28_emphatic8',
+  'وَقَبَ': 'chap10_pg28_emphatic9',
+
+  // Hamzah et Ta Marbuta
+  'سُورَةٌ': 'chap10_pg28_hamzah1',
+  'ٱلْبَقَرَةِ': 'chap10_pg28_hamzah2',
+  'ٱلسَّمَاءِ': 'chap10_pg28_hamzah3',
+  'مَاءً': 'chap10_pg28_hamzah4',
+  'ٱلصَّلَاةَ': 'chap10_pg28_hamzah5',
+  'ٱلزَّكَاةَ': 'chap10_pg28_hamzah6',
+
+  // Lettres douces (layyinah)
+  'خَوْفٍ': 'chap10_pg28_soft1',
+  'بَيْتِ': 'chap10_pg28_soft2',
+  'قُرَيْشٍ': 'chap10_pg28_soft3',
+
+  // Alif/Waw/Ya saghirah
+  'مُوسَىٰ': 'chap10_pg28_small1',
+  'عِيسَىٰ': 'chap10_pg28_small2',
+  'يَحْيَىٰ': 'chap10_pg28_small3',
+
+  // Versets
+  'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ': 'chap10_pg28_verse1',
+  'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ': 'chap10_pg28_verse2',
+};
+
+
 const Page28 = () => {
-  const { playWord } = useAudio();
+  // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter10Page28AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
 const quranicWords = [
     // Sourate Al-Fatiha (existant)
@@ -46,9 +118,14 @@ const quranicWords = [
     { text: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', color: 'violet' }     // verset 1 :contentReference[oaicite:1]{index=1}     // verset 6 :contentReference[oaicite:3]{index=3}
   ];
 
-  const handleWordClick = (word: string) => {
-    playWord(word);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
+
+  function handleWordClick(word: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>

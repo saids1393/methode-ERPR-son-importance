@@ -4,8 +4,165 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+// Mapping audio pour le Chapitre 3, Page 13 (voyelles doubles en début de mot)
+const chapter3Page13AudioMappings: { [key: string]: string } = {
+  // Alif avec voyelles doubles (isolé)
+  'اً': 'chap3_pg13_case1',
+  'اٌ': 'chap3_pg13_case2',
+  'اٍ': 'chap3_pg13_case3',
+  
+  // Ba avec voyelles doubles (début)
+  'بًـ': 'chap3_pg13_case4',
+  'بٌـ': 'chap3_pg13_case5',
+  'بٍـ': 'chap3_pg13_case6',
+  
+  // Ta avec voyelles doubles (début)
+  'تًـ': 'chap3_pg13_case7',
+  'تٌـ': 'chap3_pg13_case8',
+  'تٍـ': 'chap3_pg13_case9',
+  
+  // Tha avec voyelles doubles (début)
+  'ثًـ': 'chap3_pg13_case10',
+  'ثٌـ': 'chap3_pg13_case11',
+  'ثٍـ': 'chap3_pg13_case12',
+  
+  // Jim avec voyelles doubles (début)
+  'جًـ': 'chap3_pg13_case13',
+  'جٌـ': 'chap3_pg13_case14',
+  'جٍـ': 'chap3_pg13_case15',
+  
+  // Ha avec voyelles doubles (début)
+  'حًـ': 'chap3_pg13_case16',
+  'حٌـ': 'chap3_pg13_case17',
+  'حٍـ': 'chap3_pg13_case18',
+  
+  // Kha avec voyelles doubles (début)
+  'خًـ': 'chap3_pg13_case19',
+  'خٌـ': 'chap3_pg13_case20',
+  'خٍـ': 'chap3_pg13_case21',
+  
+  // Dal avec voyelles doubles (finale)
+  'دً': 'chap3_pg13_case22',
+  'دٌ': 'chap3_pg13_case23',
+  'دٍ': 'chap3_pg13_case24',
+  
+  // Dhal avec voyelles doubles (finale)
+  'ذً': 'chap3_pg13_case25',
+  'ذٌ': 'chap3_pg13_case26',
+  'ذٍ': 'chap3_pg13_case27',
+  
+  // Ra avec voyelles doubles (finale)
+  'رً': 'chap3_pg13_case28',
+  'رٌ': 'chap3_pg13_case29',
+  'رٍ': 'chap3_pg13_case30',
+  
+  // Zay avec voyelles doubles (finale)
+  'زً': 'chap3_pg13_case31',
+  'زٌ': 'chap3_pg13_case32',
+  'زٍ': 'chap3_pg13_case33',
+  
+  // Sin avec voyelles doubles (début)
+  'سًـ': 'chap3_pg13_case34',
+  'سٌـ': 'chap3_pg13_case35',
+  'سٍـ': 'chap3_pg13_case36',
+  
+  // Shin avec voyelles doubles (début)
+  'شًـ': 'chap3_pg13_case37',
+  'شٌـ': 'chap3_pg13_case38',
+  'شٍـ': 'chap3_pg13_case39',
+  
+  // Sad avec voyelles doubles (début)
+  'صًـ': 'chap3_pg13_case40',
+  'صٌـ': 'chap3_pg13_case41',
+  'صٍـ': 'chap3_pg13_case42',
+  
+  // Dad avec voyelles doubles (début)
+  'ضًـ': 'chap3_pg13_case43',
+  'ضٌـ': 'chap3_pg13_case44',
+  'ضٍـ': 'chap3_pg13_case45',
+  
+  // Ta emphatic avec voyelles doubles (début)
+  'طًـ': 'chap3_pg13_case46',
+  'طٌـ': 'chap3_pg13_case47',
+  'طٍـ': 'chap3_pg13_case48',
+  
+  // Dha emphatic avec voyelles doubles (début)
+  'ظًـ': 'chap3_pg13_case49',
+  'ظٌـ': 'chap3_pg13_case50',
+  'ظٍـ': 'chap3_pg13_case51',
+  
+  // Ayn avec voyelles doubles (début)
+  'عًـ': 'chap3_pg13_case52',
+  'عٌـ': 'chap3_pg13_case53',
+  'عٍـ': 'chap3_pg13_case54',
+  
+  // Ghayn avec voyelles doubles (début)
+  'غًـ': 'chap3_pg13_case55',
+  'غٌـ': 'chap3_pg13_case56',
+  'غٍـ': 'chap3_pg13_case57',
+  
+  // Fa avec voyelles doubles (début)
+  'فًـ': 'chap3_pg13_case58',
+  'فٌـ': 'chap3_pg13_case59',
+  'فٍـ': 'chap3_pg13_case60',
+  
+  // Qaf avec voyelles doubles (début)
+  'قًـ': 'chap3_pg13_case61',
+  'قٌـ': 'chap3_pg13_case62',
+  'قٍـ': 'chap3_pg13_case63',
+  
+  // Kaf avec voyelles doubles (début)
+  'كًـ': 'chap3_pg13_case64',
+  'كٌـ': 'chap3_pg13_case65',
+  'كٍـ': 'chap3_pg13_case66',
+  
+  // Lam avec voyelles doubles (début)
+  'لًـ': 'chap3_pg13_case67',
+  'لٌـ': 'chap3_pg13_case68',
+  'لٍـ': 'chap3_pg13_case69',
+  
+  // Mim avec voyelles doubles (début)
+  'مًـ': 'chap3_pg13_case70',
+  'مٌـ': 'chap3_pg13_case71',
+  'مٍـ': 'chap3_pg13_case72',
+  
+  // Nun avec voyelles doubles (début)
+  'نًـ': 'chap3_pg13_case73',
+  'نٌـ': 'chap3_pg13_case74',
+  'نٍـ': 'chap3_pg13_case75',
+  
+  // Ha avec voyelles doubles (début)
+  'هًـ': 'chap3_pg13_case76',
+  'هٌـ': 'chap3_pg13_case77',
+  'هٍـ': 'chap3_pg13_case78',
+  
+  // Waw avec voyelles doubles (finale)
+  'وً': 'chap3_pg13_case79',
+  'وٌ': 'chap3_pg13_case80',
+  'وٍ': 'chap3_pg13_case81',
+  
+  // Ya avec voyelles doubles (début)
+  'يًـ': 'chap3_pg13_case82',
+  'يٌـ': 'chap3_pg13_case83',
+  'يٍـ': 'chap3_pg13_case84',
+  
+  // Hamza avec voyelles doubles
+  'أً': 'chap3_pg13_case85',
+  'أٌ': 'chap3_pg13_case86',
+  'إٍ': 'chap3_pg13_case87'
+};
+
 const Page13 = () => {
-  const { playLetter } = useAudio();
+  // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter3Page13AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
   const nonConnectingLetters = ['ا', 'د', 'ذ', 'ر', 'ز', 'و']; // Lettres qui ne se connectent pas après elles
@@ -44,9 +201,10 @@ const Page13 = () => {
 
  const vowelNames = ['Fathatane ( son : ane )', 'Dammatane ( son : oune)', 'Kassratane ( son : in)'];
 
-  const handleLetterClick = (vowelLetter: string) => {
-    playLetter(vowelLetter);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
 
   return (
     <div 
@@ -105,7 +263,7 @@ const LetterGroup = ({
   onLetterClick?: (vowelLetter: string) => void;
 }) => {
   // Extraire la forme initiale sans voyelle
-  const baseForm = vowels[0].replace(/[َُِ]/g, '');
+  const baseForm = vowels[0].replace(/[\u064B-\u0652]/g, "");
 
   return (
     <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4">

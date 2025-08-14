@@ -4,8 +4,133 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+// Mapping audio pour le Chapitre 2, Page 10
+const chapter2Page10AudioMappings: { [key: string]: string } = {
+  // Alif avec voyelles (forme médiane)
+  'ـاَ': 'chap2_pg10_case1',
+  'ـاُ': 'chap2_pg10_case2',
+  'ـاِ': 'chap2_pg10_case3',
+  // Ba avec voyelles (forme médiane)
+  'ـبَـ': 'chap2_pg10_case4',
+  'ـبُـ': 'chap2_pg10_case5',
+  'ـبِـ': 'chap2_pg10_case6',
+  // Ta avec voyelles (forme médiane)
+  'ـتَـ': 'chap2_pg10_case7',
+  'ـتُـ': 'chap2_pg10_case8',
+  'ـتِـ': 'chap2_pg10_case9',
+  // Tha avec voyelles (forme médiane)
+  'ـثَـ': 'chap2_pg10_case10',
+  'ـثُـ': 'chap2_pg10_case11',
+  'ـثِـ': 'chap2_pg10_case12',
+  // Jim avec voyelles (forme médiane)
+  'ـجَـ': 'chap2_pg10_case13',
+  'ـجُـ': 'chap2_pg10_case14',
+  'ـجِـ': 'chap2_pg10_case15',
+  // Ha avec voyelles (forme médiane)
+  'ـحَـ': 'chap2_pg10_case16',
+  'ـحُـ': 'chap2_pg10_case17',
+  'ـحِـ': 'chap2_pg10_case18',
+  // Kha avec voyelles (forme médiane)
+  'ـخَـ': 'chap2_pg10_case19',
+  'ـخُـ': 'chap2_pg10_case20',
+  'ـخِـ': 'chap2_pg10_case21',
+  // Dal avec voyelles (forme finale)
+  'ـدَ': 'chap2_pg10_case22',
+  'ـدُ': 'chap2_pg10_case23',
+  'ـدِ': 'chap2_pg10_case24',
+  // Dhal avec voyelles (forme finale)
+  'ـذَ': 'chap2_pg10_case25',
+  'ـذُ': 'chap2_pg10_case26',
+  'ـذِ': 'chap2_pg10_case27',
+  // Ra avec voyelles (forme finale)
+  'ـرَ': 'chap2_pg10_case28',
+  'ـرُ': 'chap2_pg10_case29',
+  'ـرِ': 'chap2_pg10_case30',
+  // Zay avec voyelles (forme finale)
+  'ـزَ': 'chap2_pg10_case31',
+  'ـزُ': 'chap2_pg10_case32',
+  'ـزِ': 'chap2_pg10_case33',
+  // Sin avec voyelles (forme médiane)
+  'ـسَـ': 'chap2_pg10_case34',
+  'ـسُـ': 'chap2_pg10_case35',
+  'ـسِـ': 'chap2_pg10_case36',
+  // Shin avec voyelles (forme médiane)
+  'ـشَـ': 'chap2_pg10_case37',
+  'ـشُـ': 'chap2_pg10_case38',
+  'ـشِـ': 'chap2_pg10_case39',
+  // Sad avec voyelles (forme médiane)
+  'ـصَـ': 'chap2_pg10_case40',
+  'ـصُـ': 'chap2_pg10_case41',
+  'ـصِـ': 'chap2_pg10_case42',
+  // Dad avec voyelles (forme médiane)
+  'ـضَـ': 'chap2_pg10_case43',
+  'ـضُـ': 'chap2_pg10_case44',
+  'ـضِـ': 'chap2_pg10_case45',
+  // Ta emphatic avec voyelles (forme médiane)
+  'ـطَـ': 'chap2_pg10_case46',
+  'ـطُـ': 'chap2_pg10_case47',
+  'ـطِـ': 'chap2_pg10_case48',
+  // Dha emphatic avec voyelles (forme médiane)
+  'ـظَـ': 'chap2_pg10_case49',
+  'ـظُـ': 'chap2_pg10_case50',
+  'ـظِـ': 'chap2_pg10_case51',
+  // Ayn avec voyelles (forme médiane)
+  'ـعَـ': 'chap2_pg10_case52',
+  'ـعُـ': 'chap2_pg10_case53',
+  'ـعِـ': 'chap2_pg10_case54',
+  // Ghayn avec voyelles (forme médiane)
+  'ـغَـ': 'chap2_pg10_case55',
+  'ـغُـ': 'chap2_pg10_case56',
+  'ـغِـ': 'chap2_pg10_case57',
+  // Fa avec voyelles (forme médiane)
+  'ـفَـ': 'chap2_pg10_case58',
+  'ـفُـ': 'chap2_pg10_case59',
+  'ـفِـ': 'chap2_pg10_case60',
+  // Qaf avec voyelles (forme médiane)
+  'ـقَـ': 'chap2_pg10_case61',
+  'ـقُـ': 'chap2_pg10_case62',
+  'ـقِـ': 'chap2_pg10_case63',
+  // Kaf avec voyelles (forme médiane)
+  'ـكَـ': 'chap2_pg10_case64',
+  'ـكُـ': 'chap2_pg10_case65',
+  'ـكِـ': 'chap2_pg10_case66',
+  // Lam avec voyelles (forme médiane)
+  'ـلَـ': 'chap2_pg10_case67',
+  'ـلُـ': 'chap2_pg10_case68',
+  'ـلِـ': 'chap2_pg10_case69',
+  // Mim avec voyelles (forme médiane)
+  'ـمَـ': 'chap2_pg10_case70',
+  'ـمُـ': 'chap2_pg10_case71',
+  'ـمِـ': 'chap2_pg10_case72',
+  // Nun avec voyelles (forme médiane)
+  'ـنَـ': 'chap2_pg10_case73',
+  'ـنُـ': 'chap2_pg10_case74',
+  'ـنِـ': 'chap2_pg10_case75',
+  // Ha avec voyelles (forme médiane)
+  'ـهَـ': 'chap2_pg10_case76',
+  'ـهُـ': 'chap2_pg10_case77',
+  'ـهِـ': 'chap2_pg10_case78',
+  // Waw avec voyelles (forme finale)
+  'ـوَ': 'chap2_pg10_case79',
+  'ـوُ': 'chap2_pg10_case80',
+  'ـوِ': 'chap2_pg10_case81',
+  // Ya avec voyelles (forme médiane)
+  'ـيَـ': 'chap2_pg10_case82',
+  'ـيُـ': 'chap2_pg10_case83',
+  'ـيِـ': 'chap2_pg10_case84'
+};
+
 const Page10 = () => {
-  const { playLetter } = useAudio();
+  // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter2Page10AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
   const nonConnectingLetters = ['ا', 'د', 'ذ', 'ر', 'ز', 'و']; // Lettres qui ne se connectent pas après elles
@@ -43,9 +168,10 @@ const Page10 = () => {
 
    const vowelNames = ['Kassrah ( son : a )', 'Dammah ( son : ou )', 'Fathah ( son : i )'];
 
-  const handleLetterClick = (vowelLetter: string) => {
-    playLetter(vowelLetter);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
 
   return (
     <div 

@@ -525,23 +525,24 @@ Bienvenue dans la Méthode ERPR !
 
 ${username ? `Bonjour ${username},` : 'Bonjour,'}
 
-Félicitations ! Vous venez de rejoindre des milliers d'étudiants qui apprennent à lire et écrire l'arabe avec notre méthode éprouvée.
+Félicitations ! Vous venez de rejoindre nos étudiants qui apprennent à lire et écrire l'arabe avec notre méthode.
 
 CE QUI VOUS ATTEND :
-✅ 11 chapitres progressifs - De l'alphabet aux règles avancées
-✅ Quiz interactifs - Testez vos connaissances à chaque étape
-✅ Suivi de progression - Visualisez vos progrès en temps réel
-✅ Exercices d'écriture - Téléchargez et imprimez vos supports
-✅ Support pédagogique - Notre équipe vous accompagne
-
-Commencez maintenant : ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard
-
+✅ 10 chapitres progressifs : de l'alphabet aux règles avancées
+✅ Vidéos de cours interactifs : Des vidéos courtes vous attents a chaque chapitre
+✅ Quiz interactifs : testez vos connaissances à chaque étape
+✅ Suivi de progression : visualisez vos progrès en temps réel
+✅ Exercices d'écriture : téléchargez et imprimez vos supports
+✅ Devoirs automatisés : recevez vos devoirs par email automatiquement
+✅ Suivi des progressions de pages et quiz : suivez vos progressions en pourcentage et vos pages et quiz complétés
+✅ 3 accompagnements pédagogiques : rencontrez un professeur en physique expérimenté pour vous accompagner
+✅ Support pédagogique : notre équipe vous accompagne
+Commencez maintenant : ${process.env.NEXTAUTH_URL || 'https://methode-erpr-v1.vercel.app'}/dashboard
 CONSEIL DE VOTRE PROFESSEUR :
-"La clé du succès dans l'apprentissage de l'arabe est la régularité. 
-Consacrez 30 minutes par jour, et vous serez surpris de vos progrès !"
-- Professeur Soidroudine
+"La clé de la réussite dans l'apprentissage est la méthode ERPR (Écoute, Répétition, Pratique et Régularité). Consacrez 30 minutes par jour, et vous serez surpris de vos progrès !"
+— Professeur Soidroudine
 
-Besoin d'aide ? Contactez-nous : support@sonimportance.com
+Besoin d'aide ? Contactez-nous : sonimportance@gmail.com
 
 © ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
       `
@@ -890,7 +891,7 @@ Nouvelle adresse email : ${newEmail}
 
 Cette modification a été effectuée le ${new Date().toLocaleDateString('fr-FR')}.
 
-SÉCURITÉ : Si vous n'avez pas effectué cette modification, contactez immédiatement notre support à support@sonimportance.com
+SÉCURITÉ : Si vous n'avez pas effectué cette modification, contactez immédiatement notre support à sonimportance@gmail.com
 
 © ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
       `
@@ -1074,7 +1075,7 @@ DÉTAILS DU CHANGEMENT :
 ACTION REQUISE : Si vous n'avez pas effectué cette modification, votre compte pourrait être compromis. 
 Contactez IMMÉDIATEMENT notre support à support@sonimportance.com
 
-Support : support@sonimportance.com (Réponse sous 24h maximum)
+Support : sonimportance.com (Réponse sous 24h maximum)
 
 © ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
       `

@@ -4,26 +4,67 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+const chapter8Page23AudioMappings: { [key: string]: string } = {
+  // Mots simples
+  'قُلْ': 'chap8_pg23_case1',
+  'كَلْبٌ': 'chap8_pg23_case2',
+  'يَوْمٍ': 'chap8_pg23_case3',
+  'حَسْبُ': 'chap8_pg23_case4',
+  'رَبْعُ': 'chap8_pg23_case5',
+  'مَسْجِدٌ': 'chap8_pg23_case6',
+  'فَلْيَنْظُرْ': 'chap8_pg23_case7',
+  'يَلْهَثْ': 'chap8_pg23_case8',
+  'مِنْ': 'chap8_pg23_case9',
+  'عَنْهْ': 'chap8_pg23_case10',
+  'لَكُمْ': 'chap8_pg23_case11',
+  'دِينُكُمْ': 'chap8_pg23_case12',
+  'وَيَمْنَعُونَ': 'chap8_pg23_case13',
+  'الْمَاعُونَ': 'chap8_pg23_case14',
+  'كَعَصْفٍ': 'chap8_pg23_case15',
+  'مَأْكُولٍ': 'chap8_pg23_case16',
+  'أَنتُمْ': 'chap8_pg23_case17',
+  'عَابِدُونَ': 'chap8_pg23_case18',
+  'أَعْبُدُ': 'chap8_pg23_case19',
+  'فَأَثَرْنَ': 'chap8_pg23_case20',
+  'نَقْعًا': 'chap8_pg23_case21',
+  'وَلَا': 'chap8_pg23_case22',
+  'تَنْهَ': 'chap8_pg23_case23',
+  'عَنِ': 'chap8_pg23_case24',
+
+  // Versets
+  'وَإِذَا الْجِبَالُ نُسِفَتْ': 'chap8_pg23_case25',
+  'وَيَمْنَعُونَ الْمَاعُونَ': 'chap8_pg23_case26',
+  'وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ': 'chap8_pg23_case27',
+  'لَكُمْ دِينُكُمْ وَلِيَ دِينِ': 'chap8_pg23_case28',
+};
+
+
 const Page23 = () => {
-  const { playWord } = useAudio();
+  // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter8Page23AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   const quranicItems = [
     // Mots simples
     'قُلْ', 'كَلْبٌ', 'يَوْمٍ', 'حَسْبُ', 'رَبْعُ', 'مَسْجِدٌ',
-    'فَلْيَنْظُرْ', 'يَلْهَثْ', 'مِنْ', 'عَنْهْ', 'لَكُمْ', 'دِينُكُمْ',
+    'فَلْيَنْظُرْ', 'يَلْهَثْ', 'مِنْ', 'عَنْهُ', 'لَكُمْ', 'دِينُكُمْ',
     'وَيَمْنَعُونَ', 'الْمَاعُونَ', 'كَعَصْفٍ', 'مَأْكُولٍ', 'أَنتُمْ', 'عَابِدُونَ',
     'أَعْبُدُ', 'فَأَثَرْنَ', 'نَقْعًا', 'وَلَا', 'تَنْهَ', 'عَنِ',
 
-    // Versets
-    { text: 'وَإِذَا الْجِبَالُ نُسِفَتْ', color: 'text-blue-400' },
-    { text: 'وَيَمْنَعُونَ الْمَاعُونَ', color: 'text-violet-400' },
-    { text: 'وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ', color: 'text-blue-400' },
-    { text: 'لَكُمْ دِينُكُمْ وَلِيَ دِينِ', color: 'text-violet-400' }
+    { text: 'وَيَمْنَعُونَ الْمَاعُونَ', color: 'text-violet-400' }
   ];
 
-  const handleWordClick = (word: string) => {
-    playWord(word);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -42,6 +83,10 @@ const Page23 = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
               {quranicItems.map((item, index) => {
                 const isVerse = typeof item !== 'string';
+
+                function handleWordClick(arg0: string): void {
+                  throw new Error('Function not implemented.');
+                }
 
                 return (
                   <div

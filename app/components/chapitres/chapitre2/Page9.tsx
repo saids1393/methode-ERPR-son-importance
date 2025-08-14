@@ -4,8 +4,137 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+// Mapping audio pour le Chapitre 2, Page 9
+const chapter2Page9AudioMappings: { [key: string]: string } = {
+  // Alif avec voyelles
+  'اَ': 'chap2_pg9_case1',
+  'اُ': 'chap2_pg9_case2',
+  'اِ': 'chap2_pg9_case3',
+  // Ba avec voyelles (forme initiale)
+  'بَـ': 'chap2_pg9_case4',
+  'بُـ': 'chap2_pg9_case5',
+  'بِـ': 'chap2_pg9_case6',
+  // Ta avec voyelles (forme initiale)
+  'تَـ': 'chap2_pg9_case7',
+  'تُـ': 'chap2_pg9_case8',
+  'تِـ': 'chap2_pg9_case9',
+  // Tha avec voyelles (forme initiale)
+  'ثَـ': 'chap2_pg9_case10',
+  'ثُـ': 'chap2_pg9_case11',
+  'ثِـ': 'chap2_pg9_case12',
+  // Jim avec voyelles (forme initiale)
+  'جَـ': 'chap2_pg9_case13',
+  'جُـ': 'chap2_pg9_case14',
+  'جِـ': 'chap2_pg9_case15',
+  // Ha avec voyelles (forme initiale)
+  'حَـ': 'chap2_pg9_case16',
+  'حُـ': 'chap2_pg9_case17',
+  'حِـ': 'chap2_pg9_case18',
+  // Kha avec voyelles (forme initiale)
+  'خَـ': 'chap2_pg9_case19',
+  'خُـ': 'chap2_pg9_case20',
+  'خِـ': 'chap2_pg9_case21',
+  // Dal avec voyelles
+  'دَ': 'chap2_pg9_case22',
+  'دُ': 'chap2_pg9_case23',
+  'دِ': 'chap2_pg9_case24',
+  // Dhal avec voyelles
+  'ذَ': 'chap2_pg9_case25',
+  'ذُ': 'chap2_pg9_case26',
+  'ذِ': 'chap2_pg9_case27',
+  // Ra avec voyelles
+  'رَ': 'chap2_pg9_case28',
+  'رُ': 'chap2_pg9_case29',
+  'رِ': 'chap2_pg9_case30',
+  // Zay avec voyelles
+  'زَ': 'chap2_pg9_case31',
+  'زُ': 'chap2_pg9_case32',
+  'زِ': 'chap2_pg9_case33',
+  // Sin avec voyelles (forme initiale)
+  'سَـ': 'chap2_pg9_case34',
+  'سُـ': 'chap2_pg9_case35',
+  'سِـ': 'chap2_pg9_case36',
+  // Shin avec voyelles (forme initiale)
+  'شَـ': 'chap2_pg9_case37',
+  'شُـ': 'chap2_pg9_case38',
+  'شِـ': 'chap2_pg9_case39',
+  // Sad avec voyelles (forme initiale)
+  'صَـ': 'chap2_pg9_case40',
+  'صُـ': 'chap2_pg9_case41',
+  'صِـ': 'chap2_pg9_case42',
+  // Dad avec voyelles (forme initiale)
+  'ضَـ': 'chap2_pg9_case43',
+  'ضُـ': 'chap2_pg9_case44',
+  'ضِـ': 'chap2_pg9_case45',
+  // Ta emphatic avec voyelles (forme initiale)
+  'طَـ': 'chap2_pg9_case46',
+  'طُـ': 'chap2_pg9_case47',
+  'طِـ': 'chap2_pg9_case48',
+  // Dha emphatic avec voyelles (forme initiale)
+  'ظَـ': 'chap2_pg9_case49',
+  'ظُـ': 'chap2_pg9_case50',
+  'ظِـ': 'chap2_pg9_case51',
+  // Ayn avec voyelles (forme initiale)
+  'عَـ': 'chap2_pg9_case52',
+  'عُـ': 'chap2_pg9_case53',
+  'عِـ': 'chap2_pg9_case54',
+  // Ghayn avec voyelles (forme initiale)
+  'غَـ': 'chap2_pg9_case55',
+  'غُـ': 'chap2_pg9_case56',
+  'غِـ': 'chap2_pg9_case57',
+  // Fa avec voyelles (forme initiale)
+  'فَـ': 'chap2_pg9_case58',
+  'فُـ': 'chap2_pg9_case59',
+  'فِـ': 'chap2_pg9_case60',
+  // Qaf avec voyelles (forme initiale)
+  'قَـ': 'chap2_pg9_case61',
+  'قُـ': 'chap2_pg9_case62',
+  'قِـ': 'chap2_pg9_case63',
+  // Kaf avec voyelles (forme initiale)
+  'كَـ': 'chap2_pg9_case64',
+  'كُـ': 'chap2_pg9_case65',
+  'كِـ': 'chap2_pg9_case66',
+  // Lam avec voyelles (forme initiale)
+  'لَـ': 'chap2_pg9_case67',
+  'لُـ': 'chap2_pg9_case68',
+  'لِـ': 'chap2_pg9_case69',
+  // Mim avec voyelles (forme initiale)
+  'مَـ': 'chap2_pg9_case70',
+  'مُـ': 'chap2_pg9_case71',
+  'مِـ': 'chap2_pg9_case72',
+  // Nun avec voyelles (forme initiale)
+  'نَـ': 'chap2_pg9_case73',
+  'نُـ': 'chap2_pg9_case74',
+  'نِـ': 'chap2_pg9_case75',
+  // Ha avec voyelles (forme initiale)
+  'هَـ': 'chap2_pg9_case76',
+  'هُـ': 'chap2_pg9_case77',
+  'هِـ': 'chap2_pg9_case78',
+  // Waw avec voyelles
+  'وَ': 'chap2_pg9_case79',
+  'وُ': 'chap2_pg9_case80',
+  'وِ': 'chap2_pg9_case81',
+  // Ya avec voyelles (forme initiale)
+  'يَـ': 'chap2_pg9_case82',
+  'يُـ': 'chap2_pg9_case83',
+  'يِـ': 'chap2_pg9_case84',
+  // Hamza avec voyelles (formes spéciales)
+  'أَ': 'chap2_pg9_case85',
+  'أُ': 'chap2_pg9_case86',
+  'إِ': 'chap2_pg9_case87'
+};
+
 const Page9 = () => {
-  const { playLetter } = useAudio();
+  // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter2Page9AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
   const nonConnectingLetters = ['ا', 'د', 'ذ', 'ر', 'ز', 'و'];
@@ -44,10 +173,10 @@ const Page9 = () => {
 
   const vowelNames = ['Fathah ( son : a )', 'Dammah ( son : ou )', 'Kassrah ( son : i )'];
 
-  const handleLetterClick = (vowelLetter: string) => {
-    playLetter(vowelLetter);
-  };
-
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
       <div className="w-full h-full bg-zinc-900 overflow-hidden">

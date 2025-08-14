@@ -3,8 +3,50 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+// Mapping audio pour le Chapitre 1, Page 3
+const chapter1Page3AudioMappings: { [key: string]: string } = {
+  'ـا': 'chap1_pg3_case1',
+  'ـبـ': 'chap1_pg3_case2',
+  'ـتـ': 'chap1_pg3_case3',
+  'ـثـ': 'chap1_pg3_case4',
+  'ـجـ': 'chap1_pg3_case5',
+  'ـحـ': 'chap1_pg3_case6',
+  'ـخـ': 'chap1_pg3_case7',
+  'ـد': 'chap1_pg3_case8',
+  'ـذ': 'chap1_pg3_case9',
+  'ـر': 'chap1_pg3_case10',
+  'ـز': 'chap1_pg3_case11',
+  'ـسـ': 'chap1_pg3_case12',
+  'ـشـ': 'chap1_pg3_case13',
+  'ـصـ': 'chap1_pg3_case14',
+  'ـضـ': 'chap1_pg3_case15',
+  'ـطـ': 'chap1_pg3_case16',
+  'ـظـ': 'chap1_pg3_case17',
+  'ـعـ': 'chap1_pg3_case18',
+  'ـغـ': 'chap1_pg3_case19',
+  'ـفـ': 'chap1_pg3_case20',
+  'ـقـ': 'chap1_pg3_case21',
+  'ـكـ': 'chap1_pg3_case22',
+  'ـلـ': 'chap1_pg3_case23',
+  'ـمـ': 'chap1_pg3_case24',
+  'ـنـ': 'chap1_pg3_case25',
+  'ـهـ': 'chap1_pg3_case26',
+  'ـو': 'chap1_pg3_case27',
+  'ـيـ': 'chap1_pg3_case28',
+  'ء': 'chap1_pg3_case29'
+};
+
 const Page3 = () => {
-  const { playLetter } = useAudio();
+  // Fonction pour jouer l'audio avec le mapping spécifique
+  const playLetterAudio = (letter: string) => {
+    const audioFileName = chapter1Page3AudioMappings[letter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/${audioFileName}.mp3`);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+      });
+    }
+  };
 
   const letters = [
     // Row 1
@@ -48,9 +90,10 @@ const Page3 = () => {
   ];
 
   const handleLetterClick = (letter: string) => {
-    const cleanLetter = letter.replace(/[ـَُِ]/g, '');
-    playLetter(cleanLetter);
+    // Utiliser directement la lettre avec ses attachements pour le mapping
+    playLetterAudio(letter);
   };
+
   return (
     <div 
       className="font-arabic min-h-screen"

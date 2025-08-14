@@ -4,8 +4,44 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+// Mapping audio pour le Chapitre 4, Page 16 (lettres non-connectantes)
+const chapter4Page16AudioMappings: { [key: string]: string } = {
+  // Lettres isolées
+  'ا': 'chap4_pg16_case1',
+  'د': 'chap4_pg16_case2',
+  'ذ': 'chap4_pg16_case3',
+  'ر': 'chap4_pg16_case4',
+  'ز': 'chap4_pg16_case5',
+  'و': 'chap4_pg16_case6',
+  
+  // Exemples de mots
+  'قَالَ': 'chap4_pg16_example1',
+  'عُدْنَ': 'chap4_pg16_example2',
+  'يَذْكُرُ': 'chap4_pg16_example3',
+  'فَرِحَ': 'chap4_pg16_example4',
+  'تَزَكَّىٰ': 'chap4_pg16_example5',
+  'خَوْفٌ': 'chap4_pg16_example6',
+  
+  // Phrases explicatives
+  'il a dit': 'chap4_pg16_meaning1',
+  'revenez !': 'chap4_pg16_meaning2',
+  'il se souvient': 'chap4_pg16_meaning3',
+  'il s\'est réjoui': 'chap4_pg16_meaning4',
+  'il s\'est purifié': 'chap4_pg16_meaning5',
+  'peur': 'chap4_pg16_meaning6'
+};
+
 const Page16 = () => {
-  const { playWord } = useAudio();
+ // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter4Page16AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   const disconnectedLetters = [
     { letter: 'ا', example: 'قَالَ', meaning: 'il a dit' },
@@ -16,9 +52,14 @@ const Page16 = () => {
     { letter: 'و', example: 'خَوْفٌ', meaning: 'peur' }
   ];
 
-  const handleWordClick = (word: string) => {
-    playWord(word);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
+
+  function handleWordClick(word: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>

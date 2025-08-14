@@ -1,13 +1,57 @@
-// components/chapitres/chapitre1/Page0.tsx 
+// components/chapitres/chapitre0/Page0.tsx 
 "use client";
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+// Mapping audio pour le Chapitre 0, Page 0
+const chapter0Page0AudioMappings: { [key: string]: string } = {
+  'ا': 'chap0_pg0_case1',
+  'ب': 'chap0_pg0_case2',
+  'ت': 'chap0_pg0_case3',
+  'ث': 'chap0_pg0_case4',
+  'ج': 'chap0_pg0_case5',
+  'ح': 'chap0_pg0_case6',
+  'خ': 'chap0_pg0_case7',
+  'د': 'chap0_pg0_case8',
+  'ذ': 'chap0_pg0_case9',
+  'ر': 'chap0_pg0_case10',
+  'ز': 'chap0_pg0_case11',
+  'س': 'chap0_pg0_case12',
+  'ش': 'chap0_pg0_case13',
+  'ص': 'chap0_pg0_case14',
+  'ض': 'chap0_pg0_case15',
+  'ط': 'chap0_pg0_case16',
+  'ظ': 'chap0_pg0_case17',
+  'ع': 'chap0_pg0_case18',
+  'غ': 'chap0_pg0_case19',
+  'ف': 'chap0_pg0_case20',
+  'ق': 'chap0_pg0_case21',
+  'ك': 'chap0_pg0_case22',
+  'ل': 'chap0_pg0_case23',
+  'م': 'chap0_pg0_case24',
+  'ن': 'chap0_pg0_case25',
+  'ه': 'chap0_pg0_case26',
+  'و': 'chap0_pg0_case27',
+  'ي': 'chap0_pg0_case28',
+  'ء': 'chap0_pg0_case29',
+  'ة': 'chap0_pg0_case30'
+};
+
+
 const Page0 = () => {
-  const { playLetter } = useAudio();
+  // Hook personnalisé pour jouer l'audio avec le mapping spécifique
+  const playLetterAudio = (letter: string) => {
+    const audioFileName = chapter0Page0AudioMappings[letter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/${audioFileName}.mp3`);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+      });
+    }
+  };
 
   const associations: { [key: string]: { mot: string; emoji?: string } } = {
-    'ا': { mot: 'Abeille', emoji: '🐝' },
+   'ا': { mot: 'Abeille', emoji: '🐝' },
     'ب': { mot: 'Bateau', emoji: '🚤' },
     'ت': { mot: 'Tarte', emoji: '🥧' },
     'ث': { mot: 'Think (le verbe penser en Anglais)' },
@@ -23,7 +67,7 @@ const Page0 = () => {
     'ص': { mot: 'Bout de la langue derrière les dents du bas' },
     'ض': { mot: "Langue entière collée sur tout le palais en bloquant l'air (les joues doivent se gonfler avant la prononciation de la lettre)" },
     'ط': { mot: "Même sortie que la lettre [Ta], mais en la prononçant d'une façon lourde et grave" },
-    'ظ': { mot: "Comme ‘that’ en Anglais, mais en rendant la lettre grave tout en freinant l’air avec la langue contre les incisives supérieures (les joues doivent normalement gonfler avant la sortie de la lettre)"  },
+    'ظ': { mot: "Comme 'that' en Anglais, mais en rendant la lettre grave tout en freinant l'air avec la langue contre les incisives supérieures (les joues doivent normalement gonfler avant la sortie de la lettre)"  },
     'ع': { mot: "Vibration en haut de la pomme d'Adam" },
     'غ': { mot: "Gargouillis dans la gorge après s'être brossé les dents" },
     'ف': { mot: 'Farine'},
@@ -75,8 +119,9 @@ const Page0 = () => {
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
 
   const handleLetterClick = (letter: string) => {
-    playLetter(letter);
+    playLetterAudio(letter);
   };
+
   return (
     <div className="font-arabic min-h-screen bg-zinc-900 text-white p-6 space-y-6">
       <div className="text-center mb-4">

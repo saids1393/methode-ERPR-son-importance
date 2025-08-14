@@ -5,8 +5,50 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+// Mapping audio pour le Chapitre 1, Page 2
+const chapter1Page2AudioMappings: { [key: string]: string } = {
+  'ا': 'chap1_pg2_case1',
+  'بـ': 'chap1_pg2_case2',
+  'تـ': 'chap1_pg2_case3',
+  'ثـ': 'chap1_pg2_case4',
+  'جـ': 'chap1_pg2_case5',
+  'حـ': 'chap1_pg2_case6',
+  'خـ': 'chap1_pg2_case7',
+  'د': 'chap1_pg2_case8',
+  'ذ': 'chap1_pg2_case9',
+  'ر': 'chap1_pg2_case10',
+  'ز': 'chap1_pg2_case11',
+  'سـ': 'chap1_pg2_case12',
+  'شـ': 'chap1_pg2_case13',
+  'صـ': 'chap1_pg2_case14',
+  'ضـ': 'chap1_pg2_case15',
+  'طـ': 'chap1_pg2_case16',
+  'ظـ': 'chap1_pg2_case17',
+  'عـ': 'chap1_pg2_case18',
+  'غـ': 'chap1_pg2_case19',
+  'فـ': 'chap1_pg2_case20',
+  'قـ': 'chap1_pg2_case21',
+  'كـ': 'chap1_pg2_case22',
+  'لـ': 'chap1_pg2_case23',
+  'مـ': 'chap1_pg2_case24',
+  'نـ': 'chap1_pg2_case25',
+  'هـ': 'chap1_pg2_case26',
+  'و': 'chap1_pg2_case27',
+  'يـ': 'chap1_pg2_case28',
+  'ء': 'chap1_pg2_case29'
+};
+
 const Page2 = () => {
-  const { playLetter } = useAudio();
+  // Fonction pour jouer l'audio avec le mapping spécifique
+  const playLetterAudio = (letter: string) => {
+    const audioFileName = chapter1Page2AudioMappings[letter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/${audioFileName}.mp3`);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+      });
+    }
+  };
 
   const letters = [
     // Row 1
@@ -51,10 +93,10 @@ const Page2 = () => {
   ];
 
   const handleLetterClick = (letter: string) => {
-    // Nettoyer la lettre pour le nom de fichier (enlever les diacritiques et attachements)
-    const cleanLetter = letter.replace(/[ـَُِ]/g, '');
-    playLetter(cleanLetter);
+    // Utiliser directement la lettre avec ses attachements pour le mapping
+    playLetterAudio(letter);
   };
+
   return (
     <div 
       className="font-arabic min-h-screen"

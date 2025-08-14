@@ -4,8 +4,68 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+const chapter10Page25AudioMappings: { [key: string]: string } = {
+  // Rangée 1
+  'مَدَّ': 'chap10_pg25_case1',
+  'حَقَّ': 'chap10_pg25_case2',
+  'فُرَّ': 'chap10_pg25_case3',
+  'وَدَّ': 'chap10_pg25_case4',
+  'رُدَّ': 'chap10_pg25_case5',
+  'عَضَّ': 'chap10_pg25_case6',
+
+  // Rangée 2
+  'شَدَّ': 'chap10_pg25_case7',
+  'طُبَّ': 'chap10_pg25_case8',
+  'قَطَّ': 'chap10_pg25_case9',
+  'غَلَّ': 'chap10_pg25_case10',
+  'نَبَّ': 'chap10_pg25_case11',
+  'ذُبَّ': 'chap10_pg25_case12',
+
+  // Rangée 3
+  'كُبَّ': 'chap10_pg25_case13',
+  'ثَبَّ': 'chap10_pg25_case14',
+  'يَمَّ': 'chap10_pg25_case15',
+  'حُجَّ': 'chap10_pg25_case16',
+  'عَدَّ': 'chap10_pg25_case17',
+  'بَلَّ': 'chap10_pg25_case18',
+
+  // Rangée 4
+  'ظَنَّ': 'chap10_pg25_case19',
+  'زُرَّ': 'chap10_pg25_case20',
+  'هَبَّ': 'chap10_pg25_case21',
+  'كَنَّ': 'chap10_pg25_case22',
+  'ضَرَّ': 'chap10_pg25_case23',
+  'سَرَّ': 'chap10_pg25_case24',
+
+  // Rangée 5
+  'نَمَّ': 'chap10_pg25_case25',
+  'لَبَّ': 'chap10_pg25_case26',
+  'فَكَّ': 'chap10_pg25_case27',
+  'ذَكَّ': 'chap10_pg25_case28',
+  'خَسَّ': 'chap10_pg25_case29',
+  'هَجَّ': 'chap10_pg25_case30',
+
+  // Rangée 6
+  'طَلَّ': 'chap10_pg25_case31',
+  'وَصَّ': 'chap10_pg25_case32',
+  'جَلَّ': 'chap10_pg25_case33',
+  'فَضَّ': 'chap10_pg25_case34',
+  'سَبَّ': 'chap10_pg25_case35',
+  'زَكَّ': 'chap10_pg25_case36',
+};
+
+
 const Page25 = () => {
-  const { playWord } = useAudio();
+ // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter10Page25AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   const shaddaWords = [
     // Rangée 1
@@ -15,7 +75,7 @@ const Page25 = () => {
     ['شَدَّ', 'طُبَّ', 'قَطَّ', 'غَلَّ', 'نَبَّ', 'ذُبَّ'],
     
     // Rangée 3
-    ['كُبَّ', 'ثَبَّ', 'يَمَّ', 'حُجَّ', 'عَدَّ', 'بَلَّ'],
+    ['حُجَّ', 'عَدَّ', 'بَلَّ'],
     
     // Rangée 4
     ['ظَنَّ', 'زُرَّ', 'هَبَّ', 'كَنَّ', 'ضَرَّ', 'سَرَّ'],
@@ -24,16 +84,21 @@ const Page25 = () => {
     ['نَمَّ', 'لَبَّ', 'فَكَّ', 'ذَكَّ', 'خَسَّ', 'هَجَّ'],
     
     // Rangée 6
-    ['طَلَّ', 'وَصَّ', 'جَلَّ', 'فَضَّ', 'سَبَّ', 'زَكَّ'],
+    ['جَلَّ', 'فَضَّ', 'سَبَّ'],
   
   ];
 
   // Aplatir toutes les rangées en un seul tableau
   const allWords = shaddaWords.flat();
 
-  const handleWordClick = (word: string) => {
-    playWord(word);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
+
+  function handleWordClick(word: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div 

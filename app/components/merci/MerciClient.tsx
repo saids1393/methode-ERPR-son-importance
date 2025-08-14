@@ -1,8 +1,8 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { BookOpen, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 export default function MerciClient() {
   const searchParams = useSearchParams();
@@ -11,7 +11,6 @@ export default function MerciClient() {
 
   useEffect(() => {
     const sessionId = searchParams.get('session_id');
-
     if (!sessionId) {
       setStatus('error');
       setMessage('Session invalide');
@@ -25,13 +24,11 @@ export default function MerciClient() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId }),
         });
-
         const data = await response.json();
 
         if (response.ok && data.success) {
           setStatus('success');
           setMessage('Paiement confirmé ! Redirection vers votre espace...');
-
           setTimeout(() => {
             if (data.needsProfileCompletion) {
               window.location.replace('/complete-profile');
@@ -55,16 +52,50 @@ export default function MerciClient() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <h2 className="mt-4 text-xl font-semibold text-gray-900">
-              Vérification du paiement...
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Veuillez patienter pendant que nous confirmons votre paiement.
-            </p>
+      <div className="merci-page-dark min-h-screen relative overflow-hidden bg-black">
+        <style jsx>{`
+          .merci-page-dark {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+          }
+        `}</style>
+
+        {/* Light effects on sides */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 -left-40 w-96 h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
+          <div className="absolute top-0 -right-40 w-96 h-full bg-gradient-to-l from-transparent via-purple-500/10 to-transparent blur-3xl"></div>
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-white/5 to-transparent rounded-full blur-3xl"></div>
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.05'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`
+          }}
+        ></div>
+
+        <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
+              <BookOpen className="h-8 w-8 text-white" />
+            </div>
+            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+              <div className="relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-30"></div>
+                <div className="relative bg-gray-950/90 backdrop-blur-xl py-12 px-6 rounded-2xl border border-gray-800 sm:px-10 text-center">
+                  <div className="flex justify-center">
+                    <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+                  </div>
+                  <h2 className="mt-6 text-xl font-semibold text-white">
+                    Vérification du paiement...
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-400">
+                    Veuillez patienter pendant que nous confirmons votre paiement.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -73,25 +104,55 @@ export default function MerciClient() {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-              <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+      <div className="merci-page-dark min-h-screen relative overflow-hidden bg-black">
+        <style jsx>{`
+          .merci-page-dark {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+          }
+        `}</style>
+
+        {/* Light effects on sides */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 -left-40 w-96 h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
+          <div className="absolute top-0 -right-40 w-96 h-full bg-gradient-to-l from-transparent via-purple-500/10 to-transparent blur-3xl"></div>
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-white/5 to-transparent rounded-full blur-3xl"></div>
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.05'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`
+          }}
+        ></div>
+
+        <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
+              <BookOpen className="h-8 w-8 text-white" />
             </div>
-            <h2 className="mt-4 text-xl font-semibold text-gray-900">
-              Erreur de paiement
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">{message}</p>
-            <div className="mt-6">
-              <Link
-                href="/checkout"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Réessayer
-              </Link>
+            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+              <div className="relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-30"></div>
+                <div className="relative bg-gray-950/90 backdrop-blur-xl py-12 px-6 rounded-2xl border border-gray-800 sm:px-10 text-center">
+                  <div className="flex justify-center">
+                    <XCircle className="h-12 w-12 text-red-500" />
+                  </div>
+                  <h2 className="mt-6 text-xl font-semibold text-white">
+                    Erreur de paiement
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-400">{message}</p>
+                  <div className="mt-8">
+                    <Link
+                      href="/checkout"
+                      className="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200"
+                    >
+                      Réessayer
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -100,23 +161,47 @@ export default function MerciClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+    <div className="merci-page-dark min-h-screen relative overflow-hidden bg-black">
+      <style jsx>{`
+        .merci-page-dark {
+          background-color: #000000 !important;
+          color: #ffffff !important;
+        }
+      `}</style>
+
+      {/* Light effects on sides */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 -left-40 w-96 h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
+        <div className="absolute top-0 -right-40 w-96 h-full bg-gradient-to-l from-transparent via-purple-500/10 to-transparent blur-3xl"></div>
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-white/5 to-transparent rounded-full blur-3xl"></div>
+      </div>
+
+      {/* Grid pattern overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.05'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`
+        }}
+      ></div>
+
+      <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
+            <BookOpen className="h-8 w-8 text-white" />
           </div>
-          <h2 className="mt-4 text-xl font-semibold text-gray-900">Merci pour votre achat !</h2>
-          <p className="mt-2 text-sm text-gray-600">{message}</p>
-          <div className="mt-6">
-            <Link
-              href="/dashboard"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-            >
-              Accéder au cours
-            </Link>
+          <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+            <div className="relative">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-30"></div>
+              <div className="relative bg-gray-950/90 backdrop-blur-xl py-12 px-6 rounded-2xl border border-gray-800 sm:px-10 text-center">
+                <div className="flex justify-center">
+                  <CheckCircle2 className="h-12 w-12 text-green-500" />
+                </div>
+                <h2 className="mt-6 text-xl font-semibold text-white">
+                  Merci pour votre achat !
+                </h2>
+                <p className="mt-2 text-sm text-gray-400">{message}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

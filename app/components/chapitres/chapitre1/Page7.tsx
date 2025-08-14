@@ -4,8 +4,40 @@ import React from 'react';
 
 import { useAudio } from '@/hooks/useAudio';
 
+const chapterPage7AudioMappings: { [key: string]: string } = {
+  // Row 1
+  'الٓمٓ': 'chap_page7_huruf1',
+  'الٓمٓصٓ': 'chap_page7_huruf2',
+  'الٓر': 'chap_page7_huruf3',
+  'الٓمٓر': 'chap_page7_huruf4',
+
+  // Row 2
+  'كٓهيعٓصٓ': 'chap_page7_huruf5',
+  'طه': 'chap_page7_huruf6',
+  'طسٓمٓ': 'chap_page7_huruf7',
+  'طسٓ': 'chap_page7_huruf8',
+
+  // Row 3
+  'يسٓ': 'chap_page7_huruf9',
+  'صٓ': 'chap_page7_huruf10',
+  'قٓ': 'chap_page7_huruf11',
+  'نٓ': 'chap_page7_huruf12',
+
+  // Row 4
+  'حمٓ': 'chap_page7_huruf13',
+  'حمٓ عٓسٓقٓ': 'chap_page7_huruf14',
+};
+
 const Page7 = () => {
-  const { playWord } = useAudio();
+    const playLetterAudio = (letter: string) => {
+  const audioFileName = chapterPage7AudioMappings[letter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   const hurufMuqattaah = [
     // Row 1
@@ -31,9 +63,15 @@ const Page7 = () => {
     { letters: 'حمٓ عٓسٓقٓ', emphatic: true }
   ];
 
-  const handleHurufClick = (letters: string) => {
-    playWord(letters);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (letter: string) => {
+  playLetterAudio(letter);
+};
+
+
+  function handleHurufClick(letters: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div 

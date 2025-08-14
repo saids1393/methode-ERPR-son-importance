@@ -25,7 +25,7 @@ import {
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
 import { useSimpleTimer } from '@/hooks/useSimpleTimer';
-import InactivityWarning from '@/app/components/InactivityWarning';
+import Logo from '@/app/components/Logo';
 
 interface User {
   id: string;
@@ -312,9 +312,14 @@ const handleContactSubmit = async (e: React.FormEvent) => {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center py-4 sm:py-6">
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <div className={`bg-gradient-to-r ${genderConfig.primaryColor} p-3 rounded-xl`}>
+ <div className={`bg-gradient-to-r ${genderConfig.primaryColor} p-3 rounded-xl`}>
                 <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
+
+
+
+
+             
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
                   Méthode ERPR

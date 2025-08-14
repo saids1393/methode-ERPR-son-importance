@@ -1,208 +1,218 @@
-// lib/audioMappings.ts - Mapping des lettres/mots vers les noms de fichiers audio
+// lib/audioMappings.ts - Mapping organisé par chapitre/page/case
 
-export const letterAudioMappings: { [key: string]: string } = {
-  // Lettres de base - vous pouvez utiliser n'importe quel nom
-  'ا': 'alif',
-  'ب': 'ba',
-  'ت': 'ta',
-  'ث': 'tha',
-  'ج': 'jim',
-  'ح': 'ha',
-  'خ': 'kha',
-  'د': 'dal',
-  'ذ': 'dhal',
-  'ر': 'ra',
-  'ز': 'zay',
-  'س': 'sin',
-  'ش': 'shin',
-  'ص': 'sad',
-  'ض': 'dad',
-  'ط': 'ta_emphatic',
-  'ظ': 'dha_emphatic',
-  'ع': 'ayn',
-  'غ': 'ghayn',
-  'ف': 'fa',
-  'ق': 'qaf',
-  'ك': 'kaf',
-  'ل': 'lam',
-  'م': 'mim',
-  'ن': 'nun',
-  'ه': 'ha_final',
-  'و': 'waw',
-  'ي': 'ya',
-  'ء': 'hamza',
-  'ة': 'ta_marbuta'
+// CHAPITRE 0 - Introduction aux lettres
+export const chapter0AudioMappings: { [key: string]: string } = {
+  // Page 1 - Lettres de base
+  '1': 'chap0_pg0_case1',
+  'ب': 'chap0_pg1_case2_ba',
+  'ت': 'chap0_pg1_case3_ta',
+  // Continuez avec les autres lettres de la page 1...
+  
+  // Page 2 - Suite des lettres
+  'ج': 'chap0_pg2_case1_jim',
+  'ح': 'chap0_pg2_case2_ha',
+  'خ': 'chap0_pg2_case3_kha',
+  // Continuez...
 };
 
-export const vowelAudioMappings: { [key: string]: string } = {
-  // Lettres avec voyelles - format: lettre_voyelle
-  'اَ': 'alif_with_fatha',
-  'اُ': 'alif_with_damma',
-  'اِ': 'alif_with_kasra',
-  'بَ': 'ba_with_fatha',
-  'بُ': 'ba_with_damma',
-  'بِ': 'ba_with_kasra',
-  'تَ': 'ta_with_fatha',
-  'تُ': 'ta_with_damma',
-  'تِ': 'ta_with_kasra',
-  'ثَ': 'tha_with_fatha',
-  'ثُ': 'tha_with_damma',
-  'ثِ': 'tha_with_kasra',
-  'جَ': 'jim_with_fatha',
-  'جُ': 'jim_with_damma',
-  'جِ': 'jim_with_kasra',
-  'حَ': 'ha_with_fatha',
-  'حُ': 'ha_with_damma',
-  'حِ': 'ha_with_kasra',
-  'خَ': 'kha_with_fatha',
-  'خُ': 'kha_with_damma',
-  'خِ': 'kha_with_kasra',
-  'دَ': 'dal_with_fatha',
-  'دُ': 'dal_with_damma',
-  'دِ': 'dal_with_kasra',
-  'ذَ': 'dhal_with_fatha',
-  'ذُ': 'dhal_with_damma',
-  'ذِ': 'dhal_with_kasra',
-  'رَ': 'ra_with_fatha',
-  'رُ': 'ra_with_damma',
-  'رِ': 'ra_with_kasra',
-  'زَ': 'zay_with_fatha',
-  'زُ': 'zay_with_damma',
-  'زِ': 'zay_with_kasra',
-  'سَ': 'sin_with_fatha',
-  'سُ': 'sin_with_damma',
-  'سِ': 'sin_with_kasra',
-  'شَ': 'shin_with_fatha',
-  'شُ': 'shin_with_damma',
-  'شِ': 'shin_with_kasra',
-  'صَ': 'sad_with_fatha',
-  'صُ': 'sad_with_damma',
-  'صِ': 'sad_with_kasra',
-  'ضَ': 'dad_with_fatha',
-  'ضُ': 'dad_with_damma',
-  'ضِ': 'dad_with_kasra',
-  'طَ': 'ta_emphatic_with_fatha',
-  'طُ': 'ta_emphatic_with_damma',
-  'طِ': 'ta_emphatic_with_kasra',
-  'ظَ': 'dha_emphatic_with_fatha',
-  'ظُ': 'dha_emphatic_with_damma',
-  'ظِ': 'dha_emphatic_with_kasra',
-  'عَ': 'ayn_with_fatha',
-  'عُ': 'ayn_with_damma',
-  'عِ': 'ayn_with_kasra',
-  'غَ': 'ghayn_with_fatha',
-  'غُ': 'ghayn_with_damma',
-  'غِ': 'ghayn_with_kasra',
-  'فَ': 'fa_with_fatha',
-  'فُ': 'fa_with_damma',
-  'فِ': 'fa_with_kasra',
-  'قَ': 'qaf_with_fatha',
-  'قُ': 'qaf_with_damma',
-  'قِ': 'qaf_with_kasra',
-  'كَ': 'kaf_with_fatha',
-  'كُ': 'kaf_with_damma',
-  'كِ': 'kaf_with_kasra',
-  'لَ': 'lam_with_fatha',
-  'لُ': 'lam_with_damma',
-  'لِ': 'lam_with_kasra',
-  'مَ': 'mim_with_fatha',
-  'مُ': 'mim_with_damma',
-  'مِ': 'mim_with_kasra',
-  'نَ': 'nun_with_fatha',
-  'نُ': 'nun_with_damma',
-  'نِ': 'nun_with_kasra',
-  'هَ': 'ha_final_with_fatha',
-  'هُ': 'ha_final_with_damma',
-  'هِ': 'ha_final_with_kasra',
-  'وَ': 'waw_with_fatha',
-  'وُ': 'waw_with_damma',
-  'وِ': 'waw_with_kasra',
-  'يَ': 'ya_with_fatha',
-  'يُ': 'ya_with_damma',
-  'يِ': 'ya_with_kasra',
-  'ءَ': 'hamza_with_fatha',
-  'ءُ': 'hamza_with_damma',
-  'ءِ': 'hamza_with_kasra',
-  'ةَ': 'ta_marbuta_with_fatha',
-  'ةُ': 'ta_marbuta_with_damma',
-  'ةِ': 'ta_marbuta_with_kasra'
+// CHAPITRE 1 - Lettres avec voyelles courtes (Fatha)
+export const chapter1AudioMappings: { [key: string]: string } = {
+  // Page 1 - Fatha avec premières lettres
+  'اَ': 'chap1_pg1_case1_alif_fatha',
+  'بَ': 'chap1_pg1_case2_ba_fatha',
+  'تَ': 'chap1_pg1_case3_ta_fatha',
+  // Continuez...
+  
+  // Page 2 - Fatha avec lettres suivantes
+  'جَ': 'chap1_pg2_case1_jim_fatha',
+  'حَ': 'chap1_pg2_case2_ha_fatha',
+  'خَ': 'chap1_pg2_case3_kha_fatha',
+  // Continuez...
 };
 
-export const wordAudioMappings: { [key: string]: string } = {
-  // Mots des exercices - noms personnalisés
-  'في': 'word_fi',
-  'من': 'word_min',
-  'قل': 'word_qul',
-  'هو': 'word_huwa',
-  'ما': 'word_ma',
-  'أن': 'word_an',
-  'لم': 'word_lam',
-  'كل': 'word_kull',
-  'ثم': 'word_thumma',
-  'هل': 'word_hal',
-  'عن': 'word_an_preposition',
-  'به': 'word_bihi',
-  'له': 'word_lahu',
-  'رب': 'word_rabb',
-  'هم': 'word_hum',
-  'نا': 'word_na',
-  'كم': 'word_kam',
-  'أي': 'word_ayy',
-  'نور': 'word_nur',
-  'عبد': 'word_abd',
-  'نار': 'word_nar',
-  'يدع': 'word_yadu',
-  'فوز': 'word_fawz',
-  'ملك': 'word_malik',
-  'نهر': 'word_nahr',
-  'قمر': 'word_qamar',
-  'غيب': 'word_ghayb',
-  'رسل': 'word_rusul',
-  'نفس': 'word_nafs',
-  'ضر': 'word_darr',
-  'صمت': 'word_samt',
-  'خير': 'word_khayr',
-  'علم': 'word_ilm',
-  'قلب': 'word_qalb',
-  'خلق': 'word_khalq',
-  'غفر': 'word_ghafara',
-  'سجد': 'word_sajada',
-  'عدة': 'word_idda',
-  'خوف': 'word_khawf',
-  'صدق': 'word_sadaqa',
-  'كفر': 'word_kafara',
-  'نصر': 'word_nasr',
-  'سؤل': 'word_sual',
-  'أمر': 'word_amr',
-  'يئس': 'word_yaisa',
-  'وَرَقٌ': 'word_waraq',
-  'قَلَمٌ': 'word_qalam',
-  'مَلَكٌ': 'word_malak',
-  'بَشَرٌ': 'word_bashar',
-  'جَبَلٌ': 'word_jabal',
-  'بَقَرٌ': 'word_baqar',
-  'ثَمَرٌ': 'word_thamar',
-  'حَجَرٌ': 'word_hajar',
-  'لَبَنٌ': 'word_laban',
-  'وَلَدٌ': 'word_walad',
-  'فَمٌ': 'word_fam',
-  'رَجُلٌ': 'word_rajul',
-  'سَمَكٌ': 'word_samak',
-  'يَدٌ': 'word_yad',
-  'زَمَنٌ': 'word_zaman',
-  // Ajoutez tous les autres mots...
+// CHAPITRE 2 - Lettres avec voyelles courtes (Damma)
+export const chapter2AudioMappings: { [key: string]: string } = {
+  // Page 1 - Damma avec premières lettres
+  'اُ': 'chap2_pg1_case1_alif_damma',
+  'بُ': 'chap2_pg1_case2_ba_damma',
+  'تُ': 'chap2_pg1_case3_ta_damma',
+  // Continuez...
+  
+  // Page 2 - Damma avec lettres suivantes
+  'جُ': 'chap2_pg2_case1_jim_damma',
+  'حُ': 'chap2_pg2_case2_ha_damma',
+  'خُ': 'chap2_pg2_case3_kha_damma',
+  // Continuez...
 };
+
+// CHAPITRE 3 - Lettres avec voyelles courtes (Kasra)
+export const chapter3AudioMappings: { [key: string]: string } = {
+  // Page 1 - Kasra avec premières lettres
+  'اِ': 'chap3_pg1_case1_alif_kasra',
+  'بِ': 'chap3_pg1_case2_ba_kasra',
+  'تِ': 'chap3_pg1_case3_ta_kasra',
+  // Continuez...
+  
+  // Page 2 - Kasra avec lettres suivantes
+  'جِ': 'chap3_pg2_case1_jim_kasra',
+  'حِ': 'chap3_pg2_case2_ha_kasra',
+  'خِ': 'chap3_pg2_case3_kha_kasra',
+  // Continuez...
+};
+
+// CHAPITRE 4 - Mots de deux lettres
+export const chapter4AudioMappings: { [key: string]: string } = {
+  // Page 1 - Mots simples de 2 lettres
+  'في': 'chap4_pg1_case1_fi',
+  'من': 'chap4_pg1_case2_min',
+  'قل': 'chap4_pg1_case3_qul',
+  // Continuez...
+  
+  // Page 2 - Autres mots de 2 lettres
+  'هو': 'chap4_pg2_case1_huwa',
+  'ما': 'chap4_pg2_case2_ma',
+  'أن': 'chap4_pg2_case3_an',
+  // Continuez...
+};
+
+// CHAPITRE 5 - Mots de trois lettres
+export const chapter5AudioMappings: { [key: string]: string } = {
+  // Page 1 - Mots de 3 lettres sans voyelles
+  'نور': 'chap5_pg1_case1_nur',
+  'عبد': 'chap5_pg1_case2_abd',
+  'نار': 'chap5_pg1_case3_nar',
+  // Continuez...
+  
+  // Page 2 - Autres mots de 3 lettres
+  'ملك': 'chap5_pg2_case1_malik',
+  'نهر': 'chap5_pg2_case2_nahr',
+  'قمر': 'chap5_pg2_case3_qamar',
+  // Continuez...
+};
+
+// CHAPITRE 6 - Mots avec voyelles (Fatha)
+export const chapter6AudioMappings: { [key: string]: string } = {
+  // Page 1 - Mots avec fatha
+  'وَرَقٌ': 'chap6_pg1_case1_waraq',
+  'قَلَمٌ': 'chap6_pg1_case2_qalam',
+  'مَلَكٌ': 'chap6_pg1_case3_malak',
+  // Continuez...
+  
+  // Page 2 - Suite mots avec fatha
+  'بَشَرٌ': 'chap6_pg2_case1_bashar',
+  'جَبَلٌ': 'chap6_pg2_case2_jabal',
+  'بَقَرٌ': 'chap6_pg2_case3_baqar',
+  // Continuez...
+};
+
+// CHAPITRE 7 - Mots avec voyelles mixtes
+export const chapter7AudioMappings: { [key: string]: string } = {
+  // Page 1 - Mots avec voyelles mixtes
+  'رَجُلٌ': 'chap7_pg1_case1_rajul',
+  'سَمَكٌ': 'chap7_pg1_case2_samak',
+  'يَدٌ': 'chap7_pg1_case3_yad',
+  // Continuez...
+  
+  // Page 2 - Suite voyelles mixtes
+  'زَمَنٌ': 'chap7_pg2_case1_zaman',
+  'لَبَنٌ': 'chap7_pg2_case2_laban',
+  'وَلَدٌ': 'chap7_pg2_case3_walad',
+  // Continuez...
+};
+
+// CHAPITRE 8 - Verbes simples
+export const chapter8AudioMappings: { [key: string]: string } = {
+  // Page 1 - Verbes de base
+  'غفر': 'chap8_pg1_case1_ghafara',
+  'سجد': 'chap8_pg1_case2_sajada',
+  'خلق': 'chap8_pg1_case3_khalq',
+  // Continuez...
+  
+  // Page 2 - Autres verbes
+  'صدق': 'chap8_pg2_case1_sadaqa',
+  'كفر': 'chap8_pg2_case2_kafara',
+  'نصر': 'chap8_pg2_case3_nasr',
+  // Continuez...
+};
+
+// CHAPITRE 9 - Expressions courantes
+export const chapter9AudioMappings: { [key: string]: string } = {
+  // Page 1 - Expressions avec prépositions
+  'به': 'chap9_pg1_case1_bihi',
+  'له': 'chap9_pg1_case2_lahu',
+  'عن': 'chap9_pg1_case3_an_preposition',
+  // Continuez...
+  
+  // Page 2 - Pronoms et particules
+  'هم': 'chap9_pg2_case1_hum',
+  'نا': 'chap9_pg2_case2_na',
+  'كم': 'chap9_pg2_case3_kam',
+  // Continuez...
+};
+
+// CHAPITRE 10 - Révisions et mots avancés
+export const chapter10AudioMappings: { [key: string]: string } = {
+  // Page 1 - Mots avancés
+  'غيب': 'chap10_pg1_case1_ghayb',
+  'رسل': 'chap10_pg1_case2_rusul',
+  'نفس': 'chap10_pg1_case3_nafs',
+  // Continuez...
+  
+  // Page 2 - Concepts abstraits
+  'علم': 'chap10_pg2_case1_ilm',
+  'قلب': 'chap10_pg2_case2_qalb',
+  'خوف': 'chap10_pg2_case3_khawf',
+  // Continuez...
+};
+
+// Fonction pour fusionner tous les chapitres
+export function getAllAudioMappings(): { [key: string]: string } {
+  return {
+    ...chapter0AudioMappings,
+    ...chapter1AudioMappings,
+    ...chapter2AudioMappings,
+    ...chapter3AudioMappings,
+    ...chapter4AudioMappings,
+    ...chapter5AudioMappings,
+    ...chapter6AudioMappings,
+    ...chapter7AudioMappings,
+    ...chapter8AudioMappings,
+    ...chapter9AudioMappings,
+    ...chapter10AudioMappings
+  };
+}
+
+// Fonction pour obtenir le mapping d'un chapitre spécifique
+export function getChapterMappings(chapterNumber: number): { [key: string]: string } {
+  const chapters = [
+    chapter0AudioMappings,
+    chapter1AudioMappings,
+    chapter2AudioMappings,
+    chapter3AudioMappings,
+    chapter4AudioMappings,
+    chapter5AudioMappings,
+    chapter6AudioMappings,
+    chapter7AudioMappings,
+    chapter8AudioMappings,
+    chapter9AudioMappings,
+    chapter10AudioMappings
+  ];
+  
+  return chapters[chapterNumber] || {};
+}
 
 // Fonction pour obtenir le nom du fichier audio
-export function getAudioFileName(text: string, type: 'letter' | 'vowel' | 'word'): string {
-  switch (type) {
-    case 'letter':
-      return letterAudioMappings[text] || text;
-    case 'vowel':
-      return vowelAudioMappings[text] || text;
-    case 'word':
-      return wordAudioMappings[text] || text;
-    default:
-      return text;
+export function getAudioFileName(text: string, chapterNumber?: number): string {
+  if (chapterNumber !== undefined) {
+    const chapterMappings = getChapterMappings(chapterNumber);
+    return chapterMappings[text] || `chap${chapterNumber}_undefined_${text}`;
   }
+  
+  const allMappings = getAllAudioMappings();
+  return allMappings[text] || `undefined_${text}`;
+}
+
+// Fonction helper pour générer un nom de fichier
+export function generateAudioFileName(chapter: number, page: number, caseNumber: number, description: string): string {
+  return `chap${chapter}_pg${page}_case${caseNumber}_${description}`;
 }

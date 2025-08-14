@@ -76,3 +76,13 @@ body {
 .animate-progress-bar {
   animation: progress-bar 6s linear forwards;
 }
+
+/* Ajoutez ceci à la fin de votre globals.css */
+.dark-theme {
+  --background: #000000 !important;
+  --foreground: #ffffff !important;
+}
+
+.dark-theme body {
+  background: #000000 !important;
+}

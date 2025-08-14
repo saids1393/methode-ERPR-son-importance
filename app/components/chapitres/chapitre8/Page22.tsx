@@ -3,8 +3,100 @@
 import React from 'react';
 import { useAudio } from '@/hooks/useAudio';
 
+const chapter8Page22AudioMappings: { [key: string]: string } = {
+  // ب + ت
+  'بَتْ': 'chap8_pg22_case1',
+  'بِتْ': 'chap8_pg22_case2',
+  'بُتْ': 'chap8_pg22_case3',
+
+  // ن + ص
+  'نَصْ': 'chap8_pg22_case4',
+  'نِصْ': 'chap8_pg22_case5',
+  'نُصْ': 'chap8_pg22_case6',
+
+  // ك + ت
+  'كَتْ': 'chap8_pg22_case7',
+  'كِتْ': 'chap8_pg22_case8',
+  'كُتْ': 'chap8_pg22_case9',
+
+  // م + س
+  'مَسْ': 'chap8_pg22_case10',
+  'مِسْ': 'chap8_pg22_case11',
+  'مُسْ': 'chap8_pg22_case12',
+
+  // ر + ب
+  'رَبْ': 'chap8_pg22_case13',
+  'رِبْ': 'chap8_pg22_case14',
+  'رُبْ': 'chap8_pg22_case15',
+
+  // س + ف
+  'سَفْ': 'chap8_pg22_case16',
+  'سِفْ': 'chap8_pg22_case17',
+  'سُفْ': 'chap8_pg22_case18',
+
+  // ع + د
+  'عَدْ': 'chap8_pg22_case19',
+  'عِدْ': 'chap8_pg22_case20',
+  'عُدْ': 'chap8_pg22_case21',
+
+  // ف + ر
+  'فَرْ': 'chap8_pg22_case22',
+  'فِرْ': 'chap8_pg22_case23',
+  'فُرْ': 'chap8_pg22_case24',
+
+  // ح + ب
+  'حَبْ': 'chap8_pg22_case25',
+  'حِبْ': 'chap8_pg22_case26',
+  'حُبْ': 'chap8_pg22_case27',
+
+  // د + ر
+  'دَرْ': 'chap8_pg22_case28',
+  'دِرْ': 'chap8_pg22_case29',
+  'دُرْ': 'chap8_pg22_case30',
+
+  // ط + ب
+  'طَبْ': 'chap8_pg22_case31',
+  'طِبْ': 'chap8_pg22_case32',
+  'طُبْ': 'chap8_pg22_case33',
+
+  // ق + ل
+  'قَلْ': 'chap8_pg22_case34',
+  'قِلْ': 'chap8_pg22_case35',
+  'قُلْ': 'chap8_pg22_case36',
+
+  // غ + ض
+  'غَضْ': 'chap8_pg22_case37',
+  'غِضْ': 'chap8_pg22_case38',
+  'غُضْ': 'chap8_pg22_case39',
+
+  // ص + د
+  'صَدْ': 'chap8_pg22_case40',
+  'صِدْ': 'chap8_pg22_case41',
+  'صُدْ': 'chap8_pg22_case42',
+
+  // ض + ح
+  'ضَحْ': 'chap8_pg22_case43',
+  'ضِحْ': 'chap8_pg22_case44',
+  'ضُحْ': 'chap8_pg22_case45',
+
+  // ذ + ك
+  'ذَكْ': 'chap8_pg22_case46',
+  'ذِكْ': 'chap8_pg22_case47',
+  'ذُكْ': 'chap8_pg22_case48',
+};
+
+
 const Page22 = () => {
-  const { playWord } = useAudio();
+ // Fonction pour jouer l'audio avec le mapping spécifique
+const playLetterAudio = (vowelLetter: string) => {
+  const audioFileName = chapter8Page22AudioMappings[vowelLetter];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    audio.play().catch(error => {
+      console.error('Erreur lors de la lecture audio:', error);
+    });
+  }
+};
 
   // Groupes de syllabes combinées
   const syllableGroups = [
@@ -35,9 +127,14 @@ const Page22 = () => {
     });
   });
 
-  const handleWordClick = (word: string) => {
-    playWord(word);
-  };
+// Modifier handleLetterClick pour utiliser la nouvelle fonction
+const handleLetterClick = (vowelLetter: string) => {
+  playLetterAudio(vowelLetter);
+};
+
+  function handleWordClick(word: string): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>

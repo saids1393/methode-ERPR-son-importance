@@ -341,17 +341,18 @@ export const chapters: Chapter[] = [
     introduction: "On y est presque, accrochez-vous encore un peu !\nEntrons maintenant dans le chapitre des prolongations. Comme je vous l'ai déjà dit, la langue arabe est facile, et bonne nouvelle : il n'y a que trois lettres de prolongation :\nAlif (ا)\n\nWaw (و)\n\nYaa (ي)\n\nCes lettres permettent de prolonger le son d'une voyelle, c'est-à-dire d'étirer ou de retenir un peu plus longtemps le son de la lettre précédente.\nPas d'inquiétude, c'est très simple. Il faudra juste un peu de compréhension et de logique, et vous allez vite saisir.\nVoici la règle principale :\nPour qu'une prolongation soit activée, il faut que la lettre de prolongation corresponde à la voyelle placée sur la lettre précédente.\nAlif (ا) = active si la lettre précédente porte une fatha ( َ )\n\nWaw (و) = active si la lettre précédente porte une damma ( ُ )\n\nYaa (ي) = active si la lettre précédente porte une kasra ( ِ )\n\n💡 Dans le cas contraire, la lettre de prolongation ne sera pas active et sera considérée comme une simple consonne.\nEn résumé :\nVoyelle + lettre de prolongation = son allongé.\nPrenez votre temps pour bien comprendre cette logique : c'est simple et très utile pour lire correctement.\n\nRemarque importante :\nSi la lettre de prolongation ne correspond pas à la voyelle précédente, elle ne servira pas à allonger le son mais deviendra une layyinah, c'est-à-dire une lettre douce. Il n'y en a que deux : Yaa (ي) et Waw (و). Au lieu de prolonger le son, on arrête leur son en douceur.\n\nIl y a aussi des symboles qui agissent de la même manière que les prolongations Alif, Waw et Yaa, mais en plus petits. En arabe, on les appelle saghīghah (صغيرة), ce qui signifie « petite ».\nOn les nomme donc : Alif Saghīghah, Waw Saghīghah et Yaa Saghīghah.\nCes petites lettres ne s'activent qu'avec leur voyelle correspondante :\nAlif Saghīghah s'active avec la voyelle fatha ( َ )\n\nWaw Saghīghah s'active avec la voyelle damma ( ُ )\n\nYaa Saghīghah s'active avec la voyelle kasra ( ِ )",
     pages: [
       {
-        title: "Leçon : symboles Alif saghirah - Ya saghirah - Waw saghirah",
+        title: "Leçon : les trois lettres de prolongation",
         href: "/chapitres/6/18",
         pageNumber: 18,
         status: 'completed'
       },
       {
-        title: "Leçon : les trois lettres de prolongation",
+        title: "Leçon : symboles Alif saghirah - Ya saghirah - Waw saghirah",
         href: "/chapitres/6/19",
         pageNumber: 19,
         status: 'completed'
       },
+
       {
         title: "Leçon : lettres douces",
         href: "/chapitres/6/20",

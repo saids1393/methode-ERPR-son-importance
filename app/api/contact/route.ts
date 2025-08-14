@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: {
         name: 'Support Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'sonimportance@gmail.com'
       },
       to: process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'votre@email.com',
       subject: `Nouveau message de support de ${email}`,
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: {
         name: 'Support Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'sonimportance@gmail.com'
       },
       to: email,
       subject: 'Confirmation de votre message de support',
@@ -63,14 +63,13 @@ export async function POST(request: Request) {
           <p>En attendant, vous pouvez continuer votre apprentissage sur votre espace personnel.</p>
           
           <div style="margin-top: 30px; text-align: center;">
-            <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard" 
+            <a href="${process.env.NEXTAUTH_URL || 'https://methode-erpr-v1.vercel.app'}/dashboard" 
                style="display: inline-block; padding: 10px 20px; background-color: #4299e1; color: white; text-decoration: none; border-radius: 4px;">
               Accéder à mon espace
             </a>
           </div>
-          
           <div style="margin-top: 30px; font-size: 14px; color: #718096; border-top: 1px solid #e0e0e0; padding-top: 20px;">
-            <p>L'équipe Méthode ERPR</p>
+            <p>Méthode ERPR</p>
             <p>Professeur Soidroudine</p>
           </div>
         </div>
