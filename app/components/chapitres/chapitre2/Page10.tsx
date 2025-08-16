@@ -7,117 +7,117 @@ import React from 'react';
 // Mapping audio pour le Chapitre 2, Page 10
 const chapter2Page10AudioMappings: { [key: string]: string } = {
   // Alif avec voyelles (forme médiane)
-  'ـاَ': 'chap2_pg10_case1',
-  'ـاُ': 'chap2_pg10_case2',
-  'ـاِ': 'chap2_pg10_case3',
+  'ـاَ': 'chap2_pg8_case1',
+  'ـاُ': 'chap2_pg8_case2',
+  'ـاِ': 'chap2_pg8_case3',
   // Ba avec voyelles (forme médiane)
-  'ـبَـ': 'chap2_pg10_case4',
-  'ـبُـ': 'chap2_pg10_case5',
-  'ـبِـ': 'chap2_pg10_case6',
+  'ـبَـ': 'chap2_pg8_case4',
+  'ـبُـ': 'chap2_pg8_case5',
+  'ـبِـ': 'chap2_pg8_case6',
   // Ta avec voyelles (forme médiane)
-  'ـتَـ': 'chap2_pg10_case7',
-  'ـتُـ': 'chap2_pg10_case8',
-  'ـتِـ': 'chap2_pg10_case9',
+  'ـتَـ': 'chap2_pg8_case7',
+  'ـتُـ': 'chap2_pg8_case8',
+  'ـتِـ': 'chap2_pg8_case9',
   // Tha avec voyelles (forme médiane)
-  'ـثَـ': 'chap2_pg10_case10',
-  'ـثُـ': 'chap2_pg10_case11',
-  'ـثِـ': 'chap2_pg10_case12',
+  'ـثَـ': 'chap2_pg8_case10',
+  'ـثُـ': 'chap2_pg8_case11',
+  'ـثِـ': 'chap2_pg8_case12',
   // Jim avec voyelles (forme médiane)
-  'ـجَـ': 'chap2_pg10_case13',
-  'ـجُـ': 'chap2_pg10_case14',
-  'ـجِـ': 'chap2_pg10_case15',
+  'ـجَـ': 'chap2_pg8_case13',
+  'ـجُـ': 'chap2_pg8_case14',
+  'ـجِـ': 'chap2_pg8_case15',
   // Ha avec voyelles (forme médiane)
-  'ـحَـ': 'chap2_pg10_case16',
-  'ـحُـ': 'chap2_pg10_case17',
-  'ـحِـ': 'chap2_pg10_case18',
+  'ـحَـ': 'chap2_pg8_case16',
+  'ـحُـ': 'chap2_pg8_case17',
+  'ـحِـ': 'chap2_pg8_case18',
   // Kha avec voyelles (forme médiane)
-  'ـخَـ': 'chap2_pg10_case19',
-  'ـخُـ': 'chap2_pg10_case20',
-  'ـخِـ': 'chap2_pg10_case21',
+  'ـخَـ': 'chap2_pg8_case19',
+  'ـخُـ': 'chap2_pg8_case20',
+  'ـخِـ': 'chap2_pg8_case21',
   // Dal avec voyelles (forme finale)
-  'ـدَ': 'chap2_pg10_case22',
-  'ـدُ': 'chap2_pg10_case23',
-  'ـدِ': 'chap2_pg10_case24',
+  'ـدَ': 'chap2_pg8_case22',
+  'ـدُ': 'chap2_pg8_case23',
+  'ـدِ': 'chap2_pg8_case24',
   // Dhal avec voyelles (forme finale)
-  'ـذَ': 'chap2_pg10_case25',
-  'ـذُ': 'chap2_pg10_case26',
-  'ـذِ': 'chap2_pg10_case27',
+  'ـذَ': 'chap2_pg8_case25',
+  'ـذُ': 'chap2_pg8_case26',
+  'ـذِ': 'chap2_pg8_case27',
   // Ra avec voyelles (forme finale)
-  'ـرَ': 'chap2_pg10_case28',
-  'ـرُ': 'chap2_pg10_case29',
-  'ـرِ': 'chap2_pg10_case30',
+  'ـرَ': 'chap2_pg8_case28',
+  'ـرُ': 'chap2_pg8_case29',
+  'ـرِ': 'chap2_pg8_case30',
   // Zay avec voyelles (forme finale)
-  'ـزَ': 'chap2_pg10_case31',
-  'ـزُ': 'chap2_pg10_case32',
-  'ـزِ': 'chap2_pg10_case33',
+  'ـزَ': 'chap2_pg8_case31',
+  'ـزُ': 'chap2_pg8_case32',
+  'ـزِ': 'chap2_pg8_case33',
   // Sin avec voyelles (forme médiane)
-  'ـسَـ': 'chap2_pg10_case34',
-  'ـسُـ': 'chap2_pg10_case35',
-  'ـسِـ': 'chap2_pg10_case36',
+  'ـسَـ': 'chap2_pg8_case34',
+  'ـسُـ': 'chap2_pg8_case35',
+  'ـسِـ': 'chap2_pg8_case36',
   // Shin avec voyelles (forme médiane)
-  'ـشَـ': 'chap2_pg10_case37',
-  'ـشُـ': 'chap2_pg10_case38',
-  'ـشِـ': 'chap2_pg10_case39',
+  'ـشَـ': 'chap2_pg8_case37',
+  'ـشُـ': 'chap2_pg8_case38',
+  'ـشِـ': 'chap2_pg8_case39',
   // Sad avec voyelles (forme médiane)
-  'ـصَـ': 'chap2_pg10_case40',
-  'ـصُـ': 'chap2_pg10_case41',
-  'ـصِـ': 'chap2_pg10_case42',
+  'ـصَـ': 'chap2_pg8_case40',
+  'ـصُـ': 'chap2_pg8_case41',
+  'ـصِـ': 'chap2_pg8_case42',
   // Dad avec voyelles (forme médiane)
-  'ـضَـ': 'chap2_pg10_case43',
-  'ـضُـ': 'chap2_pg10_case44',
-  'ـضِـ': 'chap2_pg10_case45',
+  'ـضَـ': 'chap2_pg8_case43',
+  'ـضُـ': 'chap2_pg8_case44',
+  'ـضِـ': 'chap2_pg8_case45',
   // Ta emphatic avec voyelles (forme médiane)
-  'ـطَـ': 'chap2_pg10_case46',
-  'ـطُـ': 'chap2_pg10_case47',
-  'ـطِـ': 'chap2_pg10_case48',
+  'ـطَـ': 'chap2_pg8_case46',
+  'ـطُـ': 'chap2_pg8_case47',
+  'ـطِـ': 'chap2_pg8_case48',
   // Dha emphatic avec voyelles (forme médiane)
-  'ـظَـ': 'chap2_pg10_case49',
-  'ـظُـ': 'chap2_pg10_case50',
-  'ـظِـ': 'chap2_pg10_case51',
+  'ـظَـ': 'chap2_pg8_case49',
+  'ـظُـ': 'chap2_pg8_case50',
+  'ـظِـ': 'chap2_pg8_case51',
   // Ayn avec voyelles (forme médiane)
-  'ـعَـ': 'chap2_pg10_case52',
-  'ـعُـ': 'chap2_pg10_case53',
-  'ـعِـ': 'chap2_pg10_case54',
+  'ـعَـ': 'chap2_pg8_case52',
+  'ـعُـ': 'chap2_pg8_case53',
+  'ـعِـ': 'chap2_pg8_case54',
   // Ghayn avec voyelles (forme médiane)
-  'ـغَـ': 'chap2_pg10_case55',
-  'ـغُـ': 'chap2_pg10_case56',
-  'ـغِـ': 'chap2_pg10_case57',
+  'ـغَـ': 'chap2_pg8_case55',
+  'ـغُـ': 'chap2_pg8_case56',
+  'ـغِـ': 'chap2_pg8_case57',
   // Fa avec voyelles (forme médiane)
-  'ـفَـ': 'chap2_pg10_case58',
-  'ـفُـ': 'chap2_pg10_case59',
-  'ـفِـ': 'chap2_pg10_case60',
+  'ـفَـ': 'chap2_pg8_case58',
+  'ـفُـ': 'chap2_pg8_case59',
+  'ـفِـ': 'chap2_pg8_case60',
   // Qaf avec voyelles (forme médiane)
-  'ـقَـ': 'chap2_pg10_case61',
-  'ـقُـ': 'chap2_pg10_case62',
-  'ـقِـ': 'chap2_pg10_case63',
+  'ـقَـ': 'chap2_pg8_case61',
+  'ـقُـ': 'chap2_pg8_case62',
+  'ـقِـ': 'chap2_pg8_case63',
   // Kaf avec voyelles (forme médiane)
-  'ـكَـ': 'chap2_pg10_case64',
-  'ـكُـ': 'chap2_pg10_case65',
-  'ـكِـ': 'chap2_pg10_case66',
+  'ـكَـ': 'chap2_pg8_case64',
+  'ـكُـ': 'chap2_pg8_case65',
+  'ـكِـ': 'chap2_pg8_case66',
   // Lam avec voyelles (forme médiane)
-  'ـلَـ': 'chap2_pg10_case67',
-  'ـلُـ': 'chap2_pg10_case68',
-  'ـلِـ': 'chap2_pg10_case69',
+  'ـلَـ': 'chap2_pg8_case67',
+  'ـلُـ': 'chap2_pg8_case68',
+  'ـلِـ': 'chap2_pg8_case69',
   // Mim avec voyelles (forme médiane)
-  'ـمَـ': 'chap2_pg10_case70',
-  'ـمُـ': 'chap2_pg10_case71',
-  'ـمِـ': 'chap2_pg10_case72',
+  'ـمَـ': 'chap2_pg8_case70',
+  'ـمُـ': 'chap2_pg8_case71',
+  'ـمِـ': 'chap2_pg8_case72',
   // Nun avec voyelles (forme médiane)
-  'ـنَـ': 'chap2_pg10_case73',
-  'ـنُـ': 'chap2_pg10_case74',
-  'ـنِـ': 'chap2_pg10_case75',
+  'ـنَـ': 'chap2_pg8_case73',
+  'ـنُـ': 'chap2_pg8_case74',
+  'ـنِـ': 'chap2_pg8_case75',
   // Ha avec voyelles (forme médiane)
-  'ـهَـ': 'chap2_pg10_case76',
-  'ـهُـ': 'chap2_pg10_case77',
-  'ـهِـ': 'chap2_pg10_case78',
+  'ـهَـ': 'chap2_pg8_case76',
+  'ـهُـ': 'chap2_pg8_case77',
+  'ـهِـ': 'chap2_pg8_case78',
   // Waw avec voyelles (forme finale)
-  'ـوَ': 'chap2_pg10_case79',
-  'ـوُ': 'chap2_pg10_case80',
-  'ـوِ': 'chap2_pg10_case81',
+  'ـوَ': 'chap2_pg8_case79',
+  'ـوُ': 'chap2_pg8_case80',
+  'ـوِ': 'chap2_pg8_case81',
   // Ya avec voyelles (forme médiane)
-  'ـيَـ': 'chap2_pg10_case82',
-  'ـيُـ': 'chap2_pg10_case83',
-  'ـيِـ': 'chap2_pg10_case84'
+  'ـيَـ': 'chap2_pg8_case82',
+  'ـيُـ': 'chap2_pg8_case83',
+  'ـيِـ': 'chap2_pg8_case84'
 };
 
 const Page10 = () => {
@@ -125,7 +125,7 @@ const Page10 = () => {
 const playLetterAudio = (vowelLetter: string) => {
   const audioFileName = chapter2Page10AudioMappings[vowelLetter];
   if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    const audio = new Audio(`/audio/chapitre2/${audioFileName}.mp3`);
     audio.play().catch(error => {
       console.error('Erreur lors de la lecture audio:', error);
     });

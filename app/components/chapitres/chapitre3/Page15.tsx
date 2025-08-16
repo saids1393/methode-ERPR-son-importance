@@ -7,152 +7,152 @@ import React from 'react';
 // Mapping audio pour le Chapitre 3, Page 15 (voyelles doubles en fin de mot)
 const chapter3Page15AudioMappings: { [key: string]: string } = {
   // Alif avec voyelles doubles (finale)
-  'اً': 'chap3_pg15_case1',
-  'اٌ': 'chap3_pg15_case2',
-  'اٍ': 'chap3_pg15_case3',
+  'اً': 'chap3_pg12_case1',
+  'اٌ': 'chap3_pg12_case2',
+  'اٍ': 'chap3_pg12_case3',
   
   // Ba avec voyelles doubles (finale)
-  'بًا': 'chap3_pg15_case4',
-  'بٌ': 'chap3_pg15_case5',
-  'بٍ': 'chap3_pg15_case6',
+  'بًا': 'chap3_pg12_case4',
+  'بٌ': 'chap3_pg12_case5',
+  'بٍ': 'chap3_pg12_case6',
   
   // Ta avec voyelles doubles (finale)
-  'تًا': 'chap3_pg15_case7',
-  'تٌ': 'chap3_pg15_case8',
-  'تٍ': 'chap3_pg15_case9',
+  'تًا': 'chap3_pg12_case7',
+  'تٌ': 'chap3_pg12_case8',
+  'تٍ': 'chap3_pg12_case9',
   
   // Tha avec voyelles doubles (finale)
-  'ثًا': 'chap3_pg15_case10',
-  'ثٌ': 'chap3_pg15_case11',
-  'ثٍ': 'chap3_pg15_case12',
+  'ثًا': 'chap3_pg12_case10',
+  'ثٌ': 'chap3_pg12_case11',
+  'ثٍ': 'chap3_pg12_case12',
   
   // Jim avec voyelles doubles (finale)
-  'جًا': 'chap3_pg15_case13',
-  'جٌ': 'chap3_pg15_case14',
-  'جٍ': 'chap3_pg15_case15',
+  'جًا': 'chap3_pg12_case13',
+  'جٌ': 'chap3_pg12_case14',
+  'جٍ': 'chap3_pg12_case15',
   
   // Ha avec voyelles doubles (finale)
-  'حًا': 'chap3_pg15_case16',
-  'حٌ': 'chap3_pg15_case17',
-  'حٍ': 'chap3_pg15_case18',
+  'حًا': 'chap3_pg12_case16',
+  'حٌ': 'chap3_pg12_case17',
+  'حٍ': 'chap3_pg12_case18',
   
   // Kha avec voyelles doubles (finale)
-  'خًا': 'chap3_pg15_case19',
-  'خٌ': 'chap3_pg15_case20',
-  'خٍ': 'chap3_pg15_case21',
+  'خًا': 'chap3_pg12_case19',
+  'خٌ': 'chap3_pg12_case20',
+  'خٍ': 'chap3_pg12_case21',
   
   // Dal avec voyelles doubles (finale)
-  'دًا': 'chap3_pg15_case22',
-  'دٌ': 'chap3_pg15_case23',
-  'دٍ': 'chap3_pg15_case24',
+  'دًا': 'chap3_pg12_case22',
+  'دٌ': 'chap3_pg12_case23',
+  'دٍ': 'chap3_pg12_case24',
   
   // Dhal avec voyelles doubles (finale)
-  'ذًا': 'chap3_pg15_case25',
-  'ذٌ': 'chap3_pg15_case26',
-  'ذٍ': 'chap3_pg15_case27',
+  'ذًا': 'chap3_pg12_case25',
+  'ذٌ': 'chap3_pg12_case26',
+  'ذٍ': 'chap3_pg12_case27',
   
   // Ra avec voyelles doubles (finale)
-  'رًا': 'chap3_pg15_case28',
-  'رٌ': 'chap3_pg15_case29',
-  'رٍ': 'chap3_pg15_case30',
+  'رًا': 'chap3_pg12_case28',
+  'رٌ': 'chap3_pg12_case29',
+  'رٍ': 'chap3_pg12_case30',
   
   // Zay avec voyelles doubles (finale)
-  'زًا': 'chap3_pg15_case31',
-  'زٌ': 'chap3_pg15_case32',
-  'زٍ': 'chap3_pg15_case33',
+  'زًا': 'chap3_pg12_case31',
+  'زٌ': 'chap3_pg12_case32',
+  'زٍ': 'chap3_pg12_case33',
   
   // Sin avec voyelles doubles (finale)
-  'سًا': 'chap3_pg15_case34',
-  'سٌ': 'chap3_pg15_case35',
-  'سٍ': 'chap3_pg15_case36',
+  'سًا': 'chap3_pg12_case34',
+  'سٌ': 'chap3_pg12_case35',
+  'سٍ': 'chap3_pg12_case36',
   
   // Shin avec voyelles doubles (finale)
-  'شًا': 'chap3_pg15_case37',
-  'شٌ': 'chap3_pg15_case38',
-  'شٍ': 'chap3_pg15_case39',
+  'شًا': 'chap3_pg12_case37',
+  'شٌ': 'chap3_pg12_case38',
+  'شٍ': 'chap3_pg12_case39',
   
   // Sad avec voyelles doubles (finale)
-  'صًا': 'chap3_pg15_case40',
-  'صٌ': 'chap3_pg15_case41',
-  'صٍ': 'chap3_pg15_case42',
+  'صًا': 'chap3_pg12_case40',
+  'صٌ': 'chap3_pg12_case41',
+  'صٍ': 'chap3_pg12_case42',
   
   // Dad avec voyelles doubles (finale)
-  'ضًا': 'chap3_pg15_case43',
-  'ضٌ': 'chap3_pg15_case44',
-  'ضٍ': 'chap3_pg15_case45',
+  'ضًا': 'chap3_pg12_case43',
+  'ضٌ': 'chap3_pg12_case44',
+  'ضٍ': 'chap3_pg12_case45',
   
   // Ta emphatic avec voyelles doubles (finale)
-  'طًا': 'chap3_pg15_case46',
-  'طٌ': 'chap3_pg15_case47',
-  'طٍ': 'chap3_pg15_case48',
+  'طًا': 'chap3_pg12_case46',
+  'طٌ': 'chap3_pg12_case47',
+  'طٍ': 'chap3_pg12_case48',
   
   // Dha emphatic avec voyelles doubles (finale)
-  'ظًا': 'chap3_pg15_case49',
-  'ظٌ': 'chap3_pg15_case50',
-  'ظٍ': 'chap3_pg15_case51',
+  'ظًا': 'chap3_pg12_case49',
+  'ظٌ': 'chap3_pg12_case50',
+  'ظٍ': 'chap3_pg12_case51',
   
   // Ayn avec voyelles doubles (finale)
-  'عًا': 'chap3_pg15_case52',
-  'عٌ': 'chap3_pg15_case53',
-  'عٍ': 'chap3_pg15_case54',
+  'عًا': 'chap3_pg12_case52',
+  'عٌ': 'chap3_pg12_case53',
+  'عٍ': 'chap3_pg12_case54',
   
   // Ghayn avec voyelles doubles (finale)
-  'غًا': 'chap3_pg15_case55',
-  'غٌ': 'chap3_pg15_case56',
-  'غٍ': 'chap3_pg15_case57',
+  'غًا': 'chap3_pg12_case55',
+  'غٌ': 'chap3_pg12_case56',
+  'غٍ': 'chap3_pg12_case57',
   
   // Fa avec voyelles doubles (finale)
-  'فًا': 'chap3_pg15_case58',
-  'فٌ': 'chap3_pg15_case59',
-  'فٍ': 'chap3_pg15_case60',
+  'فًا': 'chap3_pg12_case58',
+  'فٌ': 'chap3_pg12_case59',
+  'فٍ': 'chap3_pg12_case60',
   
   // Qaf avec voyelles doubles (finale)
-  'قًا': 'chap3_pg15_case61',
-  'قٌ': 'chap3_pg15_case62',
-  'قٍ': 'chap3_pg15_case63',
+  'قًا': 'chap3_pg12_case61',
+  'قٌ': 'chap3_pg12_case62',
+  'قٍ': 'chap3_pg12_case63',
   
   // Kaf avec voyelles doubles (finale)
-  'كًا': 'chap3_pg15_case64',
-  'كٌ': 'chap3_pg15_case65',
-  'كٍ': 'chap3_pg15_case66',
+  'كًا': 'chap3_pg12_case64',
+  'كٌ': 'chap3_pg12_case65',
+  'كٍ': 'chap3_pg12_case66',
   
   // Lam avec voyelles doubles (finale)
-  'لًا': 'chap3_pg15_case67',
-  'لٌ': 'chap3_pg15_case68',
-  'لٍ': 'chap3_pg15_case69',
+  'لًا': 'chap3_pg12_case67',
+  'لٌ': 'chap3_pg12_case68',
+  'لٍ': 'chap3_pg12_case69',
   
   // Mim avec voyelles doubles (finale)
-  'مًا': 'chap3_pg15_case70',
-  'مٌ': 'chap3_pg15_case71',
-  'مٍ': 'chap3_pg15_case72',
+  'مًا': 'chap3_pg12_case70',
+  'مٌ': 'chap3_pg12_case71',
+  'مٍ': 'chap3_pg12_case72',
   
   // Nun avec voyelles doubles (finale)
-  'نًا': 'chap3_pg15_case73',
-  'نٌ': 'chap3_pg15_case74',
-  'نٍ': 'chap3_pg15_case75',
+  'نًا': 'chap3_pg12_case73',
+  'نٌ': 'chap3_pg12_case74',
+  'نٍ': 'chap3_pg12_case75',
   
   // Ha avec voyelles doubles (finale)
-  'هًا': 'chap3_pg15_case76',
-  'هٌ': 'chap3_pg15_case77',
-  'هٍ': 'chap3_pg15_case78',
+  'هًا': 'chap3_pg12_case76',
+  'هٌ': 'chap3_pg12_case77',
+  'هٍ': 'chap3_pg12_case78',
   
   // Waw avec voyelles doubles (finale)
-  'وً': 'chap3_pg15_case79',
-  'وٌ': 'chap3_pg15_case80',
-  'وٍ': 'chap3_pg15_case81',
+  'وً': 'chap3_pg12_case79',
+  'وٌ': 'chap3_pg12_case80',
+  'وٍ': 'chap3_pg12_case81',
   
   // Ya avec voyelles doubles (finale)
-  'يًا': 'chap3_pg15_case82',
-  'يٌ': 'chap3_pg15_case83',
-  'يٍ': 'chap3_pg15_case84'
+  'يًا': 'chap3_pg12_case82',
+  'يٌ': 'chap3_pg12_case83',
+  'يٍ': 'chap3_pg12_case84'
 };
 
 const Page15 = () => {
-      // Fonction pour jouer l'audio avec le mapping spécifique
+    // Fonction pour jouer l'audio avec le mapping spécifique
 const playLetterAudio = (vowelLetter: string) => {
   const audioFileName = chapter3Page15AudioMappings[vowelLetter];
   if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    const audio = new Audio(`/audio/chapitre3/${audioFileName}.mp3`);
     audio.play().catch(error => {
       console.error('Erreur lors de la lecture audio:', error);
     });

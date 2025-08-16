@@ -102,7 +102,7 @@ const Page18 = () => {
 const playLetterAudio = (vowelLetter: string) => {
   const audioFileName = chapter6Page18AudioMappings[vowelLetter];
   if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    const audio = new Audio(`/audio/chapitre6/${audioFileName}.mp3`);
     audio.play().catch(error => {
       console.error('Erreur lors de la lecture audio:', error);
     });
@@ -155,7 +155,11 @@ const handleLetterClick = (vowelLetter: string) => {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
               {words.map((word, index) => (
-                <ProlongationCard key={index} word={word} onClick={() => handleWordClick(word)} />
+                <ProlongationCard
+                  key={index}
+                  word={word}
+                  onClick={() => handleLetterClick(word)}
+                />
               ))}
             </div>
           </div>

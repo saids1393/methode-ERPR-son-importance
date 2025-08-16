@@ -3,7 +3,6 @@
 // components/chapitres/chapitre8/Page23.tsx
 import React from 'react';
 
-
 const chapter8Page23AudioMappings: { [key: string]: string } = {
   // Mots simples
   'قُلْ': 'chap8_pg23_case1',
@@ -32,24 +31,20 @@ const chapter8Page23AudioMappings: { [key: string]: string } = {
   'عَنِ': 'chap8_pg23_case24',
 
   // Versets
-  'وَإِذَا الْجِبَالُ نُسِفَتْ': 'chap8_pg23_case25',
-  'وَيَمْنَعُونَ الْمَاعُونَ': 'chap8_pg23_case26',
-  'وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ': 'chap8_pg23_case27',
-  'لَكُمْ دِينُكُمْ وَلِيَ دِينِ': 'chap8_pg23_case28',
+  'وَيَمْنَعُونَ الْمَاعُونَ': 'chap8_pg23_case25',
 };
-
 
 const Page23 = () => {
   // Fonction pour jouer l'audio avec le mapping spécifique
-const playLetterAudio = (vowelLetter: string) => {
-  const audioFileName = chapter8Page23AudioMappings[vowelLetter];
-  if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
-    audio.play().catch(error => {
-      console.error('Erreur lors de la lecture audio:', error);
-    });
-  }
-};
+  const playLetterAudio = (vowelLetter: string) => {
+    const audioFileName = chapter8Page23AudioMappings[vowelLetter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre8/${audioFileName}.mp3`);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+      });
+    }
+  };
 
   const quranicItems = [
     // Mots simples
@@ -57,14 +52,14 @@ const playLetterAudio = (vowelLetter: string) => {
     'فَلْيَنْظُرْ', 'يَلْهَثْ', 'مِنْ', 'عَنْهُ', 'لَكُمْ', 'دِينُكُمْ',
     'وَيَمْنَعُونَ', 'الْمَاعُونَ', 'كَعَصْفٍ', 'مَأْكُولٍ', 'أَنتُمْ', 'عَابِدُونَ',
     'أَعْبُدُ', 'فَأَثَرْنَ', 'نَقْعًا', 'وَلَا', 'تَنْهَ', 'عَنِ',
-
+    // Verset
     { text: 'وَيَمْنَعُونَ الْمَاعُونَ', color: 'text-violet-400' }
   ];
 
-// Modifier handleLetterClick pour utiliser la nouvelle fonction
-const handleLetterClick = (vowelLetter: string) => {
-  playLetterAudio(vowelLetter);
-};
+  // Gestionnaire de clic pour les mots/versets
+  const handleWordClick = (word: string) => {
+    playLetterAudio(word);
+  };
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -72,7 +67,7 @@ const handleLetterClick = (vowelLetter: string) => {
         {/* Header */}
         <div className="bg-arabic-gradient text-white p-6 text-center">
           <div className="text-3xl md:text-3xl font-bold">
-           Exercice : reconnaissance des mots avec la soukoun
+            Exercice : reconnaissance des mots avec la soukoun
           </div>
         </div>
 
@@ -83,23 +78,17 @@ const handleLetterClick = (vowelLetter: string) => {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
               {quranicItems.map((item, index) => {
                 const isVerse = typeof item !== 'string';
-
-                function handleWordClick(arg0: string): void {
-                  throw new Error('Function not implemented.');
-                }
+                const word = isVerse ? item.text : item;
+                const color = isVerse ? item.color : undefined;
 
                 return (
-                  <div
+                  <QuranicWordCard
                     key={index}
+                    word={word}
+                    color={color}
+                    onClick={() => handleWordClick(word)}
                     className={isVerse ? 'col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-6' : ''}
-                  >
-                    <QuranicWordCard
-                      word={isVerse ? item.text : item}
-                      color={isVerse ? item.color : undefined}
-                      index={index}
-                      onClick={() => handleWordClick(isVerse ? item.text : item)}
-                    />
-                  </div>
+                  />
                 );
               })}
             </div>
@@ -119,18 +108,18 @@ const handleLetterClick = (vowelLetter: string) => {
 // Composant pour chaque mot ou verset
 const QuranicWordCard = ({
   word,
-  index,
   color,
   onClick,
+  className,
 }: {
   word: string;
-  index: number;
   color?: string;
   onClick?: () => void;
+  className?: string;
 }) => {
   return (
-    <div 
-      className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer"
+    <div
+      className={`bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer ${className}`}
       onClick={onClick}
     >
       <div

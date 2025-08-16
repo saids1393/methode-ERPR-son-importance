@@ -54,7 +54,7 @@ const Page21 = () => {
 const playLetterAudio = (vowelLetter: string) => {
   const audioFileName = chapter7Page21AudioMappings[vowelLetter];
   if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    const audio = new Audio(`/audio/chapitre7/${audioFileName}.mp3`);
     audio.play().catch(error => {
       console.error('Erreur lors de la lecture audio:', error);
     });
@@ -128,9 +128,6 @@ const handleLetterClick = (vowelLetter: string) => {
   playLetterAudio(vowelLetter);
 };
 
-  function handleWordClick(word: string): void {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: "rtl" }}>
@@ -147,14 +144,14 @@ const handleLetterClick = (vowelLetter: string) => {
           <div className="max-w-6xl mx-auto">
             {/* Nouvelle grille similaire à Page20 */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
-              {words.map((item, index) => (
-                <VariousWordCard
+               {words.map((wordItem, index) => (
+                 <VariousWordCard
                   key={index}
-                  word={item.word}
-                  symbol={item.symbol}
-                  symbolPosition={item.symbolPosition}
+                  word={wordItem.word}
                   index={index}
-                  onClick={() => handleWordClick(item.word)}
+                  onClick={() => handleLetterClick(wordItem.word)}
+                  symbol={wordItem.symbol}
+                  symbolPosition={wordItem.symbolPosition}
                 />
               ))}
             </div>

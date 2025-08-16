@@ -91,7 +91,7 @@ const Page22 = () => {
 const playLetterAudio = (vowelLetter: string) => {
   const audioFileName = chapter8Page22AudioMappings[vowelLetter];
   if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    const audio = new Audio(`/audio/chapitre8/${audioFileName}.mp3`);
     audio.play().catch(error => {
       console.error('Erreur lors de la lecture audio:', error);
     });
@@ -132,9 +132,6 @@ const handleLetterClick = (vowelLetter: string) => {
   playLetterAudio(vowelLetter);
 };
 
-  function handleWordClick(word: string): void {
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -149,9 +146,13 @@ const handleLetterClick = (vowelLetter: string) => {
         {/* Contenu */}
         <div className="p-8 bg-zinc-900">
           <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
-            {words.map((word, index) => (
-              <SukoonSyllableCard key={index} word={word} onClick={() => handleWordClick(word)} />
-            ))}
+             {words.map((word, index) => (
+               <SukoonSyllableCard
+                  key={index}
+                  word={word}
+                  onClick={() => handleLetterClick(word)}
+                />
+              ))}
           </div>
         </div>
 

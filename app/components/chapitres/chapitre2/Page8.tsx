@@ -135,7 +135,7 @@ const Page8 = () => {
 const playLetterAudio = (vowelLetter: string) => {
   const audioFileName = chapter2Page8AudioMappings[vowelLetter];
   if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    const audio = new Audio(`/audio/chapitre2/${audioFileName}.mp3`);
     audio.play().catch(error => {
       console.error('Erreur lors de la lecture audio:', error);
     });

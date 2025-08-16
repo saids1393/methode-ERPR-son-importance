@@ -35,13 +35,14 @@ const chapter3Page12AudioMappings: { [key: string]: string } = {
   'وً': 'chap3_pg12_case79', 'وٌ': 'chap3_pg12_case80', 'وٍ': 'chap3_pg12_case81',
   'يً': 'chap3_pg12_case82', 'يٌ': 'chap3_pg12_case83', 'يٍ': 'chap3_pg12_case84',
   'أً': 'chap3_pg12_case85', 'أٌ': 'chap3_pg12_case86', 'إٍ': 'chap3_pg12_case87'
+  
 };
 
 const Page12 = () => {
   const playLetterAudio = (vowelLetter: string) => {
     const audioFileName = chapter3Page12AudioMappings[vowelLetter];
     if (audioFileName) {
-      const audio = new Audio(`/audio/${audioFileName}.mp3`);
+      const audio = new Audio(`/audio/chapitre3/${audioFileName}.mp3`);
       audio.play().catch(error => {
         console.error("Erreur lors de la lecture audio:", error);
       });

@@ -5,35 +5,35 @@ import React from 'react';
 
 // Mapping audio pour le Chapitre 1, Page 3
 const chapter1Page3AudioMappings: { [key: string]: string } = {
-  'ـا': 'chap1_pg3_case1',
-  'ـبـ': 'chap1_pg3_case2',
-  'ـتـ': 'chap1_pg3_case3',
-  'ـثـ': 'chap1_pg3_case4',
-  'ـجـ': 'chap1_pg3_case5',
-  'ـحـ': 'chap1_pg3_case6',
-  'ـخـ': 'chap1_pg3_case7',
-  'ـد': 'chap1_pg3_case8',
-  'ـذ': 'chap1_pg3_case9',
-  'ـر': 'chap1_pg3_case10',
-  'ـز': 'chap1_pg3_case11',
-  'ـسـ': 'chap1_pg3_case12',
-  'ـشـ': 'chap1_pg3_case13',
-  'ـصـ': 'chap1_pg3_case14',
-  'ـضـ': 'chap1_pg3_case15',
-  'ـطـ': 'chap1_pg3_case16',
-  'ـظـ': 'chap1_pg3_case17',
-  'ـعـ': 'chap1_pg3_case18',
-  'ـغـ': 'chap1_pg3_case19',
-  'ـفـ': 'chap1_pg3_case20',
-  'ـقـ': 'chap1_pg3_case21',
-  'ـكـ': 'chap1_pg3_case22',
-  'ـلـ': 'chap1_pg3_case23',
-  'ـمـ': 'chap1_pg3_case24',
-  'ـنـ': 'chap1_pg3_case25',
-  'ـهـ': 'chap1_pg3_case26',
-  'ـو': 'chap1_pg3_case27',
-  'ـيـ': 'chap1_pg3_case28',
-  'ء': 'chap1_pg3_case29'
+  'ـا': 'chap0_pg0_case1',
+  'ـبـ': 'chap0_pg0_case2',
+  'ـتـ': 'chap0_pg0_case3',
+  'ـثـ': 'chap0_pg0_case4',
+  'ـجـ': 'chap0_pg0_case5',
+  'ـحـ': 'chap0_pg0_case6',
+  'ـخـ': 'chap0_pg0_case7',
+  'ـد': 'chap0_pg0_case8',
+  // 'ـذ': 'chap0_pg0_case9',
+  'ـر': 'chap0_pg0_case10',
+  'ـز': 'chap0_pg0_case11',
+  'ـسـ': 'chap0_pg0_case12',
+  'ـشـ': 'chap0_pg0_case13',
+  'ـصـ': 'chap0_pg0_case14',
+  'ـضـ': 'chap0_pg0_case15',
+  'ـطـ': 'chap0_pg0_case16',
+  'ـظـ': 'chap0_pg0_case17',
+  'ـعـ': 'chap0_pg0_case18',
+  'ـغـ': 'chap0_pg0_case19',
+  'ـفـ': 'chap0_pg0_case20',
+  'ـقـ': 'chap0_pg0_case21',
+  'ـكـ': 'chap0_pg0_case22',
+  'ـلـ': 'chap0_pg0_case23',
+  'ـمـ': 'chap0_pg0_case24',
+  'ـنـ': 'chap0_pg0_case25',
+  'ـهـ': 'chap0_pg0_case26',
+  'ـو': 'chap0_pg0_case27',
+  'ـيـ': 'chap0_pg0_case28',
+  'ء': 'chap0_pg0_case29'
 };
 
 const Page3 = () => {
@@ -41,7 +41,7 @@ const Page3 = () => {
   const playLetterAudio = (letter: string) => {
     const audioFileName = chapter1Page3AudioMappings[letter];
     if (audioFileName) {
-      const audio = new Audio(`/audio/${audioFileName}.mp3`);
+      const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
       audio.play().catch(error => {
         console.error('Erreur lors de la lecture audio:', error);
       });

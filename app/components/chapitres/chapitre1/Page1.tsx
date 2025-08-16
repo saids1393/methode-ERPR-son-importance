@@ -6,42 +6,42 @@ import React from 'react';
 
 // Mapping audio pour lettres isolées (Chapitre 1 - Page 1)
 const chapter1Page1AudioMappings: { [key: string]: string } = {
-  'ا': 'chap1_pg1_case1',
-  'ب': 'chap1_pg1_case2',
-  'ت': 'chap1_pg1_case3',
-  'ث': 'chap1_pg1_case4',
-  'ج': 'chap1_pg1_case5',
-  'ح': 'chap1_pg1_case6',
-  'خ': 'chap1_pg1_case7',
-  'د': 'chap1_pg1_case8',
-  'ذ': 'chap1_pg1_case9',
-  'ر': 'chap1_pg1_case10',
-  'ز': 'chap1_pg1_case11',
-  'س': 'chap1_pg1_case12',
-  'ش': 'chap1_pg1_case13',
-  'ص': 'chap1_pg1_case14',
-  'ض': 'chap1_pg1_case15',
-  'ط': 'chap1_pg1_case16',
-  'ظ': 'chap1_pg1_case17',
-  'ع': 'chap1_pg1_case18',
-  'غ': 'chap1_pg1_case19',
-  'ف': 'chap1_pg1_case20',
-  'ق': 'chap1_pg1_case21',
-  'ك': 'chap1_pg1_case22',
-  'ل': 'chap1_pg1_case23',
-  'م': 'chap1_pg1_case24',
-  'ن': 'chap1_pg1_case25',
-  'ه': 'chap1_pg1_case26',
-  'و': 'chap1_pg1_case27',
-  'ي': 'chap1_pg1_case28',
-  'ء': 'chap1_pg1_case29'
+  'ا': 'chap0_pg0_case1',
+  'ب': 'chap0_pg0_case2',
+  'ت': 'chap0_pg0_case3',
+  'ث': 'chap0_pg0_case4',
+  'ج': 'chap0_pg0_case5',
+  'ح': 'chap0_pg0_case6',
+  'خ': 'chap0_pg0_case7',
+  'د': 'chap0_pg0_case8',
+  // 'ذ': 'chap0_pg0_case9',
+  'ر': 'chap0_pg0_case10',
+  'ز': 'chap0_pg0_case11',
+  'س': 'chap0_pg0_case12',
+  'ش': 'chap0_pg0_case13',
+  'ص': 'chap0_pg0_case14',
+  'ض': 'chap0_pg0_case15',
+  'ط': 'chap0_pg0_case16',
+  'ظ': 'chap0_pg0_case17',
+  'ع': 'chap0_pg0_case18',
+  'غ': 'chap0_pg0_case19',
+  'ف': 'chap0_pg0_case20',
+  'ق': 'chap0_pg0_case21',
+  'ك': 'chap0_pg0_case22',
+  'ل': 'chap0_pg0_case23',
+  'م': 'chap0_pg0_case24',
+  'ن': 'chap0_pg0_case25',
+  'ه': 'chap0_pg0_case26',
+  'و': 'chap0_pg0_case27',
+  'ي': 'chap0_pg0_case28',
+  'ء': 'chap0_pg0_case29'
 };
 
 const Page1 = () => {
   const playLetterAudio = (letter: string) => {
     const audioFileName = chapter1Page1AudioMappings[letter];
     if (audioFileName) {
-      const audio = new Audio(`/audio/${audioFileName}.mp3`);
+      const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
       audio.play().catch(error => {
         console.error('Erreur lors de la lecture audio:', error);
       });

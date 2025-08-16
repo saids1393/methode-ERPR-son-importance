@@ -2,80 +2,78 @@
 
 import React from 'react';
 
-
 const chapter9Page24AudioMappings: { [key: string]: string } = {
-  // Lettres solaires
-  'ت': 'chap9_pg24_solar1',
-  'ث': 'chap9_pg24_solar2',
-  'د': 'chap9_pg24_solar3',
-  'ذ': 'chap9_pg24_solar4',
-  'ر': 'chap9_pg24_solar5',
-  'ز': 'chap9_pg24_solar6',
-  'س': 'chap9_pg24_solar7',
-  'ش': 'chap9_pg24_solar8',
-  'ص': 'chap9_pg24_solar9',
-  'ض': 'chap9_pg24_solar10',
-  'ط': 'chap9_pg24_solar11',
-  'ظ': 'chap9_pg24_solar12',
-  'ل': 'chap9_pg24_solar13',
-  'ن': 'chap9_pg24_solar14',
+  // // Lettres solaires
+  // 'ت': 'chap9_pg24_case1',
+  // 'ث': 'chap9_pg24_case2',
+  // 'د': 'chap9_pg24_case3',
+  // 'ذ': 'chap9_pg24_case4',
+  // 'ر': 'chap9_pg24_case5',
+  // 'ز': 'chap9_pg24_case6',
+  // 'س': 'chap9_pg24_case7',
+  // 'ش': 'chap9_pg24_case8',
+  // 'ص': 'chap9_pg24_case9',
+  // 'ض': 'chap9_pg24_case10',
+  // 'ط': 'chap9_pg24_case11',
+  // 'ظ': 'chap9_pg24_case12',
+  // 'ل': 'chap9_pg24_case13',
+  // 'ن': 'chap9_pg24_case14',
 
-  // Lettres lunaires
-  'ا': 'chap9_pg24_lunar1',
-  'ب': 'chap9_pg24_lunar2',
-  'ج': 'chap9_pg24_lunar3',
-  'ح': 'chap9_pg24_lunar4',
-  'خ': 'chap9_pg24_lunar5',
-  'ع': 'chap9_pg24_lunar6',
-  'غ': 'chap9_pg24_lunar7',
-  'ف': 'chap9_pg24_lunar8',
-  'ق': 'chap9_pg24_lunar9',
-  'ك': 'chap9_pg24_lunar10',
-  'م': 'chap9_pg24_lunar11',
-  'و': 'chap9_pg24_lunar12',
-  'ه': 'chap9_pg24_lunar13',
-  'ي': 'chap9_pg24_lunar14',
+  // // Lettres lunaires
+  // 'ا': 'chap9_pg24_case1',
+  // 'ب': 'chap9_pg24_case2',
+  // 'ج': 'chap9_pg24_case3',
+  // 'ح': 'chap9_pg24_case4',
+  // 'خ': 'chap9_pg24_case5',
+  // 'ع': 'chap9_pg24_case6',
+  // 'غ': 'chap9_pg24_case7',
+  // 'ف': 'chap9_pg24_case8',
+  // 'ق': 'chap9_pg24_case9',
+  // 'ك': 'chap9_pg24_case10',
+  // 'م': 'chap9_pg24_case11',
+  // 'و': 'chap9_pg24_case12',
+  // 'ه': 'chap9_pg24_case13',
+  // 'ي': 'chap9_pg24_case14',
 
   // Exemples solaires
-  'الشَّمْسُ': 'chap9_pg24_solar_example1',
-  'النَّهْرُ': 'chap9_pg24_solar_example2',
-  'الدَّرْسُ': 'chap9_pg24_solar_example3',
-  'التِّينُ': 'chap9_pg24_solar_example4',
+  'الشَّمْسُ': 'chap9_pg24_case15',
+  'النَّهْرُ': 'chap9_pg24_case16',
+  'الدَّرْسُ': 'chap9_pg24_case17',
+  'التِّينُ': 'chap9_pg24_case18',
 
   // Exemples lunaires
-  'الْقَمَرُ': 'chap9_pg24_lunar_example1',
-  'الْبَيْتُ': 'chap9_pg24_lunar_example2',
-  'الْكِتَابُ': 'chap9_pg24_lunar_example3',
-  'الْمَاءُ': 'chap9_pg24_lunar_example4',
+  'الْقَمَرُ': 'chap9_pg24_case19',
+  'الْبَيْتُ': 'chap9_pg24_case20',
+  'الْكِتَابُ': 'chap9_pg24_case21',
+  'الْمَاءُ': 'chap9_pg24_case22',
 };
-
 
 const Page24 = () => {
-// Fonction pour jouer l'audio avec le mapping spécifique
-const playLetterAudio = (vowelLetter: string) => {
-  const audioFileName = chapter9Page24AudioMappings[vowelLetter];
-  if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
-    audio.play().catch(error => {
-      console.error('Erreur lors de la lecture audio:', error);
-    });
-  }
-};
+  // Fonction pour jouer l'audio
+  const playLetterAudio = (vowelLetter: string) => {
+    const audioFileName = chapter9Page24AudioMappings[vowelLetter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre9/${audioFileName}.mp3`);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+      });
+    }
+  };
 
+  // Séparer les lettres et exemples
   const solarLetters = ['ت', 'ث', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ل', 'ن'];
   const lunarLetters = ['ا', 'ب', 'ج', 'ح', 'خ', 'ع', 'غ', 'ف', 'ق', 'ك', 'م', 'و', 'ه', 'ي'];
 
   const solarExamples = ['الشَّمْسُ', 'النَّهْرُ', 'الدَّرْسُ', 'التِّينُ'];
   const lunarExamples = ['الْقَمَرُ', 'الْبَيْتُ', 'الْكِتَابُ', 'الْمَاءُ'];
 
-// Modifier handleLetterClick pour utiliser la nouvelle fonction
-const handleLetterClick = (vowelLetter: string) => {
-  playLetterAudio(vowelLetter);
-};
+  const handleLetterClick = (vowelLetter: string) => {
+    playLetterAudio(vowelLetter);
+  };
 
-  function handleWordClick(word: string): void {
-    throw new Error('Function not implemented.');
-  }
+  const handleWordClick = (word: string) => {
+    playLetterAudio(word);
+  };
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -99,7 +97,7 @@ const handleLetterClick = (vowelLetter: string) => {
               />
               <div className="flex flex-wrap gap-3 mb-6 justify-center">
                 {solarLetters.map((letter, index) => (
-                  <LetterCard key={index} letter={letter} type="solar" onClick={() => handleLetterClick(letter)} />
+                  <LetterCard key={index} letter={letter} type="case" onClick={() => handleLetterClick(letter)} />
                 ))}
               </div>
               <SectionSubtitle title="Exemples de lettres solaires" />
@@ -119,7 +117,7 @@ const handleLetterClick = (vowelLetter: string) => {
               />
               <div className="flex flex-wrap gap-3 mb-6 justify-center">
                 {lunarLetters.map((letter, index) => (
-                  <LetterCard key={index} letter={letter} type="lunar" onClick={() => handleLetterClick(letter)} />
+                  <LetterCard key={index} letter={letter} type="case" onClick={() => handleLetterClick(letter)} />
                 ))}
               </div>
               <SectionSubtitle title="Exemples de lettres lunaires" />
@@ -160,21 +158,22 @@ const SectionSubtitle = ({ title }: { title: string }) => (
 
 const LetterCard = ({ letter, type, onClick }: {
   letter: string;
-  type: 'solar' | 'lunar';
+  type: 'case' | 'case';
   onClick?: () => void;
 }) => {
   const colorClass =
-    type === 'solar'
+    type === 'case'
       ? 'bg-yellow-900/30 text-yellow-400 border-yellow-600'
       : 'bg-blue-900/30 text-blue-400 border-blue-600';
 
   return (
-    <div className={`
-      ${colorClass} border-2 rounded-lg p-3 text-center cursor-pointer
-      hover:scale-105 transition-transform duration-300
-      min-w-[50px] min-h-[50px] flex items-center justify-center
-    `}
-    onClick={onClick}
+    <div
+      className={`
+        ${colorClass} border-2 rounded-lg p-3 text-center cursor-pointer
+        hover:scale-105 transition-transform duration-300
+        min-w-[50px] min-h-[50px] flex items-center justify-center
+      `}
+      onClick={onClick}
     >
       <div className="text-2xl font-bold">{letter}</div>
     </div>
@@ -182,7 +181,7 @@ const LetterCard = ({ letter, type, onClick }: {
 };
 
 const ExampleCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
-  <div 
+  <div
     className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 text-center hover:bg-zinc-700 transition-all duration-300 cursor-pointer"
     onClick={onClick}
   >

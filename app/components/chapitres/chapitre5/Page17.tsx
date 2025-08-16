@@ -6,30 +6,31 @@ import React from 'react';
 // Mapping audio pour le Chapitre 5, Page 17 (mots avec voyelles)
 const chapter5Page17AudioMappings: { [key: string]: string } = {
   // Mots avec voyelles simples et doubles
-  'وَرَقٌ': 'chap5_pg17_word1',
-  'قَلَمٌ': 'chap5_pg17_word2',
-  'مَلَكٌ': 'chap5_pg17_word3',
-  'بَشَرٌ': 'chap5_pg17_word4',
-  'جَبَلٌ': 'chap5_pg17_word5',
-  'بَقَرٌ': 'chap5_pg17_word6',
-  'ثَمَرٌ': 'chap5_pg17_word7',
-  'حَجَرٌ': 'chap5_pg17_word8',
-  'لَبَنٌ': 'chap5_pg17_word9',
-  'قَمَرٌ': 'chap5_pg17_word10',
-  'وَلَدٌ': 'chap5_pg17_word11',
-  'فَمٌ': 'chap5_pg17_word12',
-  'رَجُلٌ': 'chap5_pg17_word13',
-  'سَمَكٌ': 'chap5_pg17_word14',
-  'يَدٌ': 'chap5_pg17_word15',
-  'زَمَنٌ': 'chap5_pg17_word16'
+  'وَرَقٌ': 'chap5_pg17_case1',
+  'قَلَمٌ': 'chap5_pg17_case2',
+  'مَلَكٌ': 'chap5_pg17_case3',
+  'بَشَرٌ': 'chap5_pg17_case4',
+  'جَبَلٌ': 'chap5_pg17_case5',
+  'بَقَرٌ': 'chap5_pg17_case6',
+  'ثَمَرٌ': 'chap5_pg17_case7',
+  'حَجَرٌ': 'chap5_pg17_case8',
+  'لَبَنٌ': 'chap5_pg17_case9',
+  'قَمَرٌ': 'chap5_pg17_case10',
+  'وَلَدٌ': 'chap5_pg17_case11',
+  'فَمٌ': 'chap5_pg17_case12',
+  'رَجُلٌ': 'chap5_pg17_case13',
+  'سَمَكٌ': 'chap5_pg17_case14',
+  'يَدٌ': 'chap5_pg17_case15',
+  'زَمَنٌ': 'chap5_pg17_case16'
 };
+
 
 const Page17 = () => {
   // Fonction pour jouer l'audio avec le mapping spécifique
   const playLetterAudio = (vowelLetter: string) => {
     const audioFileName = chapter5Page17AudioMappings[vowelLetter];
     if (audioFileName) {
-      const audio = new Audio(`/audio/${audioFileName}.mp3`);
+      const audio = new Audio(`/audio/chapitre5/${audioFileName}.mp3`);
       audio.play().catch(error => {
         console.error('Erreur lors de la lecture audio:', error);
       });
@@ -61,9 +62,7 @@ const Page17 = () => {
     playLetterAudio(vowelLetter);
   };
 
-  function handleWordClick(word: string): void {
-    throw new Error('Function not implemented.');
-  }
+
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -80,8 +79,13 @@ const Page17 = () => {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
               {words.map((word, index) => (
-                <WordCard key={index} word={word} onClick={() => handleWordClick(word)} />
+                <WordCard
+                  key={index}
+                  word={word}
+                  onClick={() => handleLetterClick(word)}
+                />
               ))}
+
             </div>
           </div>
         </div>
@@ -98,7 +102,7 @@ const Page17 = () => {
 
 const WordCard = ({ word, onClick }: { word: string; onClick?: () => void }) => {
   return (
-    <div 
+    <div
       className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer"
       onClick={onClick}
     >

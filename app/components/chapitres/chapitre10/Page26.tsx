@@ -5,10 +5,6 @@ import React from 'react';
 
 
 const chapter10Page26AudioMappings: { [key: string]: string } = {
-  // Mots d'introduction
-  'دَرَّسَ': 'chap10_pg26_intro1',
-  'مُسَمَّىٰ': 'chap10_pg26_intro2',
-
   // Rangée 1
   'إِنَّ': 'chap10_pg26_case1',
   'اللَّهَ': 'chap10_pg26_case2',
@@ -48,7 +44,7 @@ const chapter10Page26AudioMappings: { [key: string]: string } = {
   'تَذَكَّرُوا': 'chap10_pg26_case22',
 
   // Verset final
-  'إِنَّ اللَّهَ غَفُورٌ رَحِيمٌ': 'chap10_pg26_verse1',
+  'إِنَّ اللَّهَ غَفُورٌ رَحِيمٌ': 'chap10_pg26_case23',
 };
 
 
@@ -57,7 +53,7 @@ const Page26 = () => {
 const playLetterAudio = (vowelLetter: string) => {
   const audioFileName = chapter10Page26AudioMappings[vowelLetter];
   if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    const audio = new Audio(`/audio/chapitre10/${audioFileName}.mp3`);
     audio.play().catch(error => {
       console.error('Erreur lors de la lecture audio:', error);
     });
@@ -108,9 +104,6 @@ const handleLetterClick = (vowelLetter: string) => {
   playLetterAudio(vowelLetter);
 };
 
-  function handleWordClick(word: string): void {
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <div 
@@ -134,9 +127,9 @@ const handleLetterClick = (vowelLetter: string) => {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {allWords.map((word, index) => (
                   <WordCard 
-                    key={index} 
+                    key={index}
                     word={word}
-                    onClick={() => handleWordClick(word)}
+                    onClick={() => handleLetterClick(word)}
                   />
                 ))}
               </div>
@@ -146,7 +139,7 @@ const handleLetterClick = (vowelLetter: string) => {
             <div className="mb-8">
               <div 
                 className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-xl p-8 text-center cursor-pointer hover:bg-blue-900/30 transition-colors"
-                onClick={() => handleWordClick(verse)}
+                onClick={() => handleLetterClick(verse)}
               >
                 <div className="text-blue-400 text-3xl md:text-4xl font-bold leading-relaxed">
                   {verse}

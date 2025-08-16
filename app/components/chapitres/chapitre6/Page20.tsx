@@ -79,15 +79,15 @@ const chapter6Page20AudioMappings: { [key: string]: string } = {
 
 const Page20 = () => {
   // Fonction pour jouer l'audio avec le mapping spécifique
-const playLetterAudio = (vowelLetter: string) => {
-  const audioFileName = chapter6Page20AudioMappings[vowelLetter];
-  if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
-    audio.play().catch(error => {
-      console.error('Erreur lors de la lecture audio:', error);
-    });
-  }
-};
+  const playLetterAudio = (vowelLetter: string) => {
+    const audioFileName = chapter6Page20AudioMappings[vowelLetter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre6/${audioFileName}.mp3`);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+      });
+    }
+  };
 
   // Prépare les mots complets
   const words = [
@@ -111,14 +111,11 @@ const playLetterAudio = (vowelLetter: string) => {
     'غَوْ', 'غَيْ',
   ];
 
-// Modifier handleLetterClick pour utiliser la nouvelle fonction
-const handleLetterClick = (vowelLetter: string) => {
-  playLetterAudio(vowelLetter);
-};
+  // Modifier handleLetterClick pour utiliser la nouvelle fonction
+  const handleLetterClick = (vowelLetter: string) => {
+    playLetterAudio(vowelLetter);
+  };
 
-  function handleWordClick(word: string): void {
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -134,7 +131,11 @@ const handleLetterClick = (vowelLetter: string) => {
         <div className="p-8 bg-zinc-900">
           <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
             {words.map((word, index) => (
-              <DiphthongCard key={index} word={word} onClick={() => handleWordClick(word)} />
+              <DiphthongCard
+                key={index}
+                word={word}
+                onClick={() => handleLetterClick(word)}
+              />
             ))}
           </div>
         </div>
@@ -151,7 +152,7 @@ const handleLetterClick = (vowelLetter: string) => {
 
 // Carte pour chaque mot doux (lettre + fatha + lettre douce)
 const DiphthongCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
-  <div 
+  <div
     className="bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-center hover:bg-zinc-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer"
     onClick={onClick}
   >

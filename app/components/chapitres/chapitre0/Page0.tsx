@@ -13,7 +13,7 @@ const chapter0Page0AudioMappings: { [key: string]: string } = {
   'ح': 'chap0_pg0_case6',
   'خ': 'chap0_pg0_case7',
   'د': 'chap0_pg0_case8',
-  'ذ': 'chap0_pg0_case9',
+  // 'ذ': 'chap0_pg0_case9',
   'ر': 'chap0_pg0_case10',
   'ز': 'chap0_pg0_case11',
   'س': 'chap0_pg0_case12',
@@ -43,7 +43,7 @@ const Page0 = () => {
   const playLetterAudio = (letter: string) => {
     const audioFileName = chapter0Page0AudioMappings[letter];
     if (audioFileName) {
-      const audio = new Audio(`/audio/${audioFileName}.mp3`);
+      const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
       audio.play().catch(error => {
         console.error('Erreur lors de la lecture audio:', error);
       });

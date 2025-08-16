@@ -74,6 +74,14 @@ interface SessionsResponse {
   bookedSessionsCount: number;
 }
 
+interface User {
+  id: string;
+  email: string;
+  username: string | null;
+  gender: 'HOMME' | 'FEMME' | null;
+  isActive: boolean;
+}
+
 export default function AccompagnementPage() {
   const [data, setData] = useState<SessionsResponse | null>(null);
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
@@ -87,13 +95,27 @@ export default function AccompagnementPage() {
   const [selectedReason, setSelectedReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
+    fetchUserData();
     fetchSessions();
     fetchAvailableSlots();
     fetchCancellationReasons();
   }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
 
   const fetchSessions = async () => {
     try {
@@ -165,8 +187,8 @@ export default function AccompagnementPage() {
         toast.success('Séance réservée avec succès !');
         setShowBookingForm(false);
         setSelectedSlot(null);
-        fetchSessions(); // Recharger les données
-        fetchAvailableSlots(); // Recharger les créneaux
+        fetchSessions();
+        fetchAvailableSlots();
       } else {
         toast.error(result.error || 'Erreur lors de la réservation');
       }
@@ -234,7 +256,7 @@ export default function AccompagnementPage() {
   };
 
   const formatTime = (timeString: string) => {
-    return timeString.substring(0, 5); // HH:MM
+    return timeString.substring(0, 5);
   };
 
   const canCancelSession = (session: SessionData) => {
@@ -244,14 +266,40 @@ export default function AccompagnementPage() {
     const now = new Date();
     const hoursUntil = (sessionTime.getTime() - now.getTime()) / (1000 * 60 * 60);
     
-    return hoursUntil >= 24; // 24h minimum
+    return hoursUntil >= 24;
   };
+
+  const getGenderConfig = () => {
+    if (user?.gender === 'FEMME') {
+      return {
+        primaryColor: 'from-purple-500 to-pink-500',
+        primaryColorHover: 'from-purple-600 to-pink-600',
+        primaryText: 'text-purple-400',
+        secondaryText: 'text-purple-200',
+        primaryBorder: 'border-purple-500/30',
+        primaryGlow: 'bg-purple-500/20',
+        gradientBg: 'from-slate-900 via-purple-900 to-slate-900',
+      };
+    } else {
+      return {
+        primaryColor: 'from-blue-500 to-cyan-500',
+        primaryColorHover: 'from-blue-600 to-cyan-600',
+        primaryText: 'text-blue-400',
+        secondaryText: 'text-blue-200',
+        primaryBorder: 'border-blue-500/30',
+        primaryGlow: 'bg-blue-500/20',
+        gradientBg: 'from-slate-900 via-blue-900 to-slate-900',
+      };
+    }
+  };
+
+  const genderConfig = getGenderConfig();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+      <div className={`min-h-screen bg-gradient-to-br ${genderConfig.gradientBg} flex items-center justify-center`}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400 mx-auto mb-6"></div>
+          <div className={`animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 ${genderConfig.primaryText.replace('text', 'border')} mx-auto mb-6`}></div>
           <p className="text-white text-lg font-medium">Chargement de vos accompagnements...</p>
         </div>
       </div>
@@ -260,10 +308,10 @@ export default function AccompagnementPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+      <div className={`min-h-screen bg-gradient-to-br ${genderConfig.gradientBg} flex items-center justify-center`}>
         <div className="text-center text-white">
           <p>Erreur lors du chargement des données</p>
-          <Link href="/dashboard" className="text-blue-400 hover:text-blue-300">
+          <Link href="/dashboard" className={`${genderConfig.primaryText} hover:${genderConfig.secondaryText}`}>
             Retour au tableau de bord
           </Link>
         </div>
@@ -271,29 +319,25 @@ export default function AccompagnementPage() {
     );
   }
 
-  // Variables calculées après vérification de data
   const unlockedSessions = data.progress?.unlockedSessions ?? 0;
-  console.log('🔓 Séances débloquées calculées:', unlockedSessions);
-  console.log('📈 Progression complète:', data.progress);
   const canBookMore = data.progress?.unlockedSessions !== undefined
     ? data.bookedSessionsCount < data.progress.unlockedSessions
     : false;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      {/* Header */}
+    <div className={`min-h-screen bg-gradient-to-br ${genderConfig.gradientBg}`}>
       <header className="bg-black/20 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-3 rounded-xl">
+              <div className={`bg-gradient-to-r ${genderConfig.primaryColor} p-3 rounded-xl`}>
                 <Users className="h-8 w-8 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">
                   Accompagnement Individuel
                 </h1>
-                <p className="text-blue-200">Séances personnalisées avec votre professeur</p>
+                <p className={genderConfig.secondaryText}>Séances personnalisées avec votre professeur</p>
               </div>
             </div>
             
@@ -308,7 +352,6 @@ export default function AccompagnementPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-        {/* Statut de progression */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 mb-12">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-white mb-4">
@@ -320,7 +363,6 @@ export default function AccompagnementPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Séance 1 */}
             <div className={`p-6 rounded-2xl border-2 ${
               unlockedSessions >= 1
                 ? 'bg-green-500/20 border-green-500/30'
@@ -344,7 +386,6 @@ export default function AccompagnementPage() {
               )}
             </div>
 
-            {/* Séance 2 */}
             <div className={`p-6 rounded-2xl border-2 ${
               unlockedSessions >= 2 
                 ? 'bg-green-500/20 border-green-500/30' 
@@ -368,7 +409,6 @@ export default function AccompagnementPage() {
               )}
             </div>
 
-            {/* Séance 3 */}
             <div className={`p-6 rounded-2xl border-2 ${
               unlockedSessions >= 3 
                 ? 'bg-green-500/20 border-green-500/30' 
@@ -393,19 +433,18 @@ export default function AccompagnementPage() {
             </div>
           </div>
 
-          {/* Message de progression */}
           {!data.progress?.canBookSession && (
-            <div className="mt-8 bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6 text-center">
-              <Zap className="h-8 w-8 text-blue-400 mx-auto mb-4" />
+            <div className={`mt-8 ${genderConfig.primaryGlow} border ${genderConfig.primaryBorder} rounded-2xl p-6 text-center`}>
+              <Zap className={`h-8 w-8 ${genderConfig.primaryText} mx-auto mb-4`} />
               <h3 className="text-xl font-bold text-white mb-2">
                 Continuez votre apprentissage !
               </h3>
-              <p className="text-blue-200 mb-4">
+              <p className={`${genderConfig.secondaryText} mb-4`}>
                 Complétez jusqu'à la page 7 pour débloquer votre première séance d'accompagnement.
               </p>
               <Link
                 href="/chapitres/0/introduction"
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+                className={`inline-flex items-center gap-2 bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-6 py-3 rounded-xl transition-colors`}
               >
                 <BookOpen className="h-5 w-5" />
                 Continuer le cours
@@ -414,12 +453,11 @@ export default function AccompagnementPage() {
             </div>
           )}
 
-          {/* Bouton de réservation */}
           {data.progress?.canBookSession && canBookMore && (
             <div className="mt-8 text-center">
               <button
                 onClick={() => setShowBookingForm(true)}
-                className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center gap-3 mx-auto"
+                className={`bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center gap-3 mx-auto`}
               >
                 <Calendar className="h-6 w-6" />
                 Réserver une séance
@@ -429,11 +467,10 @@ export default function AccompagnementPage() {
           )}
         </div>
 
-        {/* Séances réservées */}
         {data.sessions?.length > 0 && (
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 mb-12">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-              <Calendar className="h-6 w-6 text-blue-400" />
+              <Calendar className={`h-6 w-6 ${genderConfig.primaryText}`} />
               Mes Séances Réservées
             </h2>
             
@@ -441,7 +478,7 @@ export default function AccompagnementPage() {
               {data.sessions?.map((session) => (
                 <div key={session.id} className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6">
                   <div className="flex items-center gap-3 mb-4">
-                    <User className="h-5 w-5 text-blue-400" />
+                    <User className={`h-5 w-5 ${genderConfig.primaryText}`} />
                     <h3 className="font-semibold text-white">{session.professor.name}</h3>
                   </div>
                   
@@ -457,7 +494,7 @@ export default function AccompagnementPage() {
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${
                         session.status === 'COMPLETED' ? 'bg-green-400' :
-                        session.status === 'SCHEDULED' ? 'bg-blue-400' :
+                        session.status === 'SCHEDULED' ? genderConfig.primaryText.replace('text', 'bg') :
                         session.status === 'CANCELLED' ? 'bg-red-400' :
                         'bg-red-400'
                       }`}></div>
@@ -469,7 +506,6 @@ export default function AccompagnementPage() {
                       </span>
                     </div>
                     
-                    {/* Afficher le motif d'annulation si applicable */}
                     {session.status === 'CANCELLED' && session.cancellation && (
                       <div className="mt-3 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
                         <div className="text-red-400 text-xs font-medium mb-1">
@@ -499,7 +535,6 @@ export default function AccompagnementPage() {
                     </div>
                   )}
                   
-                  {/* Bouton d'annulation */}
                   {canCancelSession(session) && (
                     <div className="mt-4">
                       <button
@@ -528,7 +563,6 @@ export default function AccompagnementPage() {
           </div>
         )}
 
-        {/* Modal de réservation */}
         {showBookingForm && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-3xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -557,7 +591,7 @@ export default function AccompagnementPage() {
                           onClick={() => setSelectedSlot(slot)}
                           className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                             selectedSlot?.id === slot.id
-                              ? 'border-blue-500 bg-blue-500/20'
+                              ? `${genderConfig.primaryBorder} ${genderConfig.primaryGlow}`
                               : 'border-white/20 bg-white/5 hover:border-white/40'
                           }`}
                         >
@@ -570,7 +604,7 @@ export default function AccompagnementPage() {
                           <div className="text-slate-300 text-sm">
                             {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                           </div>
-                          <div className="text-blue-400 text-xs mt-1">
+                          <div className={`${genderConfig.primaryText} text-xs mt-1`}>
                             ⏱️ {(() => {
                               const [startHour, startMin] = slot.startTime.split(':').map(Number);
                               const [endHour, endMin] = slot.endTime.split(':').map(Number);
@@ -609,7 +643,7 @@ export default function AccompagnementPage() {
                   <button
                     type="submit"
                     disabled={bookingLoading || !selectedSlot}
-                    className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50"
+                    className={`flex-1 bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50`}
                   >
                     {bookingLoading ? 'Réservation...' : 'Réserver'}
                   </button>
@@ -619,7 +653,6 @@ export default function AccompagnementPage() {
           </div>
         )}
 
-        {/* Modal d'annulation */}
         {showCancelForm && sessionToCancel && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-3xl p-8 w-full max-w-md">
@@ -697,7 +730,6 @@ export default function AccompagnementPage() {
           </div>
         )}
 
-        {/* Informations sur les règles */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
             <Award className="h-6 w-6 text-yellow-400" />
@@ -709,15 +741,15 @@ export default function AccompagnementPage() {
               <h3 className="text-lg font-semibold text-white mb-4">Déblocage progressif</h3>
               <ul className="space-y-3 text-slate-300">
                 <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                  <div className={`w-2 h-2 ${genderConfig.primaryText.replace('text', 'bg')} rounded-full mt-2 flex-shrink-0`}></div>
                   <span>Page 7 complétée → 1ère séance disponible</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                  <div className={`w-2 h-2 ${genderConfig.primaryText.replace('text', 'bg')} rounded-full mt-2 flex-shrink-0`}></div>
                   <span>Page 17 complétée → 2ème séance disponible</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                  <div className={`w-2 h-2 ${genderConfig.primaryText.replace('text', 'bg')} rounded-full mt-2 flex-shrink-0`}></div>
                   <span>Page 27 complétée → 3ème séance disponible</span>
                 </li>
               </ul>

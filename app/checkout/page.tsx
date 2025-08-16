@@ -110,20 +110,22 @@ export default function CheckoutPage() {
       ></div>
 
       <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full sm:max-w-md">
-          {/* Logo centré */}
-          <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
-            <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-          </div>
-          {/* Titre centré */}
-          <h2 className="mt-4 text-center text-3xl font-bold text-white">
-            Accédez au cours d'arabe
-          </h2>
-          {/* Sous-titre centré */}
-          <p className="mt-2 text-center text-sm text-gray-400">
-            Méthode ERPR – Apprenez à votre rythme et rapidement
-          </p>
-        </div>
+<div className="flex flex-col items-center justify-center w-full mx-auto px-4 py-8 max-w-md">
+  {/* Logo centré - Taille adaptative avec valeurs par défaut et breakpoints */}
+  <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
+    <BookOpen className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-white" />
+  </div>
+  
+  {/* Titre centré - Taille de police responsive avec line-height adapté */}
+  <h2 className="mt-4 text-center text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
+    Accédez au cours d'arabe
+  </h2>
+  
+  {/* Sous-titre centré - Taille et espacement responsive */}
+  <p className="mt-3 sm:mt-4 text-center text-sm sm:text-base text-gray-400 max-w-xs sm:max-w-md">
+    Méthode ERPR – Apprenez à votre rythme et rapidement
+  </p>
+</div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
           <div className="relative">

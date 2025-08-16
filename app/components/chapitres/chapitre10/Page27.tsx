@@ -5,10 +5,6 @@ import React from 'react';
 
 
 const chapter10Page27AudioMappings: { [key: string]: string } = {
-  // Mots d'introduction
-  'أَبَّ': 'chap10_pg27_intro1',
-  'أَبَّى': 'chap10_pg27_intro2',
-
   // Rangée 1
   'مُدَّتْ': 'chap10_pg27_case1',
   'حُقَّتْ': 'chap10_pg27_case2',
@@ -16,34 +12,29 @@ const chapter10Page27AudioMappings: { [key: string]: string } = {
   'تَبَّتْ': 'chap10_pg27_case4',
 
   // Rangée 2
-  'تَخَّلَّتْ': 'chap10_pg27_case5',
-  'قَدَّمْتُ': 'chap10_pg27_case6',
-  'وَالصُّبْحِ': 'chap10_pg27_case7',
-  'وَالشَّمْسِ': 'chap10_pg27_case8',
-  'وَالشَّفْعِ': 'chap10_pg27_case9',
-  'بِالصُّبْرِ': 'chap10_pg27_case10',
+  'قَدَّمْتُ': 'chap10_pg27_case5',
+  'وَالصُّبْحِ': 'chap10_pg27_case6',
+  'وَالشَّمْسِ': 'chap10_pg27_case7',
+  'وَالشَّفْعِ': 'chap10_pg27_case8',
 
   // Rangée 3
-  'وَالصَّيْفِ': 'chap10_pg27_case11',
-  'وَالَّيْلِ': 'chap10_pg27_case12',
-  'سِجِّيلٍ': 'chap10_pg27_case13',
-  'سِجِّينٌ': 'chap10_pg27_case14',
-  'مُنْفَكِّينَ': 'chap10_pg27_case15',
+  'وَالصَّيْفِ': 'chap10_pg27_case9',
+  'وَالَّيْلِ': 'chap10_pg27_case10',
+  'سِجِّيلٍ': 'chap10_pg27_case11',
+  'سِجِّينٌ': 'chap10_pg27_case12',
+  'مُنْفَكِّينَ': 'chap10_pg27_case13',
 
   // Rangée 4
-  'انْشَقَّتْ': 'chap10_pg27_case16',
-  'النَّجْمُ': 'chap10_pg27_case17',
-  'الثَّاقِبُ': 'chap10_pg27_case18',
+ 
+  'الثَّاقِبُ': 'chap10_pg27_case14',
 
   // Rangée 5
-  'مِنْ شَرِّ': 'chap10_pg27_case19',
-  'الْوَسْوَاسِ': 'chap10_pg27_case20',
+  'مِنْ شَرِّ': 'chap10_pg27_case15',
+  'الْوَسْوَاسِ': 'chap10_pg27_case16',
 
-  // Rangée 6
-  'عَنِّيْ': 'chap10_pg27_case21',
 
   // Verset final
-  'تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ': 'chap10_pg27_verse1',
+  'تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ': 'chap10_pg27_case17',
 };
 
 
@@ -52,7 +43,7 @@ const Page27 = () => {
 const playLetterAudio = (vowelLetter: string) => {
   const audioFileName = chapter10Page27AudioMappings[vowelLetter];
   if (audioFileName) {
-    const audio = new Audio(`/audio/${audioFileName}.mp3`);
+    const audio = new Audio(`/audio/chapitre10/${audioFileName}.mp3`);
     audio.play().catch(error => {
       console.error('Erreur lors de la lecture audio:', error);
     });
@@ -69,19 +60,17 @@ const playLetterAudio = (vowelLetter: string) => {
     ['مُدَّتْ', 'حُقَّتْ', 'خَفَّتْ', 'تَبَّتْ'],
 
     // Rangée 2
-    ['تَخَّلَّتْ', 'قَدَّمْتُ', 'وَالصُّبْحِ', 'وَالشَّمْسِ', 'وَالشَّفْعِ', 'بِالصُّبْرِ'],
+    ['قَدَّمْتُ', 'وَالصُّبْحِ', 'وَالشَّمْسِ', 'وَالشَّفْعِ'],
 
     // Rangée 3
     ['وَالصَّيْفِ', 'وَالَّيْلِ', 'سِجِّيلٍ', 'سِجِّينٌ', 'مُنْفَكِّينَ'],
 
     // Rangée 4
-    ['انْشَقَّتْ', 'النَّجْمُ', 'الثَّاقِبُ'],
+    ['الثَّاقِبُ'],
 
     // Rangée 5
     ['مِنْ شَرِّ', 'الْوَسْوَاسِ'],
 
-    // Rangée 6
-    ['عَنِّيْ']
   ];
 
   const allWords = mixedWords.flat();
@@ -92,9 +81,7 @@ const handleLetterClick = (vowelLetter: string) => {
   playLetterAudio(vowelLetter);
 };
 
-  function handleWordClick(word: string): void {
-    throw new Error('Function not implemented.');
-  }
+
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
@@ -114,7 +101,11 @@ const handleLetterClick = (vowelLetter: string) => {
             <div className="mb-8">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {allWords.map((word, index) => (
-                  <WordCard key={index} word={word} onClick={() => handleWordClick(word)} />
+                  <WordCard
+                    key={index}
+                    word={word}
+                    onClick={() => handleLetterClick(word)}
+                  />
                 ))}
               </div>
             </div>
@@ -123,9 +114,9 @@ const handleLetterClick = (vowelLetter: string) => {
             <div className="mb-8">
               <div 
                 className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border border-blue-700/30 rounded-xl p-8 text-center cursor-pointer hover:bg-blue-900/30 transition-colors"
-                onClick={() => handleWordClick(verse)}
+                onClick={() => handleLetterClick(verse)}
               >
-                <div className="text-blue-400 text-3xl md:text-4xl font-bold leading-relaxed">
+                <div className="text-2xl md:text-3xl font-bold text-white leading-relaxed">
                   {verse}
                 </div>
               </div>
