@@ -55,13 +55,6 @@ interface HomeworkSend {
   };
 }
 
-interface HomeworkStatus {
-  chapterId: number;
-  title: string;
-  status: 'sent' | 'pending';
-  sentAt?: string;
-}
-
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,6 +75,8 @@ export default function DashboardPage() {
   const [contactSuccess, setContactSuccess] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');
+  const [homeworkSends, setHomeworkSends] = useState<HomeworkSend[]>([]);
+  const [homeworkLoading, setHomeworkLoading] = useState(true);
   const router = useRouter();
 
   const {
@@ -246,6 +241,59 @@ export default function DashboardPage() {
     }
   }, [progressPercentage, progressLoading, totalPages]);
 
+  // Calculer le statut des devoirs pour chaque chapitre
+  const getHomeworkStatuses = () => {
+    const statuses: Array<{
+      chapterId: number;
+      title: string;
+      status: 'sent' | 'pending';
+      sentAt?: string;
+    }> = [];
+    
+    // Parcourir tous les chapitres (1-10, exclure 0 et 11)
+    for (let chapterId = 1; chapterId <= 10; chapterId++) {
+      const chapter = chapters.find(ch => ch.chapterNumber === chapterId);
+      if (!chapter) continue;
+
+      const sentHomework = homeworkSends.find(send => send.homework.chapterId === chapterId);
+      
+      if (sentHomework) {
+        statuses.push({
+          chapterId,
+          title: sentHomework.homework.title,
+          status: 'sent',
+          sentAt: sentHomework.sentAt
+        });
+      } else {
+        statuses.push({
+          chapterId,
+          title: `Devoir du chapitre ${chapterId}`,
+          status: 'pending'
+        });
+      }
+    }
+
+    return statuses;
+  };
+
+  const fetchHomeworkSends = async () => {
+    try {
+      const response = await fetch('/api/homework/sends');
+      if (response.ok) {
+        const data = await response.json();
+        setHomeworkSends(data.sends || []);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des devoirs:', error);
+    } finally {
+      setHomeworkLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHomeworkSends();
+  }, []);
+
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setContactLoading(true);
@@ -406,6 +454,8 @@ export default function DashboardPage() {
   if (!user) {
     return null;
   }
+
+  const homeworkStatuses = getHomeworkStatuses();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -967,113 +1017,40 @@ export default function DashboardPage() {
               <div className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Devoirs <span className="text-gray-400">(20)</span>
+                    Devoirs <span className="text-gray-400">(10)</span>
                   </h3>
-                  <span className="text-blue-800 text-sm font-medium">3/6 Complété</span>
+                  <span className="text-blue-800 text-sm font-medium">A surveiller</span>
                 </div>
 
                 <div className="space-y-4">
-                  {/* Devoir 1 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        Array.from(completedPages).filter(p => p !== 0 && p !== 30).length >= 7 
-                          ? 'bg-blue-800' 
-                          : 'bg-gray-300'
-                      }`}></div>
-                      <div>
-                        <p className="font-medium text-gray-900">Chapitre 1 - Alphabet</p>
-                        <p className="text-xs text-gray-500">
-                          {Array.from(completedPages).filter(p => p >= 1 && p <= 7).length >= 7 ? 'Terminé' : 'En cours'}
-                        </p>
+                  {homeworkStatuses.slice(0, 4).map((homework, index) => (
+                    <div key={homework.chapterId} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-2 h-2 rounded-full ${
+                          homework.status === 'sent' ? 'bg-blue-800' : 'bg-gray-300'
+                        }`}></div>
+                        <div>
+                          <p className="font-medium text-gray-900">{homework.title}</p>
+                          <div className="text-slate-400 text-xs mt-1">
+                            {homework.status === 'pending' && (
+                              <div className="text-xs text-orange-300">
+                                Terminez le chapitre pour recevoir le devoir
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        homework.status === 'sent'
+                          ? 'bg-blue-800'
+                          : 'border-2 border-gray-300'
+                      }`}>
+                        {homework.status === 'sent' && (
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        )}
                       </div>
                     </div>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      Array.from(completedPages).filter(p => p >= 1 && p <= 7).length >= 7
-                        ? 'bg-blue-800'
-                        : 'border-2 border-gray-300'
-                    }`}>
-                      {Array.from(completedPages).filter(p => p >= 1 && p <= 7).length >= 7 && (
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Devoir 2 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        Array.from(completedPages).filter(p => p >= 8 && p <= 11).length >= 4
-                          ? 'bg-blue-800' 
-                          : 'bg-gray-300'
-                      }`}></div>
-                      <div>
-                        <p className="font-medium text-gray-900">Chapitre 2 - Voyelles simples</p>
-                        <p className="text-xs text-gray-500">
-                          {Array.from(completedPages).filter(p => p >= 8 && p <= 11).length >= 4 ? 'Terminé' : 'En cours'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      Array.from(completedPages).filter(p => p >= 8 && p <= 11).length >= 4
-                        ? 'bg-blue-800'
-                        : 'border-2 border-gray-300'
-                    }`}>
-                      {Array.from(completedPages).filter(p => p >= 8 && p <= 11).length >= 4 && (
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Devoir 3 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        Array.from(completedPages).filter(p => p >= 12 && p <= 15).length >= 4
-                          ? 'bg-blue-800' 
-                          : 'bg-gray-300'
-                      }`}></div>
-                      <div>
-                        <p className="font-medium text-gray-900">Chapitre 3 - Doubles voyelles</p>
-                        <p className="text-xs text-gray-500">
-                          {Array.from(completedPages).filter(p => p >= 12 && p <= 15).length >= 4 ? 'Terminé' : 'En cours'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      Array.from(completedPages).filter(p => p >= 12 && p <= 15).length >= 4
-                        ? 'bg-blue-800'
-                        : 'border-2 border-gray-300'
-                    }`}>
-                      {Array.from(completedPages).filter(p => p >= 12 && p <= 15).length >= 4 && (
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Devoir 4 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        progressPercentage >= 75 ? 'bg-blue-800' : 'bg-gray-300'
-                      }`}></div>
-                      <div>
-                        <p className="font-medium text-gray-900">Progression avancée</p>
-                        <p className="text-xs text-gray-500">
-                          {progressPercentage >= 75 ? 'Niveau avancé atteint' : 'À débloquer'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      progressPercentage >= 75
-                        ? 'bg-blue-800'
-                        : 'border-2 border-gray-300'
-                    }`}>
-                      {progressPercentage >= 75 && (
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                      )}
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1227,4 +1204,5 @@ export default function DashboardPage() {
       )}
     </div>
   );
+  
 };
