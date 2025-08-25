@@ -501,51 +501,113 @@ export default function DashboardPage() {
           <div className="grid grid-cols-3 gap-8">
             {/* Progress Section */}
             <div className="col-span-2">
-              {/* Horizontal Progress Bar */}
+              {/* Progress Chart Section */}
               <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Progression générale</h3>
-                  <span className="text-sm text-gray-500">{progressPercentage}% complété</span>
+                  <h3 className="text-lg font-semibold text-gray-900">Progression</h3>
+                  <select className="text-sm text-gray-500 border border-gray-200 rounded-lg px-3 py-1 bg-white">
+                    <option>Cette semaine</option>
+                    <option>Ce mois</option>
+                    <option>Cette année</option>
+                  </select>
                 </div>
                 
-                {/* Horizontal Progress Bar */}
-                <div className="space-y-4">
-                  <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div 
-                      className="bg-blue-800 h-4 rounded-full transition-all duration-500 ease-out"
-                      style={{ width: `${progressPercentage}%` }}
-                    ></div>
+                {/* Chart Container */}
+                <div className="relative h-64">
+                  {/* Y-axis labels */}
+                  <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-4">
+                    <span>40</span>
+                    <span>30</span>
+                    <span>20</span>
+                    <span>10</span>
+                    <span>0</span>
                   </div>
                   
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Pages: {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}/{totalPages}</span>
-                    <span>Quiz: {completedQuizzes.size}/{totalQuizzes}</span>
-                    <span>Total: {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length + completedQuizzes.size}/{totalPages + totalQuizzes}</span>
+                  {/* Chart area */}
+                  <div className="ml-8 h-full flex items-end justify-between space-x-2">
+                    {/* Generate 7 bars for the week */}
+                    {progressData.map((day, index) => (
+                      <div key={index} className="flex flex-col items-center space-y-2">
+                        {/* Bar container */}
+                        <div className="relative h-48 w-8 bg-gray-100 rounded-t-lg overflow-hidden">
+                          {/* Blue portion (completed) */}
+                          <div 
+                            className="absolute bottom-0 w-full bg-blue-800 rounded-t-lg transition-all duration-1000"
+                            style={{ height: `${(day.completed / 40) * 100}%` }}
+                          ></div>
+                          {/* Orange portion (in progress) - removed as requested */}
+                        </div>
+                        {/* Day label */}
+                        <span className="text-xs text-gray-500 font-medium">{day.day}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
 
-              {/* Study Time Card */}
+              {/* My Courses Section */}
               <div className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Temps d'étude</h3>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-500">{formattedTime}</span>
-                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    Mes cours
+                    <span className="ml-2 text-gray-400 text-base">(7)</span>
+                  </h3>
+                  <button className="text-blue-800 text-sm font-medium hover:text-blue-900">
+                    Voir tout
+                  </button>
                 </div>
-                
-                {/* Study Stats */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-800 mb-1">{formattedTime}</div>
-                    <div className="text-sm text-gray-500">Temps total</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-800 mb-1">
-                      {Math.round(totalTime / 3600) || 0}h
+
+                <div className="flex space-x-4 overflow-x-auto pb-2">
+                  {/* Course Card 1 */}
+                  <div className="flex-shrink-0 w-80 bg-gray-50 rounded-xl p-6 border border-gray-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">01</span>
+                      </div>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
                     </div>
-                    <div className="text-sm text-gray-500">Cette semaine</div>
+                    
+                    <h4 className="font-semibold text-gray-900 mb-2">Alphabet et lettres arabes</h4>
+                    <p className="text-sm text-gray-500 mb-4">12 Leçons</p>
+                    
+                    {/* Progress bar */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Progression</span>
+                        <span className="text-gray-900 font-medium">80%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-4/5 h-2 bg-blue-800 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Course Card 2 */}
+                  <div className="flex-shrink-0 w-80 bg-gray-50 rounded-xl p-6 border border-gray-100">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">01</span>
+                      </div>
+                      <button className="text-gray-400 hover:text-gray-600">
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                    
+                    <h4 className="font-semibold text-gray-900 mb-2">Voyelles et prononciation</h4>
+                    <p className="text-sm text-gray-500 mb-4">10 Leçons</p>
+                    
+                    {/* Progress bar */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Progression</span>
+                        <span className="text-gray-900 font-medium">20%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-1/5 h-2 bg-blue-800 rounded-full"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -553,77 +615,22 @@ export default function DashboardPage() {
 
             {/* Right Sidebar */}
             <div className="space-y-6">
-              {/* My Courses */}
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    Mes cours
-                    <HelpCircle className="h-4 w-4 text-gray-400 ml-1" />
-                  </h3>
-                  <button className="text-blue-800 text-sm font-medium hover:text-blue-900">
-                    Voir tout
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Course 1 */}
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">01</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Alphabet et lettres arabes</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <div className="w-16 h-1 bg-gray-200 rounded-full">
-                            <div className="w-4/5 h-1 bg-blue-800 rounded-full"></div>
-                          </div>
-                          <span className="text-xs text-gray-500">7 Leçons</span>
-                          <span className="text-xs text-gray-900 font-medium">80%</span>
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  </div>
-
-                  {/* Course 2 */}
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">02</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Voyelles simples</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <div className="w-16 h-1 bg-gray-200 rounded-full">
-                            <div className="w-1/5 h-1 bg-blue-800 rounded-full"></div>
-                          </div>
-                          <span className="text-xs text-gray-500">4 Leçons</span>
-                          <span className="text-xs text-gray-900 font-medium">20%</span>
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Assignments */}
+              {/* Devoirs */}
               <div className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Devoirs <span className="text-gray-400">(4)</span>
+                    Devoirs <span className="text-gray-400">(20)</span>
                   </h3>
-                  <span className="text-blue-800 text-sm font-medium">2/4 Terminés</span>
+                  <span className="text-blue-800 text-sm font-medium">3/6 Complété</span>
                 </div>
 
                 <div className="space-y-4">
-                  {/* Assignment 1 */}
+                  {/* Devoir 1 */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-blue-800 rounded-full"></div>
                       <div>
-                        <p className="font-medium text-gray-900">Exercices d'alphabet</p>
+                        <p className="font-medium text-gray-900">Documentation des exigences</p>
                         <p className="text-xs text-gray-500">Terminé</p>
                       </div>
                     </div>
@@ -632,12 +639,12 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Assignment 2 */}
+                  {/* Devoir 2 */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-blue-800 rounded-full"></div>
                       <div>
-                        <p className="font-medium text-gray-900">Pratique des voyelles</p>
+                        <p className="font-medium text-gray-900">Plan de recherche utilisateur</p>
                         <p className="text-xs text-gray-500">Terminé</p>
                       </div>
                     </div>
@@ -646,24 +653,24 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Assignment 3 */}
+                  {/* Devoir 3 */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                       <div>
-                        <p className="font-medium text-gray-900">Lettres de prolongation</p>
+                        <p className="font-medium text-gray-900">Persona utilisateur</p>
                         <p className="text-xs text-gray-500">En cours</p>
                       </div>
                     </div>
                     <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
                   </div>
 
-                  {/* Assignment 4 */}
+                  {/* Devoir 4 */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                       <div>
-                        <p className="font-medium text-gray-900">Règles de lecture</p>
+                        <p className="font-medium text-gray-900">Wireframe basse fidélité</p>
                         <p className="text-xs text-gray-500">À venir</p>
                       </div>
                     </div>
