@@ -302,10 +302,10 @@ export default function DashboardPage() {
           <nav className="space-y-2">
             <Link
               href="/dashboard"
-              className="flex items-center space-x-3 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium"
+              className="flex items-center space-x-3 px-3 py-2 text-blue-800 bg-blue-100 rounded-lg font-medium"
             >
               <Home className="h-5 w-5" />
-              <span>Dashboard</span>
+              <span>Tableau de bord</span>
             </Link>
             
             <button
@@ -330,7 +330,7 @@ export default function DashboardPage() {
               className="w-full flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <BookOpen className="h-5 w-5" />
-              <span>Courses</span>
+              <span>Cours</span>
             </button>
             
             <Link
@@ -338,13 +338,13 @@ export default function DashboardPage() {
               className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors relative"
             >
               <FileText className="h-5 w-5" />
-              <span>Assignment</span>
-              <div className="w-2 h-2 bg-orange-500 rounded-full ml-auto"></div>
+              <span>Accompagnement</span>
+              <div className="w-2 h-2 bg-blue-800 rounded-full ml-auto"></div>
             </Link>
             
             <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
               <Calendar className="h-5 w-5" />
-              <span>Calendar</span>
+              <span>Calendrier</span>
             </button>
           </nav>
         </div>
@@ -357,17 +357,17 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             {/* Navigation Links */}
             <nav className="flex space-x-8">
-              <Link href="/dashboard" className="text-gray-900 font-medium border-b-2 border-blue-600 pb-4">
-                Home
+              <Link href="/dashboard" className="text-gray-900 font-medium border-b-2 border-blue-800 pb-4">
+                Accueil
               </Link>
               <Link href="/chapitres/0/introduction" className="text-gray-500 hover:text-gray-900 pb-4">
-                Event
+                Cours
               </Link>
               <Link href="/accompagnement" className="text-gray-500 hover:text-gray-900 pb-4">
-                Members
+                Accompagnement
               </Link>
               <button className="text-gray-500 hover:text-gray-900 pb-4">
-                About
+                À propos
               </button>
             </nav>
 
@@ -392,7 +392,7 @@ export default function DashboardPage() {
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center space-x-2"
                 >
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
                       {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
                     </span>
@@ -405,7 +405,7 @@ export default function DashboardPage() {
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
                     <div className="p-4 border-b border-gray-100">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                        <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center">
                           <span className="text-white font-medium">
                             {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
                           </span>
@@ -451,9 +451,9 @@ export default function DashboardPage() {
           {/* Welcome Section */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Welcome back, {user.username || 'Emma'}!
+              Bon retour, {user.username || (user.gender === 'FEMME' ? 'Étudiante' : 'Étudiant')} !
             </h1>
-            <p className="text-gray-500">Here's your study</p>
+            <p className="text-gray-500">Voici votre progression d'étude</p>
           </div>
 
           {/* Stats Cards */}
@@ -464,7 +464,7 @@ export default function DashboardPage() {
                   <BookOpen className="h-6 w-6 text-gray-600" />
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Completed courses</p>
+                  <p className="text-gray-500 text-sm">Pages complétées</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}
                   </p>
@@ -478,7 +478,7 @@ export default function DashboardPage() {
                   <GraduationCap className="h-6 w-6 text-gray-600" />
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Student score</p>
+                  <p className="text-gray-500 text-sm">Score étudiant</p>
                   <p className="text-2xl font-bold text-gray-900">{progressPercentage}</p>
                 </div>
               </div>
@@ -490,8 +490,8 @@ export default function DashboardPage() {
                   <Users className="h-6 w-6 text-gray-600" />
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Community score</p>
-                  <p className="text-2xl font-bold text-gray-900">84</p>
+                  <p className="text-gray-500 text-sm">Quiz complétés</p>
+                  <p className="text-2xl font-bold text-gray-900">{completedQuizzes.size}</p>
                 </div>
               </div>
             </div>
@@ -499,83 +499,54 @@ export default function DashboardPage() {
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-3 gap-8">
-            {/* Progress Chart */}
+            {/* Progress Section */}
             <div className="col-span-2">
-              <div className="bg-white rounded-xl p-6 border border-gray-200 mb-8">
+              {/* Horizontal Progress Bar */}
+              <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Progress</h3>
-                  <select className="text-sm text-gray-500 border border-gray-200 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>This week</option>
-                    <option>This month</option>
-                    <option>This year</option>
-                  </select>
+                  <h3 className="text-lg font-semibold text-gray-900">Progression générale</h3>
+                  <span className="text-sm text-gray-500">{progressPercentage}% complété</span>
                 </div>
                 
-                {/* Chart */}
-                <div className="h-64 flex items-end space-x-4">
-                  {progressData.map((data, index) => (
-                    <div key={index} className="flex-1 flex flex-col items-center">
-                      <div className="w-full h-48 flex flex-col justify-end">
-                        <div 
-                          className="w-full bg-orange-400 rounded-t-lg mb-1"
-                          style={{ height: `${(data.completed / data.total) * 100}%` }}
-                        ></div>
-                        <div 
-                          className="w-full bg-blue-500 rounded-t-lg"
-                          style={{ height: `${((data.total - data.completed) / data.total) * 100}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-xs text-gray-500 mt-2">{data.day}</span>
-                    </div>
-                  ))}
+                {/* Horizontal Progress Bar */}
+                <div className="space-y-4">
+                  <div className="w-full bg-gray-200 rounded-full h-4">
+                    <div 
+                      className="bg-blue-800 h-4 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercentage}%` }}
+                    ></div>
+                  </div>
+                  
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Pages: {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}/{totalPages}</span>
+                    <span>Quiz: {completedQuizzes.size}/{totalQuizzes}</span>
+                    <span>Total: {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length + completedQuizzes.size}/{totalPages + totalQuizzes}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Calendar */}
+              {/* Study Time Card */}
               <div className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Upcoming Agenda</h3>
-                  <select className="text-sm text-gray-500 border border-gray-200 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>January</option>
-                    <option>February</option>
-                    <option>March</option>
-                  </select>
+                  <h3 className="text-lg font-semibold text-gray-900">Temps d'étude</h3>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4 text-gray-400" />
+                    <span className="text-sm text-gray-500">{formattedTime}</span>
+                  </div>
                 </div>
                 
-                {/* Calendar Grid */}
-                <div className="grid grid-cols-7 gap-1 text-center text-sm">
-                  {/* Days of week */}
-                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                    <div key={day} className="p-2 text-gray-500 font-medium">{day}</div>
-                  ))}
-                  
-                  {/* Calendar days */}
-                  {Array.from({ length: 35 }, (_, i) => {
-                    const day = i - 2; // Start from 30 (previous month)
-                    const isCurrentMonth = day > 0 && day <= 31;
-                    const isToday = day === 15;
-                    const hasEvent = [1, 8, 15, 22, 29].includes(day);
-                    
-                    return (
-                      <div
-                        key={i}
-                        className={`p-2 h-10 flex items-center justify-center rounded-lg transition-colors ${
-                          isToday 
-                            ? 'bg-blue-600 text-white font-semibold' 
-                            : isCurrentMonth 
-                              ? hasEvent 
-                                ? 'text-gray-900 bg-blue-50 font-medium' 
-                                : 'text-gray-700 hover:bg-gray-50'
-                              : 'text-gray-300'
-                        }`}
-                      >
-                        {day > 0 ? day : day + 31}
-                        {hasEvent && !isToday && (
-                          <div className="w-1 h-1 bg-blue-600 rounded-full ml-1"></div>
-                        )}
-                      </div>
-                    );
-                  })}
+                {/* Study Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-800 mb-1">{formattedTime}</div>
+                    <div className="text-sm text-gray-500">Temps total</div>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-800 mb-1">
+                      {Math.round(totalTime / 3600) || 0}h
+                    </div>
+                    <div className="text-sm text-gray-500">Cette semaine</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -586,11 +557,11 @@ export default function DashboardPage() {
               <div className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    My courses 
+                    Mes cours
                     <HelpCircle className="h-4 w-4 text-gray-400 ml-1" />
                   </h3>
-                  <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
-                    View all
+                  <button className="text-blue-800 text-sm font-medium hover:text-blue-900">
+                    Voir tout
                   </button>
                 </div>
 
@@ -598,16 +569,16 @@ export default function DashboardPage() {
                   {/* Course 1 */}
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <span className="text-blue-600 font-bold text-sm">01</span>
+                      <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">01</span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">User Experience design</p>
+                        <p className="font-medium text-gray-900">Alphabet et lettres arabes</p>
                         <div className="flex items-center space-x-2 mt-1">
                           <div className="w-16 h-1 bg-gray-200 rounded-full">
-                            <div className="w-4/5 h-1 bg-blue-600 rounded-full"></div>
+                            <div className="w-4/5 h-1 bg-blue-800 rounded-full"></div>
                           </div>
-                          <span className="text-xs text-gray-500">12 Lessons</span>
+                          <span className="text-xs text-gray-500">7 Leçons</span>
                           <span className="text-xs text-gray-900 font-medium">80%</span>
                         </div>
                       </div>
@@ -618,16 +589,16 @@ export default function DashboardPage() {
                   {/* Course 2 */}
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <span className="text-blue-600 font-bold text-sm">01</span>
+                      <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">02</span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Game UI design</p>
+                        <p className="font-medium text-gray-900">Voyelles simples</p>
                         <div className="flex items-center space-x-2 mt-1">
                           <div className="w-16 h-1 bg-gray-200 rounded-full">
-                            <div className="w-1/5 h-1 bg-blue-600 rounded-full"></div>
+                            <div className="w-1/5 h-1 bg-blue-800 rounded-full"></div>
                           </div>
-                          <span className="text-xs text-gray-500">10 Lessons</span>
+                          <span className="text-xs text-gray-500">4 Leçons</span>
                           <span className="text-xs text-gray-900 font-medium">20%</span>
                         </div>
                       </div>
@@ -641,22 +612,22 @@ export default function DashboardPage() {
               <div className="bg-white rounded-xl p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Assignments <span className="text-gray-400">(20)</span>
+                    Devoirs <span className="text-gray-400">(4)</span>
                   </h3>
-                  <span className="text-blue-600 text-sm font-medium">3/6 Complete</span>
+                  <span className="text-blue-800 text-sm font-medium">2/4 Terminés</span>
                 </div>
 
                 <div className="space-y-4">
                   {/* Assignment 1 */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-800 rounded-full"></div>
                       <div>
-                        <p className="font-medium text-gray-900">Requirements documentation</p>
-                        <p className="text-xs text-gray-500">5 hours left</p>
+                        <p className="font-medium text-gray-900">Exercices d'alphabet</p>
+                        <p className="text-xs text-gray-500">Terminé</p>
                       </div>
                     </div>
-                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-6 h-6 bg-blue-800 rounded-full flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
                   </div>
@@ -664,13 +635,13 @@ export default function DashboardPage() {
                   {/* Assignment 2 */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-800 rounded-full"></div>
                       <div>
-                        <p className="font-medium text-gray-900">User Research plan</p>
-                        <p className="text-xs text-gray-500">30 minutes left</p>
+                        <p className="font-medium text-gray-900">Pratique des voyelles</p>
+                        <p className="text-xs text-gray-500">Terminé</p>
                       </div>
                     </div>
-                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-6 h-6 bg-blue-800 rounded-full flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
                   </div>
@@ -680,8 +651,8 @@ export default function DashboardPage() {
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                       <div>
-                        <p className="font-medium text-gray-900">User persona</p>
-                        <p className="text-xs text-gray-500">1 week 2 hours left</p>
+                        <p className="font-medium text-gray-900">Lettres de prolongation</p>
+                        <p className="text-xs text-gray-500">En cours</p>
                       </div>
                     </div>
                     <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
@@ -692,8 +663,8 @@ export default function DashboardPage() {
                     <div className="flex items-center space-x-3">
                       <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
                       <div>
-                        <p className="font-medium text-gray-900">Low-Fidelity Wireframe</p>
-                        <p className="text-xs text-gray-500">2 weeks 5 hours left</p>
+                        <p className="font-medium text-gray-900">Règles de lecture</p>
+                        <p className="text-xs text-gray-500">À venir</p>
                       </div>
                     </div>
                     <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
@@ -774,7 +745,7 @@ export default function DashboardPage() {
                 <button
                   type="submit"
                   disabled={editLoading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-blue-800 hover:bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editLoading ? 'Mise à jour...' : 'Sauvegarder'}
                 </button>
@@ -839,7 +810,7 @@ export default function DashboardPage() {
                   <button
                     type="submit"
                     disabled={contactLoading}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-blue-800 hover:bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {contactLoading ? 'Envoi en cours...' : 'Envoyer le message'}
                   </button>
