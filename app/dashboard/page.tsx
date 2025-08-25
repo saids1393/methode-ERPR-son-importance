@@ -20,7 +20,15 @@ import {
   ChevronDown,
   Edit3,
   BarChart3,
-  Users
+  Users,
+  Calendar,
+  Search,
+  Bell,
+  HelpCircle,
+  Home,
+  FileText,
+  GraduationCap,
+  Activity
 } from 'lucide-react';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
@@ -47,6 +55,12 @@ export default function DashboardPage() {
     confirmPassword: ''
   });
   const [editLoading, setEditLoading] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    message: '',
+  });
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState(false);
   const router = useRouter();
 
   const {
@@ -72,7 +86,6 @@ export default function DashboardPage() {
       .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 11)
       .length;
     const totalItems = totalPages + totalQuizzes;
-    // Exclure la page 0 et le chapitre 11 du décompte des pages complétées
     const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30);
     const completedItems = completedPagesFiltered.length + completedQuizzes.size;
     return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
@@ -92,89 +105,51 @@ export default function DashboardPage() {
   const progressPercentage = calculateProgress();
   const { totalPages, totalQuizzes } = getTotals();
 
-  // Personnalisation selon le genre
-  const getGenderConfig = () => {
-    if (user?.gender === 'FEMME') {
-      return {
-        primaryColor: 'from-purple-500 to-pink-500',
-        primaryColorHover: 'from-purple-600 to-pink-600',
-        primaryBg: 'bg-purple-500',
-        primaryBgHover: 'bg-purple-600',
-        primaryText: 'text-purple-400',
-        primaryBorder: 'border-purple-500/30',
-        primaryGlow: 'bg-purple-500/20',
-        primaryGlowHover: 'bg-purple-500/30',
-        gradientBg: 'from-slate-900 via-purple-900 to-slate-900',
-        accentColor: 'from-purple-400 to-pink-400',
-        welcomeText: user.username ? `Bienvenue ${user.username}` : 'Bienvenue',
-        profileText: 'Étudiante connectée',
-        agreementText: 'connectée',
-        studentText: 'étudiante'
-      };
-    } else {
-      return {
-        primaryColor: 'from-blue-500 to-cyan-500',
-        primaryColorHover: 'from-blue-600 to-cyan-600',
-        primaryBg: 'bg-blue-500',
-        primaryBgHover: 'bg-blue-600',
-        primaryText: 'text-blue-400',
-        primaryBorder: 'border-blue-500/30',
-        primaryGlow: 'bg-blue-500/20',
-        primaryGlowHover: 'bg-blue-500/30',
-        gradientBg: 'from-slate-900 via-blue-900 to-slate-900',
-        accentColor: 'from-blue-400 to-cyan-400',
-        welcomeText: user?.username ? `Bienvenue ${user.username}` : 'Bienvenue',
-        profileText: 'Étudiant connecté',
-        agreementText: 'connecté',
-        studentText: 'étudiant'
-      };
-    }
+  // Générer des données de progression pour le graphique (simulation)
+  const generateProgressData = () => {
+    const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    return days.map((day, index) => ({
+      day,
+      completed: Math.floor(Math.random() * 30) + 10,
+      total: 40
+    }));
   };
 
-  const genderConfig = getGenderConfig();
+  const progressData = generateProgressData();
 
-  // Ajoutez ces états au début de votre composant DashboardPage
-const [showContactModal, setShowContactModal] = useState(false);
-const [contactForm, setContactForm] = useState({
-  message: '',
-});
-const [contactLoading, setContactLoading] = useState(false);
-const [contactSuccess, setContactSuccess] = useState(false);
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactLoading(true);
 
-// Ajoutez cette fonction pour gérer l'envoi du message
-const handleContactSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setContactLoading(true);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email,
+          message: contactForm.message,
+        }),
+      });
 
-  try {
-    const response = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: user?.email,
-        message: contactForm.message,
-      }),
-    });
+      const data = await response.json();
 
-    const data = await response.json();
-
-    if (data.success) {
-      setContactSuccess(true);
-      setContactForm({ message: '' });
-      setTimeout(() => {
-        setContactSuccess(false);
-        setShowContactModal(false);
-      }, 3000);
-    } else {
-      alert('Erreur lors de l\'envoi du message');
+      if (data.success) {
+        setContactSuccess(true);
+        setContactForm({ message: '' });
+        setTimeout(() => {
+          setContactSuccess(false);
+          setShowContactModal(false);
+        }, 3000);
+      } else {
+        alert('Erreur lors de l\'envoi du message');
+      }
+    } catch (error) {
+      console.error('Contact error:', error);
+      alert('Erreur de connexion');
+    } finally {
+      setContactLoading(false);
     }
-  } catch (error) {
-    console.error('Contact error:', error);
-    alert('Erreur de connexion');
-  } finally {
-    setContactLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -201,13 +176,11 @@ const handleContactSubmit = async (e: React.FormEvent) => {
     checkAuth();
   }, []);
 
-  // Charger le temps quand on arrive sur le dashboard
   useEffect(() => {
     console.log('📊 Dashboard monté - chargement du temps');
     refreshTime();
   }, [refreshTime]);
   
-  // Fermer le menu quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -255,9 +228,6 @@ const handleContactSubmit = async (e: React.FormEvent) => {
         updateData.password = editForm.newPassword;
       }
 
-      // Ne pas inclure le genre dans les modifications depuis l'espace élève
-      // Le genre est défini une seule fois lors de la création du compte
-
       const response = await fetch('/api/auth/complete-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -292,10 +262,10 @@ const handleContactSubmit = async (e: React.FormEvent) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400 mx-auto mb-6"></div>
-          <p className="text-white text-lg font-medium">Chargement de votre espace...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mx-auto mb-6"></div>
+          <p className="text-gray-600 text-lg font-medium">Chargement de votre espace...</p>
         </div>
       </div>
     );
@@ -306,111 +276,446 @@ const handleContactSubmit = async (e: React.FormEvent) => {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${genderConfig.gradientBg}`}>
-      {/* Header moderne */}
-      <header className="bg-black/20 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4 sm:py-6">
-            <div className="flex items-center space-x-2 sm:space-x-4">
- <div className={`bg-gradient-to-r ${genderConfig.primaryColor} p-3 rounded-xl`}>
-                <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-              </div>
-
-
-
-
-             
-              <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
-                  Méthode ERPR
-                </h1>
-                <p className={`${genderConfig.primaryText.replace('400', '200')} text-xs sm:text-sm hidden sm:block`}>Écoute, Répétition, Pratique et Régularité</p>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-30">
+        <div className="p-6">
+          {/* Logo */}
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-white" />
             </div>
-            
-            {/* Menu Profil */}
-            <div className="relative profile-menu">
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className={`flex items-center space-x-2 sm:space-x-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 hover:border-purple-500/30 px-2 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl transition-all duration-300 group`}
-              >
-                <div className={`bg-gradient-to-r ${genderConfig.primaryColor} p-2 rounded-xl`}>
-                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <div className="text-left hidden sm:block">
-                  <p className="text-white font-semibold text-xs sm:text-sm">
-                    {user.username || user.email}
-                  </p>
-                  <p className="text-purple-200 text-xs hidden lg:block">{genderConfig.profileText}</p>
-                </div>
-                <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 text-purple-200 transition-transform duration-200 rotate-180 hidden sm:block" />
-              </button>
+            <span className="text-xl font-bold text-gray-900">InsideBox</span>
+          </div>
 
-              {/* Dropdown Menu */}
-              {showProfileMenu && (
-                <div className="absolute right-0 top-full mt-2 w-56 sm:w-64 bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden z-50">
-                  <div className="p-4 border-b border-white/10">
-                    <div className="flex items-center space-x-3">
-                      <div className={`bg-gradient-to-r ${genderConfig.primaryColor} p-2 rounded-xl`}>
-                        <User className="h-5 w-5 text-white" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-white font-semibold truncate">
-                          {user.username || (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
-                        </p>
-                        <p className="text-slate-300 text-sm truncate">{user.email}</p>
+          {/* Search */}
+          <div className="relative mb-8">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Navigation */}
+          <nav className="space-y-2">
+            <Link
+              href="/dashboard"
+              className="flex items-center space-x-3 px-3 py-2 text-blue-600 bg-blue-50 rounded-lg font-medium"
+            >
+              <Home className="h-5 w-5" />
+              <span>Dashboard</span>
+            </Link>
+            
+            <button
+              onClick={() => {
+                console.log('🎯 ===== CLIC BOUTON COMMENCER =====');
+                localStorage.setItem('courseStarted', 'true');
+                
+                fetch('/api/auth/time/start', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                }).then(response => {
+                  console.log('🚀 RÉPONSE START TIMER:', response.status);
+                  if (response.ok) {
+                    console.log('✅ CHRONO DÉMARRÉ EN DB');
+                    window.location.href = '/chapitres/0/introduction';
+                  }
+                }).catch(error => {
+                  console.error('❌ ERREUR START TIMER:', error);
+                  window.location.href = '/chapitres/0/introduction';
+                });
+              }}
+              className="w-full flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <BookOpen className="h-5 w-5" />
+              <span>Courses</span>
+            </button>
+            
+            <Link
+              href="/accompagnement"
+              className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors relative"
+            >
+              <FileText className="h-5 w-5" />
+              <span>Assignment</span>
+              <div className="w-2 h-2 bg-orange-500 rounded-full ml-auto"></div>
+            </Link>
+            
+            <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+              <Calendar className="h-5 w-5" />
+              <span>Calendar</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="ml-64">
+        {/* Top Header */}
+        <header className="bg-white border-b border-gray-200 px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Navigation Links */}
+            <nav className="flex space-x-8">
+              <Link href="/dashboard" className="text-gray-900 font-medium border-b-2 border-blue-600 pb-4">
+                Home
+              </Link>
+              <Link href="/chapitres/0/introduction" className="text-gray-500 hover:text-gray-900 pb-4">
+                Event
+              </Link>
+              <Link href="/accompagnement" className="text-gray-500 hover:text-gray-900 pb-4">
+                Members
+              </Link>
+              <button className="text-gray-500 hover:text-gray-900 pb-4">
+                About
+              </button>
+            </nav>
+
+            {/* Right Icons */}
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => setShowContactModal(true)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <MessageCircle className="h-5 w-5" />
+              </button>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <Calendar className="h-5 w-5" />
+              </button>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <Bell className="h-5 w-5" />
+              </button>
+              
+              {/* Profile Menu */}
+              <div className="relative profile-menu">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center space-x-2"
+                >
+                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                          <span className="text-white font-medium">
+                            {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-gray-900 font-semibold truncate">
+                            {user.username || (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
+                          </p>
+                          <p className="text-gray-500 text-sm truncate">{user.email}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="p-2">
-                    <button
-                      onClick={() => {
-                        setShowEditProfile(true);
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-white/10 rounded-xl transition-colors duration-200 group"
-                    >
-                      <div className={`${genderConfig.primaryGlow} group-hover:${genderConfig.primaryGlowHover} p-2 rounded-lg transition-colors`}>
-                        <Edit3 className={`h-4 w-4 ${genderConfig.primaryText}`} />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">Modifier le profil</p>
-                        <p className="text-slate-400 text-xs hidden sm:block">Pseudo ou mot de passe</p>
-                      </div>
-                    </button>
                     
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-red-500/10 rounded-xl transition-colors duration-200 group"
-                    >
-                      <div className="bg-red-500/20 p-2 rounded-lg group-hover:bg-red-500/30 transition-colors">
-                        <LogOut className="h-4 w-4 text-red-400" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">Se déconnecter</p>
-                        <p className="text-slate-400 text-xs hidden sm:block">Fermer la session</p>
-                      </div>
-                    </button>
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          setShowEditProfile(true);
+                          setShowProfileMenu(false);
+                        }}
+                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <Edit3 className="h-4 w-4 text-gray-400" />
+                        <span className="text-gray-700">Modifier le profil</span>
+                      </button>
+                      
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <LogOut className="h-4 w-4 text-gray-400" />
+                        <span className="text-gray-700">Se déconnecter</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+
+        {/* Main Dashboard Content */}
+        <main className="p-8">
+          {/* Welcome Section */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Welcome back, {user.username || 'Emma'}!
+            </h1>
+            <p className="text-gray-500">Here's your study</p>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <BookOpen className="h-6 w-6 text-gray-600" />
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">Completed courses</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <GraduationCap className="h-6 w-6 text-gray-600" />
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">Student score</p>
+                  <p className="text-2xl font-bold text-gray-900">{progressPercentage}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Users className="h-6 w-6 text-gray-600" />
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">Community score</p>
+                  <p className="text-2xl font-bold text-gray-900">84</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-3 gap-8">
+            {/* Progress Chart */}
+            <div className="col-span-2">
+              <div className="bg-white rounded-xl p-6 border border-gray-200 mb-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900">Progress</h3>
+                  <select className="text-sm text-gray-500 border border-gray-200 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>This week</option>
+                    <option>This month</option>
+                    <option>This year</option>
+                  </select>
+                </div>
+                
+                {/* Chart */}
+                <div className="h-64 flex items-end space-x-4">
+                  {progressData.map((data, index) => (
+                    <div key={index} className="flex-1 flex flex-col items-center">
+                      <div className="w-full h-48 flex flex-col justify-end">
+                        <div 
+                          className="w-full bg-orange-400 rounded-t-lg mb-1"
+                          style={{ height: `${(data.completed / data.total) * 100}%` }}
+                        ></div>
+                        <div 
+                          className="w-full bg-blue-500 rounded-t-lg"
+                          style={{ height: `${((data.total - data.completed) / data.total) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs text-gray-500 mt-2">{data.day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Calendar */}
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900">Upcoming Agenda</h3>
+                  <select className="text-sm text-gray-500 border border-gray-200 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option>January</option>
+                    <option>February</option>
+                    <option>March</option>
+                  </select>
+                </div>
+                
+                {/* Calendar Grid */}
+                <div className="grid grid-cols-7 gap-1 text-center text-sm">
+                  {/* Days of week */}
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                    <div key={day} className="p-2 text-gray-500 font-medium">{day}</div>
+                  ))}
+                  
+                  {/* Calendar days */}
+                  {Array.from({ length: 35 }, (_, i) => {
+                    const day = i - 2; // Start from 30 (previous month)
+                    const isCurrentMonth = day > 0 && day <= 31;
+                    const isToday = day === 15;
+                    const hasEvent = [1, 8, 15, 22, 29].includes(day);
+                    
+                    return (
+                      <div
+                        key={i}
+                        className={`p-2 h-10 flex items-center justify-center rounded-lg transition-colors ${
+                          isToday 
+                            ? 'bg-blue-600 text-white font-semibold' 
+                            : isCurrentMonth 
+                              ? hasEvent 
+                                ? 'text-gray-900 bg-blue-50 font-medium' 
+                                : 'text-gray-700 hover:bg-gray-50'
+                              : 'text-gray-300'
+                        }`}
+                      >
+                        {day > 0 ? day : day + 31}
+                        {hasEvent && !isToday && (
+                          <div className="w-1 h-1 bg-blue-600 rounded-full ml-1"></div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Sidebar */}
+            <div className="space-y-6">
+              {/* My Courses */}
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    My courses 
+                    <HelpCircle className="h-4 w-4 text-gray-400 ml-1" />
+                  </h3>
+                  <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
+                    View all
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Course 1 */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <span className="text-blue-600 font-bold text-sm">01</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">User Experience design</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <div className="w-16 h-1 bg-gray-200 rounded-full">
+                            <div className="w-4/5 h-1 bg-blue-600 rounded-full"></div>
+                          </div>
+                          <span className="text-xs text-gray-500">12 Lessons</span>
+                          <span className="text-xs text-gray-900 font-medium">80%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </div>
+
+                  {/* Course 2 */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <span className="text-blue-600 font-bold text-sm">01</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Game UI design</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <div className="w-16 h-1 bg-gray-200 rounded-full">
+                            <div className="w-1/5 h-1 bg-blue-600 rounded-full"></div>
+                          </div>
+                          <span className="text-xs text-gray-500">10 Lessons</span>
+                          <span className="text-xs text-gray-900 font-medium">20%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Assignments */}
+              <div className="bg-white rounded-xl p-6 border border-gray-200">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Assignments <span className="text-gray-400">(20)</span>
+                  </h3>
+                  <span className="text-blue-600 text-sm font-medium">3/6 Complete</span>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Assignment 1 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div>
+                        <p className="font-medium text-gray-900">Requirements documentation</p>
+                        <p className="text-xs text-gray-500">5 hours left</p>
+                      </div>
+                    </div>
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                  </div>
+
+                  {/* Assignment 2 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div>
+                        <p className="font-medium text-gray-900">User Research plan</p>
+                        <p className="text-xs text-gray-500">30 minutes left</p>
+                      </div>
+                    </div>
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
+                  </div>
+
+                  {/* Assignment 3 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                      <div>
+                        <p className="font-medium text-gray-900">User persona</p>
+                        <p className="text-xs text-gray-500">1 week 2 hours left</p>
+                      </div>
+                    </div>
+                    <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
+                  </div>
+
+                  {/* Assignment 4 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                      <div>
+                        <p className="font-medium text-gray-900">Low-Fidelity Wireframe</p>
+                        <p className="text-xs text-gray-500">2 weeks 5 hours left</p>
+                      </div>
+                    </div>
+                    <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
 
       {/* Modal Édition Profil */}
       {showEditProfile && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 w-full max-w-md mx-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md mx-4 border border-gray-200">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl sm:text-2xl font-bold text-white">Modifier le profil</h3>
+              <h3 className="text-xl font-bold text-gray-900">Modifier le profil</h3>
               <button
                 onClick={() => setShowEditProfile(false)}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -418,41 +723,41 @@ const handleContactSubmit = async (e: React.FormEvent) => {
             
             <form onSubmit={handleEditProfile} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Pseudo
                 </label>
                 <input
                   type="text"
                   value={editForm.username}
                   onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                  className={`w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 ${user?.gender === 'FEMME' ? 'focus:ring-purple-500' : 'focus:ring-blue-500'} focus:border-transparent transition-all`}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Votre pseudo"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nouveau mot de passe
                 </label>
                 <input 
                   type="password" 
                   value={editForm.newPassword}
                   onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className={`w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 ${user?.gender === 'FEMME' ? 'focus:ring-purple-500' : 'focus:ring-blue-500'} focus:border-transparent transition-all`}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Nouveau mot de passe"
                 />
               </div>
               
               {editForm.newPassword && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Confirmer le nouveau mot de passe
                   </label>
                   <input
                     type="password"
                     value={editForm.confirmPassword}
                     onChange={(e) => setEditForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    className={`w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 ${user?.gender === 'FEMME' ? 'focus:ring-purple-500' : 'focus:ring-blue-500'} focus:border-transparent transition-all`}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     placeholder="Confirmer le mot de passe"
                   />
                 </div>
@@ -462,14 +767,14 @@ const handleContactSubmit = async (e: React.FormEvent) => {
                 <button
                   type="button"
                   onClick={() => setShowEditProfile(false)}
-                  className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 border border-white/20 text-sm sm:text-base"
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-200"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={editLoading}
-                  className={`flex-1 bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base`}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editLoading ? 'Mise à jour...' : 'Sauvegarder'}
                 </button>
@@ -478,310 +783,72 @@ const handleContactSubmit = async (e: React.FormEvent) => {
           </div>
         </div>
       )}
-      
-      {/* Contenu principal */}
-      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-        {/* Section de bienvenue */}
-        <div className="text-center mb-16">
-          <div className={`inline-flex items-center space-x-2 ${genderConfig.primaryGlow} px-4 py-2 rounded-full mb-6 border ${genderConfig.primaryBorder}`}>
-            <Star className="h-4 w-4" />
-            <span className={`text-sm font-medium ${genderConfig.primaryText.replace('400', '300')}`}>Accès permanent et illimité</span>
-          </div>
-          
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-            {genderConfig.welcomeText} dans votre
-            <span className={`bg-gradient-to-r ${genderConfig.accentColor} bg-clip-text text-transparent block`}>
-              espace d'apprentissage
-            </span>
-          </h2>
-          
-          <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed px-4">
-            Dans cet espace, vous pourrez suivre votre progression, consulter le temps que vous avez passé sur chaque module, voir les pages complétées ainsi que les quiz terminés. Vous avez également accès à toutes les ressources pédagogiques, ainsi qu'au support en cas de besoin.
-          </p>
-        </div>
 
-        {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-            <div className={`${genderConfig.primaryGlow} w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4`}>
-              <Target className={`h-6 w-6 ${genderConfig.primaryText}`} />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-1">
-              {progressLoading ? '...' : `${progressPercentage}%`}
-            </h3>
-            <p className="text-slate-400 text-sm">Progression</p>
-          </div>
-          
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-            <div className={`${genderConfig.primaryGlow} w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4`}>
-              <Clock className={`h-6 w-6 ${genderConfig.primaryText}`} />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-1">
-              {totalTime > 0 ? formattedTime : '0s'}
-            </h3>
-            <p className="text-slate-400 text-sm">Temps d'étude</p>
-          </div>
-          
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-            <div className={`${genderConfig.primaryGlow} w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4`}>
-              <BookOpen className={`h-6 w-6 ${genderConfig.primaryText}`} />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-1">
-              {progressLoading ? '...' : `${Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}/${totalPages}`}
-            </h3>
-            <p className="text-slate-400 text-sm">Pages complétées</p>
-          </div>
-          
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center">
-            <div className={`${genderConfig.primaryGlow} w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4`}>
-              <Award className={`h-6 w-6 ${genderConfig.primaryText}`} />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-1">
-              {progressLoading ? '...' : `${completedQuizzes.size}/${totalQuizzes}`}
-            </h3>
-            <p className="text-slate-400 text-sm">Quiz complétés</p>
-          </div>
-        </div>
-
-        {/* Actions principales */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Commencer le cours */}
-          <div className={`bg-gradient-to-br ${user?.gender === 'FEMME' ? 'from-purple-500/20 to-pink-500/20' : 'from-blue-500/20 to-cyan-500/20'} backdrop-blur-xl border ${user?.gender === 'FEMME' ? 'border-purple-500/30' : 'border-blue-500/30'} rounded-3xl p-8 relative overflow-hidden`}>
-            <div className={`absolute top-0 right-0 w-32 h-32 ${user?.gender === 'FEMME' ? 'bg-purple-500/10' : 'bg-blue-500/10'} rounded-full -translate-y-16 translate-x-16`}></div>
-            <div className="relative z-10">
-              <div className={`${user?.gender === 'FEMME' ? 'bg-purple-500/30' : 'bg-blue-500/30'} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
-                <Play className={`h-8 w-8 ${user?.gender === 'FEMME' ? 'text-purple-300' : 'text-blue-300'}`} />
-              </div>
-              
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Commencer le cours
-              </h3>
-              
-              <p className="text-slate-300 mb-8 leading-relaxed">
-                Accédez à tous les chapitres de la méthode, des bases jusqu'à la lecture complète.
-              </p>
-              
+      {/* Modal Contact Support */}
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md mx-4 border border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Contactez le support</h3>
               <button
                 onClick={() => {
-                  console.log('🎯 ===== CLIC BOUTON COMMENCER =====');
-                  localStorage.setItem('courseStarted', 'true');
-                  
-                  // Démarrer le chrono DIRECTEMENT
-                  fetch('/api/auth/time/start', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                  }).then(response => {
-                    console.log('🚀 RÉPONSE START TIMER:', response.status);
-                    if (response.ok) {
-                      console.log('✅ CHRONO DÉMARRÉ EN DB');
-                      window.location.href = '/chapitres/0/introduction';
-                    }
-                  }).catch(error => {
-                    console.error('❌ ERREUR START TIMER:', error);
-                    window.location.href = '/chapitres/0/introduction';
-                  });
+                  setShowContactModal(false);
+                  setContactSuccess(false);
                 }}
-                className={`group bg-gradient-to-r ${user?.gender === 'FEMME' ? 'from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600' : 'from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'} text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center space-x-3`}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <span>Commencer maintenant</span>
-                <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
-          </div>
-
-          {/* Continuer le cours */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 relative overflow-hidden">
-            <div className={`absolute top-0 right-0 w-32 h-32 ${user?.gender === 'FEMME' ? 'bg-pink-500/10' : 'bg-cyan-500/10'} rounded-full -translate-y-16 translate-x-16`}></div>
-            <div className="relative z-10">
-              <div className={`${user?.gender === 'FEMME' ? 'bg-purple-500/30' : 'bg-blue-500/30'} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
-                <TrendingUp className={`h-8 w-8 ${user?.gender === 'FEMME' ? 'text-purple-300' : 'text-blue-300'}`} />
-              </div>
-              
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Accompagnement individuel
-              </h3>
-              
-              <p className="text-slate-300 mb-8 leading-relaxed">
-                Réservez des séances personnalisées avec votre professeur{user?.gender === 'FEMME' ? 'e' : ''}. 
-                Débloquez des créneaux en progressant dans le cours.
-              </p>
-              
-              <Link
-                href="/accompagnement"
-                className="group inline-flex items-center space-x-3 bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 border border-white/20 hover:border-white/30"
-              >
-                <span>Voir mes accompagnements</span>
-                <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Ressources et support */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Progression détaillée */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className={`${genderConfig.primaryGlow} w-10 h-10 rounded-xl flex items-center justify-center`}>
-                <TrendingUp className={`h-5 w-5 ${genderConfig.primaryText}`} />
-              </div>
-              <h3 className="text-xl font-semibold text-white">Votre progression</h3>
-            </div>
             
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-slate-300">Progression globale</span>
-                  <span className={`${genderConfig.primaryText} font-medium`}>
-                    {progressLoading ? '...' : `${progressPercentage}%`}
-                  </span>
+            {contactSuccess ? (
+              <div className="text-center py-8">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-2">
-                  <div 
-                    className={`bg-gradient-to-r ${genderConfig.accentColor} h-2 rounded-full transition-all duration-500`}
-                    style={{ width: `${progressPercentage}%` }}
-                  ></div>
+                <h4 className="text-xl font-bold text-gray-900 mb-2">Message envoyé !</h4>
+                <p className="text-gray-600">Nous avons bien reçu votre message et vous répondrons dès que possible.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Votre message
+                  </label>
+                  <textarea
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[150px]"
+                    placeholder="Décrivez votre question ou problème..."
+                    required
+                  />
                 </div>
-              </div>
-              
-              <div className="pt-4 border-t border-white/10">
-                {progressPercentage === 0 ? (
-                  <p className="text-slate-400 text-sm">
-                    Commencez votre première leçon pour voir votre progression s'afficher ici.
-                  </p>
-                ) : (
-                  <div className="text-slate-400 text-sm space-y-1">
-                    <p>📚 {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}/{totalPages} leçons terminées</p>
-                    <p>🏆 {completedQuizzes.size}/{totalQuizzes} quiz réussis</p>
-                  </div>
-                )}
-              </div>
-            </div>
+                
+                <div className="flex space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowContactModal(false)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-200"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={contactLoading}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {contactLoading ? 'Envoi en cours...' : 'Envoyer le message'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
-
-          {/* Ressources */}
-  <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-  <div className="flex items-center space-x-3 mb-6">
-    <div className="bg-blue-500/20 w-10 h-10 rounded-xl flex items-center justify-center">
-      <Star className="h-5 w-5 text-blue-400" /> {/* Remplacez par une icône appropriée */}
-    </div>
-    <h3 className="text-xl font-semibold text-white">Mise à niveau</h3>
-  </div>
-  
-  <p className="text-slate-300 mb-6 text-sm leading-relaxed">
-    Accédez au <strong>Pack Tajwid</strong> (Module 2) pour maîtriser les règles de lecture coranique avec des exercices pratiques et des supports détaillés.
-  </p>
-  
-  <button className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 font-medium px-4 py-3 rounded-xl transition-all duration-200 border border-blue-500/30">
-    Découvrir le Pack Tajwid
-  </button>
-</div>
-
-       
-  {/* Support */}
-  <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-    <div className="flex items-center space-x-3 mb-6">
-      <div className="bg-pink-500/20 w-10 h-10 rounded-xl flex items-center justify-center">
-        <MessageCircle className="h-5 w-5 text-pink-400" />
-      </div>
-      <h3 className="text-xl font-semibold text-white">Support</h3>
-    </div>
-    
-    <p className="text-slate-300 mb-6 text-sm leading-relaxed">
-      Besoin d'aide ? Notre équipe pédagogique est là pour vous accompagner dans votre apprentissage.
-    </p>
-    
-    <button 
-      onClick={() => setShowContactModal(true)}
-      className="w-full bg-pink-500/20 hover:bg-pink-500/30 text-pink-300 hover:text-pink-200 font-medium px-4 py-3 rounded-xl transition-all duration-200 border border-pink-500/30"
-    >
-      Contacter le support
-    </button>
-  </div>
-</div>
-
-        {/* Conseil motivationnel */}
-        <div className={`mt-12 bg-gradient-to-r ${user?.gender === 'FEMME' ? 'from-purple-500/10 to-pink-500/10' : 'from-blue-500/10 to-cyan-500/10'} backdrop-blur-xl border ${user?.gender === 'FEMME' ? 'border-purple-500/20' : 'border-blue-500/20'} rounded-2xl p-8 text-center`}>
-          <div className={`${genderConfig.primaryGlow} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6`}>
-            <Star className={`h-8 w-8 ${genderConfig.primaryText}`} />
-          </div>
-          
-          <h3 className="text-2xl font-bold text-white mb-4">
-            Conseil pour réussir
-          </h3>
-          
-          <p className="text-slate-300 text-lg leading-relaxed max-w-2xl mx-auto">
-            Consacrez <span className={`${genderConfig.primaryText} font-semibold`}>30 minutes par jour</span> à votre apprentissage. Cela vous permettra de laisser à votre cerveau le temps de s'adapter et d'assimiler les notions.
-            <br />
-            <span className="text-slate-400 text-sm mt-2 block">Ce temps est indicatif et dépend de votre rythme.</span>
-          </p>
         </div>
-      </main>
-      {/* Modal Contact Support */}
-{showContactModal && (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-6 sm:p-8 w-full max-w-md mx-4">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-xl sm:text-2xl font-bold text-white">Contactez le support</h3>
-        <button
-          onClick={() => {
-            setShowContactModal(false);
-            setContactSuccess(false);
-          }}
-          className="text-slate-400 hover:text-white transition-colors"
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      
-      {contactSuccess ? (
-        <div className="text-center py-8">
-          <div className="bg-green-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="h-8 w-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h4 className="text-xl font-bold text-white mb-2">Message envoyé !</h4>
-          <p className="text-slate-300">Nous avons bien reçu votre message et vous répondrons dès que possible.</p>
-        </div>
-      ) : (
-        <form onSubmit={handleContactSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Votre message
-            </label>
-            <textarea
-              value={contactForm.message}
-              onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
-              className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all min-h-[150px]"
-              placeholder="Décrivez votre question ou problème..."
-              required
-            />
-          </div>
-          
-          <div className="flex space-x-4 pt-4">
-            <button
-              type="button"
-              onClick={() => setShowContactModal(false)}
-              className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 border border-white/20 text-sm sm:text-base"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              disabled={contactLoading}
-              className={`flex-1 bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-4 sm:px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base`}
-            >
-              {contactLoading ? 'Envoi en cours...' : 'Envoyer le message'}
-            </button>
-          </div>
-        </form>
       )}
-    </div>
-  </div>
-)}
     </div>
   );
 }
