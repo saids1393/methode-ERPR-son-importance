@@ -142,7 +142,17 @@ const chapter3Page15AudioMappings: { [key: string]: string } = {
   // Ya avec voyelles doubles (finale)
   'يًا': 'chap3_pg12_case82',
   'يٌ': 'chap3_pg12_case83',
-  'يٍ': 'chap3_pg12_case84'
+  'يٍ': 'chap3_pg12_case84',
+
+  'ءً': 'chap3_pg12_case1',
+  'ءٌ': 'chap3_pg12_case2',
+  'ءٍ': 'chap3_pg12_case3',
+
+  'ـةً': 'chap3_pg12_case7',
+  'ـةٌ': 'chap3_pg12_case8',
+  'ـةٍ': 'chap3_pg12_case9'
+
+
 };
 
 const Page15 = () => {
@@ -267,20 +277,18 @@ const LetterGroup = ({
             onClick={() => onLetterClick?.(vowelLetter)}
           >
             <div
-              className={`text-2xl md:text-3xl font-bold mb-2 ${
-                emphatic ? 'text-red-400' : 'text-white'
-              }`}
+              className={`text-2xl md:text-3xl font-bold mb-2 ${emphatic ? 'text-red-400' : 'text-white'
+                }`}
             >
               {vowelLetter}
             </div>
             <div
-              className={`text-xs font-semibold px-2 py-1 rounded ${
-                index === 0
-                  ? 'text-orange-400 bg-orange-900/30'
-                  : index === 1
+              className={`text-xs font-semibold px-2 py-1 rounded ${index === 0
+                ? 'text-orange-400 bg-orange-900/30'
+                : index === 1
                   ? 'text-blue-400 bg-blue-900/30'
                   : 'text-green-400 bg-green-900/30'
-              }`}
+                }`}
             >
               {vowelNames[index]}
             </div>

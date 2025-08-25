@@ -34,7 +34,7 @@ const chapter3Page12AudioMappings: { [key: string]: string } = {
   'هً': 'chap3_pg12_case76', 'هٌ': 'chap3_pg12_case77', 'هٍ': 'chap3_pg12_case78',
   'وً': 'chap3_pg12_case79', 'وٌ': 'chap3_pg12_case80', 'وٍ': 'chap3_pg12_case81',
   'يً': 'chap3_pg12_case82', 'يٌ': 'chap3_pg12_case83', 'يٍ': 'chap3_pg12_case84',
-  'أً': 'chap3_pg12_case85', 'أٌ': 'chap3_pg12_case86', 'إٍ': 'chap3_pg12_case87'
+  'أً': 'chap3_pg12_case1', 'أٌ': 'chap3_pg12_case2', 'إٍ': 'chap3_pg12_case3'
   
 };
 

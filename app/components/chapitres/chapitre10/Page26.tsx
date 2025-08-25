@@ -6,7 +6,7 @@ import React from 'react';
 
 const chapter10Page26AudioMappings: { [key: string]: string } = {
   // Rangée 1
-  'إِنَّ': 'chap10_pg26_case1',
+  // 'إِنَّ': 'chap10_pg26_case1',
   'اللَّهَ': 'chap10_pg26_case2',
   'مُصَدِّقٌ': 'chap10_pg26_case3',
   'الرَّحْمَٰنِ': 'chap10_pg26_case4',
@@ -67,7 +67,7 @@ const playLetterAudio = (vowelLetter: string) => {
 
   const quranicWords = [
     // Rangée 1
-    ['إِنَّ', 'اللَّهَ', 'مُصَدِّقٌ', 'الرَّحْمَٰنِ', 'الرَّحِيمِ', 'الصَّبِرِ'],
+    ['اللَّهَ', 'مُصَدِّقٌ', 'الرَّحْمَٰنِ', 'الرَّحِيمِ', 'الصَّبِرِ'],
     
     // Rangée 2
     ['الظَّالِمِينَ', /* 'مَضَىٰ', 'بِسْمِهِ', */ 'تَبَّتْ', /* 'كَفَّرَ', */ 'شَدِّدْ'],
