@@ -45,16 +45,21 @@ interface User {
   isActive: boolean;
 }
 
-interface Homework {
-  id: string;
-  chapterId: number;
-  title: string;
-}
-
 interface HomeworkSend {
   id: string;
   sentAt: string;
-  homework: Homework;
+  homework: {
+    id: string;
+    chapterId: number;
+    title: string;
+  };
+}
+
+interface HomeworkStatus {
+  chapterId: number;
+  title: string;
+  status: 'sent' | 'pending';
+  sentAt?: string;
 }
 
 export default function DashboardPage() {
@@ -301,6 +306,7 @@ export default function DashboardPage() {
     checkAuth();
   }, []);
 
+  
   // Charger le temps quand on arrive sur le dashboard
   useEffect(() => {
     console.log('📊 Dashboard monté - chargement du temps');
