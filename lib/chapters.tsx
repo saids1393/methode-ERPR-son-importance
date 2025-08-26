@@ -22,6 +22,7 @@ export type Chapter = {
   quiz?: QuizQuestion[];
 };
 
+
 export const chapters: Chapter[] = [
   {
     title: " avant la méthode",

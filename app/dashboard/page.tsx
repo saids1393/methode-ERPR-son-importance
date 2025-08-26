@@ -77,6 +77,7 @@ export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');
   const [homeworkSends, setHomeworkSends] = useState<HomeworkSend[]>([]);
   const [homeworkLoading, setHomeworkLoading] = useState(true);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const router = useRouter();
 
   const {
@@ -85,6 +86,9 @@ export default function DashboardPage() {
     isLoading: progressLoading,
   } = useUserProgress();
 
+  const getSentHomeworkCount = () => {
+    return homeworkSends.length;
+  };
   // Intégration de la fonctionnalité timer
   const {
     totalTime,
@@ -241,54 +245,54 @@ export default function DashboardPage() {
     }
   }, [progressPercentage, progressLoading, totalPages]);
 
- const getHomeworkStatuses = () => {
-  const statuses: Array<{
-    chapterId: number;
-    title: string;
-    status: 'sent' | 'pending';
-    sentAt?: string;
-  }> = [];
-  
-  // Parcourir tous les chapitres (1-10)
-  for (let chapterId = 1; chapterId <= 10; chapterId++) {
-    const chapter = chapters.find(ch => ch.chapterNumber === chapterId);
-    if (!chapter) {
-      // Si le chapitre n'existe pas dans les données, créer un placeholder
-      statuses.push({
-        chapterId,
-        title: `Devoir du chapitre ${chapterId}`,
-        status: 'pending'
-      });
-      continue;
+  const getHomeworkStatuses = () => {
+    const statuses: Array<{
+      chapterId: number;
+      title: string;
+      status: 'sent' | 'pending';
+      sentAt?: string;
+    }> = [];
+
+    // Parcourir tous les chapitres (1-10)
+    for (let chapterId = 1; chapterId <= 10; chapterId++) {
+      const chapter = chapters.find(ch => ch.chapterNumber === chapterId);
+      if (!chapter) {
+        // Si le chapitre n'existe pas dans les données, créer un placeholder
+        statuses.push({
+          chapterId,
+          title: `Devoir du chapitre ${chapterId}`,
+          status: 'pending'
+        });
+        continue;
+      }
+
+      // Vérifier si l'utilisateur a terminé ce chapitre
+      const chapterPages = chapter.pages.map(p => p.pageNumber);
+      const chapterCompleted = chapterPages.every(pageNum => completedPages.has(pageNum));
+      const chapterQuizCompleted = !chapter.quiz || completedQuizzes.has(chapterId);
+      const isChapterFullyCompleted = chapterCompleted && chapterQuizCompleted;
+
+      // Chercher si le devoir a été envoyé
+      const sentHomework = homeworkSends.find(send => send.homework.chapterId === chapterId);
+
+      if (sentHomework) {
+        statuses.push({
+          chapterId,
+          title: sentHomework.homework.title,
+          status: 'sent',
+          sentAt: sentHomework.sentAt
+        });
+      } else {
+        statuses.push({
+          chapterId,
+          title: `Devoir du chapitre ${chapterId}`,
+          status: isChapterFullyCompleted ? 'sent' : 'pending'
+        });
+      }
     }
 
-    // Vérifier si l'utilisateur a terminé ce chapitre
-    const chapterPages = chapter.pages.map(p => p.pageNumber);
-    const chapterCompleted = chapterPages.every(pageNum => completedPages.has(pageNum));
-    const chapterQuizCompleted = !chapter.quiz || completedQuizzes.has(chapterId);
-    const isChapterFullyCompleted = chapterCompleted && chapterQuizCompleted;
-
-    // Chercher si le devoir a été envoyé
-    const sentHomework = homeworkSends.find(send => send.homework.chapterId === chapterId);
-    
-    if (sentHomework) {
-      statuses.push({
-        chapterId,
-        title: sentHomework.homework.title,
-        status: 'sent',
-        sentAt: sentHomework.sentAt
-      });
-    } else {
-      statuses.push({
-        chapterId,
-        title: `Devoir du chapitre ${chapterId}`,
-        status: isChapterFullyCompleted ? 'sent' : 'pending'
-      });
-    }
-  }
-
-  return statuses;
-};
+    return statuses;
+  };
 
   const fetchHomeworkSends = async () => {
     try {
@@ -479,10 +483,10 @@ export default function DashboardPage() {
           {/* Logo */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <BookOpen className="h-5 w-5 text-white" />
+              <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
+                <BookOpen className="h-5 w-5 text-white " />
               </div>
-              <span className="text-xl font-bold text-gray-900">Méthode ERPR</span>
+              <span className="md:text-xl sm:text-sm font-bold text-gray-900">Méthode ERPR</span>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -586,17 +590,17 @@ export default function DashboardPage() {
         <header className="bg-white border-b border-gray-200 px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Navigation Links */}
-            <nav className="hidden lg:flex space-x-8">
+            <nav className="hidden lg:flex space-x-8 items-center">
               <Link href="/dashboard" className="text-gray-900 font-medium border-b-2 border-blue-800">
                 Accueil
               </Link>
-              <Link href="/chapitres/0/introduction" className="text-gray-500 hover:text-gray-900 pb-4">
+              <Link href="/chapitres/0/introduction" className="text-gray-500 hover:text-gray-900">
                 Cours
               </Link>
-              <Link href="/accompagnement" className="text-gray-500 hover:text-gray-900 pb-4">
+              <Link href="/accompagnement" className="text-gray-500 hover:text-gray-900">
                 Accompagnement
               </Link>
-              <button className="text-gray-500 hover:text-gray-900 pb-4">
+              <button className="text-gray-500 hover:text-gray-900">
                 Devoirs
               </button>
             </nav>
@@ -610,29 +614,40 @@ export default function DashboardPage() {
             </button>
 
             {/* Right Icons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 justify-center">
               <button
                 onClick={() => setShowContactModal(true)}
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <MessageCircle className="h-5 w-5" />
               </button>
-              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <Bell className="h-5 w-5" />
-              </button>
-
-              {/* Profile Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotificationModal(true)}
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <Bell className="h-5 w-5 mt-1" />
+                  {getSentHomeworkCount() > 0 && (
+                    <span className="absolute top-[-2px] -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                      {getSentHomeworkCount()}
+                    </span>
+                  )}
+                </button>
+              </div>
               <div className="relative profile-menu">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center space-x-2"
+                  className="flex items-center space-x-3"
                 >
-                  <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0">
                     <span className="text-white text-sm font-medium">
                       {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                  <span className="text-gray-700 font-medium whitespace-nowrap">
+                    {user.username || (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
                 </button>
 
                 {/* Dropdown Menu */}
@@ -677,6 +692,64 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
+              {/* Modal Notifications */}
+              {showNotificationModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 border border-gray-200 max-h-[80vh] overflow-hidden">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-bold text-gray-900">
+                        Notifications ({getSentHomeworkCount()})
+                      </h3>
+                      <button
+                        onClick={() => setShowNotificationModal(false)}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
+
+                    <div className="max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                      {/* Dans le modal, remplacez cette partie : */}
+                      {homeworkSends.length > 0 ? (
+                        <div className="space-y-3">
+                          {homeworkSends.map((send) => (
+                            <div key={send.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                              <div className="flex items-start space-x-3">
+                                <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <span className="text-white text-sm font-bold">
+                                    {send.homework.chapterId}
+                                  </span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-gray-900 text-sm">
+                                    {send.homework.title}
+                                  </h4>
+                                  <p className="text-xs text-green-600 mt-1">
+                                    Envoyé le {new Date(send.sentAt).toLocaleDateString('fr-FR', {
+                                      day: 'numeric',
+                                      month: 'long',
+                                      year: 'numeric'
+                                    })}
+                                  </p>
+                                </div>
+                                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0 mt-2"></div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                          <p className="text-gray-500">Aucune notification pour le moment</p>
+                          <p className="text-gray-400 text-sm mt-1">
+                            Les devoirs envoyés apparaîtront ici
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -726,6 +799,8 @@ export default function DashboardPage() {
                   <p className="text-2xl font-bold text-gray-900">{progressPercentage}%</p>
                 </div>
               </div>
+
+              
             </div>
 
             <div className="bg-white rounded-xl p-6 border border-gray-200">
@@ -1151,19 +1226,19 @@ export default function DashboardPage() {
                                   </span>
                                 ) : homework.sentAt ? (
                                   <span className="text-green-600">
-                                   Le devoir a été envoyé le {new Date(homework.sentAt).toLocaleDateString('fr-FR')}
+                                    Le devoir a été envoyé le {new Date(homework.sentAt).toLocaleDateString('fr-FR')}
                                   </span>
                                 ) : (
                                   <span className="text-red-600">
-                                  Chapitre et quiz completés, mais devoirs inexistants.
+                                    Chapitre et quiz completés, mais devoirs inexistants.
                                   </span>
                                 )}
                               </div>
                             </div>
                           </div>
                           <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center flex-shrink-0 ml-2 ${homework.status === 'sent'
-                              ? 'bg-blue-800'
-                              : 'border-2 border-gray-300'
+                            ? 'bg-blue-800'
+                            : 'border-2 border-gray-300'
                             }`}>
                             {homework.status === 'sent' && (
                               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>

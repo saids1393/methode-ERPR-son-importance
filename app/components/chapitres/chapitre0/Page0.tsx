@@ -123,7 +123,7 @@ const Page0 = () => {
   };
 
   return (
-    <div className="font-arabic min-h-screen bg-zinc-900 text-white p-6 space-y-6">
+    <div className="font-arabic min-h-screen bg-gray-900 text-white p-6 space-y-6">
       <div className="text-center mb-4">
         <div className="text-3xl font-bold mb-2">📘 Apprenons l'alphabet arabe</div>
         <div className="text-lg text-indigo-300">Association visuelle pour francophones</div>

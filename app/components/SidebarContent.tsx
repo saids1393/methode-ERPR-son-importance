@@ -130,35 +130,35 @@ export default function SidebarContent() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full text-black bg-white">
-        <div className="px-6 py-5 border-b border-gray-200 flex-shrink-0">
+      <div className="flex flex-col h-full text-white bg-gray-900">
+        <div className="px-6 py-5 border-b border-gray-800 flex-shrink-0">
           <div className="animate-pulse">
-            <div className="h-6 bg-gray-200 rounded mb-3"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-6 bg-gray-700 rounded mb-3"></div>
+            <div className="h-4 bg-gray-700 rounded w-3/4"></div>
           </div>
         </div>
         <div className="flex-grow flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full text-black bg-white">
+    <div className="flex flex-col h-full text-gray-100 bg-gray-900">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-gray-200 flex-shrink-0">
+      <div className="px-6 py-5 border-b border-gray-800 flex-shrink-0">
         <h1 className="text-xl font-bold flex items-center gap-2">
-          <BookOpen className="text-blue-700" size={20} />
+          <BookOpen className="text-blue-400" size={20} />
           <span>Sommaire du Cours</span>
         </h1>
         <div className="mt-3">
           <Link
             href={isProfessorMode ? "/professor" : "/dashboard"}
             onClick={handleDashboardReturn}
-            className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-black hover:bg-gray-200"
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-gray-200 hover:bg-gray-800"
           >
-            <Home size={16} className="text-blue-700" />
+            <Home size={16} className="text-blue-400" />
             <span>Retour au tableau de bord</span>
           </Link>
         </div>
@@ -166,12 +166,12 @@ export default function SidebarContent() {
         {!isProfessorMode && (
           <div className="mt-4">
             <div className="flex justify-between text-sm mb-1">
-              <span className="text-black">Progression</span>
-              <span className="font-medium text-blue-700">{progressPercentage}%</span>
+              <span>Progression</span>
+              <span className="font-medium text-blue-400">{progressPercentage}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-800 rounded-full h-2">
               <div
-                className="bg-blue-700 h-2 rounded-full transition-all duration-300"
+                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
@@ -180,7 +180,7 @@ export default function SidebarContent() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-grow overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
+      <nav className="flex-grow overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
         <ul className="space-y-1 px-3">
           {chapters.map((chapter) => {
             const chapterComplete = isChapterCompleted(chapter);
@@ -190,9 +190,9 @@ export default function SidebarContent() {
                   onClick={() => setOpen(prev => ({ ...prev, [chapter.chapterNumber]: !prev[chapter.chapterNumber] }))}
                   className={`w-full text-left px-3 py-3 flex justify-between items-center rounded-lg transition-colors ${
                     open[chapter.chapterNumber]
-                      ? 'bg-gray-200 text-black'
-                      : 'hover:bg-gray-100 text-black'
-                  } ${chapterComplete && !isProfessorMode ? '!text-blue-700' : ''}`}
+                      ? 'bg-gray-800 text-gray-100'
+                      : 'hover:bg-gray-800 text-gray-200'
+                  } ${chapterComplete && !isProfessorMode ? '!text-blue-400' : ''}`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="font-bold">
@@ -200,25 +200,25 @@ export default function SidebarContent() {
                     </span>
                   </div>
                   {open[chapter.chapterNumber] ? (
-                    <ChevronDown className={`${chapterComplete && !isProfessorMode ? 'text-blue-700' : 'text-gray-700'}`} size={18} />
+                    <ChevronDown className={`${chapterComplete && !isProfessorMode ? 'text-blue-400' : 'text-gray-400'}`} size={18} />
                   ) : (
-                    <ChevronRight className={`${chapterComplete && !isProfessorMode ? 'text-blue-700' : 'text-gray-700'}`} size={18} />
+                    <ChevronRight className={`${chapterComplete && !isProfessorMode ? 'text-blue-400' : 'text-gray-400'}`} size={18} />
                   )}
                 </button>
 
                 {open[chapter.chapterNumber] && (
-                  <ul className="ml-8 mt-1 space-y-1 py-1 border-l-2 border-gray-200">
+                  <ul className="ml-8 mt-1 space-y-1 py-1 border-l-2 border-gray-700">
                     {getVideoByChapter(chapter.chapterNumber) && (
                       <li key={`video-${chapter.chapterNumber}`}>
                         <Link
                           href={`/chapitres/${chapter.chapterNumber}/video`}
                           className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                             pathname === `/chapitres/${chapter.chapterNumber}/video`
-                              ? 'bg-blue-100 text-black border-l-2 border-blue-700'
-                              : 'hover:bg-gray-100 text-black'
+                              ? 'bg-gray-800 text-blue-400 border-l-2 border-blue-500'
+                              : 'hover:bg-gray-800 text-gray-200'
                           }`}
                         >
-                          <Play size={14} className="text-blue-700" />
+                          <Play size={14} className="text-blue-400" />
                           <span className="font-semibold">Vidéo du chapitre</span>
                         </Link>
                       </li>
@@ -230,11 +230,11 @@ export default function SidebarContent() {
                           href={`/chapitres/${chapter.chapterNumber}/introduction`}
                           className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                             pathname === `/chapitres/${chapter.chapterNumber}/introduction`
-                              ? 'bg-blue-100 text-black border-l-2 border-blue-700'
-                              : 'hover:bg-gray-100 text-black'
+                              ? 'bg-gray-800 text-blue-400 border-l-2 border-blue-500'
+                              : 'hover:bg-gray-800 text-gray-200'
                           }`}
                         >
-                          <BookOpen size={14} className="text-blue-700" />
+                          <BookOpen size={14} className="text-blue-400" />
                           <span>Introduction</span>
                         </Link>
                       </li>
@@ -249,8 +249,8 @@ export default function SidebarContent() {
                             onClick={(e) => handleNavigation(page.href, e)}
                             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                               pathname === page.href
-                                ? 'bg-blue-100 text-black border-l-2 border-blue-700'
-                                : 'hover:bg-gray-100 text-black'
+                                ? 'bg-gray-800 text-blue-400 border-l-2 border-blue-500'
+                                : 'hover:bg-gray-800 text-gray-200'
                             }`}
                           >
                             {!isProfessorMode && chapter.chapterNumber !== 0 && chapter.chapterNumber !== 11 && (
@@ -259,9 +259,9 @@ export default function SidebarContent() {
                                 className="flex-shrink-0"
                               >
                                 {isCompleted ? (
-                                  <CheckCircle className="text-green-700" size={14} />
+                                  <CheckCircle className="text-green-500" size={14} />
                                 ) : (
-                                  <Circle className="text-gray-400 hover:text-green-700" size={14} />
+                                  <Circle className="text-gray-500 hover:text-green-400" size={14} />
                                 )}
                               </button>
                             )}
@@ -280,8 +280,8 @@ export default function SidebarContent() {
                           onClick={(e) => handleNavigation(`/chapitres/${chapter.chapterNumber}/quiz`, e)}
                           className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
                             pathname === `/chapitres/${chapter.chapterNumber}/quiz`
-                              ? 'bg-blue-100 text-black border-l-2 border-blue-700'
-                              : 'hover:bg-gray-100 text-black'
+                              ? 'bg-gray-800 text-blue-400 border-l-2 border-blue-500'
+                              : 'hover:bg-gray-800 text-gray-200'
                           }`}
                         >
                           {!isProfessorMode && chapter.chapterNumber !== 11 && (
@@ -294,13 +294,13 @@ export default function SidebarContent() {
                               className="flex-shrink-0"
                             >
                               {completedQuizzes.has(chapter.chapterNumber) ? (
-                                <CheckCircle className="text-green-700" size={14} />
+                                <CheckCircle className="text-green-500" size={14} />
                               ) : (
-                                <Circle className="text-gray-400 hover:text-green-700" size={14} />
+                                <Circle className="text-gray-500 hover:text-green-400" size={14} />
                               )}
                             </button>
                           )}
-                          <BookOpen size={14} className="text-blue-700" />
+                          <BookOpen size={14} className="text-blue-400" />
                           <span className="font-semibold">Quiz</span>
                         </Link>
                       </li>
@@ -314,7 +314,7 @@ export default function SidebarContent() {
       </nav>
 
       {!isProfessorMode && (
-        <div className="border-t border-gray-200 px-6 py-3 text-xs text-blue-500 flex justify-between">
+        <div className="border-t border-gray-800 px-6 py-3 text-xs text-gray-400 flex justify-between">
           <span>Pages complétées: {completedPages.size}</span>
           <span>Quiz complétés: {completedQuizzes.size}</span>
         </div>
