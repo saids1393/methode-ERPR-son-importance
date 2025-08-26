@@ -58,8 +58,8 @@ export default function AccompagnementPage() {
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
-        setEditForm(prev => ({ 
-          ...prev, 
+        setEditForm(prev => ({
+          ...prev,
           username: userData.username || ''
         }));
       } else {
@@ -84,8 +84,8 @@ export default function AccompagnementPage() {
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
-          setEditForm(prev => ({ 
-            ...prev, 
+          setEditForm(prev => ({
+            ...prev,
             username: userData.username || ''
           }));
         } else {
@@ -125,7 +125,7 @@ export default function AccompagnementPage() {
 
   const handleEditProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editForm.newPassword && editForm.newPassword !== editForm.confirmPassword) {
       alert('Les mots de passe ne correspondent pas');
       return;
@@ -140,11 +140,11 @@ export default function AccompagnementPage() {
 
     try {
       const updateData: any = {};
-      
+
       if (editForm.username !== user?.username) {
         updateData.username = editForm.username;
       }
-      
+
       if (editForm.newPassword) {
         updateData.password = editForm.newPassword;
       }
@@ -158,16 +158,16 @@ export default function AccompagnementPage() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setUser(prev => prev ? { 
-          ...prev, 
+        setUser(prev => prev ? {
+          ...prev,
           username: data.user.username
         } : null);
         setShowEditProfile(false);
-        setEditForm(prev => ({ 
-          ...prev, 
-          currentPassword: '', 
-          newPassword: '', 
-          confirmPassword: '' 
+        setEditForm(prev => ({
+          ...prev,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
         }));
         alert('Profil mis à jour avec succès !');
       } else {
@@ -252,7 +252,7 @@ export default function AccompagnementPage() {
               </div>
               <span className="text-xl font-bold text-gray-900">Méthode ERPR</span>
             </div>
-            <button 
+            <button
               onClick={() => setMobileMenuOpen(false)}
               className="lg:hidden text-gray-500 hover:text-gray-700"
             >
@@ -260,15 +260,15 @@ export default function AccompagnementPage() {
             </button>
           </div>
 
-   {/* Search */}
-<div className="relative mb-8">
-  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-  <input
-    type="text"
-    placeholder="Search"
-    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-  />
-</div>
+          {/* Search */}
+          <div className="relative mb-8">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
           {/* Navigation */}
           <nav className="space-y-2">
             <Link
@@ -279,11 +279,11 @@ export default function AccompagnementPage() {
               <Home className="h-5 w-5" />
               <span>Tableau de bord</span>
             </Link>
-            
+
             <button
               onClick={() => {
                 localStorage.setItem('courseStarted', 'true');
-                
+
                 fetch('/api/auth/time/start', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -302,7 +302,7 @@ export default function AccompagnementPage() {
               <BookOpen className="h-5 w-5" />
               <span>Cours</span>
             </button>
-            
+
             <Link
               href="/accompagnement"
               className="flex items-center space-x-3 px-3 py-2 text-blue-800 bg-blue-100 rounded-lg font-medium relative"
@@ -312,15 +312,15 @@ export default function AccompagnementPage() {
               <span>Accompagnement</span>
               <div className="w-2 h-2 bg-blue-800 rounded-full ml-auto"></div>
             </Link>
-            
-            <button 
+
+            <button
               className="w-full flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
               onClick={() => {
                 setShowContactModal(true);
                 setMobileMenuOpen(false);
               }}
             >
-               <MessageCircle className="h-5 w-5" />
+              <MessageCircle className="h-5 w-5" />
               <span>Support contact</span>
             </button>
           </nav>
@@ -329,7 +329,7 @@ export default function AccompagnementPage() {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
         ></div>
@@ -357,7 +357,7 @@ export default function AccompagnementPage() {
             </nav>
 
             {/* Mobile Navigation Toggle */}
-            <button 
+            <button
               className="lg:hidden p-2 text-gray-600"
               onClick={() => setMobileMenuOpen(true)}
             >
@@ -366,7 +366,7 @@ export default function AccompagnementPage() {
 
             {/* Right Icons */}
             <div className="flex items-center space-x-4">
-              <button 
+              <button
                 onClick={() => setShowContactModal(true)}
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
               >
@@ -375,7 +375,7 @@ export default function AccompagnementPage() {
               <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <Bell className="h-5 w-5" />
               </button>
-              
+
               {/* Profile Menu */}
               <div className="relative profile-menu">
                 <button
@@ -408,7 +408,7 @@ export default function AccompagnementPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="p-2">
                       <button
                         onClick={() => {
@@ -420,7 +420,7 @@ export default function AccompagnementPage() {
                         <Edit3 className="h-4 w-4 text-gray-400" />
                         <span className="text-gray-700">Modifier le profil</span>
                       </button>
-                      
+
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
@@ -438,10 +438,10 @@ export default function AccompagnementPage() {
 
         {/* Main Dashboard Content */}
         <main className="p-4 lg:p-8">
-        
 
-        
-      
+
+
+
           {/* Actions principales */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* WhatsApp */}
@@ -449,15 +449,17 @@ export default function AccompagnementPage() {
               <div className="bg-green-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
                 <MessageCircle className="h-8 w-8 text-green-600" />
               </div>
-              
+
               <h3 className="text-2xl font-semibold text-gray-900 mb-4">
                 Accompagnement individuel via WhatsApp
               </h3>
-              
+
               <p className="text-gray-600 mb-8 leading-relaxed">
-                Vous avez une question ? Contactez-moi directement sur WhatsApp via ce lien :
+                Des problèmes, des questions, besoin de conseils ?
+                Envoyez-nous un message via WhatsApp. Nous vous répondrons au plus vite, par message vocal ou par écrit.
+                Nous mettrons tous les moyens nécessaires pour vous accompagner face aux difficultés que vous pourriez rencontrer.
               </p>
-              
+
               <a
                 href="https://wa.me/201022767532"
                 target="_blank"
@@ -475,15 +477,15 @@ export default function AccompagnementPage() {
               <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
                 <Send className="h-8 w-8 text-blue-600" />
               </div>
-              
+
               <h3 className="text-2xl font-semibold text-gray-900 mb-4">
                 Groupe Telegram Privé
               </h3>
-              
+
               <p className="text-gray-600 mb-8 leading-relaxed">
-                Nous restons disponibles 7 jours sur 7 pour vous accompagner individuellement en répondant à vos problèmes sur WhatsApp, et vous pourrez rejoindre notre groupe privé Telegram pour accéder aux questions/réponses et rester informé des nouveautés :
+                Rejoignez notre groupe privé Telegram, où vous trouverez des questions-réponses, des quiz interactifs, des conseils pratiques ainsi que l’annonce des nouveautés à venir.
               </p>
-              
+
               <a
                 href="https://t.me/+your_telegram_group_link"
                 target="_blank"
@@ -494,52 +496,6 @@ export default function AccompagnementPage() {
                 <span>Rejoindre le groupe Telegram</span>
                 <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </a>
-            </div>
-          </div>
-
-          {/* Section informative */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-12">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
-              <Users className="h-6 w-6 text-green-600" />
-              Comment nous contacter ?
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Support individuel</h3>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Questions personnalisées via WhatsApp</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Réponse rapide et directe</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Disponible 7 jours sur 7</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Communauté Telegram</h3>
-                <ul className="space-y-3 text-gray-600">
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Questions/réponses partagées</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Nouveautés et mises à jour</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Échanges avec la communauté</span>
-                  </li>
-                </ul>
-              </div>
             </div>
           </div>
 
@@ -559,7 +515,7 @@ export default function AccompagnementPage() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <form onSubmit={handleEditProfile} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -573,20 +529,20 @@ export default function AccompagnementPage() {
                   placeholder="Votre pseudo"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nouveau mot de passe
                 </label>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={editForm.newPassword}
                   onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Nouveau mot de passe"
                 />
               </div>
-              
+
               {editForm.newPassword && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -601,7 +557,7 @@ export default function AccompagnementPage() {
                   />
                 </div>
               )}
-              
+
               <div className="flex space-x-4 pt-4">
                 <button
                   type="button"
@@ -639,7 +595,7 @@ export default function AccompagnementPage() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             {contactSuccess ? (
               <div className="text-center py-8">
                 <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -664,7 +620,7 @@ export default function AccompagnementPage() {
                     required
                   />
                 </div>
-                
+
                 <div className="flex space-x-4 pt-4">
                   <button
                     type="button"
