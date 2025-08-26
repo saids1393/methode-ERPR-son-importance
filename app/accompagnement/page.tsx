@@ -4,75 +4,24 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Calendar,
-  Clock,
-  User,
-  Video,
-  CheckCircle,
-  Lock,
+  MessageCircle,
+  Send,
   ArrowRight,
-  BookOpen,
-  Award,
+  Home,
+  Star,
   Users,
-  Zap,
-  X
+  ChevronRight,
+  BookOpen,
+  Search,
+  Bell,
+  ChevronDown,
+  Edit3,
+  LogOut,
+  User,
+  Menu,
+  X,
+  FileText
 } from 'lucide-react';
-import toast from 'react-hot-toast';
-
-interface SessionData {
-  id: string;
-  scheduledAt: string;
-  status: string;
-  availabilityId?: string;
-  cancellation?: {
-    id: string;
-    cancelledBy: string;
-    reason: {
-      reason: string;
-      category: string;
-    };
-    customReason?: string;
-    cancelledAt: string;
-  };
-  professor: {
-    name: string;
-    gender: string;
-  };
-  zoomLink?: string;
-}
-
-interface AvailableSlot {
-  id: string;
-  availabilityId: string;
-  professor: {
-    id: string;
-    name: string;
-    email: string;
-    gender: string;
-  };
-  date: string;
-  startTime: string;
-  endTime: string;
-  dayOfWeek: number;
-  scheduledAt: string;
-  isSpecific?: boolean;
-}
-
-interface CancellationReason {
-  id: string;
-  reason: string;
-  category: string;
-}
-
-interface SessionsResponse {
-  progress: {
-    unlockedSessions: number;
-    canBookSession: boolean;
-    nextUnlockPage?: number;
-  };
-  sessions: SessionData[];
-  bookedSessionsCount: number;
-}
 
 interface User {
   id: string;
@@ -83,27 +32,25 @@ interface User {
 }
 
 export default function AccompagnementPage() {
-  const [data, setData] = useState<SessionsResponse | null>(null);
-  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
-  const [cancellationReasons, setCancellationReasons] = useState<CancellationReason[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showBookingForm, setShowBookingForm] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<AvailableSlot | null>(null);
-  const [bookingLoading, setBookingLoading] = useState(false);
-  const [showCancelForm, setShowCancelForm] = useState(false);
-  const [sessionToCancel, setSessionToCancel] = useState<SessionData | null>(null);
-  const [selectedReason, setSelectedReason] = useState('');
-  const [customReason, setCustomReason] = useState('');
-  const [cancelLoading, setCancelLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editForm, setEditForm] = useState({
+    username: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    message: '',
+  });
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contactSuccess, setContactSuccess] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    fetchUserData();
-    fetchSessions();
-    fetchAvailableSlots();
-    fetchCancellationReasons();
-  }, []);
 
   const fetchUserData = async () => {
     try {
@@ -111,207 +58,180 @@ export default function AccompagnementPage() {
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  };
-
-  const fetchSessions = async () => {
-    try {
-      const response = await fetch('/api/sessions');
-      if (response.ok) {
-        const sessionData = await response.json();
-        console.log('📊 Données de session reçues:', sessionData);
-        setData(sessionData);
-      } else if (response.status === 401) {
-        router.push('/login');
+        setEditForm(prev => ({ 
+          ...prev, 
+          username: userData.username || ''
+        }));
       } else {
-        toast.error('Erreur lors du chargement');
+        window.location.replace('/checkout');
       }
     } catch (error) {
-      toast.error('Erreur de connexion');
-      console.error('Error fetching sessions:', error);
+      console.error('Auth check error:', error);
+      window.location.replace('/checkout');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAvailableSlots = async () => {
-    try {
-      const response = await fetch('/api/sessions/available');
-      if (response.ok) {
-        const slotsData = await response.json();
-        setAvailableSlots(slotsData.availableSlots || []);
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+          setEditForm(prev => ({ 
+            ...prev, 
+            username: userData.username || ''
+          }));
+        } else {
+          window.location.replace('/checkout');
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.replace('/checkout');
+      } finally {
+        setLoading(false);
       }
+    };
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.profile-menu')) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/login';
     } catch (error) {
-      console.error('Error fetching available slots:', error);
+      console.error('Logout error:', error);
     }
   };
 
-  const fetchCancellationReasons = async () => {
-    try {
-      const response = await fetch('/api/sessions/cancellation-reasons?category=STUDENT');
-      if (response.ok) {
-        const reasonsData = await response.json();
-        setCancellationReasons(reasonsData.reasons || []);
-      }
-    } catch (error) {
-      console.error('Error fetching cancellation reasons:', error);
-    }
-  };
-
-  const handleBookSession = async (e: React.FormEvent) => {
+  const handleEditProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedSlot) {
-      toast.error('Veuillez sélectionner un créneau');
+    if (editForm.newPassword && editForm.newPassword !== editForm.confirmPassword) {
+      alert('Les mots de passe ne correspondent pas');
       return;
     }
 
-    setBookingLoading(true);
+    if (editForm.newPassword && editForm.newPassword.length < 8) {
+      alert('Le mot de passe doit contenir au moins 8 caractères');
+      return;
+    }
+
+    setEditLoading(true);
 
     try {
-      const response = await fetch('/api/sessions', {
+      const updateData: any = {};
+      
+      if (editForm.username !== user?.username) {
+        updateData.username = editForm.username;
+      }
+      
+      if (editForm.newPassword) {
+        updateData.password = editForm.newPassword;
+      }
+
+      const response = await fetch('/api/auth/complete-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setUser(prev => prev ? { 
+          ...prev, 
+          username: data.user.username
+        } : null);
+        setShowEditProfile(false);
+        setEditForm(prev => ({ 
+          ...prev, 
+          currentPassword: '', 
+          newPassword: '', 
+          confirmPassword: '' 
+        }));
+        alert('Profil mis à jour avec succès !');
+      } else {
+        alert(data.error || 'Erreur lors de la mise à jour');
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+      alert('Erreur de connexion');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactLoading(true);
+
+    try {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          slotId: selectedSlot.id,
-          availabilityId: selectedSlot.availabilityId
-        })
+          email: user?.email,
+          message: contactForm.message,
+        }),
       });
 
-      const result = await response.json();
+      const data = await response.json();
 
-      if (response.ok && result.success) {
-        toast.success('Séance réservée avec succès !');
-        setShowBookingForm(false);
-        setSelectedSlot(null);
-        fetchSessions();
-        fetchAvailableSlots();
+      if (data.success) {
+        setContactSuccess(true);
+        setContactForm({ message: '' });
+        setTimeout(() => {
+          setContactSuccess(false);
+          setShowContactModal(false);
+        }, 3000);
       } else {
-        toast.error(result.error || 'Erreur lors de la réservation');
+        alert('Erreur lors de l\'envoi du message');
       }
     } catch (error) {
-      toast.error('Erreur de connexion');
-      console.error('Booking error:', error);
+      console.error('Contact error:', error);
+      alert('Erreur de connexion');
     } finally {
-      setBookingLoading(false);
+      setContactLoading(false);
     }
   };
-
-  const handleCancelSession = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!sessionToCancel || !customReason.trim()) {
-      toast.error('Veuillez saisir un motif d\'annulation');
-      return;
-    }
-
-    if (customReason.trim().length < 10) {
-      toast.error('Le motif doit contenir au moins 10 caractères');
-      return;
-    }
-
-    setCancelLoading(true);
-
-    try {
-      const response = await fetch('/api/sessions/cancel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: sessionToCancel.id,
-          customReason: customReason.trim(),
-          cancelledBy: 'STUDENT'
-        })
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        toast.success('Séance annulée avec succès');
-        setShowCancelForm(false);
-        setSessionToCancel(null);
-        setCustomReason('');
-        fetchSessions();
-        fetchAvailableSlots();
-      } else {
-        toast.error(result.error || 'Erreur lors de l\'annulation');
-      }
-    } catch (error) {
-      toast.error('Erreur de connexion');
-      console.error('Cancel error:', error);
-    } finally {
-      setCancelLoading(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const formatTime = (timeString: string) => {
-    return timeString.substring(0, 5);
-  };
-
-  const canCancelSession = (session: SessionData) => {
-    if (session.status !== 'SCHEDULED') return false;
-    
-    const sessionTime = new Date(session.scheduledAt);
-    const now = new Date();
-    const hoursUntil = (sessionTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
-    return hoursUntil >= 24;
-  };
-
-  const getGenderConfig = () => {
-    if (user?.gender === 'FEMME') {
-      return {
-        primaryColor: 'from-purple-500 to-pink-500',
-        primaryColorHover: 'from-purple-600 to-pink-600',
-        primaryText: 'text-purple-400',
-        secondaryText: 'text-purple-200',
-        primaryBorder: 'border-purple-500/30',
-        primaryGlow: 'bg-purple-500/20',
-        gradientBg: 'from-slate-900 via-purple-900 to-slate-900',
-      };
-    } else {
-      return {
-        primaryColor: 'from-blue-500 to-cyan-500',
-        primaryColorHover: 'from-blue-600 to-cyan-600',
-        primaryText: 'text-blue-400',
-        secondaryText: 'text-blue-200',
-        primaryBorder: 'border-blue-500/30',
-        primaryGlow: 'bg-blue-500/20',
-        gradientBg: 'from-slate-900 via-blue-900 to-slate-900',
-      };
-    }
-  };
-
-  const genderConfig = getGenderConfig();
 
   if (loading) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${genderConfig.gradientBg} flex items-center justify-center`}>
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className={`animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 ${genderConfig.primaryText.replace('text', 'border')} mx-auto mb-6`}></div>
-          <p className="text-white text-lg font-medium">Chargement de vos accompagnements...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto mb-6"></div>
+          <p className="text-gray-600 text-lg font-medium">Chargement de votre espace d'accompagnement...</p>
         </div>
       </div>
     );
   }
 
-  if (!data) {
+  if (!user) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${genderConfig.gradientBg} flex items-center justify-center`}>
-        <div className="text-center text-white">
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center text-gray-600">
           <p>Erreur lors du chargement des données</p>
-          <Link href="/dashboard" className={`${genderConfig.primaryText} hover:${genderConfig.secondaryText}`}>
+          <Link href="/dashboard" className="text-blue-600 hover:text-blue-800">
             Retour au tableau de bord
           </Link>
         </div>
@@ -319,466 +239,453 @@ export default function AccompagnementPage() {
     );
   }
 
-  const unlockedSessions = data.progress?.unlockedSessions ?? 0;
-  const canBookMore = data.progress?.unlockedSessions !== undefined
-    ? data.bookedSessionsCount < data.progress.unlockedSessions
-    : false;
-
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${genderConfig.gradientBg}`}>
-      <header className="bg-black/20 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <div className={`bg-gradient-to-r ${genderConfig.primaryColor} p-3 rounded-xl`}>
-                <Users className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-30 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-6">
+          {/* Logo */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">
-                  Accompagnement Individuel
-                </h1>
-                <p className={genderConfig.secondaryText}>Séances personnalisées avec votre professeur</p>
-              </div>
+              <span className="text-xl font-bold text-gray-900">Méthode ERPR</span>
             </div>
-            
+            <button 
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
+   {/* Search */}
+<div className="relative mb-8">
+  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+  <input
+    type="text"
+    placeholder="Search"
+    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  />
+</div>
+          {/* Navigation */}
+          <nav className="space-y-2">
             <Link
               href="/dashboard"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-xl transition-all duration-300 text-white"
+              className="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
             >
-              Retour au tableau de bord
+              <Home className="h-5 w-5" />
+              <span>Tableau de bord</span>
             </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Votre Progression
-            </h2>
-            <p className="text-slate-300 text-lg">
-              Débloquez des séances d'accompagnement en progressant dans le cours
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className={`p-6 rounded-2xl border-2 ${
-              unlockedSessions >= 1
-                ? 'bg-green-500/20 border-green-500/30'
-                : 'bg-zinc-800/50 border-zinc-700'
-            }`}>
-              <div className="flex items-center gap-3 mb-4">
-                {unlockedSessions >= 1 ? (
-                  <CheckCircle className="h-6 w-6 text-green-400" />
-                ) : (
-                  <Lock className="h-6 w-6 text-zinc-400" />
-                )}
-                <h3 className="text-xl font-bold text-white">1ère Séance</h3>
-              </div>
-              <p className="text-slate-300 mb-2">
-                Débloquée à la page 7
-              </p>
-              {unlockedSessions >= 1 ? (
-                <span className="text-green-400 font-semibold">✓ Disponible</span>
-              ) : (
-                <span className="text-zinc-400">🔒 Verrouillée</span>
-              )}
-            </div>
-
-            <div className={`p-6 rounded-2xl border-2 ${
-              unlockedSessions >= 2 
-                ? 'bg-green-500/20 border-green-500/30' 
-                : 'bg-zinc-800/50 border-zinc-700'
-            }`}>
-              <div className="flex items-center gap-3 mb-4">
-                {unlockedSessions >= 2 ? (
-                  <CheckCircle className="h-6 w-6 text-green-400" />
-                ) : (
-                  <Lock className="h-6 w-6 text-zinc-400" />
-                )}
-                <h3 className="text-xl font-bold text-white">2ème Séance</h3>
-              </div>
-              <p className="text-slate-300 mb-2">
-                Débloquée à la page 17
-              </p>
-              {unlockedSessions >= 2 ? (
-                <span className="text-green-400 font-semibold">✓ Disponible</span>
-              ) : (
-                <span className="text-zinc-400">🔒 Verrouillée</span>
-              )}
-            </div>
-
-            <div className={`p-6 rounded-2xl border-2 ${
-              unlockedSessions >= 3 
-                ? 'bg-green-500/20 border-green-500/30' 
-                : 'bg-zinc-800/50 border-zinc-700'
-            }`}>
-              <div className="flex items-center gap-3 mb-4">
-                {unlockedSessions >= 3 ? (
-                  <CheckCircle className="h-6 w-6 text-green-400" />
-                ) : (
-                  <Lock className="h-6 w-6 text-zinc-400" />
-                )}
-                <h3 className="text-xl font-bold text-white">3ème Séance</h3>
-              </div>
-              <p className="text-slate-300 mb-2">
-                Débloquée à la page 27
-              </p>
-              {unlockedSessions >= 3 ? (
-                <span className="text-green-400 font-semibold">✓ Disponible</span>
-              ) : (
-                <span className="text-zinc-400">🔒 Verrouillée</span>
-              )}
-            </div>
-          </div>
-
-          {!data.progress?.canBookSession && (
-            <div className={`mt-8 ${genderConfig.primaryGlow} border ${genderConfig.primaryBorder} rounded-2xl p-6 text-center`}>
-              <Zap className={`h-8 w-8 ${genderConfig.primaryText} mx-auto mb-4`} />
-              <h3 className="text-xl font-bold text-white mb-2">
-                Continuez votre apprentissage !
-              </h3>
-              <p className={`${genderConfig.secondaryText} mb-4`}>
-                Complétez jusqu'à la page 7 pour débloquer votre première séance d'accompagnement.
-              </p>
-              <Link
-                href="/chapitres/0/introduction"
-                className={`inline-flex items-center gap-2 bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-6 py-3 rounded-xl transition-colors`}
-              >
-                <BookOpen className="h-5 w-5" />
-                Continuer le cours
-                <ArrowRight className="h-5 w-5" />
-              </Link>
-            </div>
-          )}
-
-          {data.progress?.canBookSession && canBookMore && (
-            <div className="mt-8 text-center">
-              <button
-                onClick={() => setShowBookingForm(true)}
-                className={`bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center gap-3 mx-auto`}
-              >
-                <Calendar className="h-6 w-6" />
-                Réserver une séance
-                <ArrowRight className="h-5 w-5" />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {data.sessions?.length > 0 && (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-              <Calendar className={`h-6 w-6 ${genderConfig.primaryText}`} />
-              Mes Séances Réservées
-            </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data.sessions?.map((session) => (
-                <div key={session.id} className="bg-zinc-800/50 border border-zinc-700 rounded-2xl p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <User className={`h-5 w-5 ${genderConfig.primaryText}`} />
-                    <h3 className="font-semibold text-white">{session.professor.name}</h3>
+            <button
+              onClick={() => {
+                localStorage.setItem('courseStarted', 'true');
+                
+                fetch('/api/auth/time/start', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                }).then(response => {
+                  if (response.ok) {
+                    window.location.href = '/chapitres/0/introduction';
+                  }
+                }).catch(error => {
+                  console.error('Erreur:', error);
+                  window.location.href = '/chapitres/0/introduction';
+                });
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <BookOpen className="h-5 w-5" />
+              <span>Cours</span>
+            </button>
+            
+            <Link
+              href="/accompagnement"
+              className="flex items-center space-x-3 px-3 py-2 text-blue-800 bg-blue-100 rounded-lg font-medium relative"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <FileText className="h-5 w-5" />
+              <span>Accompagnement</span>
+              <div className="w-2 h-2 bg-blue-800 rounded-full ml-auto"></div>
+            </Link>
+            
+            <button 
+              className="w-full flex items-center space-x-3 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+              onClick={() => {
+                setShowContactModal(true);
+                setMobileMenuOpen(false);
+              }}
+            >
+               <MessageCircle className="h-5 w-5" />
+              <span>Support contact</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
+      )}
+
+      {/* Main Content */}
+      <div className="lg:ml-64">
+        {/* Top Header */}
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Navigation Links */}
+            <nav className="hidden lg:flex space-x-8">
+              <Link href="/dashboard" className="text-gray-500 hover:text-gray-900 pb-4">
+                Accueil
+              </Link>
+              <Link href="/chapitres/0/introduction" className="text-gray-500 hover:text-gray-900 pb-4">
+                Cours
+              </Link>
+              <Link href="/accompagnement" className="text-gray-900 font-medium border-b-2 border-blue-800 pb-4">
+                Accompagnement
+              </Link>
+              <button className="text-gray-500 hover:text-gray-900 pb-4">
+                Devoirs
+              </button>
+            </nav>
+
+            {/* Mobile Navigation Toggle */}
+            <button 
+              className="lg:hidden p-2 text-gray-600"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+
+            {/* Right Icons */}
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => setShowContactModal(true)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <MessageCircle className="h-5 w-5" />
+              </button>
+              <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                <Bell className="h-5 w-5" />
+              </button>
+              
+              {/* Profile Menu */}
+              <div className="relative profile-menu">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center space-x-2"
+                >
+                  <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      {user?.username ? user.username.charAt(0).toUpperCase() : user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
                   </div>
-                  
-                  <div className="space-y-2 text-sm text-slate-300">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(session.scheduledAt).toLocaleDateString('fr-FR')}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      <span>{new Date(session.scheduledAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${
-                        session.status === 'COMPLETED' ? 'bg-green-400' :
-                        session.status === 'SCHEDULED' ? genderConfig.primaryText.replace('text', 'bg') :
-                        session.status === 'CANCELLED' ? 'bg-red-400' :
-                        'bg-red-400'
-                      }`}></div>
-                      <span className="capitalize">
-                        {session.status === 'SCHEDULED' ? 'Programmée' :
-                         session.status === 'COMPLETED' ? 'Terminée' :
-                         session.status === 'CANCELLED' ? 'Annulée' :
-                         session.status.toLowerCase()}
-                      </span>
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center">
+                          <span className="text-white font-medium">
+                            {user?.username ? user.username.charAt(0).toUpperCase() : user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-gray-900 font-semibold truncate">
+                            {user?.username || (user?.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
+                          </p>
+                          <p className="text-gray-500 text-sm truncate">{user?.email}</p>
+                        </div>
+                      </div>
                     </div>
                     
-                    {session.status === 'CANCELLED' && session.cancellation && (
-                      <div className="mt-3 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                        <div className="text-red-400 text-xs font-medium mb-1">
-                          Annulée par {session.cancellation.cancelledBy === 'STUDENT' ? 'vous' : 'le professeur'}
-                        </div>
-                        <div className="text-red-300 text-xs">
-                          Motif : {session.cancellation.reason.reason}
-                          {session.cancellation.customReason && (
-                            <span> - {session.cancellation.customReason}</span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {session.zoomLink && session.status === 'SCHEDULED' && (
-                    <div className="mt-4">
-                      <a
-                        href={session.zoomLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors w-full justify-center"
-                      >
-                        <Video className="h-4 w-4" />
-                        Rejoindre la séance Zoom
-                      </a>
-                    </div>
-                  )}
-                  
-                  {canCancelSession(session) && (
-                    <div className="mt-4">
+                    <div className="p-2">
                       <button
                         onClick={() => {
-                          setSessionToCancel(session);
-                          setShowCancelForm(true);
+                          setShowEditProfile(true);
+                          setShowProfileMenu(false);
                         }}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors w-full justify-center"
+                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
                       >
-                        <X className="h-4 w-4" />
-                        Annuler la séance
+                        <Edit3 className="h-4 w-4 text-gray-400" />
+                        <span className="text-gray-700">Modifier le profil</span>
                       </button>
-                    </div>
-                  )}
-                  
-                  {!session.zoomLink && session.status === 'SCHEDULED' && (
-                    <div className="mt-4">
-                      <div className="bg-yellow-600/20 border border-yellow-500/30 text-yellow-300 px-4 py-2 rounded-lg text-sm text-center">
-                        ⚠️ Lien Zoom en attente de configuration par le professeur
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {showBookingForm && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-3xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Réserver une séance</h3>
-                <button
-                  onClick={() => setShowBookingForm(false)}
-                  className="text-slate-400 hover:text-white transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <form onSubmit={handleBookSession} className="space-y-6">
-                {availableSlots.length > 0 ? (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-4">
-                      Créneaux disponibles
-                    </label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                      {availableSlots.map((slot) => (
-                        <div
-                          key={slot.id}
-                          onClick={() => setSelectedSlot(slot)}
-                          className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                            selectedSlot?.id === slot.id
-                              ? `${genderConfig.primaryBorder} ${genderConfig.primaryGlow}`
-                              : 'border-white/20 bg-white/5 hover:border-white/40'
-                          }`}
-                        >
-                          <div className="text-white font-semibold mb-2">
-                            {slot.professor.name}
-                          </div>
-                          <div className="text-slate-300 text-sm">
-                            {formatDate(slot.date)}
-                          </div>
-                          <div className="text-slate-300 text-sm">
-                            {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                          </div>
-                          <div className={`${genderConfig.primaryText} text-xs mt-1`}>
-                            ⏱️ {(() => {
-                              const [startHour, startMin] = slot.startTime.split(':').map(Number);
-                              const [endHour, endMin] = slot.endTime.split(':').map(Number);
-                              const duration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
-                              return `${Math.floor(duration / 60)}h${duration % 60 > 0 ? (duration % 60).toString().padStart(2, '0') : ''}`;
-                            })()}
-                          </div>
-                          {slot.isSpecific && (
-                            <div className="text-yellow-400 text-xs mt-1">
-                              📅 Créneau ponctuel
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="text-slate-400 mb-4">
-                      Aucun créneau disponible pour le moment
-                    </div>
-                    <div className="text-slate-500 text-sm">
-                      Les professeurs ajoutent régulièrement de nouveaux créneaux
+                      
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <LogOut className="h-4 w-4 text-gray-400" />
+                        <span className="text-gray-700">Se déconnecter</span>
+                      </button>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Dashboard Content */}
+        <main className="p-4 lg:p-8">
+        
+
+        
+      
+          {/* Actions principales */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            {/* WhatsApp */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="bg-green-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                <MessageCircle className="h-8 w-8 text-green-600" />
+              </div>
+              
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                Accompagnement individuel via WhatsApp
+              </h3>
+              
+              <p className="text-gray-600 mb-8 leading-relaxed">
+                Vous avez une question ? Contactez-moi directement sur WhatsApp via ce lien :
+              </p>
+              
+              <a
+                href="https://wa.me/201022767532"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center space-x-3"
+              >
+                <MessageCircle className="h-6 w-6" />
+                <span>Contacter sur WhatsApp</span>
+                <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+
+            {/* Telegram */}
+            <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
+                <Send className="h-8 w-8 text-blue-600" />
+              </div>
+              
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                Groupe Telegram Privé
+              </h3>
+              
+              <p className="text-gray-600 mb-8 leading-relaxed">
+                Nous restons disponibles 7 jours sur 7 pour vous accompagner individuellement en répondant à vos problèmes sur WhatsApp, et vous pourrez rejoindre notre groupe privé Telegram pour accéder aux questions/réponses et rester informé des nouveautés :
+              </p>
+              
+              <a
+                href="https://t.me/+your_telegram_group_link"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center space-x-3"
+              >
+                <Send className="h-6 w-6" />
+                <span>Rejoindre le groupe Telegram</span>
+                <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+          </div>
+
+          {/* Section informative */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm mb-12">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
+              <Users className="h-6 w-6 text-green-600" />
+              Comment nous contacter ?
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Support individuel</h3>
+                <ul className="space-y-3 text-gray-600">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Questions personnalisées via WhatsApp</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Réponse rapide et directe</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Disponible 7 jours sur 7</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Communauté Telegram</h3>
+                <ul className="space-y-3 text-gray-600">
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Questions/réponses partagées</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Nouveautés et mises à jour</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>Échanges avec la communauté</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+
+      {/* Modal Édition Profil */}
+      {showEditProfile && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md mx-4 border border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Modifier le profil</h3>
+              <button
+                onClick={() => setShowEditProfile(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditProfile} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Pseudo
+                </label>
+                <input
+                  type="text"
+                  value={editForm.username}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Votre pseudo"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nouveau mot de passe
+                </label>
+                <input 
+                  type="password" 
+                  value={editForm.newPassword}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Nouveau mot de passe"
+                />
+              </div>
+              
+              {editForm.newPassword && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirmer le nouveau mot de passe
+                  </label>
+                  <input
+                    type="password"
+                    value={editForm.confirmPassword}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    placeholder="Confirmer le mot de passe"
+                  />
+                </div>
+              )}
+              
+              <div className="flex space-x-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowEditProfile(false)}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-200"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="flex-1 bg-blue-800 hover:bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {editLoading ? 'Mise à jour...' : 'Sauvegarder'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Contact Support */}
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md mx-4 border border-gray-200">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Contactez le support</h3>
+              <button
+                onClick={() => {
+                  setShowContactModal(false);
+                  setContactSuccess(false);
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {contactSuccess ? (
+              <div className="text-center py-8">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-2">Message envoyé !</h4>
+                <p className="text-gray-600">Nous avons bien reçu votre message et vous répondrons dès que possible.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Votre message
+                  </label>
+                  <textarea
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[150px]"
+                    placeholder="Décrivez votre question ou problème..."
+                    required
+                  />
+                </div>
                 
                 <div className="flex space-x-4 pt-4">
                   <button
                     type="button"
-                    onClick={() => setShowBookingForm(false)}
-                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 border border-white/20"
+                    onClick={() => setShowContactModal(false)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-200"
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
-                    disabled={bookingLoading || !selectedSlot}
-                    className={`flex-1 bg-gradient-to-r ${genderConfig.primaryColor} hover:${genderConfig.primaryColorHover} text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50`}
+                    disabled={contactLoading}
+                    className="flex-1 bg-blue-800 hover:bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {bookingLoading ? 'Réservation...' : 'Réserver'}
+                    {contactLoading ? 'Envoi en cours...' : 'Envoyer le message'}
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
-        )}
-
-        {showCancelForm && sessionToCancel && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-slate-800/95 backdrop-blur-xl border border-white/10 rounded-3xl p-8 w-full max-w-md">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Annuler la séance</h3>
-                <button
-                  onClick={() => setShowCancelForm(false)}
-                  className="text-slate-400 hover:text-white transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              <div className="mb-6 p-4 bg-white/5 rounded-xl">
-                <div className="text-white font-semibold mb-2">
-                  Séance avec {sessionToCancel.professor.name}
-                </div>
-                <div className="text-slate-300 text-sm">
-                  {new Date(sessionToCancel.scheduledAt).toLocaleDateString('fr-FR')} à{' '}
-                  {new Date(sessionToCancel.scheduledAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </div>
-              
-              <form onSubmit={handleCancelSession} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Motif d'annulation *
-                  </label>
-                  <textarea
-                    value={customReason}
-                    onChange={(e) => setCustomReason(e.target.value)}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    placeholder="Décrivez le motif de votre annulation..."
-                    rows={4}
-                    required
-                  />
-                </div>
-                
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="text-yellow-400 text-lg">⚠️</div>
-                    <div>
-                      <h4 className="text-yellow-400 font-semibold text-sm mb-1">
-                        Conditions d'annulation
-                      </h4>
-                      <p className="text-yellow-300 text-xs leading-relaxed">
-                        • Annulation possible jusqu'à 24h avant la séance<br/>
-                        • Le créneau sera remis à disposition<br/>
-                        • Vous pourrez réserver un nouveau créneau
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex space-x-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowCancelForm(false)}
-                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 border border-white/20"
-                  >
-                    Garder la séance
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={cancelLoading}
-                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50"
-                  >
-                    {cancelLoading ? 'Annulation...' : 'Confirmer l\'annulation'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <Award className="h-6 w-6 text-yellow-400" />
-            Comment ça marche ?
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Déblocage progressif</h3>
-              <ul className="space-y-3 text-slate-300">
-                <li className="flex items-start gap-3">
-                  <div className={`w-2 h-2 ${genderConfig.primaryText.replace('text', 'bg')} rounded-full mt-2 flex-shrink-0`}></div>
-                  <span>Page 7 complétée → 1ère séance disponible</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className={`w-2 h-2 ${genderConfig.primaryText.replace('text', 'bg')} rounded-full mt-2 flex-shrink-0`}></div>
-                  <span>Page 17 complétée → 2ème séance disponible</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className={`w-2 h-2 ${genderConfig.primaryText.replace('text', 'bg')} rounded-full mt-2 flex-shrink-0`}></div>
-                  <span>Page 27 complétée → 3ème séance disponible</span>
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Règles de réservation</h3>
-              <ul className="space-y-3 text-slate-300">
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Maximum 3 séances par élève</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Espacement minimum de 2 jours entre séances</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Professeur assigné selon votre genre</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>Annulation possible jusqu'à 24h avant</span>
-                </li>
-              </ul>
-            </div>
+            )}
           </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }

@@ -478,15 +478,16 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          {/* Search */}
-          <div className="relative mb-8">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+{/* Search */}
+<div className="relative mb-8">
+  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+  <input
+    type="text"
+    placeholder="Search"
+    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  />
+</div>
+
 
           {/* Navigation */}
           <nav className="space-y-2">
@@ -555,7 +556,8 @@ export default function DashboardPage() {
       )}
 
       {/* Mobile Sidebar Toggle */}
-      <div className="lg:hidden fixed top-4 left-4 z-20">
+      <div className="lg:hidden fixed p-2 text-gray-600">
+         
         <button 
           className="p-2 bg-white rounded-lg shadow-md"
           onClick={() => setMobileMenuOpen(true)}
@@ -825,190 +827,184 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Resume Section */}
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Reprendre où vous vous êtes arrêté
-                  </h3>
-                  <span className="text-blue-800 text-sm font-medium">
-                    {progressPercentage}% complété
+          {/* Resume Section */}
+<div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6">
+    <h3 className="text-lg font-semibold text-gray-900">
+      Reprendre où vous vous êtes arrêté
+    </h3>
+    <span className="text-blue-800 text-sm font-medium mt-2 sm:mt-0">
+      {progressPercentage}% complété
+    </span>
+  </div>
+
+  {(() => {
+    const getNextPageToComplete = () => {
+      const completedPagesArray = Array.from(completedPages).filter(p => p !== 0 && p !== 30);
+
+      if (completedPagesArray.length === 0) {
+        return { chapterNumber: 1, pageNumber: 1, isFirstPage: true };
+      }
+
+      for (const chapter of chapters) {
+        if (chapter.chapterNumber === 0 || chapter.chapterNumber === 11) continue;
+
+        for (const page of chapter.pages) {
+          if (!completedPages.has(page.pageNumber)) {
+            return { 
+              chapterNumber: chapter.chapterNumber, 
+              pageNumber: page.pageNumber,
+              pageTitle: page.title,
+              chapterTitle: chapter.title,
+              href: page.href,
+              isFirstPage: false
+            };
+          }
+        }
+
+        if (chapter.quiz && !completedQuizzes.has(chapter.chapterNumber)) {
+          return {
+            chapterNumber: chapter.chapterNumber,
+            pageNumber: null,
+            pageTitle: 'Quiz du chapitre',
+            chapterTitle: chapter.title,
+            href: `/chapitres/${chapter.chapterNumber}/quiz`,
+            isQuiz: true,
+            isFirstPage: false
+          };
+        }
+      }
+
+      return { 
+        chapterNumber: 11, 
+        pageNumber: 30, 
+        pageTitle: 'Évaluation finale',
+        chapterTitle: 'Évaluation finale',
+        href: '/chapitres/11/30',
+        isCompleted: true,
+        isFirstPage: false
+      };
+    };
+
+    const nextPage = getNextPageToComplete();
+
+    if (nextPage.isCompleted) {
+      return (
+        <div className="text-center py-8 sm:py-12">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Award className="h-8 w-8 text-green-600" />
+          </div>
+          <h4 className="text-xl font-bold text-gray-900 mb-2">
+            🎉 Félicitations !
+          </h4>
+          <p className="text-gray-600 mb-6">
+            Vous avez terminé toute la méthode ERPR !
+          </p>
+          <Link
+            href="/chapitres/11/30"
+            className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+          >
+            <Award className="h-5 w-5" />
+            <span>Voir l'évaluation finale</span>
+          </Link>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 sm:p-6 border border-blue-200">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="w-12 h-12 flex-shrink-0 bg-blue-800 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold">
+                {nextPage.chapterNumber}
+              </span>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
+                Chapitre {nextPage.chapterNumber} - {nextPage.chapterTitle}
+              </h4>
+              <p className="text-xs sm:text-sm text-gray-600">
+                {nextPage.isQuiz ? (
+                  <span className="flex items-center gap-1">
+                    <Award className="h-4 w-4" />
+                    {nextPage.pageTitle}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="h-4 w-4" />
+                    Page {nextPage.pageNumber} - {nextPage.pageTitle}
+                  </span>
+                )}
+              </p>
+              {nextPage.isFirstPage && (
+                <div className="mt-2">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    🚀 Commencer l'aventure
                   </span>
                 </div>
+              )}
+            </div>
+          </div>
 
-                {(() => {
-                  // Calculer la prochaine page à faire
-                  const getNextPageToComplete = () => {
-                    const completedPagesArray = Array.from(completedPages).filter(p => p !== 0 && p !== 30);
-                    
-                    // Si aucune page complétée, commencer par la page 1
-                    if (completedPagesArray.length === 0) {
-                      return { chapterNumber: 1, pageNumber: 1, isFirstPage: true };
-                    }
-                    
-                    // Trouver la page suivante non complétée
-                    for (const chapter of chapters) {
-                      if (chapter.chapterNumber === 0 || chapter.chapterNumber === 11) continue;
-                      
-                      for (const page of chapter.pages) {
-                        if (!completedPages.has(page.pageNumber)) {
-                          return { 
-                            chapterNumber: chapter.chapterNumber, 
-                            pageNumber: page.pageNumber,
-                            pageTitle: page.title,
-                            chapterTitle: chapter.title,
-                            href: page.href,
-                            isFirstPage: false
-                          };
-                        }
-                      }
-                      
-                      // Vérifier si le quiz du chapitre n'est pas complété
-                      if (chapter.quiz && !completedQuizzes.has(chapter.chapterNumber)) {
-                        return {
-                          chapterNumber: chapter.chapterNumber,
-                          pageNumber: null,
-                          pageTitle: 'Quiz du chapitre',
-                          chapterTitle: chapter.title,
-                          href: `/chapitres/${chapter.chapterNumber}/quiz`,
-                          isQuiz: true,
-                          isFirstPage: false
-                        };
-                      }
-                    }
-                    
-                    // Si tout est complété
-                    return { 
-                      chapterNumber: 11, 
-                      pageNumber: 30, 
-                      pageTitle: 'Évaluation finale',
-                      chapterTitle: 'Évaluation finale',
-                      href: '/chapitres/11/30',
-                      isCompleted: true,
-                      isFirstPage: false
-                    };
-                  };
+          <Link
+            href={nextPage.href || '/chapitres/1/1'}
+            onClick={() => {
+              if (nextPage.isFirstPage) {
+                localStorage.setItem('courseStarted', 'true');
+                fetch('/api/auth/time/start', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                }).catch(console.error);
+              }
+            }}
+            className="mt-4 md:mt-0 inline-flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg transition-colors group"
+          >
+            <span>{nextPage.isFirstPage ? 'Commencer' : 'Reprendre'}</span>
+            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
 
-                  const nextPage = getNextPageToComplete();
+        <div className="mt-4 sm:mt-6">
+          <div className="flex justify-between text-xs sm:text-sm mb-2">
+            <span className="text-gray-600">Progression du chapitre {nextPage.chapterNumber}</span>
+            <span className="text-gray-900 font-medium">
+              {(() => {
+                const chapter = chapters.find(ch => ch.chapterNumber === nextPage.chapterNumber);
+                if (!chapter) return '0%';
 
-                  if (nextPage.isCompleted) {
-                    return (
-                      <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Award className="h-8 w-8 text-green-600" />
-                        </div>
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">
-                          🎉 Félicitations !
-                        </h4>
-                        <p className="text-gray-600 mb-6">
-                          Vous avez terminé toute la méthode ERPR !
-                        </p>
-                        <Link
-                          href="/chapitres/11/30"
-                          className="inline-flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-                        >
-                          <Award className="h-5 w-5" />
-                          <span>Voir l'évaluation finale</span>
-                        </Link>
-                      </div>
-                    );
-                  }
+                const chapterPages = chapter.pages.map(p => p.pageNumber);
+                const completedInChapter = chapterPages.filter(p => completedPages.has(p)).length;
+                const totalInChapter = chapterPages.length;
+                const chapterProgress = Math.round((completedInChapter / totalInChapter) * 100);
 
-                  return (
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-blue-800 rounded-xl flex items-center justify-center">
-                            <span className="text-white font-bold">
-                              {nextPage.chapterNumber}
-                            </span>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-900 mb-1">
-                              Chapitre {nextPage.chapterNumber} - {nextPage.chapterTitle}
-                            </h4>
-                            <p className="text-sm text-gray-600">
-                              {nextPage.isQuiz ? (
-                                <span className="flex items-center gap-1">
-                                  <Award className="h-4 w-4" />
-                                  {nextPage.pageTitle}
-                                </span>
-                              ) : (
-                                <span className="flex items-center gap-1">
-                                  <BookOpen className="h-4 w-4" />
-                                  Page {nextPage.pageNumber} - {nextPage.pageTitle}
-                                </span>
-                              )}
-                            </p>
-                            {nextPage.isFirstPage && (
-                              <div className="mt-2">
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  🚀 Commencer l'aventure
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <Link
-                          href={nextPage.href || '/chapitres/1/1'}
-                          onClick={() => {
-                            // Démarrer le chrono si c'est la première fois
-                            if (nextPage.isFirstPage) {
-                              localStorage.setItem('courseStarted', 'true');
-                              fetch('/api/auth/time/start', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                              }).catch(console.error);
-                            }
-                          }}
-                          className="inline-flex items-center space-x-2 bg-blue-800 hover:bg-blue-900 text-white font-semibold px-6 py-3 rounded-lg transition-colors group"
-                        >
-                          <span>{nextPage.isFirstPage ? 'Commencer' : 'Reprendre'}</span>
-                          <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                      </div>
-                      
-                      {/* Barre de progression du chapitre actuel */}
-                      <div className="mt-6">
-                        <div className="flex justify-between text-sm mb-2">
-                          <span className="text-gray-600">Progression du chapitre {nextPage.chapterNumber}</span>
-                          <span className="text-gray-900 font-medium">
-                            {(() => {
-                              const chapter = chapters.find(ch => ch.chapterNumber === nextPage.chapterNumber);
-                              if (!chapter) return '0%';
-                              
-                              const chapterPages = chapter.pages.map(p => p.pageNumber);
-                              const completedInChapter = chapterPages.filter(p => completedPages.has(p)).length;
-                              const totalInChapter = chapterPages.length;
-                              const chapterProgress = Math.round((completedInChapter / totalInChapter) * 100);
-                              
-                              return `${chapterProgress}%`;
-                            })()}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="h-2 bg-blue-800 rounded-full transition-all duration-500"
-                            style={{ 
-                              width: `${(() => {
-                                const chapter = chapters.find(ch => ch.chapterNumber === nextPage.chapterNumber);
-                                if (!chapter) return 0;
-                                
-                                const chapterPages = chapter.pages.map(p => p.pageNumber);
-                                const completedInChapter = chapterPages.filter(p => completedPages.has(p)).length;
-                                const totalInChapter = chapterPages.length;
-                                
-                                return Math.round((completedInChapter / totalInChapter) * 100);
-                              })()}%` 
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
+                return `${chapterProgress}%`;
+              })()}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="h-2 bg-blue-800 rounded-full transition-all duration-500"
+              style={{ 
+                width: `${(() => {
+                  const chapter = chapters.find(ch => ch.chapterNumber === nextPage.chapterNumber);
+                  if (!chapter) return 0;
+
+                  const chapterPages = chapter.pages.map(p => p.pageNumber);
+                  const completedInChapter = chapterPages.filter(p => completedPages.has(p)).length;
+                  const totalInChapter = chapterPages.length;
+
+                  return Math.round((completedInChapter / totalInChapter) * 100);
+                })()}%` 
+              }}
+            ></div>
+          </div>
+        </div>
+      </div>
+    );
+  })()}
+</div>
+
             </div>
 
             {/* Right Sidebar */}
