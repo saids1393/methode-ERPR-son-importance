@@ -208,14 +208,18 @@ export default function AdminVideosPage() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Durée (secondes)</label>
-                  <input
-                    type="number"
-                    value={formData.duration}
-                    onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                    className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
-                    min="0"
-                    placeholder="Ex: 300 (5 minutes)"
-                  />
+                 <input
+  type="number"
+  value={formData.duration || ''}
+  onChange={(e) => {
+    const val = parseInt(e.target.value);
+    setFormData(prev => ({ ...prev, duration: isNaN(val) ? 0 : val }));
+  }}
+  className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
+  min="0"
+  placeholder="Ex: 300 (5 minutes)"
+/>
+
                 </div>
 
                 <div className="flex gap-4 pt-4">

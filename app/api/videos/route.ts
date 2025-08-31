@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
 
     const { chapterNumber, title, cloudflareVideoId, thumbnailUrl, duration } = await request.json();
 
-    if (!chapterNumber || !title || !cloudflareVideoId) {
+    // Validation des données
+    if (chapterNumber == null || !title || !cloudflareVideoId) {
       return NextResponse.json(
         { error: 'Données manquantes' },
         { status: 400 }
