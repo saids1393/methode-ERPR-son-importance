@@ -53,14 +53,12 @@ export default function AdminVideosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     try {
       const response = await fetch('/api/videos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
       if (response.ok) {
         await loadVideos();
         resetForm();
@@ -88,12 +86,10 @@ export default function AdminVideosPage() {
 
   const handleDelete = async (chapterNumber: number) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?')) return;
-
     try {
       const response = await fetch(`/api/videos/${chapterNumber}`, {
         method: 'DELETE',
       });
-
       if (response.ok) {
         await loadVideos();
         alert('Vidéo supprimée avec succès !');
@@ -162,12 +158,14 @@ export default function AdminVideosPage() {
                   <label className="block text-sm font-medium mb-2">Numéro de chapitre</label>
                   <input
                     type="number"
-                    value={formData.chapterNumber}
-                    onChange={(e) => setFormData(prev => ({ ...prev, chapterNumber: parseInt(e.target.value) }))}
+                    value={formData.chapterNumber ?? ''}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setFormData(prev => ({ ...prev, chapterNumber: isNaN(val) ? 0 : val }));
+                    }}
                     className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
                     required
-                    min="0"
-                    max="11"
+                    min={0}
                   />
                 </div>
 
@@ -208,18 +206,17 @@ export default function AdminVideosPage() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Durée (secondes)</label>
-                 <input
-  type="number"
-  value={formData.duration || ''}
-  onChange={(e) => {
-    const val = parseInt(e.target.value);
-    setFormData(prev => ({ ...prev, duration: isNaN(val) ? 0 : val }));
-  }}
-  className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
-  min="0"
-  placeholder="Ex: 300 (5 minutes)"
-/>
-
+                  <input
+                    type="number"
+                    value={formData.duration ?? ''}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      setFormData(prev => ({ ...prev, duration: isNaN(val) ? 0 : val }));
+                    }}
+                    className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
+                    min={0}
+                    placeholder="Ex: 300 (5 minutes)"
+                  />
                 </div>
 
                 <div className="flex gap-4 pt-4">
@@ -249,9 +246,7 @@ export default function AdminVideosPage() {
             <div key={video.id} className="bg-zinc-800 border border-zinc-700 rounded-xl p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-1">
-                    Chapitre {video.chapterNumber}
-                  </h3>
+                  <h3 className="text-lg font-semibold text-white mb-1">Chapitre {video.chapterNumber}</h3>
                   <p className="text-zinc-300 text-sm">{video.title}</p>
                 </div>
                 <div className="flex gap-2">
@@ -273,9 +268,7 @@ export default function AdminVideosPage() {
               <div className="space-y-2 text-sm text-zinc-400">
                 <div>
                   <span className="font-medium">ID Cloudflare:</span>
-                  <div className="font-mono text-xs bg-zinc-700 p-1 rounded mt-1 break-all">
-                    {video.cloudflareVideoId}
-                  </div>
+                  <div className="font-mono text-xs bg-zinc-700 p-1 rounded mt-1 break-all">{video.cloudflareVideoId}</div>
                 </div>
                 
                 {video.duration && (
@@ -301,12 +294,8 @@ export default function AdminVideosPage() {
         {videos.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🎬</div>
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Aucune vidéo configurée
-            </h3>
-            <p className="text-zinc-400 mb-6">
-              Commencez par ajouter des vidéos pour vos chapitres.
-            </p>
+            <h3 className="text-xl font-semibold text-white mb-2">Aucune vidéo configurée</h3>
+            <p className="text-zinc-400 mb-6">Commencez par ajouter des vidéos pour vos chapitres.</p>
             <button
               onClick={() => setShowForm(true)}
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors"
