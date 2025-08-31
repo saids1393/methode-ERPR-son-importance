@@ -56,20 +56,29 @@ export function useChapterVideo(chapterNumber: number) {
 
   useEffect(() => {
     const fetchVideo = async () => {
+      console.log(`🎬 [HOOK] Récupération vidéo chapitre ${chapterNumber}`);
       try {
         const response = await fetch(`/api/videos/${chapterNumber}`);
+        console.log(`📡 [HOOK] Réponse API: ${response.status}`);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log(`✅ [HOOK] Vidéo reçue:`, data);
           setVideo(data);
         } else if (response.status === 404) {
+          console.log(`📹 [HOOK] Aucune vidéo pour le chapitre ${chapterNumber}`);
           setVideo(null); // Pas de vidéo pour ce chapitre
         } else {
+          console.log(`❌ [HOOK] Erreur HTTP ${response.status}`);
+          const errorText = await response.text();
+          console.log(`❌ [HOOK] Détails erreur:`, errorText);
           setError('Erreur lors du chargement de la vidéo');
         }
       } catch (err) {
+        console.error(`❌ [HOOK] Erreur de connexion:`, err);
         setError('Erreur de connexion');
-        console.error('Error fetching chapter video:', err);
       } finally {
+        console.log(`🏁 [HOOK] Fin du chargement vidéo chapitre ${chapterNumber}`);
         setIsLoading(false);
       }
     };

@@ -16,14 +16,14 @@ interface VideoPageProps {
 export default function VideoPage({ params }: VideoPageProps) {
   const resolvedParams = use(params);
   const chapterNumber = parseInt(resolvedParams.chapitres, 10);
-  
+
   const chapter = getChapterByNumber(chapterNumber);
   const { video, isLoading, error } = useChapterVideo(chapterNumber);
-  
+
   // Activer l'auto-progression pour les vidéos
-  useAutoProgress({ 
+  useAutoProgress({
     minTimeOnPage: 6000, // 6 secondes
-    enabled: true 
+    enabled: true
   });
 
   if (!chapter) {
@@ -38,7 +38,7 @@ export default function VideoPage({ params }: VideoPageProps) {
             Vidéo - {chapter.title}
           </div>
         </div>
-        
+
         <div className="p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-400 mx-auto mb-6"></div>
@@ -57,7 +57,7 @@ export default function VideoPage({ params }: VideoPageProps) {
             Vidéo - {chapter.title}
           </div>
         </div>
-        
+
         <div className="p-8">
           <div className="max-w-4xl mx-auto text-center">
             <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-8">
@@ -66,10 +66,10 @@ export default function VideoPage({ params }: VideoPageProps) {
                 Vidéo bientôt disponible
               </h3>
               <p className="text-zinc-300 text-lg leading-relaxed">
-                La vidéo pour ce chapitre sera ajoutée prochainement. 
+                La vidéo pour ce chapitre sera ajoutée prochainement.
                 En attendant, vous pouvez consulter l'introduction et les leçons du chapitre.
               </p>
-              
+
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                 {chapter.introduction && (
                   <a
@@ -79,7 +79,7 @@ export default function VideoPage({ params }: VideoPageProps) {
                     📖 Lire l'introduction
                   </a>
                 )}
-                
+
                 {chapter.pages.length > 0 && (
                   <a
                     href={chapter.pages[0].href}
@@ -103,21 +103,18 @@ export default function VideoPage({ params }: VideoPageProps) {
         <div className="text-3xl font-bold mb-4">
           {video.title}
         </div>
-        <div className="text-lg text-purple-200">
-          Chapitre {chapterNumber} - {chapter.title}
-        </div>
       </div>
 
       {/* Lecteur vidéo pleine largeur */}
-      <div className="w-full">
+      <div className="w-full h-[50vh] md:h-[60vh] lg:h-[80vh]">
         <CloudflareVideoPlayer
           videoId={video.cloudflareVideoId}
           title={video.title}
           thumbnailUrl={video.thumbnailUrl}
-          className="w-full h-[50vh] md:h-[60vh] lg:h-[80vh]"
           controls={true}
         />
       </div>
+
     </div>
   );
 }

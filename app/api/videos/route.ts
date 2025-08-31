@@ -51,8 +51,16 @@ export async function POST(request: NextRequest) {
 
     const { chapterNumber, title, cloudflareVideoId, thumbnailUrl, duration } = await request.json();
 
+    console.log('📹 [API] Création/mise à jour vidéo:', {
+      chapterNumber,
+      title,
+      cloudflareVideoId,
+      thumbnailUrl,
+      duration
+    });
     // Validation des données
     if (chapterNumber == null || !title || !cloudflareVideoId) {
+      console.log('❌ [API] Données manquantes:', { chapterNumber, title, cloudflareVideoId });
       return NextResponse.json(
         { error: 'Données manquantes' },
         { status: 400 }
@@ -78,6 +86,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log('✅ [API] Vidéo sauvegardée:', video);
     return NextResponse.json(video);
   } catch (error) {
     console.error('Create/Update video error:', error);
