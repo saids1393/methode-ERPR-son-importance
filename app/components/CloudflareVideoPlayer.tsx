@@ -72,17 +72,52 @@ export default function CloudflareVideoPlayer({
     if (!videoRef.current) return;
     const video = videoRef.current;
 
-    // Configuration spécifique mobile
+    // Configuration spécifique mobile AVANT tout le reste
     if (isMobile) {
       video.setAttribute('playsinline', 'true');
       video.setAttribute('webkit-playsinline', 'true');
       video.setAttribute('x5-playsinline', 'true');
+      video.setAttribute('x5-video-player-type', 'h5');
+      video.muted = true; // Force muted sur mobile pour l'autoload
+      video.preload = 'metadata'; // Charge au moins les métadonnées
     }
 
     const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
-    if (!isNaN(savedTime)) video.currentTime = savedTime;
 
-    video.addEventListener('loadedmetadata', () => setDuration(video.duration || 0));
+    // Event listeners avec gestion mobile améliorée
+    const handleLoadedMetadata = () => {
+      console.log('Metadata loaded, duration:', video.duration);
+      setDuration(video.duration || 0);
+      if (!isNaN(savedTime) && savedTime > 0) {
+        video.currentTime = savedTime;
+      }
+    };
+
+    const handleCanPlay = () => {
+      console.log('Can play - duration:', video.duration);
+      if (!duration && video.duration) {
+        setDuration(video.duration);
+      }
+    };
+
+    const handleLoadedData = () => {
+      console.log('Data loaded - duration:', video.duration);
+      if (!duration && video.duration) {
+        setDuration(video.duration);
+      }
+    };
+
+    const handleDurationChange = () => {
+      console.log('Duration changed:', video.duration);
+      if (video.duration && video.duration !== Infinity) {
+        setDuration(video.duration);
+      }
+    };
+
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('loadeddata', handleLoadedData);
+    video.addEventListener('durationchange', handleDurationChange);
     video.addEventListener('play', () => setIsPlaying(true));
     video.addEventListener('pause', () => setIsPlaying(false));
     video.addEventListener('timeupdate', () => {
@@ -94,41 +129,91 @@ export default function CloudflareVideoPlayer({
       setIsMuted(video.muted);
     });
 
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = hlsUrl;
-      setStreamType('native');
-    } else {
-      import('hls.js').then(HlsLib => {
-        if (HlsLib.default.isSupported()) {
-          const hls = new HlsLib.default({ debug: false });
-          hls.loadSource(hlsUrl);
-          hls.attachMedia(video);
-          setHlsInstance(hls);
-          setStreamType('hls');
-        } else {
-          import('dashjs').then(dashLib => {
-            const player = dashLib.MediaPlayer().create();
-            player.initialize(video, dashUrl, autoplay);
-            setDashInstance(player);
-            setStreamType('dash');
-          }).catch(() => {
-            // Fallback final
-            video.src = hlsUrl;
-            setStreamType('native');
-          });
-        }
-      }).catch(() => {
-        // Fallback si HLS.js ne charge pas
+    // Logique de chargement vidéo
+    const loadVideo = () => {
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        console.log('Using native HLS support');
         video.src = hlsUrl;
         setStreamType('native');
-      });
-    }
+        
+        // Force le chargement des métadonnées sur mobile
+        if (isMobile) {
+          video.load();
+        }
+      } else {
+        import('hls.js').then(HlsLib => {
+          if (HlsLib.default.isSupported()) {
+            console.log('Using HLS.js');
+            const hls = new HlsLib.default({ 
+              debug: false,
+              startLevel: -1,
+              capLevelToPlayerSize: true,
+              maxBufferLength: 30
+            });
+            
+            hls.on(HlsLib.default.Events.MANIFEST_PARSED, () => {
+              console.log('HLS manifest parsed');
+            });
+            
+            hls.on(HlsLib.default.Events.ERROR, (event: any, data: any) => {
+              if (data.fatal) {
+                console.log('HLS fatal error, fallback to native');
+                hls.destroy();
+                video.src = hlsUrl;
+                setStreamType('native');
+                if (isMobile) video.load();
+              }
+            });
+            
+            hls.loadSource(hlsUrl);
+            hls.attachMedia(video);
+            setHlsInstance(hls);
+            setStreamType('hls');
+          } else {
+            console.log('HLS.js not supported, trying DASH');
+            import('dashjs').then(dashLib => {
+              const player = dashLib.MediaPlayer().create();
+              player.initialize(video, dashUrl, false);
+              setDashInstance(player);
+              setStreamType('dash');
+            }).catch(() => {
+              console.log('DASH failed, using native fallback');
+              video.src = hlsUrl;
+              setStreamType('native');
+              if (isMobile) video.load();
+            });
+          }
+        }).catch(() => {
+          console.log('HLS.js loading failed, using native fallback');
+          video.src = hlsUrl;
+          setStreamType('native');
+          if (isMobile) video.load();
+        });
+      }
+    };
+
+    loadVideo();
 
     return () => {
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.removeEventListener('durationchange', handleDurationChange);
+      video.removeEventListener('play', () => setIsPlaying(true));
+      video.removeEventListener('pause', () => setIsPlaying(false));
+      video.removeEventListener('timeupdate', () => {
+        setCurrentTime(video.currentTime);
+        localStorage.setItem(STORAGE_KEY, video.currentTime.toString());
+      });
+      video.removeEventListener('volumechange', () => {
+        setVolume(video.volume);
+        setIsMuted(video.muted);
+      });
+      
       if (hlsInstance) hlsInstance.destroy();
       if (dashInstance) dashInstance.destroy();
     };
-  }, [videoId, isMobile]);
+  }, [videoId, isMobile, duration]);
 
   const handleMouseMove = () => {
     if (!isMobile) {
@@ -168,17 +253,36 @@ export default function CloudflareVideoPlayer({
       if (isPlaying) {
         videoRef.current.pause();
       } else {
+        // Sur mobile, force le chargement si pas encore fait
+        if (isMobile && (!duration || duration === 0)) {
+          console.log('Forcing video load on mobile');
+          videoRef.current.load();
+          // Attendre un peu que les métadonnées se chargent
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
         await videoRef.current.play();
+        
+        // Unmute après le premier play réussi sur mobile
+        if (isMobile && videoRef.current.muted) {
+          setTimeout(() => {
+            if (videoRef.current) {
+              videoRef.current.muted = false;
+            }
+          }, 1000);
+        }
       }
     } catch (err) {
       console.log("Erreur de lecture:", err);
-      // Retry with muted if failed on mobile
-      if (isMobile) {
+      // Retry avec load() sur mobile
+      if (isMobile && !isPlaying) {
         try {
+          videoRef.current.load();
+          await new Promise(resolve => setTimeout(resolve, 1000));
           videoRef.current.muted = true;
           await videoRef.current.play();
         } catch (mutedErr) {
-          console.log("Échec même en muet:", mutedErr);
+          console.log("Échec même avec reload:", mutedErr);
         }
       }
     }
@@ -271,12 +375,13 @@ export default function CloudflareVideoPlayer({
       <video
         ref={videoRef}
         className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
-        autoPlay={autoplay}
-        muted={isMobile ? true : false}
-        playsInline={isMobile}
+        autoPlay={false}
+        muted={isMobile}
+        playsInline={true}
         poster={thumbnailUrl || thumbnailApiUrl}
-        preload="auto"
+        preload={isMobile ? "metadata" : "auto"}
         controls={false}
+        crossOrigin="anonymous"
       />
 
       <div 
