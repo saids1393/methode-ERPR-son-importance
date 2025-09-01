@@ -13,13 +13,6 @@ interface CloudflareVideoPlayerProps {
   primaryColor?: string;
 }
 
-declare global {
-  interface Window {
-    Hls: any;
-    dashjs: any;
-  }
-}
-
 export default function CloudflareVideoPlayer({
   videoId,
   title,
@@ -31,9 +24,8 @@ export default function CloudflareVideoPlayer({
 }: CloudflareVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(autoplay);
+  const [isMuted, setIsMuted] = useState(true); // Muted par défaut pour mobile
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -55,55 +47,11 @@ export default function CloudflareVideoPlayer({
   }, [isFullscreen]);
 
   useEffect(() => {
-    // Écouter les messages de l'iframe pour mettre à jour l'état
-    const handleMessage = (event: MessageEvent) => {
-      // Vérifier que le message provient bien de l'iframe Cloudflare Stream
-      if (!event.origin.includes('cloudflarestream.com')) return;
-      
-      try {
-        const data = JSON.parse(event.data);
-        
-        switch (data.event) {
-          case 'play':
-            setIsPlaying(true);
-            break;
-          case 'pause':
-            setIsPlaying(false);
-            break;
-          case 'timeupdate':
-            setCurrentTime(data.currentTime);
-            localStorage.setItem(STORAGE_KEY, data.currentTime.toString());
-            break;
-          case 'durationchange':
-            setDuration(data.duration);
-            break;
-          case 'volumechange':
-            setVolume(data.volume);
-            setIsMuted(data.muted);
-            break;
-        }
-      } catch (e) {
-        console.error('Error parsing message from iframe:', e);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    
     // Charger la progression sauvegardée
     const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
-    if (!isNaN(savedTime) && iframeRef.current) {
-      // Envoyer un message à l'iframe pour définir le temps de lecture
-      setTimeout(() => {
-        iframeRef.current?.contentWindow?.postMessage(
-          JSON.stringify({ method: 'setCurrentTime', value: savedTime }),
-          '*'
-        );
-      }, 1000);
+    if (!isNaN(savedTime)) {
+      setCurrentTime(savedTime);
     }
-
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
   }, [videoId]);
 
   const handleMouseMove = () => {
@@ -123,33 +71,82 @@ export default function CloudflareVideoPlayer({
     }
   };
 
-  const sendCommandToIframe = (method: string, value?: any) => {
+  const togglePlay = () => {
     if (!iframeRef.current) return;
     
-    iframeRef.current.contentWindow?.postMessage(
-      JSON.stringify({ method, value }),
-      '*'
-    );
-  };
-
-  const togglePlay = () => {
+    const iframe = iframeRef.current;
+    const iframeWindow = iframe.contentWindow;
+    
     if (isPlaying) {
-      sendCommandToIframe('pause');
+      // Envoyer un message pour mettre en pause
+      iframeWindow?.postMessage(JSON.stringify({
+        event: 'method',
+        method: 'pause',
+        value: null
+      }), '*');
+      setIsPlaying(false);
     } else {
-      sendCommandToIframe('play');
+      // Envoyer un message pour jouer
+      iframeWindow?.postMessage(JSON.stringify({
+        event: 'method',
+        method: 'play',
+        value: null
+      }), '*');
+      setIsPlaying(true);
     }
   };
 
   const toggleMute = () => {
-    sendCommandToIframe('setMuted', !isMuted);
+    if (!iframeRef.current) return;
+    
+    const iframeWindow = iframeRef.current.contentWindow;
+    const newMutedState = !isMuted;
+    
+    iframeWindow?.postMessage(JSON.stringify({
+      event: 'method',
+      method: 'setMuted',
+      value: newMutedState
+    }), '*');
+    
+    setIsMuted(newMutedState);
   };
 
   const setVideoVolume = (newVolume: number) => {
-    sendCommandToIframe('setVolume', Math.max(0, Math.min(1, newVolume)));
+    if (!iframeRef.current) return;
+    
+    const iframeWindow = iframeRef.current.contentWindow;
+    const clampedVolume = Math.max(0, Math.min(1, newVolume));
+    
+    iframeWindow?.postMessage(JSON.stringify({
+      event: 'method',
+      method: 'setVolume',
+      value: clampedVolume
+    }), '*');
+    
+    setVolume(clampedVolume);
+    
+    // Si le volume est à 0, mute automatiquement
+    if (clampedVolume === 0) {
+      setIsMuted(true);
+    } else if (isMuted) {
+      setIsMuted(false);
+    }
   };
 
   const seekTo = (time: number) => {
-    sendCommandToIframe('setCurrentTime', Math.max(0, Math.min(duration, time)));
+    if (!iframeRef.current) return;
+    
+    const iframeWindow = iframeRef.current.contentWindow;
+    const clampedTime = Math.max(0, Math.min(duration, time));
+    
+    iframeWindow?.postMessage(JSON.stringify({
+      event: 'method',
+      method: 'setCurrentTime',
+      value: clampedTime
+    }), '*');
+    
+    setCurrentTime(clampedTime);
+    localStorage.setItem(STORAGE_KEY, clampedTime.toString());
   };
 
   const skip = (seconds: number) => {
@@ -158,7 +155,16 @@ export default function CloudflareVideoPlayer({
   };
 
   const changePlaybackRate = (rate: number) => {
-    sendCommandToIframe('setPlaybackRate', rate);
+    if (!iframeRef.current) return;
+    
+    const iframeWindow = iframeRef.current.contentWindow;
+    
+    iframeWindow?.postMessage(JSON.stringify({
+      event: 'method',
+      method: 'setPlaybackRate',
+      value: rate
+    }), '*');
+    
     setPlaybackRate(rate);
     setShowSpeedMenu(false);
     setShowSettingsMenu(false);
@@ -173,7 +179,7 @@ export default function CloudflareVideoPlayer({
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  function toggleFullscreen(event: React.MouseEvent<HTMLButtonElement>): void {
+  const toggleFullscreen = () => {
     if (!containerRef.current) return;
 
     if (document.fullscreenElement) {
@@ -181,7 +187,7 @@ export default function CloudflareVideoPlayer({
     } else {
       containerRef.current.requestFullscreen().then(() => setIsFullscreen(true));
     }
-  }
+  };
 
   const handleVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -192,6 +198,25 @@ export default function CloudflareVideoPlayer({
     else if (clickX > width * 0.7) skip(10);
     else togglePlay();
   };
+
+  // Mise à jour manuelle du temps pour simuler la progression
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setCurrentTime(prev => {
+          const newTime = prev + 0.5;
+          localStorage.setItem(STORAGE_KEY, newTime.toString());
+          return newTime;
+        });
+      }, 500);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPlaying]);
 
   return (
     <div
@@ -207,12 +232,23 @@ export default function CloudflareVideoPlayer({
     >
       <iframe
         ref={iframeRef}
-        src={`${embedUrl}?autoplay=${autoplay}&muted=true&controls=false&preload=auto`}
+        src={`${embedUrl}?autoplay=${autoplay ? 'true' : 'false'}&muted=true&controls=false&preload=auto`}
         className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
         allow="autoplay; fullscreen; encrypted-media; accelerometer; gyroscope; picture-in-picture"
         allowFullScreen
         frameBorder="0"
         title={title}
+        onLoad={() => {
+          // Définir la durée une fois que l'iframe est chargée
+          // Pour Cloudflare Stream, vous devrez peut-être ajuster cette valeur
+          setDuration(361.7); // Valeur provenant de vos informations
+          
+          // Aller à la position sauvegardée
+          const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
+          if (savedTime > 0) {
+            setTimeout(() => seekTo(savedTime), 1000);
+          }
+        }}
       />
 
       <div className="absolute inset-0 cursor-pointer z-10" onClick={handleVideoClick} />
