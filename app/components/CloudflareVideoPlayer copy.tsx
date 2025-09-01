@@ -127,21 +127,44 @@ export default function CloudflareVideoPlayer({
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        await videoRef.current.play(); // 🔹 force play pour iPhone
+        await videoRef.current.play();
       }
     } catch (err) {
-      console.log("Erreur de lecture sur iPhone :", err);
+      console.log("Erreur de lecture :", err);
     }
   };
 
+  // Fonction pour le toggle du son
   const toggleMute = () => {
     if (!videoRef.current) return;
-    videoRef.current.muted = !isMuted;
+    
+    if (isMuted) {
+      // Démuter : on remet le son et on s'assure que le volume soit audible
+      videoRef.current.muted = false;
+      if (videoRef.current.volume < 0.1) {
+        videoRef.current.volume = 0.5; // Volume par défaut quand on démute
+        setVolume(0.5);
+      }
+      setIsMuted(false);
+    } else {
+      // Muter
+      videoRef.current.muted = true;
+      setIsMuted(true);
+    }
   };
 
   const setVideoVolume = (newVolume: number) => {
     if (!videoRef.current) return;
-    videoRef.current.volume = Math.max(0, Math.min(1, newVolume));
+    const clampedVolume = Math.max(0, Math.min(1, newVolume));
+    videoRef.current.volume = clampedVolume;
+    
+    // Si on change le volume et qu'il est > 0, on démute automatiquement
+    if (clampedVolume > 0 && isMuted) {
+      videoRef.current.muted = false;
+      setIsMuted(false);
+    }
+    
+    setVolume(clampedVolume);
   };
 
   const seekTo = (time: number) => {
@@ -211,7 +234,7 @@ export default function CloudflareVideoPlayer({
         ref={videoRef}
         className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
         autoPlay={autoplay}
-        muted={true} // 🔹 obligatoire pour iPhone
+        muted={false}
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
@@ -257,7 +280,7 @@ export default function CloudflareVideoPlayer({
 
           <button
             onClick={toggleMute}
-            className={`transition-colors ${isMuted ? 'text-white hover:text-gray-300' : 'text-blue-400 hover:text-blue-300'}`}
+            className={`transition-colors ${isMuted ? 'text-gray-400 hover:text-gray-300' : 'text-white hover:text-blue-300'}`}
           >
             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
@@ -268,13 +291,13 @@ export default function CloudflareVideoPlayer({
               min="0"
               max="1"
               step="0.05"
-              value={volume}
+              value={isMuted ? 0 : volume} // Affiche 0 quand muted
               onChange={(e) => setVideoVolume(parseFloat(e.target.value))}
               className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
                        [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${volume * 100}%, #4b5563 ${volume * 100}%, #4b5563 100%)`
+                background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${(isMuted ? 0 : volume) * 100}%, #4b5563 ${(isMuted ? 0 : volume) * 100}%, #4b5563 100%)`
               }}
             />
           </div>
