@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Settings } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Settings, ExternalLink } from 'lucide-react';
 
 interface CloudflareVideoPlayerProps {
   videoId: string;
@@ -46,6 +46,7 @@ export default function CloudflareVideoPlayer({
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
 
   const hlsUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.m3u8`;
   const dashUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.mpd`;
@@ -54,8 +55,30 @@ export default function CloudflareVideoPlayer({
 
   const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
-  // Détection iOS simple
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // Détection des appareils mobiles et tablettes
+  useEffect(() => {
+    const checkDevice = () => {
+      // Vérifier si c'est un appareil mobile ou tablette
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isIOS = /iphone|ipad|ipod/.test(userAgent);
+      const isAndroid = /android/.test(userAgent);
+      const isMobile = /mobile/.test(userAgent);
+      const width = window.innerWidth;
+      const isTablet = width <= 1024 && width >= 768;
+      
+      setIsMobileOrTablet(isIOS || isAndroid || isMobile || isTablet);
+    };
+
+    // Vérifier au chargement initial
+    checkDevice();
+
+    // Écouter les changements de taille d'écran
+    window.addEventListener('resize', checkDevice);
+    
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+    };
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = isFullscreen ? 'hidden' : '';
@@ -88,14 +111,14 @@ export default function CloudflareVideoPlayer({
     video.addEventListener('timeupdate', onTimeUpdate);
     video.addEventListener('volumechange', onVolumeChange);
 
-    // Initialisation du player vidéo en fonction de la plateforme
+    // Détection iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
+    // Initialisation du player vidéo en fonction de la plateforme
     if (isIOS) {
-      // iOS supporte HLS nativement - ne pas utiliser hls.js ici
       video.src = hlsUrl;
       setStreamType('native');
     } else {
-      // Autres navigateurs : essayer hls.js puis dash.js sinon fallback native
       if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = hlsUrl;
         setStreamType('native');
@@ -120,7 +143,6 @@ export default function CloudflareVideoPlayer({
     }
 
     return () => {
-      // Nettoyage au démontage
       video.removeEventListener('loadedmetadata', onLoadedMetadata);
       video.removeEventListener('play', onPlay);
       video.removeEventListener('pause', onPause);
@@ -130,7 +152,7 @@ export default function CloudflareVideoPlayer({
       if (hlsInstance) hlsInstance.destroy();
       if (dashInstance) dashInstance.destroy();
     };
-  }, [videoId, isIOS]);
+  }, [videoId]);
 
   const handleMouseMove = () => {
     setShowControls(true);
@@ -155,10 +177,10 @@ export default function CloudflareVideoPlayer({
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        await videoRef.current.play(); // force play pour iPhone après interaction
+        await videoRef.current.play();
       }
     } catch (err) {
-      console.log("Erreur de lecture sur iPhone :", err);
+      console.log("Erreur de lecture:", err);
     }
   };
 
@@ -222,6 +244,36 @@ export default function CloudflareVideoPlayer({
     else if (clickX > width * 0.7) skip(10);
     else togglePlay();
   };
+
+  // Si on est sur mobile/tablette, afficher un lien vers la vidéo
+  if (isMobileOrTablet) {
+    return (
+      <div className={`relative w-full bg-black rounded-xl overflow-hidden ${className}`} style={{ aspectRatio: '16/9' }}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black p-4 text-center z-10">
+          <div className="text-white text-lg font-medium mb-4">
+            Lecture optimisée disponible pour cette vidéo
+          </div>
+          <p className="text-gray-300 mb-6">
+            Pour une meilleure expérience sur votre appareil, veuillez utiliser le lecteur externe.
+          </p>
+          <a
+            href={hlsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            <ExternalLink size={18} className="mr-2" />
+            Ouvrir la vidéo dans le lecteur natif
+          </a>
+        </div>
+        <img 
+          src={thumbnailUrl || thumbnailApiUrl} 
+          alt={`Miniature de ${title}`}
+          className="w-full h-full object-cover opacity-50"
+        />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -287,7 +339,9 @@ export default function CloudflareVideoPlayer({
 
           <button
             onClick={toggleMute}
-            className={`transition-colors ${isMuted ? 'text-white hover:text-gray-300' : 'text-blue-400 hover:text-blue-300'}`}
+            className={`transition-colors ${
+              isMuted ? 'text-white hover:text-gray-300' : 'text-blue-400 hover:text-blue-300'
+            }`}
           >
             {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
@@ -362,7 +416,7 @@ export default function CloudflareVideoPlayer({
             )}
           </div>
 
-          <button onClick={toggleFullscreen} className="text-white hover:text-gray-300 transition-colors">
+          <button onClick={toggleFullscreen} className="text-white hover:text-gray-300 transition-colors ml-4">
             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
           </button>
         </div>
