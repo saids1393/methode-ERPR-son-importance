@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Settings } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Settings, ExternalLink } from 'lucide-react';
 
 interface CloudflareVideoPlayerProps {
   videoId: string;
@@ -46,6 +46,7 @@ export default function CloudflareVideoPlayer({
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
 
   const hlsUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.m3u8`;
   const dashUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.mpd`;
@@ -54,12 +55,29 @@ export default function CloudflareVideoPlayer({
 
   const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
+  // Détecter si on est sur mobile ou tablette
+  useEffect(() => {
+    const checkMobileOrTablet = () => {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(userAgent);
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 1024;
+      
+      setIsMobileOrTablet(isMobile || (isTouchDevice && isSmallScreen));
+    };
+
+    checkMobileOrTablet();
+    window.addEventListener('resize', checkMobileOrTablet);
+    
+    return () => window.removeEventListener('resize', checkMobileOrTablet);
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = isFullscreen ? 'hidden' : '';
   }, [isFullscreen]);
 
   useEffect(() => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || isMobileOrTablet) return;
     const video = videoRef.current;
 
     const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
@@ -102,7 +120,7 @@ export default function CloudflareVideoPlayer({
       if (hlsInstance) hlsInstance.destroy();
       if (dashInstance) dashInstance.destroy();
     };
-  }, [videoId]);
+  }, [videoId, isMobileOrTablet]);
 
   const handleMouseMove = () => {
     setShowControls(true);
