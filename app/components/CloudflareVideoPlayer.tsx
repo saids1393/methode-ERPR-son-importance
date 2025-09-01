@@ -13,6 +13,12 @@ interface CloudflareVideoPlayerProps {
   primaryColor?: string;
 }
 
+declare global {
+  interface Window {
+    Stream: any;
+  }
+}
+
 export default function CloudflareVideoPlayer({
   videoId,
   title,
@@ -24,8 +30,10 @@ export default function CloudflareVideoPlayer({
 }: CloudflareVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<any>(null);
+
   const [isPlaying, setIsPlaying] = useState(autoplay);
-  const [isMuted, setIsMuted] = useState(true); // Muted par défaut pour mobile
+  const [isMuted, setIsMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -35,6 +43,7 @@ export default function CloudflareVideoPlayer({
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const embedUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/iframe`;
   const thumbnailApiUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/thumbnails/thumbnail.jpg`;
@@ -47,11 +56,64 @@ export default function CloudflareVideoPlayer({
   }, [isFullscreen]);
 
   useEffect(() => {
-    // Charger la progression sauvegardée
-    const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
-    if (!isNaN(savedTime)) {
-      setCurrentTime(savedTime);
+    // Initialiser le player une fois que l'iframe est chargée
+    const handleLoad = () => {
+      if (!iframeRef.current) return;
+      
+      // Accéder à l'API du player Cloudflare Stream
+      try {
+        playerRef.current = iframeRef.current.contentWindow?.Stream(iframeRef.current);
+        
+        // Configurer les écouteurs d'événements
+        if (playerRef.current) {
+          playerRef.current.addEventListener('play', () => {
+            setIsPlaying(true);
+            setIsLoading(false);
+          });
+          
+          playerRef.current.addEventListener('pause', () => {
+            setIsPlaying(false);
+          });
+          
+          playerRef.current.addEventListener('timeupdate', (event: any) => {
+            setCurrentTime(event.currentTime);
+            localStorage.setItem(STORAGE_KEY, event.currentTime.toString());
+          });
+          
+          playerRef.current.addEventListener('durationchange', (event: any) => {
+            setDuration(event.duration);
+          });
+          
+          playerRef.current.addEventListener('volumechange', (event: any) => {
+            setVolume(event.volume);
+            setIsMuted(event.muted);
+          });
+          
+          playerRef.current.addEventListener('loadeddata', () => {
+            setIsLoading(false);
+            
+            // Charger la progression sauvegardée
+            const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
+            if (!isNaN(savedTime) && savedTime > 0) {
+              playerRef.current.currentTime = savedTime;
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Erreur initialisation player Cloudflare:', error);
+        setIsLoading(false);
+      }
+    };
+
+    if (iframeRef.current) {
+      iframeRef.current.addEventListener('load', handleLoad);
     }
+
+    return () => {
+      if (iframeRef.current) {
+        iframeRef.current.removeEventListener('load', handleLoad);
+      }
+    };
   }, [videoId]);
 
   const handleMouseMove = () => {
@@ -72,81 +134,59 @@ export default function CloudflareVideoPlayer({
   };
 
   const togglePlay = () => {
-    if (!iframeRef.current) return;
+    if (!playerRef.current) return;
     
-    const iframe = iframeRef.current;
-    const iframeWindow = iframe.contentWindow;
-    
-    if (isPlaying) {
-      // Envoyer un message pour mettre en pause
-      iframeWindow?.postMessage(JSON.stringify({
-        event: 'method',
-        method: 'pause',
-        value: null
-      }), '*');
-      setIsPlaying(false);
-    } else {
-      // Envoyer un message pour jouer
-      iframeWindow?.postMessage(JSON.stringify({
-        event: 'method',
-        method: 'play',
-        value: null
-      }), '*');
-      setIsPlaying(true);
+    try {
+      if (isPlaying) {
+        playerRef.current.pause();
+      } else {
+        playerRef.current.play();
+      }
+    } catch (error) {
+      console.error('Erreur contrôle lecture:', error);
     }
   };
 
   const toggleMute = () => {
-    if (!iframeRef.current) return;
+    if (!playerRef.current) return;
     
-    const iframeWindow = iframeRef.current.contentWindow;
-    const newMutedState = !isMuted;
-    
-    iframeWindow?.postMessage(JSON.stringify({
-      event: 'method',
-      method: 'setMuted',
-      value: newMutedState
-    }), '*');
-    
-    setIsMuted(newMutedState);
+    try {
+      playerRef.current.muted = !isMuted;
+    } catch (error) {
+      console.error('Erreur contrôle volume:', error);
+    }
   };
 
   const setVideoVolume = (newVolume: number) => {
-    if (!iframeRef.current) return;
+    if (!playerRef.current) return;
     
-    const iframeWindow = iframeRef.current.contentWindow;
-    const clampedVolume = Math.max(0, Math.min(1, newVolume));
-    
-    iframeWindow?.postMessage(JSON.stringify({
-      event: 'method',
-      method: 'setVolume',
-      value: clampedVolume
-    }), '*');
-    
-    setVolume(clampedVolume);
-    
-    // Si le volume est à 0, mute automatiquement
-    if (clampedVolume === 0) {
-      setIsMuted(true);
-    } else if (isMuted) {
-      setIsMuted(false);
+    try {
+      const clampedVolume = Math.max(0, Math.min(1, newVolume));
+      playerRef.current.volume = clampedVolume;
+      setVolume(clampedVolume);
+      
+      // Si le volume est à 0, mute automatiquement
+      if (clampedVolume === 0) {
+        playerRef.current.muted = true;
+      } else if (isMuted) {
+        playerRef.current.muted = false;
+      }
+    } catch (error) {
+      console.error('Erreur réglage volume:', error);
     }
   };
 
   const seekTo = (time: number) => {
-    if (!iframeRef.current) return;
+    if (!playerRef.current) return;
     
-    const iframeWindow = iframeRef.current.contentWindow;
-    const clampedTime = Math.max(0, Math.min(duration, time));
-    
-    iframeWindow?.postMessage(JSON.stringify({
-      event: 'method',
-      method: 'setCurrentTime',
-      value: clampedTime
-    }), '*');
-    
-    setCurrentTime(clampedTime);
-    localStorage.setItem(STORAGE_KEY, clampedTime.toString());
+    try {
+      const clampedTime = Math.max(0, Math.min(duration, time));
+      playerRef.current.currentTime = clampedTime;
+      setCurrentTime(clampedTime);
+      localStorage.setItem(STORAGE_KEY, clampedTime.toString());
+    } catch (error) {
+      console.error('Erreur navigation:', error);
+    }
   };
 
   const skip = (seconds: number) => {
@@ -155,17 +195,15 @@ export default function CloudflareVideoPlayer({
   };
 
   const changePlaybackRate = (rate: number) => {
-    if (!iframeRef.current) return;
+    if (!playerRef.current) return;
     
-    const iframeWindow = iframeRef.current.contentWindow;
+    try {
+      playerRef.current.playbackRate = rate;
+      setPlaybackRate(rate);
+    } catch (error) {
+      console.error('Erreur changement vitesse:', error);
+    }
     
-    iframeWindow?.postMessage(JSON.stringify({
-      event: 'method',
-      method: 'setPlaybackRate',
-      value: rate
-    }), '*');
-    
-    setPlaybackRate(rate);
     setShowSpeedMenu(false);
     setShowSettingsMenu(false);
   };
@@ -199,25 +237,6 @@ export default function CloudflareVideoPlayer({
     else togglePlay();
   };
 
-  // Mise à jour manuelle du temps pour simuler la progression
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setCurrentTime(prev => {
-          const newTime = prev + 0.5;
-          localStorage.setItem(STORAGE_KEY, newTime.toString());
-          return newTime;
-        });
-      }, 500);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isPlaying]);
-
   return (
     <div
       ref={containerRef}
@@ -230,39 +249,34 @@ export default function CloudflareVideoPlayer({
       onTouchStart={handleMouseMove}
       onTouchEnd={handleMouseLeave}
     >
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+      
       <iframe
         ref={iframeRef}
         src={`${embedUrl}?autoplay=${autoplay ? 'true' : 'false'}&muted=true&controls=false&preload=auto`}
-        className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
+        className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'} ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         allow="autoplay; fullscreen; encrypted-media; accelerometer; gyroscope; picture-in-picture"
         allowFullScreen
         frameBorder="0"
         title={title}
-        onLoad={() => {
-          // Définir la durée une fois que l'iframe est chargée
-          // Pour Cloudflare Stream, vous devrez peut-être ajuster cette valeur
-          setDuration(361.7); // Valeur provenant de vos informations
-          
-          // Aller à la position sauvegardée
-          const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
-          if (savedTime > 0) {
-            setTimeout(() => seekTo(savedTime), 1000);
-          }
-        }}
       />
 
-      <div className="absolute inset-0 cursor-pointer z-10" onClick={handleVideoClick} />
+      <div className="absolute inset-0 cursor-pointer z-20" onClick={handleVideoClick} />
 
-      {!isPlaying && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-          <div className="bg-black/70 rounded-full p-6" onClick={togglePlay}>
+      {!isPlaying && !isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+          <div className="bg-black/70 rounded-full p-6 pointer-events-auto" onClick={togglePlay}>
             <Play size={48} className="text-white ml-2" />
           </div>
         </div>
       )}
 
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-30 transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-40 transition-opacity duration-300 ${
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
