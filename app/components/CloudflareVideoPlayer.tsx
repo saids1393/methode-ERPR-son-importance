@@ -104,7 +104,6 @@ export default function CloudflareVideoPlayer({
     };
   }, [videoId]);
 
-  // Gestion des contrôles
   const handleMouseMove = () => {
     setShowControls(true);
     if (controlsTimeout) clearTimeout(controlsTimeout);
@@ -122,9 +121,17 @@ export default function CloudflareVideoPlayer({
     }
   };
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (!videoRef.current) return;
-    isPlaying ? videoRef.current.pause() : videoRef.current.play();
+    try {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        await videoRef.current.play(); // 🔹 force play pour iPhone
+      }
+    } catch (err) {
+      console.log("Erreur de lecture sur iPhone :", err);
+    }
   };
 
   const toggleMute = () => {
@@ -171,7 +178,7 @@ export default function CloudflareVideoPlayer({
     if (document.fullscreenElement) {
       document.exitFullscreen().then(() => setIsFullscreen(false));
     } else if ((videoRef.current as any).webkitEnterFullscreen) {
-      (videoRef.current as any).webkitEnterFullscreen(); // iOS
+      (videoRef.current as any).webkitEnterFullscreen();
       setIsFullscreen(true);
     } else {
       containerRef.current.requestFullscreen().then(() => setIsFullscreen(true));
@@ -191,8 +198,9 @@ export default function CloudflareVideoPlayer({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden bg-black group ${className} ${isFullscreen ? 'fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center' : 'rounded-xl'
-        }`}
+      className={`relative w-full overflow-hidden bg-black group ${className} ${
+        isFullscreen ? 'fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center' : 'rounded-xl'
+      }`}
       style={{ aspectRatio: isFullscreen ? undefined : '16/9', maxHeight: isFullscreen ? '100vh' : '80vh' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -203,7 +211,7 @@ export default function CloudflareVideoPlayer({
         ref={videoRef}
         className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
         autoPlay={autoplay}
-        muted={true}               // 🔹 Toujours true pour iPhone
+        muted={true} // 🔹 obligatoire pour iPhone
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
@@ -212,20 +220,20 @@ export default function CloudflareVideoPlayer({
         controls={false}
       />
 
-
       <div className="absolute inset-0 cursor-pointer z-10" onClick={handleVideoClick} />
 
       {!isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-          <div className="bg-black/70 rounded-full p-6">
+          <div className="bg-black/70 rounded-full p-6" onClick={togglePlay}>
             <Play size={48} className="text-white ml-2" />
           </div>
         </div>
       )}
 
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-30 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'
-          }`}
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-30 transition-opacity duration-300 ${
+          showControls ? 'opacity-100' : 'opacity-0'
+        }`}
       >
         <div className="mb-4">
           <div
@@ -263,7 +271,7 @@ export default function CloudflareVideoPlayer({
               value={volume}
               onChange={(e) => setVideoVolume(parseFloat(e.target.value))}
               className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
-                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3
+                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
                        [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
               style={{
                 background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${volume * 100}%, #4b5563 ${volume * 100}%, #4b5563 100%)`
@@ -313,8 +321,9 @@ export default function CloudflareVideoPlayer({
                   <button
                     key={speed}
                     onClick={() => changePlaybackRate(speed)}
-                    className={`w-full text-left px-3 py-2 text-white hover:bg-gray-700 rounded ${playbackRate === speed ? 'bg-blue-500' : ''
-                      }`}
+                    className={`w-full text-left px-3 py-2 text-white hover:bg-gray-700 rounded ${
+                      playbackRate === speed ? 'bg-blue-500' : ''
+                    }`}
                   >
                     {speed}x {speed === 1 ? '(Normal)' : ''}
                   </button>
