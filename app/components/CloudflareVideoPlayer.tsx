@@ -15,7 +15,8 @@ interface CloudflareVideoPlayerProps {
 
 declare global {
   interface Window {
-    Stream: any;
+    Hls: any;
+    dashjs: any;
   }
 }
 
@@ -29,92 +30,107 @@ export default function CloudflareVideoPlayer({
   primaryColor = '#10b981'
 }: CloudflareVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const playerRef = useRef<any>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const [isPlaying, setIsPlaying] = useState(autoplay);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [streamType, setStreamType] = useState<'hls' | 'dash' | 'native'>('hls');
+  const [hlsInstance, setHlsInstance] = useState<any>(null);
+  const [dashInstance, setDashInstance] = useState<any>(null);
   const [showControls, setShowControls] = useState(true);
   const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const embedUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/iframe`;
+  const hlsUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.m3u8`;
+  const dashUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.mpd`;
   const thumbnailApiUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/thumbnails/thumbnail.jpg`;
   const STORAGE_KEY = `video-progress-${videoId}`;
 
   const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+
+  // Détection iOS simple
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   useEffect(() => {
     document.body.style.overflow = isFullscreen ? 'hidden' : '';
   }, [isFullscreen]);
 
   useEffect(() => {
-    // Initialiser le player une fois que l'iframe est chargée
-    const handleLoad = () => {
-      if (!iframeRef.current) return;
-      
-      // Accéder à l'API du player Cloudflare Stream
-      try {
-        playerRef.current = iframeRef.current.contentWindow?.Stream(iframeRef.current);
-        
-        // Configurer les écouteurs d'événements
-        if (playerRef.current) {
-          playerRef.current.addEventListener('play', () => {
-            setIsPlaying(true);
-            setIsLoading(false);
-          });
-          
-          playerRef.current.addEventListener('pause', () => {
-            setIsPlaying(false);
-          });
-          
-          playerRef.current.addEventListener('timeupdate', (event: any) => {
-            setCurrentTime(event.currentTime);
-            localStorage.setItem(STORAGE_KEY, event.currentTime.toString());
-          });
-          
-          playerRef.current.addEventListener('durationchange', (event: any) => {
-            setDuration(event.duration);
-          });
-          
-          playerRef.current.addEventListener('volumechange', (event: any) => {
-            setVolume(event.volume);
-            setIsMuted(event.muted);
-          });
-          
-          playerRef.current.addEventListener('loadeddata', () => {
-            setIsLoading(false);
-            
-            // Charger la progression sauvegardée
-            const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
-            if (!isNaN(savedTime) && savedTime > 0) {
-              playerRef.current.currentTime = savedTime;
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Erreur initialisation player Cloudflare:', error);
-        setIsLoading(false);
-      }
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+
+    // Restaurer la position de lecture sauvegardée
+    const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
+    if (!isNaN(savedTime)) video.currentTime = savedTime;
+
+    // Gestion des événements natifs du player
+    const onLoadedMetadata = () => setDuration(video.duration || 0);
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onTimeUpdate = () => {
+      setCurrentTime(video.currentTime);
+      localStorage.setItem(STORAGE_KEY, video.currentTime.toString());
+    };
+    const onVolumeChange = () => {
+      setVolume(video.volume);
+      setIsMuted(video.muted);
     };
 
-    if (iframeRef.current) {
-      iframeRef.current.addEventListener('load', handleLoad);
+    video.addEventListener('loadedmetadata', onLoadedMetadata);
+    video.addEventListener('play', onPlay);
+    video.addEventListener('pause', onPause);
+    video.addEventListener('timeupdate', onTimeUpdate);
+    video.addEventListener('volumechange', onVolumeChange);
+
+    // Initialisation du player vidéo en fonction de la plateforme
+
+    if (isIOS) {
+      // iOS supporte HLS nativement - ne pas utiliser hls.js ici
+      video.src = hlsUrl;
+      setStreamType('native');
+    } else {
+      // Autres navigateurs : essayer hls.js puis dash.js sinon fallback native
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = hlsUrl;
+        setStreamType('native');
+      } else {
+        import('hls.js').then(HlsLib => {
+          if (HlsLib.default.isSupported()) {
+            const hls = new HlsLib.default({ debug: false });
+            hls.loadSource(hlsUrl);
+            hls.attachMedia(video);
+            setHlsInstance(hls);
+            setStreamType('hls');
+          } else {
+            import('dashjs').then(dashLib => {
+              const player = dashLib.MediaPlayer().create();
+              player.initialize(video, dashUrl, autoplay);
+              setDashInstance(player);
+              setStreamType('dash');
+            });
+          }
+        });
+      }
     }
 
     return () => {
-      if (iframeRef.current) {
-        iframeRef.current.removeEventListener('load', handleLoad);
-      }
+      // Nettoyage au démontage
+      video.removeEventListener('loadedmetadata', onLoadedMetadata);
+      video.removeEventListener('play', onPlay);
+      video.removeEventListener('pause', onPause);
+      video.removeEventListener('timeupdate', onTimeUpdate);
+      video.removeEventListener('volumechange', onVolumeChange);
+
+      if (hlsInstance) hlsInstance.destroy();
+      if (dashInstance) dashInstance.destroy();
     };
-  }, [videoId]);
+  }, [videoId, isIOS]);
 
   const handleMouseMove = () => {
     setShowControls(true);
@@ -133,77 +149,44 @@ export default function CloudflareVideoPlayer({
     }
   };
 
-  const togglePlay = () => {
-    if (!playerRef.current) return;
-    
+  const togglePlay = async () => {
+    if (!videoRef.current) return;
     try {
       if (isPlaying) {
-        playerRef.current.pause();
+        videoRef.current.pause();
       } else {
-        playerRef.current.play();
+        await videoRef.current.play(); // force play pour iPhone après interaction
       }
-    } catch (error) {
-      console.error('Erreur contrôle lecture:', error);
+    } catch (err) {
+      console.log("Erreur de lecture sur iPhone :", err);
     }
   };
 
   const toggleMute = () => {
-    if (!playerRef.current) return;
-    
-    try {
-      playerRef.current.muted = !isMuted;
-    } catch (error) {
-      console.error('Erreur contrôle volume:', error);
-    }
+    if (!videoRef.current) return;
+    videoRef.current.muted = !isMuted;
   };
 
   const setVideoVolume = (newVolume: number) => {
-    if (!playerRef.current) return;
-    
-    try {
-      const clampedVolume = Math.max(0, Math.min(1, newVolume));
-      playerRef.current.volume = clampedVolume;
-      setVolume(clampedVolume);
-      
-      // Si le volume est à 0, mute automatiquement
-      if (clampedVolume === 0) {
-        playerRef.current.muted = true;
-      } else if (isMuted) {
-        playerRef.current.muted = false;
-      }
-    } catch (error) {
-      console.error('Erreur réglage volume:', error);
-    }
+    if (!videoRef.current) return;
+    videoRef.current.volume = Math.max(0, Math.min(1, newVolume));
   };
 
   const seekTo = (time: number) => {
-    if (!playerRef.current) return;
-    
-    try {
-      const clampedTime = Math.max(0, Math.min(duration, time));
-      playerRef.current.currentTime = clampedTime;
-      setCurrentTime(clampedTime);
-      localStorage.setItem(STORAGE_KEY, clampedTime.toString());
-    } catch (error) {
-      console.error('Erreur navigation:', error);
-    }
+    if (!videoRef.current) return;
+    videoRef.current.currentTime = Math.max(0, Math.min(duration, time));
   };
 
   const skip = (seconds: number) => {
-    const newTime = currentTime + seconds;
+    if (!videoRef.current) return;
+    const newTime = videoRef.current.currentTime + seconds;
     seekTo(newTime);
   };
 
   const changePlaybackRate = (rate: number) => {
-    if (!playerRef.current) return;
-    
-    try {
-      playerRef.current.playbackRate = rate;
-      setPlaybackRate(rate);
-    } catch (error) {
-      console.error('Erreur changement vitesse:', error);
-    }
-    
+    if (!videoRef.current) return;
+    videoRef.current.playbackRate = rate;
+    setPlaybackRate(rate);
     setShowSpeedMenu(false);
     setShowSettingsMenu(false);
   };
@@ -217,15 +200,18 @@ export default function CloudflareVideoPlayer({
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  const toggleFullscreen = () => {
-    if (!containerRef.current) return;
+  function toggleFullscreen(event: React.MouseEvent<HTMLButtonElement>): void {
+    if (!containerRef.current || !videoRef.current) return;
 
     if (document.fullscreenElement) {
       document.exitFullscreen().then(() => setIsFullscreen(false));
+    } else if ((videoRef.current as any).webkitEnterFullscreen) {
+      (videoRef.current as any).webkitEnterFullscreen();
+      setIsFullscreen(true);
     } else {
       containerRef.current.requestFullscreen().then(() => setIsFullscreen(true));
     }
-  };
+  }
 
   const handleVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -241,7 +227,9 @@ export default function CloudflareVideoPlayer({
     <div
       ref={containerRef}
       className={`relative w-full overflow-hidden bg-black group ${className} ${
-        isFullscreen ? 'fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center' : 'rounded-xl'
+        isFullscreen
+          ? 'fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center'
+          : 'rounded-xl'
       }`}
       style={{ aspectRatio: isFullscreen ? undefined : '16/9', maxHeight: isFullscreen ? '100vh' : '80vh' }}
       onMouseMove={handleMouseMove}
@@ -249,34 +237,31 @@ export default function CloudflareVideoPlayer({
       onTouchStart={handleMouseMove}
       onTouchEnd={handleMouseLeave}
     >
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      )}
-      
-      <iframe
-        ref={iframeRef}
-        src={`${embedUrl}?autoplay=${autoplay ? 'true' : 'false'}&muted=true&controls=false&preload=auto`}
-        className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'} ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-        allow="autoplay; fullscreen; encrypted-media; accelerometer; gyroscope; picture-in-picture"
-        allowFullScreen
-        frameBorder="0"
-        title={title}
+      <video
+        ref={videoRef}
+        className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
+        autoPlay={autoplay}
+        muted
+        playsInline
+        webkit-playsinline="true"
+        x5-playsinline="true"
+        poster={thumbnailUrl || thumbnailApiUrl}
+        preload="auto"
+        controls={false}
       />
 
-      <div className="absolute inset-0 cursor-pointer z-20" onClick={handleVideoClick} />
+      <div className="absolute inset-0 cursor-pointer z-10" onClick={handleVideoClick} />
 
-      {!isPlaying && !isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-          <div className="bg-black/70 rounded-full p-6 pointer-events-auto" onClick={togglePlay}>
+      {!isPlaying && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+          <div className="bg-black/70 rounded-full p-6" onClick={togglePlay}>
             <Play size={48} className="text-white ml-2" />
           </div>
         </div>
       )}
 
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-40 transition-opacity duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-30 transition-opacity duration-300 ${
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -316,10 +301,10 @@ export default function CloudflareVideoPlayer({
               value={volume}
               onChange={(e) => setVideoVolume(parseFloat(e.target.value))}
               className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
-                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-                       [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
+               [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
+               [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${volume * 100}%, #4b5563 ${volume * 100}%, #4b5563 100%)`
+                background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${volume * 100}%, #4b5563 ${volume * 100}%, #4b5563 100%)`,
               }}
             />
           </div>
