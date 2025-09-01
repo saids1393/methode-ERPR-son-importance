@@ -191,9 +191,8 @@ export default function CloudflareVideoPlayer({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden bg-black group ${className} ${
-        isFullscreen ? 'fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center' : 'rounded-xl'
-      }`}
+      className={`relative w-full overflow-hidden bg-black group ${className} ${isFullscreen ? 'fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center' : 'rounded-xl'
+        }`}
       style={{ aspectRatio: isFullscreen ? undefined : '16/9', maxHeight: isFullscreen ? '100vh' : '80vh' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -204,7 +203,7 @@ export default function CloudflareVideoPlayer({
         ref={videoRef}
         className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
         autoPlay={autoplay}
-        muted={autoplay}
+        muted={true}               // 🔹 Toujours true pour iPhone
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
@@ -212,6 +211,7 @@ export default function CloudflareVideoPlayer({
         preload="auto"
         controls={false}
       />
+
 
       <div className="absolute inset-0 cursor-pointer z-10" onClick={handleVideoClick} />
 
@@ -224,9 +224,8 @@ export default function CloudflareVideoPlayer({
       )}
 
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-30 transition-opacity duration-300 ${
-          showControls ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-30 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'
+          }`}
       >
         <div className="mb-4">
           <div
@@ -314,9 +313,8 @@ export default function CloudflareVideoPlayer({
                   <button
                     key={speed}
                     onClick={() => changePlaybackRate(speed)}
-                    className={`w-full text-left px-3 py-2 text-white hover:bg-gray-700 rounded ${
-                      playbackRate === speed ? 'bg-blue-500' : ''
-                    }`}
+                    className={`w-full text-left px-3 py-2 text-white hover:bg-gray-700 rounded ${playbackRate === speed ? 'bg-blue-500' : ''
+                      }`}
                   >
                     {speed}x {speed === 1 ? '(Normal)' : ''}
                   </button>
