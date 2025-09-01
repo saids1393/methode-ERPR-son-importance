@@ -31,9 +31,8 @@ export default function CloudflareVideoPlayer({
 }: CloudflareVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Muted par défaut sur mobile
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -47,6 +46,9 @@ export default function CloudflareVideoPlayer({
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const hlsUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.m3u8`;
   const dashUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.mpd`;
@@ -55,13 +57,21 @@ export default function CloudflareVideoPlayer({
 
   const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
-  // Détection mobile simple
+  // Détection mobile améliorée
   useEffect(() => {
     const checkMobile = () => {
       const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       setIsMobile(isMobileDevice);
     };
     checkMobile();
+    
+    // Écouter les changements d'orientation
+    const handleOrientationChange = () => {
+      setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    window.addEventListener('orientationchange', handleOrientationChange);
+    return () => window.removeEventListener('orientationchange', handleOrientationChange);
   }, []);
 
   useEffect(() => {
@@ -72,47 +82,54 @@ export default function CloudflareVideoPlayer({
     if (!videoRef.current) return;
     const video = videoRef.current;
 
-    // Configuration spécifique mobile AVANT tout le reste
+    // Configuration spécifique mobile
     if (isMobile) {
       video.setAttribute('playsinline', 'true');
       video.setAttribute('webkit-playsinline', 'true');
       video.setAttribute('x5-playsinline', 'true');
       video.setAttribute('x5-video-player-type', 'h5');
-      video.muted = true; // Force muted sur mobile pour l'autoload
-      video.preload = 'metadata'; // Charge au moins les métadonnées
+      video.muted = true; // Forcer muted sur mobile
+      video.preload = 'metadata';
     }
 
     const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
 
-    // Event listeners avec gestion mobile améliorée
+    // Event listeners
     const handleLoadedMetadata = () => {
-      console.log('Metadata loaded, duration:', video.duration);
       setDuration(video.duration || 0);
       if (!isNaN(savedTime) && savedTime > 0) {
         video.currentTime = savedTime;
       }
+      setIsLoading(false);
     };
 
     const handleCanPlay = () => {
-      console.log('Can play - duration:', video.duration);
       if (!duration && video.duration) {
         setDuration(video.duration);
       }
+      setIsLoading(false);
     };
 
     const handleLoadedData = () => {
-      console.log('Data loaded - duration:', video.duration);
       if (!duration && video.duration) {
         setDuration(video.duration);
       }
+      setIsLoading(false);
     };
 
     const handleDurationChange = () => {
-      console.log('Duration changed:', video.duration);
       if (video.duration && video.duration !== Infinity) {
         setDuration(video.duration);
       }
     };
+
+    const handleError = () => {
+      setError('Erreur de chargement de la vidéo');
+      setIsLoading(false);
+    };
+
+    const handleWaiting = () => setIsLoading(true);
+    const handlePlaying = () => setIsLoading(false);
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('canplay', handleCanPlay);
@@ -128,18 +145,27 @@ export default function CloudflareVideoPlayer({
       setVolume(video.volume);
       setIsMuted(video.muted);
     });
+    video.addEventListener('error', handleError);
+    video.addEventListener('waiting', handleWaiting);
+    video.addEventListener('playing', handlePlaying);
 
     // Logique de chargement vidéo
     const loadVideo = () => {
+      setIsLoading(true);
+      
+      // Sur mobile, on utilise directement la source native
+      if (isMobile) {
+        console.log('Using native video on mobile');
+        video.src = hlsUrl;
+        setStreamType('native');
+        video.load();
+        return;
+      }
+
       if (video.canPlayType('application/vnd.apple.mpegurl')) {
         console.log('Using native HLS support');
         video.src = hlsUrl;
         setStreamType('native');
-        
-        // Force le chargement des métadonnées sur mobile
-        if (isMobile) {
-          video.load();
-        }
       } else {
         import('hls.js').then(HlsLib => {
           if (HlsLib.default.isSupported()) {
@@ -161,7 +187,6 @@ export default function CloudflareVideoPlayer({
                 hls.destroy();
                 video.src = hlsUrl;
                 setStreamType('native');
-                if (isMobile) video.load();
               }
             });
             
@@ -180,14 +205,12 @@ export default function CloudflareVideoPlayer({
               console.log('DASH failed, using native fallback');
               video.src = hlsUrl;
               setStreamType('native');
-              if (isMobile) video.load();
             });
           }
         }).catch(() => {
           console.log('HLS.js loading failed, using native fallback');
           video.src = hlsUrl;
           setStreamType('native');
-          if (isMobile) video.load();
         });
       }
     };
@@ -209,11 +232,26 @@ export default function CloudflareVideoPlayer({
         setVolume(video.volume);
         setIsMuted(video.muted);
       });
+      video.removeEventListener('error', handleError);
+      video.removeEventListener('waiting', handleWaiting);
+      video.removeEventListener('playing', handlePlaying);
       
       if (hlsInstance) hlsInstance.destroy();
       if (dashInstance) dashInstance.destroy();
     };
   }, [videoId, isMobile, duration]);
+
+  const handleUserInteraction = () => {
+    setUserInteracted(true);
+    if (isMobile) {
+      setShowControls(true);
+      if (controlsTimeout) clearTimeout(controlsTimeout);
+      const timeout = setTimeout(() => {
+        if (isPlaying) setShowControls(false);
+      }, 4000);
+      setControlsTimeout(timeout);
+    }
+  };
 
   const handleMouseMove = () => {
     if (!isMobile) {
@@ -227,14 +265,7 @@ export default function CloudflareVideoPlayer({
   };
 
   const handleTouchStart = () => {
-    if (isMobile) {
-      setShowControls(true);
-      if (controlsTimeout) clearTimeout(controlsTimeout);
-      const timeout = setTimeout(() => {
-        if (isPlaying) setShowControls(false);
-      }, 4000);
-      setControlsTimeout(timeout);
-    }
+    handleUserInteraction();
   };
 
   const handleMouseLeave = () => {
@@ -249,42 +280,32 @@ export default function CloudflareVideoPlayer({
 
   const togglePlay = async () => {
     if (!videoRef.current) return;
+    handleUserInteraction();
+    
     try {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        // Sur mobile, force le chargement si pas encore fait
-        if (isMobile && (!duration || duration === 0)) {
-          console.log('Forcing video load on mobile');
-          videoRef.current.load();
-          // Attendre un peu que les métadonnées se chargent
-          await new Promise(resolve => setTimeout(resolve, 500));
+        // Sur mobile, on doit attendre l'interaction utilisateur
+        if (isMobile && !userInteracted) {
+          setUserInteracted(true);
         }
         
         await videoRef.current.play();
         
-        // Unmute après le premier play réussi sur mobile
+        // Après le premier play réussi, on peut unmute
         if (isMobile && videoRef.current.muted) {
           setTimeout(() => {
             if (videoRef.current) {
               videoRef.current.muted = false;
+              setIsMuted(false);
             }
           }, 1000);
         }
       }
     } catch (err) {
       console.log("Erreur de lecture:", err);
-      // Retry avec load() sur mobile
-      if (isMobile && !isPlaying) {
-        try {
-          videoRef.current.load();
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          videoRef.current.muted = true;
-          await videoRef.current.play();
-        } catch (mutedErr) {
-          console.log("Échec même avec reload:", mutedErr);
-        }
-      }
+      setError("Impossible de lire la vidéo. Veuillez réessayer.");
     }
   };
 
@@ -341,13 +362,13 @@ export default function CloudflareVideoPlayer({
   }
 
   const handleVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    handleUserInteraction();
+    
     if (isMobile) {
-      // Sur mobile, simple toggle play/pause
       togglePlay();
       return;
     }
 
-    // Comportement desktop original
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
@@ -355,6 +376,14 @@ export default function CloudflareVideoPlayer({
     if (clickX < width * 0.3) skip(-10);
     else if (clickX > width * 0.7) skip(10);
     else togglePlay();
+  };
+
+  const retryLoad = () => {
+    setError(null);
+    setIsLoading(true);
+    if (videoRef.current) {
+      videoRef.current.load();
+    }
   };
 
   return (
@@ -376,7 +405,7 @@ export default function CloudflareVideoPlayer({
         ref={videoRef}
         className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
         autoPlay={false}
-        muted={isMobile}
+        muted={isMobile && !userInteracted}
         playsInline={true}
         poster={thumbnailUrl || thumbnailApiUrl}
         preload={isMobile ? "metadata" : "auto"}
@@ -384,13 +413,31 @@ export default function CloudflareVideoPlayer({
         crossOrigin="anonymous"
       />
 
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-40">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+
+      {error && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-50 p-4">
+          <div className="text-white text-center mb-4">{error}</div>
+          <button 
+            onClick={retryLoad}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Réessayer
+          </button>
+        </div>
+      )}
+
       <div 
         className="absolute inset-0 cursor-pointer z-10" 
         onClick={handleVideoClick}
         style={{ touchAction: isMobile ? 'manipulation' : 'auto' }}
       />
 
-      {!isPlaying && (
+      {!isPlaying && !isLoading && !error && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
           <div 
             className={`bg-black/70 rounded-full p-6 pointer-events-auto cursor-pointer ${
@@ -408,7 +455,7 @@ export default function CloudflareVideoPlayer({
         className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent ${
           isMobile ? 'p-3' : 'p-4'
         } z-30 transition-opacity duration-300 ${
-          showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
+          showControls || !isPlaying || isLoading ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <div className={isMobile ? 'mb-3' : 'mb-4'}>
@@ -438,33 +485,32 @@ export default function CloudflareVideoPlayer({
             {isPlaying ? <Pause size={isMobile ? 28 : 24} /> : <Play size={isMobile ? 28 : 24} />}
           </button>
 
-          {/* Contrôles audio - cachés sur très petit écran mobile */}
-          {!isMobile && (
-            <>
-              <button
-                onClick={toggleMute}
-                className={`transition-colors ${isMuted ? 'text-white hover:text-gray-300' : 'text-blue-400 hover:text-blue-300'}`}
-              >
-                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-              </button>
+          {/* Contrôles audio - simplifiés sur mobile */}
+          <button
+            onClick={toggleMute}
+            className={`transition-colors ${isMuted ? 'text-white hover:text-gray-300' : 'text-blue-400 hover:text-blue-300'}`}
+            style={{ touchAction: 'manipulation' }}
+          >
+            {isMuted ? <VolumeX size={isMobile ? 24 : 20} /> : <Volume2 size={isMobile ? 24 : 20} />}
+          </button>
 
-              <div className="flex items-center space-x-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={volume}
-                  onChange={(e) => setVideoVolume(parseFloat(e.target.value))}
-                  className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
-                           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-                           [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
-                  style={{
-                    background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${volume * 100}%, #4b5563 ${volume * 100}%, #4b5563 100%)`
-                  }}
-                />
-              </div>
-            </>
+          {!isMobile && (
+            <div className="flex items-center space-x-2">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={volume}
+                onChange={(e) => setVideoVolume(parseFloat(e.target.value))}
+                className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
+                         [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
+                         [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${volume * 100}%, #4b5563 ${volume * 100}%, #4b5563 100%)`
+                }}
+              />
+            </div>
           )}
 
           <div className={`text-white ${isMobile ? 'text-xs' : 'text-sm'} font-mono`}>
@@ -473,7 +519,7 @@ export default function CloudflareVideoPlayer({
 
           <div className="flex-1" />
 
-          {/* Menu des paramètres - caché sur mobile pour économiser l'espace */}
+          {/* Menu des paramètres - simplifié sur mobile */}
           {!isMobile && (
             <div className="relative flex items-center">
               <button
