@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Play, Save, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface ChapterVideo {
   id: string;
@@ -23,6 +24,7 @@ interface VideoForm {
 export default function AdminVideosPage() {
   const [videos, setVideos] = useState<ChapterVideo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingVideo, setEditingVideo] = useState<ChapterVideo | null>(null);
   const [formData, setFormData] = useState<VideoForm>({
@@ -38,14 +40,21 @@ export default function AdminVideosPage() {
   }, []);
 
   const loadVideos = async () => {
+    setIsLoading(true);
     try {
+      console.log('🔄 [ADMIN] Chargement des vidéos...');
       const response = await fetch('/api/videos');
       if (response.ok) {
         const data = await response.json();
+        console.log('📊 [ADMIN] Vidéos chargées:', data);
         setVideos(data);
+      } else {
+        console.error('❌ [ADMIN] Erreur lors du chargement:', response.status);
+        toast.error('Erreur lors du chargement des vidéos');
       }
     } catch (error) {
       console.error('Error loading videos:', error);
+      toast.error('Erreur de connexion');
     } finally {
       setIsLoading(false);
     }
@@ -53,22 +62,58 @@ export default function AdminVideosPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation côté client
+    if (!formData.title.trim()) {
+      toast.error('Le titre est requis');
+      return;
+    }
+    
+    if (!formData.cloudflareVideoId.trim()) {
+      toast.error('L\'ID Cloudflare est requis');
+      return;
+    }
+    
+    if (formData.chapterNumber < 0 || formData.chapterNumber > 11) {
+      toast.error('Le numéro de chapitre doit être entre 0 et 11');
+      return;
+    }
+    
+    setLoading(true);
+    
     try {
+      console.log('📤 [ADMIN] Envoi des données vidéo:', formData);
+      
       const response = await fetch('/api/videos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          chapterNumber: formData.chapterNumber,
+          title: formData.title.trim(),
+          cloudflareVideoId: formData.cloudflareVideoId.trim(),
+          thumbnailUrl: formData.thumbnailUrl.trim() || undefined,
+          duration: formData.duration || undefined,
+        }),
       });
+      
+      console.log('📡 [ADMIN] Réponse API:', response.status);
+      
+      const result = await response.json();
+      console.log('📊 [ADMIN] Données de réponse:', result);
+      
       if (response.ok) {
-        await loadVideos();
+        toast.success(editingVideo ? 'Vidéo modifiée avec succès !' : 'Vidéo ajoutée avec succès !');
+        setShowForm(false);
         resetForm();
-        alert('Vidéo sauvegardée avec succès !');
+        await loadVideos();
       } else {
-        alert('Erreur lors de la sauvegarde');
+        toast.error(result.error || 'Erreur lors de la sauvegarde');
       }
     } catch (error) {
       console.error('Error saving video:', error);
-      alert('Erreur de connexion');
+      toast.error('Erreur de connexion');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,24 +129,6 @@ export default function AdminVideosPage() {
     setShowForm(true);
   };
 
-  const handleDelete = async (chapterNumber: number) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?')) return;
-    try {
-      const response = await fetch(`/api/videos/${chapterNumber}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        await loadVideos();
-        alert('Vidéo supprimée avec succès !');
-      } else {
-        alert('Erreur lors de la suppression');
-      }
-    } catch (error) {
-      console.error('Error deleting video:', error);
-      alert('Erreur de connexion');
-    }
-  };
-
   const resetForm = () => {
     setFormData({
       chapterNumber: 0,
@@ -111,8 +138,29 @@ export default function AdminVideosPage() {
       duration: 0,
     });
     setEditingVideo(null);
-    setShowForm(false);
   };
+  const handleDelete = async (chapterNumber: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?')) return;
+    
+    try {
+      const response = await fetch(`/api/videos/${chapterNumber}`, {
+        method: 'DELETE',
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        toast.success('Vidéo supprimée avec succès !');
+        await loadVideos();
+      } else {
+        toast.error(result.error || 'Erreur lors de la suppression');
+      }
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      toast.error('Erreur de connexion');
+    }
+  };
+
 
   if (isLoading) {
     return (
@@ -158,7 +206,7 @@ export default function AdminVideosPage() {
                   <label className="block text-sm font-medium mb-2">Numéro de chapitre</label>
                   <input
                     type="number"
-                    value={formData.chapterNumber ?? ''}
+                    value={formData.chapterNumber}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
                       setFormData(prev => ({ ...prev, chapterNumber: isNaN(val) ? 0 : val }));
@@ -166,6 +214,7 @@ export default function AdminVideosPage() {
                     className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
                     required
                     min={0}
+                    max={11}
                   />
                 </div>
 
@@ -178,6 +227,7 @@ export default function AdminVideosPage() {
                     className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
                     required
                     placeholder="Ex: Introduction au chapitre 1"
+                    maxLength={200}
                   />
                 </div>
 
@@ -190,6 +240,7 @@ export default function AdminVideosPage() {
                     className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
                     required
                     placeholder="Ex: abc123def456"
+                    maxLength={100}
                   />
                 </div>
 
@@ -208,13 +259,14 @@ export default function AdminVideosPage() {
                   <label className="block text-sm font-medium mb-2">Durée (secondes)</label>
                   <input
                     type="number"
-                    value={formData.duration ?? ''}
+                    value={formData.duration || ''}
                     onChange={(e) => {
                       const val = parseInt(e.target.value);
                       setFormData(prev => ({ ...prev, duration: isNaN(val) ? 0 : val }));
                     }}
                     className="w-full bg-zinc-700 border border-zinc-600 rounded-lg px-3 py-2 text-white"
                     min={0}
+                    max={7200}
                     placeholder="Ex: 300 (5 minutes)"
                   />
                 </div>
@@ -229,10 +281,20 @@ export default function AdminVideosPage() {
                   </button>
                   <button
                     type="submit"
+                    disabled={loading}
                     className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors"
                   >
-                    <Save size={16} />
-                    Sauvegarder
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                        Sauvegarde...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} />
+                        {editingVideo ? 'Modifier' : 'Ajouter'}
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
@@ -302,6 +364,21 @@ export default function AdminVideosPage() {
             >
               Ajouter la première vidéo
             </button>
+          </div>
+        )}
+        
+        {/* Debug info en développement */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-8 bg-zinc-800 border border-zinc-700 rounded-lg p-4">
+            <h4 className="text-white font-semibold mb-2">Debug Info</h4>
+            <pre className="text-zinc-300 text-xs overflow-auto">
+              {JSON.stringify({ 
+                videosCount: videos.length, 
+                isLoading, 
+                formData,
+                editingVideo: editingVideo?.id 
+              }, null, 2)}
+            </pre>
           </div>
         )}
       </div>
