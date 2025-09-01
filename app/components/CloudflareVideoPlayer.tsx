@@ -46,6 +46,7 @@ export default function CloudflareVideoPlayer({
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const hlsUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.m3u8`;
   const dashUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/manifest/video.mpd`;
@@ -54,6 +55,15 @@ export default function CloudflareVideoPlayer({
 
   const speedOptions = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
+  // Détection mobile simple
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(isMobileDevice);
+    };
+    checkMobile();
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = isFullscreen ? 'hidden' : '';
   }, [isFullscreen]);
@@ -61,6 +71,13 @@ export default function CloudflareVideoPlayer({
   useEffect(() => {
     if (!videoRef.current) return;
     const video = videoRef.current;
+
+    // Configuration spécifique mobile
+    if (isMobile) {
+      video.setAttribute('playsinline', 'true');
+      video.setAttribute('webkit-playsinline', 'true');
+      video.setAttribute('x5-playsinline', 'true');
+    }
 
     const savedTime = parseFloat(localStorage.getItem(STORAGE_KEY) || '0');
     if (!isNaN(savedTime)) video.currentTime = savedTime;
@@ -79,6 +96,7 @@ export default function CloudflareVideoPlayer({
 
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = hlsUrl;
+      setStreamType('native');
     } else {
       import('hls.js').then(HlsLib => {
         if (HlsLib.default.isSupported()) {
@@ -93,8 +111,16 @@ export default function CloudflareVideoPlayer({
             player.initialize(video, dashUrl, autoplay);
             setDashInstance(player);
             setStreamType('dash');
+          }).catch(() => {
+            // Fallback final
+            video.src = hlsUrl;
+            setStreamType('native');
           });
         }
+      }).catch(() => {
+        // Fallback si HLS.js ne charge pas
+        video.src = hlsUrl;
+        setStreamType('native');
       });
     }
 
@@ -102,22 +128,37 @@ export default function CloudflareVideoPlayer({
       if (hlsInstance) hlsInstance.destroy();
       if (dashInstance) dashInstance.destroy();
     };
-  }, [videoId]);
+  }, [videoId, isMobile]);
 
   const handleMouseMove = () => {
-    setShowControls(true);
-    if (controlsTimeout) clearTimeout(controlsTimeout);
-    const timeout = setTimeout(() => {
-      if (isPlaying) setShowControls(false);
-    }, 3000);
-    setControlsTimeout(timeout);
+    if (!isMobile) {
+      setShowControls(true);
+      if (controlsTimeout) clearTimeout(controlsTimeout);
+      const timeout = setTimeout(() => {
+        if (isPlaying) setShowControls(false);
+      }, 3000);
+      setControlsTimeout(timeout);
+    }
+  };
+
+  const handleTouchStart = () => {
+    if (isMobile) {
+      setShowControls(true);
+      if (controlsTimeout) clearTimeout(controlsTimeout);
+      const timeout = setTimeout(() => {
+        if (isPlaying) setShowControls(false);
+      }, 4000);
+      setControlsTimeout(timeout);
+    }
   };
 
   const handleMouseLeave = () => {
-    if (controlsTimeout) clearTimeout(controlsTimeout);
-    if (isPlaying) {
-      const timeout = setTimeout(() => setShowControls(false), 1000);
-      setControlsTimeout(timeout);
+    if (!isMobile && controlsTimeout) {
+      clearTimeout(controlsTimeout);
+      if (isPlaying) {
+        const timeout = setTimeout(() => setShowControls(false), 1000);
+        setControlsTimeout(timeout);
+      }
     }
   };
 
@@ -127,10 +168,19 @@ export default function CloudflareVideoPlayer({
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        await videoRef.current.play(); // 🔹 force play pour iPhone
+        await videoRef.current.play();
       }
     } catch (err) {
-      console.log("Erreur de lecture sur iPhone :", err);
+      console.log("Erreur de lecture:", err);
+      // Retry with muted if failed on mobile
+      if (isMobile) {
+        try {
+          videoRef.current.muted = true;
+          await videoRef.current.play();
+        } catch (mutedErr) {
+          console.log("Échec même en muet:", mutedErr);
+        }
+      }
     }
   };
 
@@ -177,7 +227,8 @@ export default function CloudflareVideoPlayer({
 
     if (document.fullscreenElement) {
       document.exitFullscreen().then(() => setIsFullscreen(false));
-    } else if ((videoRef.current as any).webkitEnterFullscreen) {
+    } else if (isMobile && (videoRef.current as any).webkitEnterFullscreen) {
+      // Fullscreen natif sur iOS
       (videoRef.current as any).webkitEnterFullscreen();
       setIsFullscreen(true);
     } else {
@@ -186,6 +237,13 @@ export default function CloudflareVideoPlayer({
   }
 
   const handleVideoClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile) {
+      // Sur mobile, simple toggle play/pause
+      togglePlay();
+      return;
+    }
+
+    // Comportement desktop original
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
@@ -201,139 +259,171 @@ export default function CloudflareVideoPlayer({
       className={`relative w-full overflow-hidden bg-black group ${className} ${
         isFullscreen ? 'fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center' : 'rounded-xl'
       }`}
-      style={{ aspectRatio: isFullscreen ? undefined : '16/9', maxHeight: isFullscreen ? '100vh' : '80vh' }}
+      style={{ 
+        aspectRatio: isFullscreen ? undefined : '16/9', 
+        maxHeight: isFullscreen ? '100vh' : '80vh',
+        touchAction: isMobile ? 'manipulation' : 'auto'
+      }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      onTouchStart={handleMouseMove}
-      onTouchEnd={handleMouseLeave}
+      onTouchStart={handleTouchStart}
     >
       <video
         ref={videoRef}
         className={`w-full h-full ${isFullscreen ? 'object-contain' : 'object-cover rounded-xl'}`}
         autoPlay={autoplay}
-        muted={true} // 🔹 obligatoire pour iPhone
-        playsInline
-        webkit-playsinline="true"
-        x5-playsinline="true"
+        muted={isMobile ? true : false}
+        playsInline={isMobile}
         poster={thumbnailUrl || thumbnailApiUrl}
         preload="auto"
         controls={false}
       />
 
-      <div className="absolute inset-0 cursor-pointer z-10" onClick={handleVideoClick} />
+      <div 
+        className="absolute inset-0 cursor-pointer z-10" 
+        onClick={handleVideoClick}
+        style={{ touchAction: isMobile ? 'manipulation' : 'auto' }}
+      />
 
       {!isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-          <div className="bg-black/70 rounded-full p-6" onClick={togglePlay}>
-            <Play size={48} className="text-white ml-2" />
+          <div 
+            className={`bg-black/70 rounded-full p-6 pointer-events-auto cursor-pointer ${
+              isMobile ? 'scale-110' : ''
+            }`} 
+            onClick={togglePlay}
+            style={{ touchAction: 'manipulation' }}
+          >
+            <Play size={isMobile ? 56 : 48} className="text-white ml-2" />
           </div>
         </div>
       )}
 
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 z-30 transition-opacity duration-300 ${
-          showControls ? 'opacity-100' : 'opacity-0'
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent ${
+          isMobile ? 'p-3' : 'p-4'
+        } z-30 transition-opacity duration-300 ${
+          showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <div className="mb-4">
+        <div className={isMobile ? 'mb-3' : 'mb-4'}>
           <div
-            className="w-full h-1 bg-gray-600 rounded-full cursor-pointer hover:h-2 transition-all duration-200"
+            className={`w-full ${isMobile ? 'h-2' : 'h-1'} bg-gray-600 rounded-full cursor-pointer hover:h-2 transition-all duration-200`}
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const perc = (e.clientX - rect.left) / rect.width;
               seekTo(perc * duration);
             }}
+            style={{ touchAction: 'manipulation' }}
           >
             <div className="h-full bg-blue-400 rounded-full relative" style={{ width: `${progressPercentage}%` }}>
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-blue-400 rounded-full opacity-0 hover:opacity-100 transition-opacity" />
+              <div className={`absolute right-0 top-1/2 transform -translate-y-1/2 ${
+                isMobile ? 'w-4 h-4' : 'w-3 h-3'
+              } bg-blue-400 rounded-full opacity-0 hover:opacity-100 transition-opacity`} />
             </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4 relative">
-          <button onClick={togglePlay} className="text-white hover:text-gray-300 transition-colors">
-            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-          </button>
-
-          <button
-            onClick={toggleMute}
-            className={`transition-colors ${isMuted ? 'text-white hover:text-gray-300' : 'text-blue-400 hover:text-blue-300'}`}
+        <div className={`flex items-center ${isMobile ? 'space-x-3' : 'space-x-4'} relative`}>
+          <button 
+            onClick={togglePlay} 
+            className="text-white hover:text-gray-300 transition-colors"
+            style={{ touchAction: 'manipulation' }}
           >
-            {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            {isPlaying ? <Pause size={isMobile ? 28 : 24} /> : <Play size={isMobile ? 28 : 24} />}
           </button>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={volume}
-              onChange={(e) => setVideoVolume(parseFloat(e.target.value))}
-              className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
-                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-                       [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${volume * 100}%, #4b5563 ${volume * 100}%, #4b5563 100%)`
-              }}
-            />
-          </div>
+          {/* Contrôles audio - cachés sur très petit écran mobile */}
+          {!isMobile && (
+            <>
+              <button
+                onClick={toggleMute}
+                className={`transition-colors ${isMuted ? 'text-white hover:text-gray-300' : 'text-blue-400 hover:text-blue-300'}`}
+              >
+                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              </button>
 
-          <div className="text-white text-sm font-mono">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={volume}
+                  onChange={(e) => setVideoVolume(parseFloat(e.target.value))}
+                  className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
+                           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
+                           [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, #60a5fa 0%, #60a5fa ${volume * 100}%, #4b5563 ${volume * 100}%, #4b5563 100%)`
+                  }}
+                />
+              </div>
+            </>
+          )}
+
+          <div className={`text-white ${isMobile ? 'text-xs' : 'text-sm'} font-mono`}>
             {formatTime(currentTime)} / {formatTime(duration)}
           </div>
 
           <div className="flex-1" />
 
-          <div className="relative flex items-center">
-            <button
-              onClick={() => {
-                setShowSettingsMenu(!showSettingsMenu);
-                setShowSpeedMenu(false);
-              }}
-              className="text-white hover:text-gray-300 transition-colors flex items-center relative"
-            >
-              <Settings size={20} />
-              <span className="absolute -top-3 -right-3 bg-blue-400 text-black text-[10px] font-bold px-0.5 py-0.5 rounded leading-none">
-                HD
-              </span>
-            </button>
+          {/* Menu des paramètres - caché sur mobile pour économiser l'espace */}
+          {!isMobile && (
+            <div className="relative flex items-center">
+              <button
+                onClick={() => {
+                  setShowSettingsMenu(!showSettingsMenu);
+                  setShowSpeedMenu(false);
+                }}
+                className="text-white hover:text-gray-300 transition-colors flex items-center relative"
+              >
+                <Settings size={20} />
+                <span className="absolute -top-3 -right-3 bg-blue-400 text-black text-[10px] font-bold px-0.5 py-0.5 rounded leading-none">
+                  HD
+                </span>
+              </button>
 
-            {showSettingsMenu && (
-              <div className="absolute bottom-full right-0 mb-2 bg-black/90 rounded-lg p-2 min-w-48">
-                <button
-                  onClick={() => {
-                    setShowSpeedMenu(true);
-                    setShowSettingsMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-white hover:bg-gray-700 rounded flex justify-between items-center"
-                >
-                  <span>Vitesse de lecture</span>
-                  <span className="text-gray-400">{playbackRate}x</span>
-                </button>
-              </div>
-            )}
-
-            {showSpeedMenu && (
-              <div className="absolute bottom-full right-0 mb-2 bg-black/90 rounded-lg p-2 min-w-32">
-                <div className="px-3 py-2 text-gray-300 text-sm border-b border-gray-600 mb-1">Vitesse</div>
-                {speedOptions.map((speed) => (
+              {showSettingsMenu && (
+                <div className="absolute bottom-full right-0 mb-2 bg-black/90 rounded-lg p-2 min-w-48">
                   <button
-                    key={speed}
-                    onClick={() => changePlaybackRate(speed)}
-                    className={`w-full text-left px-3 py-2 text-white hover:bg-gray-700 rounded ${
-                      playbackRate === speed ? 'bg-blue-500' : ''
-                    }`}
+                    onClick={() => {
+                      setShowSpeedMenu(true);
+                      setShowSettingsMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-white hover:bg-gray-700 rounded flex justify-between items-center"
                   >
-                    {speed}x {speed === 1 ? '(Normal)' : ''}
+                    <span>Vitesse de lecture</span>
+                    <span className="text-gray-400">{playbackRate}x</span>
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
+              )}
 
-          <button onClick={toggleFullscreen} className="text-white hover:text-gray-300 transition-colors">
-            {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+              {showSpeedMenu && (
+                <div className="absolute bottom-full right-0 mb-2 bg-black/90 rounded-lg p-2 min-w-32">
+                  <div className="px-3 py-2 text-gray-300 text-sm border-b border-gray-600 mb-1">Vitesse</div>
+                  {speedOptions.map((speed) => (
+                    <button
+                      key={speed}
+                      onClick={() => changePlaybackRate(speed)}
+                      className={`w-full text-left px-3 py-2 text-white hover:bg-gray-700 rounded ${
+                        playbackRate === speed ? 'bg-blue-500' : ''
+                      }`}
+                    >
+                      {speed}x {speed === 1 ? '(Normal)' : ''}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <button 
+            onClick={toggleFullscreen} 
+            className="text-white hover:text-gray-300 transition-colors"
+            style={{ touchAction: 'manipulation' }}
+          >
+            {isFullscreen ? <Minimize size={isMobile ? 24 : 20} /> : <Maximize size={isMobile ? 24 : 20} />}
           </button>
         </div>
       </div>
