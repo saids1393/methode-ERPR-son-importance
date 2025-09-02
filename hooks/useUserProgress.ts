@@ -1,5 +1,3 @@
-// hooks/useUserProgress.ts
-
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
@@ -27,22 +25,19 @@ export function useUserProgress() {
     }
   }, []);
 
-  // Forcer la mise à jour
   const forceUpdate = useCallback(() => {
     setUpdateTrigger(prev => prev + 1);
   }, []);
 
-  // Mise à jour depuis des données externes
   const updateFromExternal = useCallback((data: { completedPages?: number[]; completedQuizzes?: number[] }) => {
     if (data.completedPages) setCompletedPages(new Set(data.completedPages));
     if (data.completedQuizzes) setCompletedQuizzes(new Set(data.completedQuizzes));
     forceUpdate();
   }, [forceUpdate]);
 
-  // Vérifier si un chapitre est complété
   const isChapterCompleted = useCallback((chapterNumber: number): boolean => {
     const chapterPages: { [key: number]: number[] } = {
-      1: [1, 2, 3, 4, 5, 6, 7],
+      1: [0, 1, 2, 3, 4, 5, 6, 7],
       2: [8, 9, 10, 11],
       3: [12, 13, 14, 15],
       4: [16],
@@ -63,7 +58,6 @@ export function useUserProgress() {
     return allPagesCompleted && quizCompleted;
   }, [completedPages, completedQuizzes]);
 
-  // Envoi de devoir
   const triggerHomeworkSend = useCallback(async (chapterNumber: number) => {
     if (isProfessorMode) return;
 
@@ -86,7 +80,6 @@ export function useUserProgress() {
     }
   }, [isProfessorMode]);
 
-  // Chargement de la progression
   const loadProgress = useCallback(async () => {
     if (isProfessorMode) {
       setIsLoading(false);
@@ -108,7 +101,6 @@ export function useUserProgress() {
     }
   }, [isProfessorMode, forceUpdate]);
 
-  // Sauvegarde de la progression
   const saveProgress = useCallback(async (pageNumber?: number, quizNumber?: number, action: 'add' | 'remove' = 'add') => {
     if (isProfessorMode) return false;
 
@@ -137,9 +129,9 @@ export function useUserProgress() {
     }
   }, [isProfessorMode, forceUpdate]);
 
-  // Toggle page completion
+  // Toggle page completion – page 0 autorisée
   const togglePageCompletion = useCallback(async (pageNumber: number) => {
-    if (isProfessorMode || pageNumber === 0 || pageNumber === 30) return;
+    if (isProfessorMode || pageNumber === 30) return; // page 0 autorisée
 
     const isCompleted = completedPages.has(pageNumber);
     const action = isCompleted ? 'remove' : 'add';
@@ -165,7 +157,6 @@ export function useUserProgress() {
     }
   }, [completedPages, saveProgress, isProfessorMode, forceUpdate]);
 
-  // Toggle quiz completion
   const toggleQuizCompletion = useCallback(async (quizNumber: number) => {
     if (isProfessorMode || quizNumber === 11) return;
 
@@ -196,7 +187,7 @@ export function useUserProgress() {
   // Vérification automatique des chapitres complétés
   useEffect(() => {
     const chapterPages: { [key: number]: number[] } = {
-      1: [1, 2, 3, 4, 5, 6, 7],
+      1: [0, 1, 2, 3, 4, 5, 6, 7],
       2: [8, 9, 10, 11],
       3: [12, 13, 14, 15],
       4: [16],

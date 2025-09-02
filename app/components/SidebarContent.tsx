@@ -1,5 +1,3 @@
-// app/components/SidebarContent.tsx
-
 'use client';
 
 import Link from "next/link";
@@ -63,9 +61,18 @@ export default function SidebarContent() {
     return calculateProgress(completedPages, completedQuizzes);
   }, [completedPages, completedQuizzes, updateTrigger]);
 
+  // ✅ Fonction ajustée pour vérifier pages + quiz, avec cas spécial pour chapitre 0
   const isChapterCompleted = useCallback((chapter: typeof chapters[0]) => {
-    return chapter.pages.every(page => completedPages.has(page.pageNumber));
-  }, [completedPages]);
+    const pagesCompleted = chapter.pages.every(page => completedPages.has(page.pageNumber));
+    const quizCompleted = chapter.quiz ? completedQuizzes.has(chapter.chapterNumber) : true;
+
+    // Cas spécial pour le chapitre 0 : pas de pages, seulement le quiz
+    if (chapter.chapterNumber === 0) {
+      return quizCompleted;
+    }
+
+    return pagesCompleted && quizCompleted;
+  }, [completedPages, completedQuizzes]);
 
   const handleNavigation = useCallback(async (href: string, e: React.MouseEvent) => {
     const timeOnPage = getTimeOnCurrentPage();
@@ -203,6 +210,8 @@ export default function SidebarContent() {
                     <ChevronDown className={`${chapterComplete && !isProfessorMode ? 'text-blue-400' : 'text-gray-400'}`} size={18} />
                   ) : (
                     <ChevronRight className={`${chapterComplete && !isProfessorMode ? 'text-blue-400' : 'text-gray-400'}`} size={18} />
+                 
+
                   )}
                 </button>
 

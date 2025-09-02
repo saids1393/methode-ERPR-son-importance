@@ -25,50 +25,57 @@ export type Chapter = {
 
 export const chapters: Chapter[] = [
   {
-    title: " avant la méthode",
+    title: "avant la méthode",
     chapterNumber: 0,
     introduction: "Imaginez que vous entrez dans une nouvelle classe avec 28 élèves. Chaque élève porte un prénom unique : le premier s'appelle Alif, le tout premier que vous rencontrerez. Le dernier s'appelle Ya, le dernier de la classe. Au début, retenir les prénoms de ces 28 camarades vous semblera difficile… mais à force de les revoir, de les entendre et de les répéter, même les prénoms les plus compliqués finiront par vous sembler familiers.\nC'est exactement pareil pour les 28 lettres de l'alphabet arabe. Chacune est comme un prénom à apprendre et à reconnaître. Ces lettres sont la base de tout : ce sont les voyelles et consonnes qui donnent vie aux mots.\nDans cette méthode, nous allons apprendre à bien prononcer chaque lettre — comme si vous prononciez correctement le prénom de chacun de vos nouveaux amis, même ceux dont le prénom semble difficile au départ.\nEt quel est le secret ?\nUn seul : l'écoute, la répétition, l'enregistrement de la lecture de ces lettres, la comparaison et réessayer jusqu'à la réussite, jusqu'à bien les prononcer.",
-    pages: [
-      {
-        title: "Leçon : prononciation des lettres arabes",
-        href: "/chapitres/0/0",
-        pageNumber: 0,
-        status: 'completed'
-      }
-    ],
+    pages: [],
     quiz: [
-      {
-        question: "Combien y a-t-il de lettres dans l'alphabet arabe ?",
-        choices: ["26", "28", "30", "32"],
-        correctAnswerIndex: 1
-      },
-      {
-        question: "Comment s'appelle la première lettre de l'alphabet arabe ?",
-        choices: ["Ba", "Ta", "Alif", "Ya"],
-        correctAnswerIndex: 2
-      },
-      {
-        question: "Comment s'appelle la dernière lettre de l'alphabet arabe ?",
-        choices: ["Alif", "Ya", "Noun", "Mim"],
-        correctAnswerIndex: 1
-      },
-      {
-        question: "Quel est le secret pour bien apprendre la prononciation des lettres arabes selon la méthode ?",
-        choices: ["Écrire beaucoup", "L'écoute et la répétition", "Mémoriser uniquement", "Lire rapidement"],
-        correctAnswerIndex: 1
-      },
-      {
-        question: "À quoi compare-t-on les 28 lettres arabes dans l'introduction ?",
-        choices: ["Des animaux", "Des objets", "Des élèves avec des prénoms", "Des couleurs"],
-        correctAnswerIndex: 2
-      }
-    ]
+    {
+      question: "Que veut dire l’acronyme de ERPR ?",
+      choices: [
+        "Égale, répétition, pratique, régularité",
+        "Écoute, répétition, pratique, régularité",
+        "Entendre, régularité, pratique, répétition",
+        "Écoute, régularité, pratique, répétition"
+      ],
+      correctAnswerIndex: 1
+    },
+    {
+      question: "Que faut-il pour pratiquer la méthode ERPR ?",
+      choices: ["La force", "La motivation", "La discipline", "La détermination"],
+      correctAnswerIndex: 2
+    },
+    {
+      question: "L’ERPR sont 4 piliers qui mènent vers quoi ?",
+      choices: ["La victoire", "La réussite", "Le succès", "L’engagement"],
+      correctAnswerIndex: 1
+    },
+    {
+      question: "Entendre veut dire ?",
+      choices: [
+        "Écouter sans y prêter attention",
+        "Écouter en y prêtant attention"
+      ],
+      correctAnswerIndex: 1
+    },
+    {
+      question: "La méthode ERPR est une logique naturelle que nous détenons tous ?",
+      choices: ["Oui", "Non"],
+      correctAnswerIndex: 0
+    }
+  ]
   },
   {
     title: "Lettres de l'alphabet",
     chapterNumber: 1,
     introduction: "Nous avons découvert les 28 lettres de base. Il est maintenant temps d'entrer un peu plus dans le détail.\nParmi ces 28 lettres, 8 lettres particulières sont appelées lettres emphatiques, ou encore lettres graves. Dans notre méthode, elles seront colorées en rouge au début, car elles se prononcent avec un son plus grave et plus profond que les autres.\nPour mieux retenir : imaginez que, dans une classe de 28 élèves, 8 d'entre eux ont une voix grave, tandis que les autres ont une voix plus aiguë. C'est exactement cette différence que vous devrez entendre, sentir et reproduire en prononçant ces lettres.\nMais ce n'est pas tout !\nEn plus des 28 lettres principales, il existe deux caractères spéciaux que nous allons aussi apprendre à reconnaître. Dans notre méthode, ils seront colorés en violet au début :\nLa lettre Hamzah (ء) : c'est une lettre auxiliaire, souvent portée par d'autres lettres (comme Alif, Wâw, Yâ ou même isolée sur la ligne). Elle ne fait pas partie des 28 lettres de base, mais elle joue un rôle essentiel dans la prononciation des sons coupés (coupure glottale).\n\nLe Tâ Marbûta (ة), aussi appelé \"Tâ fermé\" : ce n'est pas une lettre indépendante, mais une forme particulière de la lettre Tâ (ت). On la retrouve uniquement en fin de mot, et elle sert principalement à indiquer le féminin.",
     pages: [
+      {
+        title: "Leçon : prononciation des lettres arabes",
+        href: "/chapitres/1/0",
+        pageNumber: 0,
+        status: 'completed'
+      },
       {
         title: "Leçon : lettres seules (non attachées)",
         href: "/chapitres/1/1",
@@ -113,32 +120,32 @@ export const chapters: Chapter[] = [
       }
     ],
     quiz: [
-      {
-        question: "Combien de lettres emphatiques y a‑t‑il dans l'alphabet arabe ?",
-        choices: ["5", "8", "12", "28"],
-        correctAnswerIndex: 1
-      },
-      {
-        question: "Quelle lettre est une lettre auxiliaire ?",
-        choices: ["Alif", "Hamzah", "Tâ Marbûta", "Yâ"],
-        correctAnswerIndex: 1
-      },
-      {
-        question: "Où trouve-t-on le Tâ Marbûta (ة) dans un mot ?",
-        choices: ["Au début", "Au milieu", "À la fin", "N'importe où"],
-        correctAnswerIndex: 2
-      },
-      {
-        question: "À quoi sert principalement le Tâ Marbûta ?",
-        choices: ["Indiquer le masculin", "Indiquer le féminin", "Indiquer le pluriel", "Indiquer la négation"],
-        correctAnswerIndex: 1
-      },
-      {
-        question: "Comment sont colorées les lettres emphatiques dans cette méthode ?",
-        choices: ["En bleu", "En vert", "En rouge", "En violet"],
-        correctAnswerIndex: 2
-      }
-    ]
+    {
+      question: "Combien de lettres emphatiques y a-t-il dans l'alphabet arabe ?",
+      choices: ["5", "8", "12", "28"],
+      correctAnswerIndex: 1
+    },
+    {
+      question: "Combien de lettres y a-t-il dans la langue arabe ?",
+      choices: ["25", "28", "30", "29"],
+      correctAnswerIndex: 1
+    },
+    {
+      question: "Dans ce chapitre, les lettres sont comparées comme quoi en terme d’analogie pédagogique ?",
+      choices: ["Des lettres françaises", "Des objets", "Des élèves", "N’importe où"],
+      correctAnswerIndex: 2
+    },
+    {
+      question: "Pour les points de sortie, sont-ils ?",
+      choices: ["À savoir", "À mémoriser", "À connaître", "En rouge"],
+      correctAnswerIndex: 3
+    },
+    {
+      question: "Comment sont colorées les lettres emphatiques dans cette méthode ?",
+      choices: ["En bleu", "En vert", "En rouge", "En violet"],
+      correctAnswerIndex: 2
+    }
+  ]
   },
   {
     title: "Voyelles simples",
@@ -177,7 +184,7 @@ export const chapters: Chapter[] = [
         correctAnswerIndex: 1
       },
       {
-        question: "Quel son produit la Fatha ?",
+        question: "Quel son produit la Fathah ?",
         choices: ["I", "OU", "A", "É"],
         correctAnswerIndex: 2
       },
@@ -187,7 +194,7 @@ export const chapters: Chapter[] = [
         correctAnswerIndex: 3
       },
       {
-        question: "Quel son produit la Kasrah ?",
+        question: "Quel son produit la Kassrah ?",
         choices: ["OU", "A", "I", "É"],
         correctAnswerIndex: 2
       },
@@ -235,17 +242,17 @@ export const chapters: Chapter[] = [
         correctAnswerIndex: 1
       },
       {
-        question: "Comment se prononce la double voyelle de la Fatha ?",
+        question: "Comment se prononce la double voyelle de la Fathah ?",
         choices: ["in", "oun", "an", "en"],
         correctAnswerIndex: 2
       },
       {
-        question: "Comment se prononce la double voyelle de la Damma ?",
+        question: "Comment se prononce la double voyelle de la Dammah ?",
         choices: ["an", "in", "en", "oun"],
         correctAnswerIndex: 3
       },
       {
-        question: "Comment se prononce la double voyelle de la Kasra ?",
+        question: "Comment se prononce la double voyelle de la Kassrah ?",
         choices: ["an", "oun", "in", "on"],
         correctAnswerIndex: 2
       },
@@ -285,13 +292,13 @@ export const chapters: Chapter[] = [
         correctAnswerIndex: 1
       },
       {
-        question: "Si une lettre avec un point au-dessus ne s'attache pas à la lettre suivante, quelle lettre est-ce probablement ?",
+        question: "Si une lettre avec un point au-dessus ne s'attache pas à la lettre suivante, quelle lettre dans les propositions ci-dessous ?",
         choices: ["Noun", "Ba", "Dhal", "Mim"],
         correctAnswerIndex: 2
       },
       {
         question: "Pourquoi est-il important de connaître les lettres qui ne s'attachent pas ?",
-        choices: ["Pour écrire plus vite", "Pour éviter les erreurs de lecture", "Pour la calligraphie", "Pour la grammaire"],
+        choices: ["Pour écrire plus vite", "Pour éviter les erreurs de lecture et d'écriture", "Pour la calligraphie", "Pour la grammaire"],
         correctAnswerIndex: 1
       }
     ]
@@ -369,12 +376,12 @@ export const chapters: Chapter[] = [
       },
       {
         question: "Quelle voyelle doit porter la lettre précédente pour activer la prolongation Alif ?",
-        choices: ["Kasra", "Damma", "Fatha", "Sukoun"],
+        choices: ["Kassrah", "Damma", "Fathah", "Soukoun"],
         correctAnswerIndex: 2
       },
       {
         question: "Quelle voyelle doit porter la lettre précédente pour activer la prolongation Waw ?",
-        choices: ["Fatha", "Damma", "Kasra", "Tanwin"],
+        choices: ["Fathah", "Dammah", "Kassrah", "Tanwin"],
         correctAnswerIndex: 1
       },
       {
@@ -383,8 +390,8 @@ export const chapters: Chapter[] = [
         correctAnswerIndex: 2
       },
       {
-        question: "Que signifie 'saghīghah' en arabe ?",
-        choices: ["Grande", "Petite", "Longue", "Courte"],
+        question: "La 2ème partie des prolongations concerne ",
+        choices: ["l'arabe standard uniquement", "le Tajwid", "l'arabe standard et le Tajwid", "La grammaire"],
         correctAnswerIndex: 1
       }
     ]
@@ -565,7 +572,7 @@ export const chapters: Chapter[] = [
       },
       {
         question: "Comment prononce-t-on une lettre avec shaddah ?",
-        choices: ["Rapidement", "En la sautant", "En appuyant et insistant", "Doucement"],
+        choices: ["Rapidement", "En la sautant", "En appuyant et insistant sur le point de sortie de la lettre", "Doucement"],
         correctAnswerIndex: 2
       },
       {
@@ -591,33 +598,7 @@ export const chapters: Chapter[] = [
         status: 'completed'
       }
     ],
-    quiz: [
-      {
-        question: "Combien de lettres compose l'alphabet arabe de base ?",
-        choices: ["26", "28", "30", "32"],
-        correctAnswerIndex: 1
-      },
-      {
-        question: "Quels sont les trois éléments principaux du Tachkil étudiés dans les derniers chapitres ?",
-        choices: ["Fatha, Damma, Kasra", "Alif, Waw, Yaa", "Madd, sukoun, shaddah", "Solaire, lunaire, emphatique"],
-        correctAnswerIndex: 2
-      },
-      {
-        question: "Combien de lettres ne s'attachent pas à la lettre suivante ?",
-        choices: ["4", "5", "6", "8"],
-        correctAnswerIndex: 2
-      },
-      {
-        question: "Qu'est-ce qui différencie les lettres solaires des lettres lunaires ?",
-        choices: ["Leur forme", "La prononciation du lâm de l'article", "Leur position", "Leur couleur"],
-        correctAnswerIndex: 1
-      },
-      {
-        question: "Quelles sont les trois lettres de prolongation en arabe ?",
-        choices: ["Ba, Ta, Tha", "Alif, Waw, Yaa", "Noun, Mim, Lam", "Dal, Dhal, Ra"],
-        correctAnswerIndex: 1
-      }
-    ]
+   
   }
 ];
 
