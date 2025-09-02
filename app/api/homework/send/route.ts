@@ -1,117 +1,122 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUserFromRequest } from '@/lib/auth';
-import { checkAndSendHomework } from '@/lib/homework-email';
+import { requireAdmin } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 
-// Variable pour stocker les requêtes en cours par utilisateur
-const processingRequests = new Map<string, boolean>();
-
-// POST - Déclencher l'envoi d'un devoir pour un chapitre
-export async function POST(request: NextRequest) {
-  let userId: string | null = null;
-  let chapterNumber: number | null = null;
-
+// GET - Récupérer tous les envois de devoirs avec détails
+export async function GET(request: NextRequest) {
   try {
-    console.log(`📝 [API] ===== DÉBUT ENVOI DEVOIR =====`);
+    await requireAdmin(request);
 
-    const user = await getAuthUserFromRequest(request);
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const chapterId = searchParams.get('chapterId');
+    const userId = searchParams.get('userId');
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
 
-    if (!user) {
-      console.log(`❌ [API] Utilisateur non authentifié`);
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      );
+    const skip = (page - 1) * limit;
+
+    // Construire les conditions de recherche
+    const whereConditions: any = {};
+    if (chapterId) {
+      whereConditions.homework = { chapterId: parseInt(chapterId) };
+    }
+    if (userId) {
+      whereConditions.userId = userId;
+    }
+    if (status === 'success') {
+      whereConditions.emailSent = true;
+    } else if (status === 'failed') {
+      whereConditions.emailSent = false;
+    }
+    if (search) {
+      whereConditions.user = {
+        OR: [
+          { email: { contains: search, mode: 'insensitive' } },
+          { username: { contains: search, mode: 'insensitive' } }
+        ]
+      };
     }
 
-    userId = user.id;
-
-    const body = await request.json();
-    chapterNumber = body.chapterNumber;
-
-    if (typeof chapterNumber !== 'number' || chapterNumber < 0 || chapterNumber > 11) {
-      console.log(`❌ [API] Numéro de chapitre invalide:`, chapterNumber);
-      return NextResponse.json(
-        { error: 'Numéro de chapitre invalide' },
-        { status: 400 }
-      );
-    }
-
-    // PROTECTION CONTRE LES REQUÊTES SIMULTANÉES
-    const requestKey = `${userId}-${chapterNumber}`;
-
-    if (processingRequests.get(requestKey)) {
-      console.log(`⚠️ [API] Requête déjà en cours pour ${requestKey}`);
-      return NextResponse.json({
-        success: true,
-        sent: false,
-        message: `Traitement déjà en cours pour le chapitre ${chapterNumber}`
-      });
-    }
-
-    // Marquer la requête comme en cours
-    processingRequests.set(requestKey, true);
-
-    console.log(`📝 [API] Demande d'envoi de devoir pour utilisateur ${userId}, chapitre ${chapterNumber}`);
-
-    // VÉRIFICATION PRÉALABLE RENFORCÉE : Éviter les appels multiples
-    console.log(`🔍 [API] VÉRIFICATION PRÉALABLE - Recherche envoi existant...`);
-
-    const existingCheck = await prisma.homeworkSend.findFirst({
-      where: {
-        userId: userId,
-        homework: {
-          chapterId: chapterNumber
-        }
-      }
-    });
-
-    if (existingCheck) {
-      console.log(`🚫 [API] Devoir déjà envoyé - ID: ${existingCheck.id}`);
-      console.log(`📝 [API] ===== FIN ENVOI DEVOIR (DOUBLON DÉTECTÉ) =====`);
-
-      // Libérer le verrou
-      processingRequests.delete(requestKey);
-
-      return NextResponse.json({
-        success: true,
-        sent: false,
-        message: `Devoir du chapitre ${chapterNumber} déjà envoyé`,
-        alreadySent: true
-      });
-    }
-
-    console.log(`✅ [API] Aucun envoi existant trouvé - Poursuite du traitement`);
-
-    // Vérifier et envoyer le devoir
-    const sent = await checkAndSendHomework(userId, chapterNumber);
-
-    console.log(`📧 [API] Résultat envoi devoir chapitre ${chapterNumber}:`, sent);
-    console.log(`📝 [API] ===== FIN ENVOI DEVOIR =====`);
-
-    // Libérer le verrou
-    processingRequests.delete(requestKey);
+    const [sends, totalCount, stats] = await Promise.all([
+      prisma.homeworkSend.findMany({
+        where: whereConditions,
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              gender: true
+            }
+          },
+          homework: {
+            select: {
+              id: true,
+              chapterId: true,
+              title: true
+            }
+          }
+        },
+        orderBy: { sentAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.homeworkSend.count({ where: whereConditions }),
+      // Statistiques globales
+      prisma.homeworkSend.aggregate({
+        _count: {
+          id: true,
+          userId: true
+        },
+        where: whereConditions
+      }).then(async (agg) => {
+        const [successfulSends, failedSends, uniqueUsers] = await Promise.all([
+          prisma.homeworkSend.count({ 
+            where: { ...whereConditions, emailSent: true } 
+          }),
+          prisma.homeworkSend.count({ 
+            where: { ...whereConditions, emailSent: false } 
+          }),
+          prisma.homeworkSend.groupBy({
+            by: ['userId'],
+            where: whereConditions,
+            _count: { userId: true }
+          }).then(groups => groups.length)
+        ]);
+        
+        return {
+          totalSends: agg._count.id,
+          successfulSends,
+          failedSends,
+          uniqueUsers
+        };
+      })
+    ]);
 
     return NextResponse.json({
-      success: true,
-      sent,
-      message: sent 
-        ? `Devoir du chapitre ${chapterNumber} envoyé avec succès`
-        : `Aucun devoir à envoyer pour le chapitre ${chapterNumber}`,
-      alreadySent: false
+      sends: sends.map(send => ({
+        id: send.id,
+        sentAt: send.sentAt.toISOString(),
+        emailSent: send.emailSent,
+        user: send.user,
+        homework: send.homework
+      })),
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        hasNext: page * limit < totalCount,
+        hasPrev: page > 1
+      },
+      stats
     });
-
   } catch (error) {
-    console.error('❌ [API] Send homework error:', error);
-
-    // Libérer le verrou en cas d'erreur
-    if (userId !== null && chapterNumber !== null) {
-      const requestKey = `${userId}-${chapterNumber}`;
-      processingRequests.delete(requestKey);
-    }
-
+    console.error('Get homework sends error:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de l\'envoi du devoir' },
+      { error: 'Erreur lors du chargement des envois' },
       { status: 500 }
     );
   }

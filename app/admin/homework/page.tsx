@@ -17,7 +17,8 @@ import {
   Eye,
   ChevronDown,
   ChevronRight,
-  Mail,
+  Mail, 
+  Send,
   Users,
   TrendingUp,
   BarChart3
@@ -288,6 +289,14 @@ export default function AdminHomeworkPage() {
                 <span className="hidden sm:inline">Statistiques</span>
                 <span className="sm:hidden">Stats</span>
               </button>
+              <Link
+                href="/admin/homework/sends"
+                className="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition-colors text-sm sm:text-base"
+              >
+                <Mail className="h-4 w-4" />
+                <span className="hidden sm:inline">Voir tous les envois</span>
+                <span className="sm:hidden">Envois</span>
+              </Link>
               <button
                 onClick={() => setShowForm(true)}
                 className="bg-orange-600 hover:bg-orange-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition-colors text-sm sm:text-base"
@@ -402,7 +411,12 @@ export default function AdminHomeworkPage() {
                       {stats && (
                         <div className="flex items-center gap-1 text-green-400 text-sm">
                           <Mail className="h-3 w-3" />
-                          <span>{stats.homeworkStats.find(s => s.id === homework.id)?.sentCount || 0} envoi(s)</span>
+                          <Link 
+                            href={`/admin/homework/users/${homework.id}`}
+                            className="hover:underline"
+                          >
+                            {stats.homeworkStats.find(s => s.id === homework.id)?.sentCount || 0} envoi(s)
+                          </Link>
                         </div>
                       )}
                     </div>

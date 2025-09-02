@@ -14,8 +14,12 @@ import {
   Search,
   Filter,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Download,
+  Eye,
+  Users as UsersIcon
 } from 'lucide-react';
+import React from 'react';
 
 interface HomeworkSend {
   id: string;
@@ -44,6 +48,118 @@ interface SendsResponse {
     hasNext: boolean;
     hasPrev: boolean;
   };
+  stats: {
+    totalSends: number;
+    successfulSends: number;
+    failedSends: number;
+    uniqueUsers: number;
+  };
+}
+
+interface UserDetails {
+  progressPercentage: number;
+  completedPagesCount: number;
+  completedQuizzesCount: number;
+  studyTimeFormatted: string;
+  createdAt: string;
+  isActive: boolean;
+}
+
+// Composant pour afficher les détails d'un utilisateur
+function UserDetailsCard({ userId }: { userId: string }) {
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await fetch(`/api/admin/user/${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setUserDetails(data);
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserDetails();
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-400 mx-auto"></div>
+      </div>
+    );
+  }
+
+  if (!userDetails) {
+    return (
+      <div className="text-center py-4 text-red-400">
+        Erreur lors du chargement des détails
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-zinc-700 rounded-lg p-4">
+      <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+        <User className="h-5 w-5 text-blue-400" />
+        Détails de l&apos;utilisateur
+      </h4>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+          <div className="text-zinc-400 text-sm">Progression</div>
+          <div className="text-white font-semibold">{userDetails.progressPercentage}%</div>
+          <div className="w-full bg-zinc-600 rounded-full h-2 mt-1">
+            <div 
+              className="bg-blue-400 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${userDetails.progressPercentage}%` }}
+            ></div>
+          </div>
+        </div>
+        
+        <div>
+          <div className="text-zinc-400 text-sm">Pages complétées</div>
+          <div className="text-white font-semibold">
+            {userDetails.completedPagesCount}/29
+          </div>
+        </div>
+        
+        <div>
+          <div className="text-zinc-400 text-sm">Quiz complétés</div>
+          <div className="text-white font-semibold">
+            {userDetails.completedQuizzesCount}/11
+          </div>
+        </div>
+        
+        <div>
+          <div className="text-zinc-400 text-sm">Temps d&apos;étude</div>
+          <div className="text-white font-semibold">
+            {userDetails.studyTimeFormatted}
+          </div>
+        </div>
+        
+        <div>
+          <div className="text-zinc-400 text-sm">Inscription</div>
+          <div className="text-white font-semibold text-sm">
+            {new Date(userDetails.createdAt).toLocaleDateString('fr-FR')}
+          </div>
+        </div>
+        
+        <div>
+          <div className="text-zinc-400 text-sm">Statut</div>
+          <div className={`font-semibold text-sm ${userDetails.isActive ? 'text-green-400' : 'text-red-400'}`}>
+            {userDetails.isActive ? 'Actif' : 'Inactif'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function HomeworkSendsPage() {
@@ -52,11 +168,13 @@ export default function HomeworkSendsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedChapter, setSelectedChapter] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [showUserDetails, setShowUserDetails] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     fetchSends();
-  }, [currentPage, selectedChapter]);
+  }, [currentPage, selectedChapter, selectedStatus]);
 
   const fetchSends = async () => {
     setLoading(true);
@@ -70,6 +188,13 @@ export default function HomeworkSendsPage() {
         params.append('chapterId', selectedChapter);
       }
 
+      if (selectedStatus) {
+        params.append('status', selectedStatus);
+      }
+
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
       const response = await fetch(`/api/admin/homework/sends?${params}`);
       if (response.status === 403) {
         router.push('/dashboard');
@@ -90,6 +215,31 @@ export default function HomeworkSendsPage() {
     e.preventDefault();
     setCurrentPage(1);
     fetchSends();
+  };
+
+  const exportSends = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (selectedChapter) params.append('chapterId', selectedChapter);
+      if (selectedStatus) params.append('status', selectedStatus);
+      if (searchTerm) params.append('search', searchTerm);
+      params.append('format', 'csv');
+
+      const response = await fetch(`/api/admin/homework/sends/export?${params}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `envois-devoirs-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+    }
   };
 
   if (loading && !data) {
@@ -127,14 +277,48 @@ export default function HomeworkSendsPage() {
                 </h1>
                 <p className="text-zinc-400 mt-1 sm:mt-2 text-sm sm:text-base">
                   {data?.pagination.totalCount || 0} envoi(s) au total
+                  {data?.stats && ` • ${data.stats.successfulSends} réussis • ${data.stats.uniqueUsers} utilisateurs touchés`}
                 </p>
               </div>
             </div>
+            
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <button
+                onClick={exportSends}
+                className="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg flex items-center gap-1 sm:gap-2 transition-colors text-sm sm:text-base"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Exporter CSV</span>
+                <span className="sm:hidden">Export</span>
+              </button>
+            </div>
           </div>
 
-          {/* Filtres */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <form onSubmit={handleSearch} className="flex gap-4 flex-1">
+          {/* Statistiques rapides */}
+          {data?.stats && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">{data.stats.totalSends}</div>
+                <div className="text-zinc-400 text-sm">Total envois</div>
+              </div>
+              <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-green-400">{data.stats.successfulSends}</div>
+                <div className="text-zinc-400 text-sm">Réussis</div>
+              </div>
+              <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-red-400">{data.stats.failedSends}</div>
+                <div className="text-zinc-400 text-sm">Échecs</div>
+              </div>
+              <div className="bg-zinc-700 border border-zinc-600 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-blue-400">{data.stats.uniqueUsers}</div>
+                <div className="text-zinc-400 text-sm">Utilisateurs</div>
+              </div>
+            </div>
+          )}
+
+          {/* Filtres améliorés */}
+          <div className="flex flex-col gap-4">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-zinc-400 h-4 w-4 sm:h-5 sm:w-5" />
                 <input
@@ -146,16 +330,35 @@ export default function HomeworkSendsPage() {
                 />
               </div>
               
-              <select
-                value={selectedChapter}
-                onChange={(e) => setSelectedChapter(e.target.value)}
-                className="bg-zinc-700 border border-zinc-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
-              >
-                <option value="">Tous les chapitres</option>
-                {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i} value={i}>Chapitre {i}</option>
-                ))}
-              </select>
+              <div className="flex gap-2 sm:gap-4">
+                <select
+                  value={selectedChapter}
+                  onChange={(e) => setSelectedChapter(e.target.value)}
+                  className="bg-zinc-700 border border-zinc-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                >
+                  <option value="">Tous les chapitres</option>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <option key={i} value={i}>Chapitre {i}</option>
+                  ))}
+                </select>
+                
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="bg-zinc-700 border border-zinc-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                >
+                  <option value="">Tous les statuts</option>
+                  <option value="success">Réussis</option>
+                  <option value="failed">Échecs</option>
+                </select>
+                
+                <button
+                  type="submit"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base"
+                >
+                  🔍
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -172,62 +375,98 @@ export default function HomeworkSendsPage() {
                     <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-zinc-300 text-xs sm:text-sm">Utilisateur</th>
                     <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-zinc-300 text-xs sm:text-sm">Devoir</th>
                     <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-zinc-300 text-xs sm:text-sm hidden sm:table-cell">Statut</th>
-                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-zinc-300 text-xs sm:text-sm">Date d'envoi</th>
+                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-zinc-300 text-xs sm:text-sm">Date d&apos;envoi</th>
+                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-zinc-300 text-xs sm:text-sm">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.sends.map((send) => (
-                    <tr key={send.id} className="border-b border-zinc-700 hover:bg-zinc-700/50">
-                      <td className="py-3 sm:py-4 px-3 sm:px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                            {send.user.gender === 'HOMME' ? '👨' : send.user.gender === 'FEMME' ? '👩' : '👤'}
+                    <React.Fragment key={send.id}>
+                      <tr className="border-b border-zinc-700 hover:bg-zinc-700/50">
+                        <td className="py-3 sm:py-4 px-3 sm:px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="bg-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                              {send.user.gender === 'HOMME' ? '👨' : send.user.gender === 'FEMME' ? '👩' : '👤'}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-white text-sm sm:text-base">
+                                {send.user.username || 'Sans pseudo'}
+                              </div>
+                              <div className="text-xs sm:text-sm text-zinc-400 truncate max-w-[150px] sm:max-w-none">
+                                {send.user.email}
+                              </div>
+                              <div className="text-xs text-zinc-500">
+                                ID: {send.user.id.substring(0, 8)}...
+                              </div>
+                            </div>
                           </div>
+                        </td>
+                        <td className="py-3 sm:py-4 px-3 sm:px-6">
                           <div>
                             <div className="font-semibold text-white text-sm sm:text-base">
-                              {send.user.username || 'Sans pseudo'}
+                              Chapitre {send.homework.chapterId}
                             </div>
                             <div className="text-xs sm:text-sm text-zinc-400 truncate max-w-[150px] sm:max-w-none">
-                              {send.user.email}
+                              {send.homework.title}
+                            </div>
+                            <div className="text-xs text-zinc-500">
+                              ID: {send.homework.id.substring(0, 8)}...
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 sm:py-4 px-3 sm:px-6">
-                        <div>
-                          <div className="font-semibold text-white text-sm sm:text-base">
-                            Chapitre {send.homework.chapterId}
+                        </td>
+                        <td className="py-3 sm:py-4 px-3 sm:px-6 hidden sm:table-cell">
+                          <div className="flex items-center gap-2">
+                            {send.emailSent ? (
+                              <>
+                                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
+                                <span className="text-green-400 text-sm sm:text-base">Envoyé</span>
+                              </>
+                            ) : (
+                              <>
+                                <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
+                                <span className="text-red-400 text-sm sm:text-base">Échec</span>
+                              </>
+                            )}
                           </div>
-                          <div className="text-xs sm:text-sm text-zinc-400 truncate max-w-[150px] sm:max-w-none">
-                            {send.homework.title}
+                        </td>
+                        <td className="py-3 sm:py-4 px-3 sm:px-6 text-zinc-300 text-sm">
+                          {new Date(send.sentAt).toLocaleDateString('fr-FR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </td>
+                        <td className="py-3 sm:py-4 px-3 sm:px-6">
+                          <div className="flex gap-1 sm:gap-2">
+                            <button
+                              onClick={() => setShowUserDetails(showUserDetails === send.user.id ? null : send.user.id)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white p-1.5 sm:p-2 rounded-lg transition-colors"
+                              title="Voir les détails utilisateur"
+                            >
+                              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </button>
+                            <Link
+                              href={`/admin/users/${send.user.id}`}
+                              className="bg-purple-600 hover:bg-purple-700 text-white p-1.5 sm:p-2 rounded-lg transition-colors"
+                              title="Profil utilisateur complet"
+                            >
+                              <UsersIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Link>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 sm:py-4 px-3 sm:px-6 hidden sm:table-cell">
-                        <div className="flex items-center gap-2">
-                          {send.emailSent ? (
-                            <>
-                              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" />
-                              <span className="text-green-400 text-sm sm:text-base">Envoyé</span>
-                            </>
-                          ) : (
-                            <>
-                              <XCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />
-                              <span className="text-red-400 text-sm sm:text-base">Échec</span>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 sm:py-4 px-3 sm:px-6 text-zinc-300 text-sm">
-                        {new Date(send.sentAt).toLocaleDateString('fr-FR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </td>
-                    </tr>
+                        </td>
+                      </tr>
+                      
+                      {/* Détails utilisateur étendus */}
+                      {showUserDetails === send.user.id && (
+                        <tr key={`details-${send.id}`} className="bg-zinc-800">
+                          <td colSpan={5} className="p-6">
+                            <UserDetailsCard userId={send.user.id} />
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
