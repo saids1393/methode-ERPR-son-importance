@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -46,11 +46,9 @@ interface HomeworkDetail {
   };
 }
 
-export default function HomeworkUsersPage({
-  params,
-}: {
-  params: { homeworkId: string };
-}) {
+export default function HomeworkUsersPage() {
+  const params = useParams();
+  const homeworkId = params?.homeworkId;
   const [homework, setHomework] = useState<HomeworkDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,14 +57,14 @@ export default function HomeworkUsersPage({
   const router = useRouter();
 
   useEffect(() => {
+    if (!homeworkId) return;
     fetchHomeworkDetails();
-  }, [params.homeworkId]);
+  }, [homeworkId]);
 
   const fetchHomeworkDetails = async () => {
+    if (!homeworkId) return;
     try {
-      const response = await fetch(
-        `/api/admin/homework/${params.homeworkId}/users`
-      );
+      const response = await fetch(`/api/admin/homework/${homeworkId}/users`);
       if (response.status === 403) {
         router.push('/dashboard');
         return;
@@ -89,9 +87,7 @@ export default function HomeworkUsersPage({
           !searchTerm ||
           send.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (send.user.username &&
-            send.user.username
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()));
+            send.user.username.toLowerCase().includes(searchTerm.toLowerCase()));
 
         const matchesStatus =
           !statusFilter ||
@@ -103,9 +99,7 @@ export default function HomeworkUsersPage({
       .sort((a, b) => {
         switch (sortBy) {
           case 'date':
-            return (
-              new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime()
-            );
+            return new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime();
           case 'name': {
             const nameA = a.user.username || a.user.email;
             const nameB = b.user.username || b.user.email;
@@ -237,15 +231,12 @@ export default function HomeworkUsersPage({
         </div>
       </div>
 
+      {/* Contenu principal */}
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* Liste des utilisateurs */}
         {filteredSends.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSends.map((send) => (
-              <div
-                key={send.id}
-                className="bg-zinc-800 border border-zinc-700 rounded-xl p-6"
-              >
+              <div key={send.id} className="bg-zinc-800 border border-zinc-700 rounded-xl p-6">
                 {/* En-tête utilisateur */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold">
@@ -259,9 +250,7 @@ export default function HomeworkUsersPage({
                     <h3 className="font-semibold text-white truncate">
                       {send.user.username || 'Sans pseudo'}
                     </h3>
-                    <p className="text-zinc-400 text-sm truncate">
-                      {send.user.email}
-                    </p>
+                    <p className="text-zinc-400 text-sm truncate">{send.user.email}</p>
                   </div>
                 </div>
 
@@ -276,16 +265,12 @@ export default function HomeworkUsersPage({
                   {send.emailSent ? (
                     <>
                       <CheckCircle className="h-5 w-5 text-green-400" />
-                      <span className="text-green-400 font-medium">
-                        Envoi réussi
-                      </span>
+                      <span className="text-green-400 font-medium">Envoi réussi</span>
                     </>
                   ) : (
                     <>
                       <XCircle className="h-5 w-5 text-red-400" />
-                      <span className="text-red-400 font-medium">
-                        Envoi échoué
-                      </span>
+                      <span className="text-red-400 font-medium">Envoi échoué</span>
                     </>
                   )}
                   <div className="ml-auto text-xs text-zinc-400">
@@ -303,16 +288,12 @@ export default function HomeworkUsersPage({
                   <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-zinc-300">Progression</span>
-                      <span className="text-blue-400 font-medium">
-                        {send.user.progressPercentage}%
-                      </span>
+                      <span className="text-blue-400 font-medium">{send.user.progressPercentage}%</span>
                     </div>
                     <div className="w-full bg-zinc-600 rounded-full h-2">
                       <div
                         className="bg-blue-400 h-2 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${send.user.progressPercentage}%`,
-                        }}
+                        style={{ width: `${send.user.progressPercentage}%` }}
                       ></div>
                     </div>
                   </div>
@@ -320,23 +301,17 @@ export default function HomeworkUsersPage({
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-zinc-400">Pages</div>
-                      <div className="text-white font-semibold">
-                        {send.user.completedPagesCount}/29
-                      </div>
+                      <div className="text-white font-semibold">{send.user.completedPagesCount}/29</div>
                     </div>
                     <div>
                       <div className="text-zinc-400">Quiz</div>
-                      <div className="text-white font-semibold">
-                        {send.user.completedQuizzesCount}/11
-                      </div>
+                      <div className="text-white font-semibold">{send.user.completedQuizzesCount}/11</div>
                     </div>
                   </div>
 
                   <div className="text-sm">
                     <div className="text-zinc-400">Temps d'étude</div>
-                    <div className="text-white font-semibold">
-                      {send.user.studyTimeFormatted}
-                    </div>
+                    <div className="text-white font-semibold">{send.user.studyTimeFormatted}</div>
                   </div>
                 </div>
 
@@ -354,14 +329,10 @@ export default function HomeworkUsersPage({
                 {/* Badges */}
                 <div className="flex gap-2 mt-3">
                   {send.user.isPaid && (
-                    <span className="bg-green-900/30 text-green-400 px-2 py-1 rounded-full text-xs font-medium">
-                      💰 Payant
-                    </span>
+                    <span className="bg-green-900/30 text-green-400 px-2 py-1 rounded-full text-xs font-medium">💰 Payant</span>
                   )}
                   {!send.user.isActive && (
-                    <span className="bg-red-900/30 text-red-400 px-2 py-1 rounded-full text-xs font-medium">
-                      ⚠️ Inactif
-                    </span>
+                    <span className="bg-red-900/30 text-red-400 px-2 py-1 rounded-full text-xs font-medium">⚠️ Inactif</span>
                   )}
                   <span className="bg-blue-900/30 text-blue-400 px-2 py-1 rounded-full text-xs font-medium">
                     {send.user.gender || 'Genre non spécifié'}
@@ -398,14 +369,10 @@ export default function HomeworkUsersPage({
         {/* Résumé en bas */}
         {homework && filteredSends.length > 0 && (
           <div className="mt-8 bg-zinc-800 border border-zinc-700 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Résumé des envois
-            </h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Résumé des envois</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
-                <div className="text-xl font-bold text-white">
-                  {filteredSends.length}
-                </div>
+                <div className="text-xl font-bold text-white">{filteredSends.length}</div>
                 <div className="text-zinc-400 text-sm">Envois affichés</div>
               </div>
               <div>
@@ -423,16 +390,12 @@ export default function HomeworkUsersPage({
               <div>
                 <div className="text-xl font-bold text-blue-400">
                   {Math.round(
-                    filteredSends.reduce(
-                      (sum, s) => sum + s.user.progressPercentage,
-                      0
-                    ) / (filteredSends.length || 1)
+                    filteredSends.reduce((sum, s) => sum + s.user.progressPercentage, 0) /
+                      (filteredSends.length || 1)
                   )}
                   %
                 </div>
-                <div className="text-zinc-400 text-sm">
-                  Progression moyenne
-                </div>
+                <div className="text-zinc-400 text-sm">Progression moyenne</div>
               </div>
             </div>
           </div>
