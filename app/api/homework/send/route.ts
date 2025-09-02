@@ -1,11 +1,79 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/admin-auth';
+import { getAuthUserFromRequest } from '@/lib/auth';
+import { checkAndSendHomework } from '@/lib/homework-email';
 import { prisma } from '@/lib/prisma';
+
+// POST - Envoyer un devoir automatiquement quand un chapitre est complété
+export async function POST(request: NextRequest) {
+  try {
+    console.log('📧 [API] ===== DÉBUT ENVOI DEVOIR =====');
+    
+    const user = await getAuthUserFromRequest(request);
+    if (!user) {
+      console.log('❌ [API] Utilisateur non authentifié');
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      );
+    }
+
+    console.log('👤 [API] Utilisateur authentifié:', user.id);
+
+    const { chapterNumber } = await request.json();
+    
+    if (typeof chapterNumber !== 'number' || chapterNumber < 1 || chapterNumber > 10) {
+      console.log('❌ [API] Numéro de chapitre invalide:', chapterNumber);
+      return NextResponse.json(
+        { error: 'Numéro de chapitre invalide (1-10)' },
+        { status: 400 }
+      );
+    }
+
+    console.log('📚 [API] Tentative d\'envoi devoir pour chapitre:', chapterNumber);
+
+    // Utiliser la fonction de la lib pour vérifier et envoyer
+    const sent = await checkAndSendHomework(user.id, chapterNumber);
+    
+    console.log('📧 [API] Résultat envoi devoir:', sent);
+    console.log('📧 [API] ===== FIN ENVOI DEVOIR =====');
+
+    return NextResponse.json({
+      success: true,
+      sent,
+      message: sent 
+        ? `Devoir du chapitre ${chapterNumber} envoyé avec succès`
+        : `Devoir du chapitre ${chapterNumber} non envoyé (déjà envoyé ou inexistant)`
+    });
+  } catch (error) {
+    console.error('❌ [API] Erreur envoi devoir:', error);
+    return NextResponse.json(
+      { error: 'Erreur lors de l\'envoi du devoir' },
+      { status: 500 }
+    );
+  }
+}
 
 // GET - Récupérer tous les envois de devoirs avec détails
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    const user = await getAuthUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 401 }
+      );
+    }
+
+    // Vérifier si c'est un admin pour accéder à tous les envois
+    const ADMIN_EMAILS = [process.env.ADMIN_EMAIL || 'soidroudinesaid51@gmail.com'];
+    const isAdmin = ADMIN_EMAILS.includes(user.email);
+    
+    if (!isAdmin) {
+      return NextResponse.json(
+        { error: 'Accès administrateur requis' },
+        { status: 403 }
+      );
+    }
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');

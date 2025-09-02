@@ -269,7 +269,7 @@ const getReceiptTemplate = (data: PaymentData) => `
                 Notre équipe pédagogique est là pour vous accompagner dans votre apprentissage.
             </p>
             <p style="margin: 0;">
-                <strong>Support :</strong> support@sonimportance.com<br>
+                <strong>Support :</strong> arabeimportance@gmail.com<br>
                 <strong>Réponse :</strong> Sous 24h maximum
             </p>
         </div>
@@ -326,7 +326,7 @@ Votre accès premium à la Méthode ERPR est maintenant actif.
 Commencez votre apprentissage : ${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/dashboard
 
 SUPPORT :
-Email : support@sonimportance.com
+Email : arabeimportance@gmail.com
 Réponse sous 24h maximum
 
 Conseil : Consacrez 30 minutes par jour pour de meilleurs résultats !
@@ -344,7 +344,7 @@ export async function sendPaymentReceiptEmail(data: PaymentData): Promise<boolea
     const mailOptions = {
       from: {
         name: 'Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com'
       },
       to: data.email,
       subject: `✅ Reçu de paiement - Accès confirmé à la Méthode ERPR`,
@@ -504,7 +504,7 @@ export async function sendWelcomeEmail(email: string, username?: string): Promis
                     Apprenez à lire et écrire l'arabe à votre rythme
                 </p>
                 <p style="margin-top: 20px;">
-                    Besoin d'aide ? Contactez-nous : support@sonimportance.com
+                    Besoin d'aide ? Contactez-nous : arabeimportance@gmail.com
                 </p>
             </div>
         </div>
@@ -515,7 +515,7 @@ export async function sendWelcomeEmail(email: string, username?: string): Promis
     const mailOptions = {
       from: {
         name: 'Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com'
       },
       to: email,
       subject: `🎉 Bienvenue dans la Méthode ERPR !`,
@@ -542,7 +542,7 @@ CONSEIL DE VOTRE PROFESSEUR :
 "La clé de la réussite dans l'apprentissage est la méthode ERPR (Écoute, Répétition, Pratique et Régularité). Consacrez 30 minutes par jour, et vous serez surpris de vos progrès !"
 — Professeur Soidroudine
 
-Besoin d'aide ? Contactez-nous : sonimportance@gmail.com
+Besoin d'aide ? Contactez-nous : arabeimportance@gmail.com
 
 © ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
       `
@@ -697,7 +697,7 @@ export async function sendPasswordResetEmail(email: string, resetToken: string, 
                     Apprenez à lire et écrire l'arabe à votre rythme
                 </p>
                 <p style="margin-top: 20px;">
-                    Besoin d'aide ? Contactez-nous : support@sonimportance.com
+                    Besoin d'aide ? Contactez-nous : arabeimportance@gmail.com
                 </p>
             </div>
         </div>
@@ -708,7 +708,7 @@ export async function sendPasswordResetEmail(email: string, resetToken: string, 
     const mailOptions = {
       from: {
         name: 'Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com'
       },
       to: email,
       subject: `🔐 Réinitialisation de votre mot de passe - Méthode ERPR`,
@@ -730,7 +730,7 @@ INFORMATIONS DE SÉCURITÉ :
 - Il ne peut être utilisé qu'une seule fois
 - Votre nouveau mot de passe doit contenir au moins 8 caractères
 
-Besoin d'aide ? Contactez-nous : support@sonimportance.com
+Besoin d'aide ? Contactez-nous : arabeimportance@gmail.com
 
 © ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
       `
@@ -853,7 +853,7 @@ export async function sendEmailChangeConfirmation(newEmail: string, username?: s
                 <h4 style="margin-top: 0; color: #856404;">🔒 Sécurité</h4>
                 <p style="margin: 0; color: #856404;">
                     Si vous n'avez pas effectué cette modification, contactez immédiatement notre support à 
-                    <strong>support@sonimportance.com</strong>
+                    <strong>arabeimportance@gmail.com</strong>
                 </p>
             </div>
 
@@ -875,7 +875,7 @@ export async function sendEmailChangeConfirmation(newEmail: string, username?: s
     const mailOptions = {
       from: {
         name: 'Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com'
       },
       to: newEmail,
       subject: `✅ Confirmation de changement d'email - Méthode ERPR`,
@@ -891,7 +891,7 @@ Nouvelle adresse email : ${newEmail}
 
 Cette modification a été effectuée le ${new Date().toLocaleDateString('fr-FR')}.
 
-SÉCURITÉ : Si vous n'avez pas effectué cette modification, contactez immédiatement notre support à sonimportance@gmail.com
+SÉCURITÉ : Si vous n'avez pas effectué cette modification, contactez immédiatement notre support à arabeimportance@gmail.com
 
 © ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
       `
@@ -1024,14 +1024,14 @@ export async function sendEmailChangeNotification(oldEmail: string, newEmail: st
                 <h4 style="margin-top: 0; color: #721c24;">🚨 Action requise si ce n'est pas vous</h4>
                 <p style="margin: 0; color: #721c24;">
                     Si vous n'avez pas effectué cette modification, votre compte pourrait être compromis. 
-                    Contactez <strong>immédiatement</strong> notre support à <strong>support@sonimportance.com</strong>
+                    Contactez <strong>immédiatement</strong> notre support à <strong>arabeimportance@gmail.com</strong>
                 </p>
             </div>
 
             <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2196f3;">
                 <h4 style="margin-top: 0; color: #1976d2;">📞 Support</h4>
                 <p style="margin: 0; color: #1976d2;">
-                    <strong>Email :</strong> support@sonimportance.com<br>
+                    <strong>Email :</strong> arabeimportance@gmail.com<br>
                     <strong>Réponse :</strong> Sous 24h maximum
                 </p>
             </div>
@@ -1055,7 +1055,7 @@ export async function sendEmailChangeNotification(oldEmail: string, newEmail: st
     const mailOptions = {
       from: {
         name: 'Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@sonimportance.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com'
       },
       to: oldEmail,
       subject: `⚠️ Notification de changement d'email - Méthode ERPR`,
@@ -1073,9 +1073,9 @@ DÉTAILS DU CHANGEMENT :
 - Date : ${new Date().toLocaleDateString('fr-FR')}
 
 ACTION REQUISE : Si vous n'avez pas effectué cette modification, votre compte pourrait être compromis. 
-Contactez IMMÉDIATEMENT notre support à support@sonimportance.com
+Contactez IMMÉDIATEMENT notre support à arabeimportance@gmail.com
 
-Support : sonimportance.com (Réponse sous 24h maximum)
+Support : arabeimportance@gmail.com (Réponse sous 24h maximum)
 
 © ${new Date().getFullYear()} Méthode ERPR - Tous droits réservés
       `

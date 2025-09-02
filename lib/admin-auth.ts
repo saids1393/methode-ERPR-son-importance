@@ -3,7 +3,7 @@ import { verifyToken } from './auth';
 
 // Liste des emails administrateurs autorisés
 const ADMIN_EMAILS = [
-  process.env.ADMIN_EMAIL || 'admin@sonimportance.com',
+  process.env.ADMIN_EMAIL || 'soidroudinesaid51@gmail.com',
   // Ajoutez d'autres emails admin ici si nécessaire
 ];
 

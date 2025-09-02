@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: {
         name: 'Support Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'sonimportance@gmail.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com'
       },
       to: process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'votre@email.com',
       subject: `Nouveau message de support de ${email}`,
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: {
         name: 'Support Méthode ERPR',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'sonimportance@gmail.com'
+        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com'
       },
       to: email,
       subject: 'Confirmation de votre message de support',

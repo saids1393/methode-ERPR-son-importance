@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Empêcher la suppression d'utilisateurs admin (optionnel)
-    const adminEmails = [process.env.ADMIN_EMAIL || 'admin@sonimportance.com'];
+    const adminEmails = [process.env.ADMIN_EMAIL || 'soidroudinesaid51@gmail.com'];
     const adminUsers = existingUsers.filter((user: { email: string; }) => adminEmails.includes(user.email));
     
     if (adminUsers.length > 0) {
