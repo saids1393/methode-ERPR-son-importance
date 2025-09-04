@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { sendPaymentReceiptEmail, sendWelcomeEmail } from '@/lib/email';
+import { sendWelcomeEmail } from '@/lib/email';
 
 // --- Fonction simple pour tester la configuration SMTP ---
 async function testEmailConfiguration(): Promise<boolean> {
   try {
-    // Vérifie juste si les variables d'environnement existent
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
       console.error('❌ Configuration SMTP manquante');
       return false;
@@ -53,24 +52,13 @@ export async function POST(req: Request) {
 
     let result = false;
 
-    if (type === 'receipt') {
-      // Test d'envoi de reçu
-      const testData = {
-        email: email,
-        amount: 9700,
-        currency: 'eur',
-        sessionId: 'cs_test_' + Date.now(),
-        username: 'Utilisateur Test',
-        isNewAccount: true
-      };
-      result = await sendPaymentReceiptEmail(testData);
-    } else if (type === 'welcome') {
+    if (type === 'welcome') {
       // Test d'envoi de bienvenue
       result = await sendWelcomeEmail(email, 'Utilisateur Test');
     } else {
       return NextResponse.json({
         success: false,
-        error: 'Type invalide. Utilisez "receipt" ou "welcome"'
+        error: 'Type invalide. Utilisez "welcome"'
       }, { status: 400 });
     }
 

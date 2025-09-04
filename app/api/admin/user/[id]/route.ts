@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin-auth';
-import { sendEmailChangeNotification } from '@/lib/email';
+import { sendEmailChangeConfirmation } from '@/lib/email';
 import { validateEmail } from '@/lib/security';
 
 export async function GET(
@@ -37,7 +37,7 @@ export async function GET(
       );
     }
 
-    // Enrichir les données
+    // Progression calculée
     const completedPagesCount = user.completedPages.filter((p: number) => p !== 0 && p !== 30).length;
     const completedQuizzesCount = user.completedQuizzes.filter((q: number) => q !== 11).length;
     const totalPossibleItems = 29 + 11;
@@ -50,7 +50,7 @@ export async function GET(
       completedPagesCount,
       completedQuizzesCount,
       progressPercentage,
-      isPaid: !!user.stripeCustomerId, // Statut payant basé sur stripeCustomerId
+      isPaid: !!user.stripeCustomerId,
       studyTimeFormatted: formatStudyTime(user.studyTimeSeconds)
     });
   } catch (error) {
@@ -71,7 +71,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    // Récupérer l'utilisateur actuel pour comparer les changements
+    // Récupérer l'utilisateur actuel
     const currentUser = await prisma.user.findUnique({
       where: { id },
       select: { 
@@ -79,7 +79,7 @@ export async function PATCH(
         username: true, 
         gender: true, 
         isActive: true,
-        stripeCustomerId: true // Ajouté ici pour corriger l'erreur
+        stripeCustomerId: true
       }
     });
 
@@ -93,7 +93,6 @@ export async function PATCH(
     const allowedFields = ['isActive', 'username'];
     const updateData: any = {};
     let emailChanged = false;
-    let oldEmail = '';
     let newEmail = '';
 
     for (const field of allowedFields) {
@@ -102,18 +101,18 @@ export async function PATCH(
       }
     }
 
-    // Gestion du statut payant manuel
+    // Statut payant manuel
     if (body.isPaid !== undefined) {
       if (body.isPaid && !currentUser.stripeCustomerId) {
         updateData.stripeCustomerId = `manual_${Date.now()}`;
         updateData.stripeSessionId = `manual_session_${Date.now()}`;
       } else if (!body.isPaid) {
-        // Retirer le statut payant
         updateData.stripeCustomerId = null;
         updateData.stripeSessionId = null;
       }
     }
 
+    // Vérification email
     if (body.email !== undefined && body.email !== currentUser.email) {
       if (!validateEmail(body.email)) {
         return NextResponse.json(
@@ -122,7 +121,6 @@ export async function PATCH(
         );
       }
 
-      // Vérifier l'unicité de l'email
       const existingUser = await prisma.user.findUnique({
         where: { email: body.email }
       });
@@ -135,7 +133,6 @@ export async function PATCH(
       }
 
       emailChanged = true;
-      oldEmail = currentUser.email;
       newEmail = body.email;
       updateData.email = body.email;
     }
@@ -171,19 +168,13 @@ export async function PATCH(
       }
     });
 
-    // Envoyer les emails de confirmation si l'email a changé
+    // Envoi confirmation si email changé
     if (emailChanged) {
       try {
-        // Email de confirmation à la nouvelle adresse
-        await sendEmailChangeNotification(newEmail, user.username || undefined);
-        
-        // Email de notification à l'ancienne adresse
-        await sendEmailChangeNotification(oldEmail, newEmail, user.username || undefined);
-        
-        console.log('✅ Emails de changement d\'email envoyés avec succès');
+        await sendEmailChangeConfirmation(newEmail, user.username || undefined);
+        console.log('✅ Email de confirmation envoyé');
       } catch (emailError) {
-        console.error('❌ Erreur lors de l\'envoi des emails de changement:', emailError);
-        // Ne pas faire échouer la mise à jour pour une erreur d'email
+        console.error('❌ Erreur lors de l\'envoi de la confirmation email:', emailError);
       }
     }
 

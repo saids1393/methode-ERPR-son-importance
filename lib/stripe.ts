@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 import { prisma } from '@/lib/prisma';
 import { createUser, getUserByEmail } from '@/lib/auth';
-import { sendPaymentReceiptEmail, sendWelcomeEmail, PaymentData } from '@/lib/email';
+import { sendWelcomeEmail } from '@/lib/email';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not defined');
@@ -66,49 +66,25 @@ export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Se
       console.log(`🔓 Utilisateur activé: ${user.id}`);
     }
 
-    // Récupérer le reçu officiel Stripe
-    type ExpandedPaymentIntent = Stripe.PaymentIntent & {
-      charges?: { data: Array<{ receipt_url?: string }> };
-    };
-    const paymentIntent = (await stripe.paymentIntents.retrieve(
-      session.payment_intent as string,
-      { expand: ['charges'] }
-    )) as ExpandedPaymentIntent;
-
-    const receiptUrl = paymentIntent.charges?.data?.[0]?.receipt_url || undefined;
-
-
-    // Préparer les données pour l'email
-    const paymentData: PaymentData = {
-      email: user.email,
-      amount: session.amount_total || 9700,
-      currency: session.currency || 'eur',
-      sessionId: session.id,
-      username: user.username || undefined,
-      isNewAccount,
-      receiptUrl,
-    };
-
     // Enregistrer le paiement dans Prisma
     await prisma.payment.create({
       data: {
         stripeSessionId: session.id,
         stripePaymentIntentId: session.payment_intent as string,
-        amount: paymentData.amount,
-        currency: paymentData.currency,
+        amount: session.amount_total || 0,
+        currency: session.currency || 'eur',
         userId: user.id,
       },
     });
 
-    // Envoyer les emails en parallèle
-    try {
-      await Promise.all([
-        sendPaymentReceiptEmail(paymentData),
-        isNewAccount ? sendWelcomeEmail(user.email, user.username || undefined) : Promise.resolve(true),
-      ]);
-      console.log('📧 Emails envoyés avec succès à:', email);
-    } catch (emailError) {
-      console.error('❌ Erreur lors de l\'envoi des emails:', emailError);
+    // Envoyer uniquement le mail de bienvenue si nouvel utilisateur
+    if (isNewAccount) {
+      try {
+        await sendWelcomeEmail(user.email, user.username || undefined);
+        console.log('📧 Email de bienvenue envoyé à:', email);
+      } catch (emailError) {
+        console.error('❌ Erreur lors de l\'envoi de l\'email de bienvenue:', emailError);
+      }
     }
   } catch (err) {
     console.error('❌ Erreur handleCheckoutSessionCompleted:', err);
