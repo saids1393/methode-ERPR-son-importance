@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getUserByEmail, createUser, generateToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { sendPaymentReceiptEmail, sendWelcomeEmail } from '@/lib/email';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
   try {
@@ -66,25 +66,12 @@ export async function POST(req: Request) {
       email: user.email,
     });
 
-    // Préparer les données pour l'email
-    const paymentData = {
-      email: user.email,
-      amount: session.amount_total || 9700, // 97€ en centimes
-      currency: session.currency || 'eur',
-      sessionId: sessionId,
-      username: user.username || undefined,
-      isNewAccount: isNewAccount
-    };
-
-    // Envoyer les emails en arrière-plan (ne pas bloquer la réponse)
-    Promise.all([
-      sendPaymentReceiptEmail(paymentData),
-      isNewAccount ? sendWelcomeEmail(user.email, user.username || undefined) : Promise.resolve(true)
-    ]).then(([receiptSent, welcomeSent]) => {
-      console.log('📧 Emails envoyés:', { receiptSent, welcomeSent });
-    }).catch(error => {
-      console.error('❌ Erreur envoi emails:', error);
-    });
+    // Envoyer l'email de bienvenue si nouvel utilisateur
+    if (isNewAccount) {
+      sendWelcomeEmail(user.email, user.username || undefined).catch(error => {
+        console.error('❌ Erreur envoi email de bienvenue:', error);
+      });
+    }
 
     // Créer la réponse et y attacher le cookie
     const response = NextResponse.json({
