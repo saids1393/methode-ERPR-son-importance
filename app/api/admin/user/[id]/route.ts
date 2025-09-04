@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin-auth';
-import { sendEmailChangeConfirmation, sendEmailChangeNotification } from '@/lib/email';
+import { sendEmailChangeNotification } from '@/lib/email';
 import { validateEmail } from '@/lib/security';
 
 export async function GET(
@@ -175,7 +175,7 @@ export async function PATCH(
     if (emailChanged) {
       try {
         // Email de confirmation à la nouvelle adresse
-        await sendEmailChangeConfirmation(newEmail, user.username || undefined);
+        await sendEmailChangeNotification(newEmail, user.username || undefined);
         
         // Email de notification à l'ancienne adresse
         await sendEmailChangeNotification(oldEmail, newEmail, user.username || undefined);

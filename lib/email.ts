@@ -140,7 +140,7 @@ export async function sendWelcomeEmail(email: string, username?: string): Promis
 }
 
 // --- Notification de changement d'email ---
-export async function sendEmailChangeNotification(newEmail: string, username?: string): Promise<boolean> {
+export async function sendEmailChangeNotification(newEmail: string, username?: string, p0?: string | undefined): Promise<boolean> {
   try {
     await transporter.sendMail({
       from: { name: 'Méthode ERPR', address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com' },
