@@ -141,7 +141,7 @@ const playLetterAudio = (vowelLetter: string) => {
 };
 
 
-  const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
+  const emphaticLetters = ['خ', 'ر', 'ص', '��', 'ط', 'ظ', 'غ', 'ق'];
   const nonConnectingLetters = ['ا', 'د', 'ذ', 'ر', 'ز', 'و', 'ء'];
 
   const letterGroups = [
@@ -163,7 +163,7 @@ const playLetterAudio = (vowelLetter: string) => {
     { letter: 'ط', vowels: ['ـطَ', 'ـطُ', 'ـطِ'] },
     { letter: 'ظ', vowels: ['ـظَ', 'ـظُ', 'ـظِ'] },
     { letter: 'ع', vowels: ['ـعَ', 'ـعُ', 'ـعِ'] },
-    { letter: 'غ', vowels: ['ـغَ', 'ـغُ', 'ـغِ'] },
+    { letter: 'غ', vowels: ['ـغَ', '��غُ', 'ـغِ'] },
     { letter: 'ف', vowels: ['ـفَ', 'ـفُ', 'ـفِ'] },
     { letter: 'ق', vowels: ['ـقَ', 'ـقُ', 'ـقِ'] },
     { letter: 'ك', vowels: ['ـكَ', 'ـكُ', 'ـكِ'] },
@@ -185,24 +185,25 @@ const handleLetterClick = (vowelLetter: string) => {
 };
 
   return (
-    <div
+    <div 
       className="font-arabic min-h-screen"
       style={{ direction: 'rtl' }}
     >
-      <div className="w-full h-full bg-zinc-900 overflow-hidden">
+      <div className="w-full h-full bg-gray-900 overflow-hidden">
         {/* Header */}
-        <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl md:text-3xl font-bold">
-            Leçon : lettres attachées à la fin d’un mot avec voyelles simples
+        <div className="text-white p-6 text-center border-b-2">
+          <div className="text-3xl md:text-3xl font-bold mb-4">
+            Leçon : lettres attachées à la fin d'un mot avec voyelles simples
           </div>
         </div>
-
+        
         {/* Letters with Vowels Grid */}
-        <div className="p-8 bg-zinc-900">
+        <div className="p-8 bg-gray-900">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {letterGroups.map((group, index) => (
-              <LetterGroup
-                key={index}
+              <LetterGroup 
+                key={index} 
+                letter={group.letter}
                 vowels={group.vowels}
                 vowelNames={vowelNames}
                 emphatic={emphaticLetters.includes(group.letter)}
@@ -210,79 +211,68 @@ const handleLetterClick = (vowelLetter: string) => {
                 onLetterClick={handleLetterClick}
               />
             ))}
-
-
           </div>
+          
+          {/* Footer */}
+          <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+            <div>Page 11</div>
+            <div className="mt-1">© 2025 Tous droits réservés</div>
+          </footer>
         </div>
-
-        {/* Footer */}
-        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
-          <div>Page 9</div>
-          <div className="mt-1">© 2025 Tous droits réservés</div>
-        </footer>
-
       </div>
     </div>
   );
 };
 
 // LetterGroup Component
-const LetterGroup = ({
-  vowels,
-  vowelNames,
-  emphatic,
-  nonConnecting,
-  onLetterClick,
-}: {
+const LetterGroup = ({ 
+  letter, 
+  vowels, 
+  vowelNames, 
+  emphatic, 
+  nonConnecting, 
+  onLetterClick 
+}: { 
+  letter: string; 
   vowels: string[];
   vowelNames: string[];
   emphatic?: boolean;
   nonConnecting?: boolean;
   onLetterClick?: (vowelLetter: string) => void;
-}) => {
-  // Extraire la forme initiale sans voyelle
-  const baseForm = vowels[0].replace(/[َُِ]/g, '');
-
-  return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4">
-      <div className="text-center font-bold text-3xl text-white mb-4">
-        {baseForm}
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        {vowels.map((vowelLetter, index) => (
-          <div
-            key={index}
-            className="bg-zinc-700 border border-zinc-600 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 relative cursor-pointer"
-            onClick={() => onLetterClick?.(vowelLetter)}
-          >
-            <div
-              className={`text-2xl md:text-3xl font-bold mb-2 ${emphatic ? 'text-red-400' : 'text-white'
-                }`}
-            >
-              {vowelLetter}
-            </div>
-            <div
-              className={`text-xs font-semibold px-2 py-1 rounded ${index === 0
-                  ? 'text-orange-400 bg-orange-900/30'
-                  : index === 1
-                    ? 'text-blue-400 bg-blue-900/30'
-                    : 'text-green-400 bg-green-900/30'
-                }`}
-            >
-              {vowelNames[index]}
-            </div>
-
-            {/* Badge non-connection */}
-            {nonConnecting && index === 0 && (
-              <div className="text-xs text-purple-400 bg-purple-900/30 px-1 py-1 rounded mt-2">
-                لا تتصل
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+}) => (
+  <div className="bg-gray-800 border border-zinc-500 rounded-xl p-4">
+    <div className="text-center font-bold text-3xl text-white mb-4">
+      {letter}
     </div>
-  );
-};
+    <div className="grid grid-cols-3 gap-3">
+      {vowels.map((vowelLetter, index) => (
+        <div 
+          key={index} 
+          className="bg-gray-900 border border-zinc-500 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 cursor-pointer"
+          onClick={() => onLetterClick?.(vowelLetter)}
+        >
+          <div className={`text-2xl md:text-3xl font-bold mb-2 ${
+            emphatic ? 'text-red-400' : 'text-white'
+          }`}>
+            {vowelLetter}
+          </div>
+          <div className={`text-xs font-semibold px-2 py-1 rounded ${
+            index === 0 ? 'text-orange-400 bg-orange-900/30' :
+            index === 1 ? 'text-blue-400 bg-blue-900/30' :
+            'text-green-400 bg-green-900/30'
+          }`}>
+            {vowelNames[index]}
+          </div>
+          {/* Badge non-connection */}
+          {nonConnecting && index === 0 && (
+            <div className="text-xs text-purple-400 bg-purple-900/30 px-1 py-1 rounded mt-2">
+              لا تتصل
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 export default Page11;

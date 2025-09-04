@@ -1,109 +1,130 @@
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
+import { createUser, getUserByEmail } from "@/lib/auth";
+import { sendPaymentReceiptEmail, sendWelcomeEmail } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
-import { getUserByEmail, createUser } from "@/lib/auth";
-import { prisma } from '@/lib/prisma';
-import { sendPaymentReceiptEmail, sendWelcomeEmail } from '@/lib/email';
+import Stripe from "stripe";
 
-
-export async function POST(req: Request) {
-  try {
-    const body = await req.text();
-    const signature = req.headers.get("stripe-signature");
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-    if (!signature || !endpointSecret) {
-      return NextResponse.json(
-        { error: 'Configuration webhook manquante' },
-        { status: 400 }
-      );
-    }
-
-    const event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
-
-    switch (event.type) {
-      case 'checkout.session.completed':
-        const session = event.data.object as Stripe.Checkout.Session;
-        await handleCheckoutSessionCompleted(session);
-        break;
-
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
-    }
-
-    return NextResponse.json({ received: true });
-  } catch (err) {
-    console.error('Webhook error:', err);
-    return NextResponse.json(
-      { error: 'Erreur webhook' },
-      { status: 400 }
-    );
-  }
+interface PaymentData {
+  email: string;
+  amount: number;
+  currency: string;
+  sessionId: string;
+  username?: string;
+  isNewAccount: boolean;
+  receiptUrl?: string;
 }
 
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   try {
     const email = session.customer_email || session.metadata?.email;
     if (!email) {
-      console.error('No email in session');
+      console.error("❌ Aucun email trouvé dans la session Stripe");
       return;
     }
 
-    console.log(`Paiement réussi pour l'email ${email}`);
+    console.log(`✅ Paiement réussi pour l'email ${email}`);
 
-    // Vérifier si l'utilisateur existe
+    // Vérifier si le paiement a déjà été traité
+    const existingPayment = await prisma.payment.findUnique({
+      where: { stripeSessionId: session.id },
+    });
+
+    if (existingPayment) {
+      console.log(`⚠️ Paiement déjà traité pour la session ${session.id}`);
+      return;
+    }
+
+    // Vérifier ou créer l'utilisateur
     let user = await getUserByEmail(email);
     let isNewAccount = false;
 
     if (!user) {
-      // Créer un nouvel utilisateur
       user = await createUser({
-        email: email,
+        email,
         stripeCustomerId: session.customer as string,
         stripeSessionId: session.id,
       });
-      console.log(`Nouvel utilisateur créé: ${user.id}`);
+      console.log(`🆕 Nouvel utilisateur créé: ${user.id}`);
       isNewAccount = true;
     } else {
-      // Activer l'utilisateur existant
       await prisma.user.update({
         where: { id: user.id },
-        data: { 
+        data: {
           isActive: true,
           stripeCustomerId: session.customer as string,
           stripeSessionId: session.id,
-        }
+        },
       });
-      console.log(`Utilisateur activé: ${user.id}`);
-      isNewAccount = false;
+      console.log(`🔓 Utilisateur activé: ${user.id}`);
+    }
+
+    // Créer une session Prisma si metadata fournie
+    if (
+      session.metadata?.availabilityId &&
+      session.metadata?.professorId &&
+      session.metadata?.scheduledAt
+    ) {
+      await prisma.session.create({
+        data: {
+          userId: user.id,
+          professorId: session.metadata.professorId,
+          availabilityId: session.metadata.availabilityId,
+          scheduledAt: new Date(session.metadata.scheduledAt),
+          status: "SCHEDULED",
+        },
+      });
+      console.log("📅 Session Prisma créée pour l’utilisateur");
+    }
+
+    // Récupérer le reçu Stripe officiel
+    type ExpandedPaymentIntent = Stripe.PaymentIntent & {
+      charges?: { data: Array<{ receipt_url?: string }> };
+    };
+
+    const paymentIntent = (await stripe.paymentIntents.retrieve(
+      session.payment_intent as string,
+      { expand: ["charges"] }
+    )) as ExpandedPaymentIntent;
+
+    const receiptUrl = paymentIntent.charges?.data?.[0]?.receipt_url || undefined;
+
+    if (!receiptUrl) {
+      console.warn("⚠️ Aucun reçu Stripe disponible pour ce paiement");
     }
 
     // Préparer les données pour l'email
-    const paymentData = {
+    const paymentData: PaymentData = {
       email: user.email,
-      amount: session.amount_total || 9700, // 97€ en centimes
-      currency: session.currency || 'eur',
+      amount: session.amount_total || 9700,
+      currency: session.currency || "eur",
       sessionId: session.id,
       username: user.username || undefined,
-      isNewAccount: isNewAccount
+      isNewAccount,
+      receiptUrl,
     };
 
-    // Envoyer les emails en arrière-plan
-    try {
-    Promise.all([
-      sendPaymentReceiptEmail(paymentData),
-      isNewAccount ? sendWelcomeEmail(user.email, user.username || undefined) : Promise.resolve(true)
-    ]).then(([receiptSent, welcomeSent]) => {
-      console.log('📧 Emails envoyés:', { receiptSent, welcomeSent });
-    }).catch(error => {
-      console.error('❌ Erreur envoi emails:', error);
+    // Enregistrer le paiement comme traité
+    await prisma.payment.create({
+      data: {
+        stripeSessionId: session.id,
+        stripePaymentIntentId: session.payment_intent as string,
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        userId: user.id,
+      },
     });
-      console.log('✅ Emails envoyés avec succès pour:', email);
+
+    // Envoyer emails en parallèle
+    try {
+      await Promise.all([
+        sendPaymentReceiptEmail(paymentData),
+        isNewAccount ? sendWelcomeEmail(user.email, user.username || undefined) : Promise.resolve(true),
+      ]);
+      console.log("📧 Emails envoyés avec succès à:", email);
     } catch (emailError) {
-      console.error('❌ Erreur lors de l\'envoi des emails:', emailError);
-      // Ne pas faire échouer le webhook pour une erreur d'email
+      console.error("❌ Erreur lors de l'envoi des emails:", emailError);
     }
   } catch (error) {
-    console.error('Error handling checkout session completed:', error);
+    console.error("❌ Erreur handleCheckoutSessionCompleted:", error);
   }
 }

@@ -146,13 +146,13 @@ const playLetterAudio = (vowelLetter: string) => {
     { letter: 'د', name: 'دَال', vowels: ['ـدَ', 'ـدُ', 'ـدِ'] },
     { letter: 'ذ', name: 'ذَال', vowels: ['ـذَ', 'ـذُ', 'ـذِ'] },
     { letter: 'ر', name: 'رَاء', vowels: ['ـرَ', 'ـرُ', 'ـرِ'] },
-    { letter: 'ز', name: 'زَاي', vowels: ['ـزَ', 'ـزُ', 'ـزِ'] },
+    { letter: 'ز', name: 'زَاي', vowels: ['ـزَ', 'ـزُ', '��زِ'] },
     { letter: 'س', name: 'سِين', vowels: ['ـسَـ', 'ـسُـ', 'ـسِـ'] },
     { letter: 'ش', name: 'شِين', vowels: ['ـشَـ', 'ـشُـ', 'ـشِـ'] },
     { letter: 'ص', name: 'صَاد', vowels: ['ـصَـ', 'ـصُـ', 'ـصِـ'] },
     { letter: 'ض', name: 'ضَاد', vowels: ['ـضَـ', 'ـضُـ', 'ـضِـ'] },
     { letter: 'ط', name: 'طَاء', vowels: ['ـطَـ', 'ـطُـ', 'ـطِـ'] },
-    { letter: 'ظ', name: 'ظَاء', vowels: ['ـظَـ', 'ـظُـ', 'ـظِـ'] },
+    { letter: 'ظ', name: 'ظَاء', vowels: ['ـظَ��', 'ـظُـ', 'ـظِـ'] },
     { letter: 'ع', name: 'عَين', vowels: ['ـعَـ', 'ـعُـ', 'ـعِـ'] },
     { letter: 'غ', name: 'غَين', vowels: ['ـغَـ', 'ـغُـ', 'ـغِـ'] },
     { letter: 'ف', name: 'فَاء', vowels: ['ـفَـ', 'ـفُـ', 'ـفِـ'] },
@@ -166,7 +166,7 @@ const playLetterAudio = (vowelLetter: string) => {
     { letter: 'ي', name: 'يَاء', vowels: ['ـيَـ', 'ـيُـ', 'ـيِـ'] }
   ];
 
-   const vowelNames = ['Kassrah ( son : a )', 'Dammah ( son : ou )', 'Fathah ( son : i )'];
+  const vowelNames = ['Fathah ( son : a )', 'Dammah ( son : ou )', 'Kassrah ( son : i )'];
 
 // Modifier handleLetterClick pour utiliser la nouvelle fonction
 const handleLetterClick = (vowelLetter: string) => {
@@ -178,20 +178,21 @@ const handleLetterClick = (vowelLetter: string) => {
       className="font-arabic min-h-screen"
       style={{ direction: 'rtl' }}
     >
-<div className="w-full h-full bg-zinc-900 overflow-hidden">
+      <div className="w-full h-full bg-gray-900 overflow-hidden">
         {/* Header */}
-        <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl md:text-3xl font-bold">
-       Leçon : lettres attachées au milieu d’un mot avec voyelles simples
+        <div className="text-white p-6 text-center border-b-2">
+          <div className="text-3xl md:text-3xl font-bold mb-4">
+            Leçon : lettres attachées au milieu d'un mot avec voyelles simples
           </div>
         </div>
         
         {/* Letters with Vowels Grid */}
-        <div className="p-8 bg-zinc-900">
+        <div className="p-8 bg-gray-900">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {letterGroups.map((group, index) => (
               <LetterGroup 
                 key={index} 
+                letter={group.letter}
                 vowels={group.vowels}
                 vowelNames={vowelNames}
                 emphatic={emphaticLetters.includes(group.letter)}
@@ -199,80 +200,68 @@ const handleLetterClick = (vowelLetter: string) => {
                 onLetterClick={handleLetterClick}
               />
             ))}
-
-
           </div>
+          
+          {/* Footer */}
+          <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+            <div>Page 10</div>
+            <div className="mt-1">© 2025 Tous droits réservés</div>
+          </footer>
         </div>
-        
-    {/* Footer */}
-        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
-          <div>Page 10</div>
-          <div className="mt-1">© 2025 Tous droits réservés</div>
-        </footer>
       </div>
     </div>
   );
 };
 
 // LetterGroup Component
-const LetterGroup = ({
-  vowels,
-  vowelNames,
-  emphatic,
-  nonConnecting,
-  onLetterClick,
-}: {
+const LetterGroup = ({ 
+  letter, 
+  vowels, 
+  vowelNames, 
+  emphatic, 
+  nonConnecting, 
+  onLetterClick 
+}: { 
+  letter: string; 
   vowels: string[];
   vowelNames: string[];
   emphatic?: boolean;
   nonConnecting?: boolean;
   onLetterClick?: (vowelLetter: string) => void;
-}) => {
-  // Extraire la forme initiale sans voyelle
-  const baseForm = vowels[0].replace(/[َُِ]/g, '');
-
-  return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4">
-      <div className="text-center font-bold text-3xl text-white mb-4">
-        {baseForm}
-      </div>
-      <div className="grid grid-cols-3 gap-3">
-        {vowels.map((vowelLetter, index) => (
-          <div
-            key={index}
-            className="bg-zinc-700 border border-zinc-600 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 relative cursor-pointer"
-            onClick={() => onLetterClick?.(vowelLetter)}
-          >
-            <div
-              className={`text-2xl md:text-3xl font-bold mb-2 ${
-                emphatic ? 'text-red-400' : 'text-white'
-              }`}
-            >
-              {vowelLetter}
-            </div>
-            <div
-              className={`text-xs font-semibold px-2 py-1 rounded ${
-                index === 0
-                  ? 'text-orange-400 bg-orange-900/30'
-                  : index === 1
-                  ? 'text-blue-400 bg-blue-900/30'
-                  : 'text-green-400 bg-green-900/30'
-              }`}
-            >
-              {vowelNames[index]}
-            </div>
-
-            {/* Badge non-connection */}
-            {nonConnecting && index === 0 && (
-              <div className="text-xs text-purple-400 bg-purple-900/30 px-1 py-1 rounded mt-2">
-                لا تتصل
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+}) => (
+  <div className="bg-gray-800 border border-zinc-500 rounded-xl p-4">
+    <div className="text-center font-bold text-3xl text-white mb-4">
+      {letter}
     </div>
-  );
-};
+    <div className="grid grid-cols-3 gap-3">
+      {vowels.map((vowelLetter, index) => (
+        <div 
+          key={index} 
+          className="bg-gray-900 border border-zinc-500 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 cursor-pointer"
+          onClick={() => onLetterClick?.(vowelLetter)}
+        >
+          <div className={`text-2xl md:text-3xl font-bold mb-2 ${
+            emphatic ? 'text-red-400' : 'text-white'
+          }`}>
+            {vowelLetter}
+          </div>
+          <div className={`text-xs font-semibold px-2 py-1 rounded ${
+            index === 0 ? 'text-orange-400 bg-orange-900/30' :
+            index === 1 ? 'text-blue-400 bg-blue-900/30' :
+            'text-green-400 bg-green-900/30'
+          }`}>
+            {vowelNames[index]}
+          </div>
+          {/* Badge non-connection */}
+          {nonConnecting && index === 0 && (
+            <div className="text-xs text-purple-400 bg-purple-900/30 px-1 py-1 rounded mt-2">
+              لا تتصل
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 export default Page10;

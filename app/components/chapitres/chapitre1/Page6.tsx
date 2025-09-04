@@ -88,13 +88,13 @@ const Page6 = () => {
 
   return (
     <div className="font-arabic min-h-screen" style={{ direction: 'rtl' }}>
-      <div className="w-full h-full bg-zinc-900 overflow-hidden">
+      <div className="w-full h-full bg-gray-900 overflow-hidden">
         {/* Header */}
-        <div className="bg-arabic-gradient text-white p-6 text-center">
+        <div className="text-white p-6 text-center border-b-2">
           <div className="text-3xl font-bold mb-4">Exercice : reconnaissance des lettres seules et attachées</div>
         </div>
         {/* Words Grid */}
-        <div className="p-8 bg-zinc-900">
+        <div className="p-8 bg-gray-900">
           <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6">
             {words.map((word, index) => (
               <WordCell
@@ -105,12 +105,12 @@ const Page6 = () => {
               />
             ))}
           </div>
+          {/* Footer */}
+          <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+            <div>Page 6</div>
+            <div className="mt-1">© 2025 Tous droits réservés</div>
+          </footer>
         </div>
-        {/* Footer */}
-        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
-          <div>Page 6</div>
-          <div className="mt-1">© 2025 Tous droits réservés</div>
-        </footer>
       </div>
     </div>
   );
@@ -128,7 +128,7 @@ const WordCell = ({
 }) => {
   return (
     <div
-      className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[80px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+      className="bg-gray-900 border border-zinc-500 rounded-xl p-4 text-center min-h-[80px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
       onClick={onClick}
     >
       <div className="text-3xl md:text-4xl font-bold text-white">

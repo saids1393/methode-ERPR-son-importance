@@ -188,16 +188,16 @@ const handleLetterClick = (vowelLetter: string) => {
       className="font-arabic min-h-screen"
       style={{ direction: 'rtl' }}
     >
-      <div className="w-full h-full bg-zinc-900 overflow-hidden">
+      <div className="w-full h-full bg-gray-900 overflow-hidden">
         {/* Header */}
-        <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl md:text-3xl font-bold">
-          Leçon : lettres seules (non attachées) avec voyelles
+        <div className="text-white p-6 text-center border-b-2">
+          <div className="text-3xl md:text-3xl font-bold mb-4">
+            Leçon : lettres seules (non attachées) avec voyelles
           </div>
         </div>
         
         {/* Letters with Vowels Grid */}
-        <div className="p-8 bg-zinc-900">
+        <div className="p-8 bg-gray-900">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {letterGroups.map((group, index) => (
               <LetterGroup 
@@ -210,13 +210,13 @@ const handleLetterClick = (vowelLetter: string) => {
               />
             ))}
           </div>
+          
+          {/* Footer */}
+          <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+            <div>Page 8</div>
+            <div className="mt-1">© 2025 Tous droits réservés</div>
+          </footer>
         </div>
-
-        {/* Footer */}
-        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
-          <div>Page 8</div>
-          <div className="mt-1">© 2025 Tous droits réservés</div>
-        </footer>
       </div>
     </div>
   );
@@ -230,7 +230,7 @@ const LetterGroup = ({ letter, vowels, vowelNames, emphatic, onLetterClick }: {
   emphatic?: boolean;
   onLetterClick?: (vowelLetter: string) => void;
 }) => (
-  <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-4">
+  <div className="bg-gray-800 border border-zinc-500 rounded-xl p-4">
     <div className="text-center font-bold text-3xl text-white mb-4">
       {letter}
     </div>
@@ -238,7 +238,7 @@ const LetterGroup = ({ letter, vowels, vowelNames, emphatic, onLetterClick }: {
       {vowels.map((vowelLetter, index) => (
         <div 
           key={index} 
-          className="bg-zinc-700 border border-zinc-600 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 cursor-pointer"
+          className="bg-gray-900 border border-zinc-500 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 cursor-pointer"
           onClick={() => onLetterClick?.(vowelLetter)}
         >
           <div className={`text-2xl md:text-3xl font-bold mb-2 ${

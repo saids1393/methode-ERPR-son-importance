@@ -99,16 +99,16 @@ const Page3 = () => {
       className="font-arabic min-h-screen"
       style={{ direction: 'rtl' }}
     >
-      <div className="w-full h-full bg-zinc-900 overflow-hidden">
+      <div className="w-full h-full bg-gray-900 overflow-hidden">
         {/* Header */}
-        <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-2">
-          Leçon : lettres attachées au milieu d'un mot
+        <div className="text-white p-6 text-center border-b-2">
+          <div className="text-3xl font-bold mb-4">
+            Leçon : lettres attachées au milieu d'un mot
           </div>
         </div>
         
         {/* Alphabet Grid */}
-        <div className="p-8 bg-zinc-900">
+        <div className="p-8 bg-gray-900">
           <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6">
             {letters.map((item, index) => (
               <Cell 
@@ -122,7 +122,7 @@ const Page3 = () => {
           </div>
           
           {/* Légende simplifiée */}
-          <div className="bg-zinc-800 rounded-lg p-4 mb-4">
+          <div className="bg-gray-800 rounded-lg p-4 mb-4">
             <div className="flex items-center justify-center gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-400 rounded-full"></div>
@@ -134,14 +134,13 @@ const Page3 = () => {
               </div>
             </div>
           </div>
+          
+          {/* Footer */}
+          <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+            <div>Page 3</div>
+            <div className="mt-1">© 2025 Tous droits réservés</div>
+          </footer>
         </div>
-        
-        
-        {/* Footer standard */}
-        <footer className="bg-zinc-800 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
-          <div>Page 3</div>
-          <div className="mt-1">© 2025 Tous droits réservés</div>
-        </footer>
       </div>
     </div>
   );
@@ -155,7 +154,7 @@ const Cell = ({ letter, emphatic, violet, onClick }: {
   onClick?: () => void;
 }) => (
   <div 
-    className="bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+    className="bg-gray-900 border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
     onClick={onClick}
   >
     <div className={`text-3xl md:text-4xl font-bold transition-colors ${

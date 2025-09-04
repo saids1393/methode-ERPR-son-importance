@@ -124,9 +124,11 @@ const Page0 = () => {
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900 text-white p-6 space-y-6">
-      <div className="text-center mb-4">
-        <div className="text-3xl font-bold mb-2">📘 Apprenons l'alphabet arabe</div>
-        <div className="text-lg text-indigo-300">Association visuelle pour francophones</div>
+      {/* Header */}
+      <div className="text-white p-6 text-center border-b-2">
+        <div className="text-3xl font-bold mb-4">
+          Leçon : lettres seules isolées (non attachées)
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -135,16 +137,16 @@ const Page0 = () => {
           return (
             <div
               key={index}
-              className="flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 transition-all p-6 rounded-xl shadow-lg cursor-pointer"
+              className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
               onClick={() => handleLetterClick(item.letter)}
             >
               {/* Lettre arabe */}
               <div
-                className={`text-6xl md:text-8xl font-bold w-1/4 text-center ${
+                className={`text-3xl md:text-4xl font-bold transition-colors ${
                   index >= allLetters.length - 2
-                    ? 'text-purple-500'
+                    ? 'text-purple-400'
                     : emphaticLetters.includes(item.letter)
-                    ? 'text-red-500'
+                    ? 'text-red-400'
                     : 'text-white'
                 }`}
               >
@@ -152,8 +154,8 @@ const Page0 = () => {
               </div>
 
               {/* Mot français associé */}
-              <div className="w-3/4 text-left pl-6">
-                <div className="text-xl md:text-3xl font-semibold text-amber-300">
+              <div className="text-left pl-6 mt-2">
+                <div className="text-xl md:text-2xl font-semibold text-amber-300">
                   {assoc ? (
                     <span>
                       {assoc.mot}
@@ -170,7 +172,7 @@ const Page0 = () => {
       </div>
 
       {/* Légende simplifiée */}
-      <div className="bg-zinc-800 rounded-lg p-4 mb-4">
+      <div className="bg-gray-800 rounded-lg p-4 mb-4">
         <div className="flex items-center justify-center gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-red-400 rounded-full"></div>
@@ -183,9 +185,11 @@ const Page0 = () => {
         </div>
       </div>
 
-      <div className="mt-8 text-center text-sm text-zinc-400">
-        Page 0 — Méthode simple & intuitive pour débutants
-      </div>
+      {/* Footer */}
+      <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+        <div>Page 0</div>
+        <div className="mt-1">© 2025 Tous droits réservés</div>
+      </footer>
     </div>
   );
 };
