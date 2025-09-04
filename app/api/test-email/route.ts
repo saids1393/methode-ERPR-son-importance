@@ -1,11 +1,25 @@
 import { NextResponse } from 'next/server';
-import { testEmailConfiguration, sendPaymentReceiptEmail, sendWelcomeEmail } from '@/lib/email';
+import { sendPaymentReceiptEmail, sendWelcomeEmail } from '@/lib/email';
+
+// --- Fonction simple pour tester la configuration SMTP ---
+async function testEmailConfiguration(): Promise<boolean> {
+  try {
+    // Vérifie juste si les variables d'environnement existent
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.error('❌ Configuration SMTP manquante');
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Erreur testEmailConfiguration:', err);
+    return false;
+  }
+}
 
 export async function GET() {
   try {
-    // Tester la configuration
     const configValid = await testEmailConfiguration();
-    
+
     if (!configValid) {
       return NextResponse.json({
         success: false,
