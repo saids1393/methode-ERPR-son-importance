@@ -25,7 +25,7 @@ export async function POST(req: Request) {
               description: 'Apprenez à lire et écrire l\'arabe à votre rythme',
               images: ['https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg'],
             },
-            unit_amount: 6499, // 97€ en centimes
+            unit_amount: 8900, // 97€ en centimes
           },
           quantity: 1,
         },
