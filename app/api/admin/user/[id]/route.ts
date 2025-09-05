@@ -171,7 +171,11 @@ export async function PATCH(
     // Envoi confirmation si email changé
     if (emailChanged) {
       try {
-        await sendEmailChangeConfirmation(newEmail, user.username || undefined);
+        // Générer le lien de confirmation
+        const token = 'token_de_confirmation'; // TODO : générer un vrai token sécurisé
+        const confirmationUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/confirm-email?token=${token}`;
+
+        await sendEmailChangeConfirmation(currentUser.email, newEmail, confirmationUrl);
         console.log('✅ Email de confirmation envoyé');
       } catch (emailError) {
         console.error('❌ Erreur lors de l\'envoi de la confirmation email:', emailError);
