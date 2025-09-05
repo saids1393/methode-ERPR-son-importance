@@ -48,7 +48,7 @@ const createWelcomeEmailTemplate = (username?: string) => `
 <style>
 body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
 .container { max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 2px; border-radius: 16px; }
-.content { background: white; border-radius: 14px; overflow: hidden; padding: 40px 30px; }
+.content { background: white; border-radius: 14px; overflow: hidden; padding: 10px 10px; }
 .header { background: linear-gradient(135deg, #ffffffff, #1900ffff); color: white; padding: 100px 10px; text-align: center; }
 .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
 .header .subtitle { font-size: 16px; opacity: 0.9; }
@@ -84,7 +84,7 @@ h2 { text-align: center; }
     <h2>${getWelcomeGreeting(username, 'welcome')}</h2>
 
     <div class="feature-list">
-        <h3 style="margin-top: 0; color: #333;">🎯 Ce qui vous attend :</h3>
+        <h3 style="margin-top: 0; color: #ffffffff;">🎯 Ce qui vous attend :</h3>
         <div class="feature-item">
             <strong>10 chapitres progressifs</strong> - De l'alphabet aux règles avancées
         </div>
