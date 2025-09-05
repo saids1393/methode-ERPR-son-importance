@@ -12,37 +12,31 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// Variables communes réutilisables
+// Variables communes
 const SENDER_INFO = {
     name: 'Méthode ERPR',
     address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com'
 };
-
 const BASE_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
-// Styles CSS
+// CSS centralisé
 const getEmailStyles = () => `
 <style>
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        line-height: 1.6;
-        color: #333333;
-        background-color: #f8fafc;
-    }
-    .email-container { max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 2px; border-radius: 16px; }
-    .email-content { background: white; border-radius: 14px; overflow: hidden; }
-    .header { background: linear-gradient(135deg); color: white; padding: 40px 30px; text-align: center; }
-    .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
-    .header .subtitle { font-size: 16px; opacity: 0.9; }
-    .main-content { padding: 40px 30px; }
-    .cta-section { text-align: center; margin: 40px 0; padding: 30px; background: #f1f5f9; border-radius: 16px; }
-    .cta-button { display: inline-block; background: linear-gradient(135deg); color: white; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px; }
-    .footer { background: #1e293b; color: #94a3b8; padding: 30px; text-align: center; border-radius: 0 0 14px 14px; }
-    .footer a { color: #667eea; text-decoration: none; }
+body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; background-color: #f8fafc; }
+.email-container { max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 2px; border-radius: 16px; }
+.email-content { background: white; border-radius: 14px; overflow: hidden; }
+.header { background: linear-gradient(135deg); color: white; padding: 40px 30px; text-align: center; }
+.header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+.header .subtitle { font-size: 16px; opacity: 0.9; }
+.main-content { padding: 40px 30px; }
+.cta-section { text-align: center; margin: 40px 0; padding: 30px; background: #f1f5f9; border-radius: 16px; }
+.cta-button { display: inline-block; background: linear-gradient(135deg); color: white; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px; }
+.footer { background: #1e293b; color: #94a3b8; padding: 30px; text-align: center; border-radius: 0 0 14px 14px; }
+.footer a { color: #667eea; text-decoration: none; }
 </style>
 `;
 
-// Helpers
+// Helper greeting
 const getWelcomeGreeting = (username?: string, context: 'welcome' | 'reset' | 'change' = 'welcome') => {
     const greetings = {
         welcome: `🎉 Bienvenue ${username || ''} !`,
@@ -52,9 +46,7 @@ const getWelcomeGreeting = (username?: string, context: 'welcome' | 'reset' | 'c
     return greetings[context];
 };
 
-// === Templates ===
-
-// Welcome email
+// === Templates HTML ===
 const createWelcomeEmailTemplate = (username?: string) => `
 <!DOCTYPE html>
 <html lang="fr">
@@ -89,7 +81,6 @@ ${getEmailStyles()}
 </html>
 `;
 
-// Reset password
 const createResetPasswordTemplate = (resetUrl: string, username?: string) => `
 <!DOCTYPE html>
 <html lang="fr">
@@ -123,7 +114,6 @@ ${getEmailStyles()}
 </html>
 `;
 
-// Email change
 const createEmailChangeTemplate = (newEmail: string, username?: string) => `
 <!DOCTYPE html>
 <html lang="fr">
@@ -157,18 +147,15 @@ ${getEmailStyles()}
 `;
 
 // === Fonctions d’envoi ===
-
-// Bienvenue
 export async function sendWelcomeEmail(email: string, username?: string): Promise<boolean> {
     try {
         const raw = createWelcomeEmailTemplate(username);
-        const inlined = juice(raw);
         await transporter.sendMail({
             from: SENDER_INFO,
             to: email,
-            subject: `🎉 Bienvenue dans la Méthode ERPR - Votre parcours d'apprentissage !`,
-            html: inlined,
-            text: `${getWelcomeGreeting(username, 'welcome')}\n\nCommencez : ${BASE_URL}/dashboard`
+            subject: `🎉 Bienvenue dans la Méthode ERPR !`,
+            html: juice(raw),
+            text: `${getWelcomeGreeting(username, 'welcome')}\nCommencez : ${BASE_URL}/dashboard`
         });
         return true;
     } catch (err) {
@@ -177,18 +164,16 @@ export async function sendWelcomeEmail(email: string, username?: string): Promis
     }
 }
 
-// Reset password
 export async function sendPasswordResetEmail(email: string, resetToken: string, username?: string): Promise<boolean> {
     try {
         const resetUrl = `${BASE_URL}/reset-password?token=${resetToken}`;
         const raw = createResetPasswordTemplate(resetUrl, username);
-        const inlined = juice(raw);
         await transporter.sendMail({
             from: SENDER_INFO,
             to: email,
             subject: `🔐 Réinitialisation de votre mot de passe - Méthode ERPR`,
-            html: inlined,
-            text: `${getWelcomeGreeting(username, 'reset')}\n\nRéinitialisez ici : ${resetUrl}`
+            html: juice(raw),
+            text: `${getWelcomeGreeting(username, 'reset')}\nRéinitialisez ici : ${resetUrl}`
         });
         return true;
     } catch (err) {
@@ -197,17 +182,15 @@ export async function sendPasswordResetEmail(email: string, resetToken: string, 
     }
 }
 
-// Changement d’email
 export async function sendEmailChangeConfirmation(newEmail: string, username?: string): Promise<boolean> {
     try {
         const raw = createEmailChangeTemplate(newEmail, username);
-        const inlined = juice(raw);
         await transporter.sendMail({
             from: SENDER_INFO,
             to: newEmail,
             subject: `✅ Confirmation de changement d'email - Méthode ERPR`,
-            html: inlined,
-            text: `${getWelcomeGreeting(username, 'change')}\n\nNouvel email : ${newEmail}`
+            html: juice(raw),
+            text: `${getWelcomeGreeting(username, 'change')}\nNouvel email : ${newEmail}`
         });
         return true;
     } catch (err) {
@@ -216,7 +199,6 @@ export async function sendEmailChangeConfirmation(newEmail: string, username?: s
     }
 }
 
-// Vérification de la config
 export async function testEmailConfiguration(): Promise<boolean> {
     try {
         await transporter.verify();
