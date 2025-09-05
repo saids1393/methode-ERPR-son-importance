@@ -57,7 +57,6 @@ export async function POST(req: Request) {
         }
       });
       user.isActive = true;
-      isNewAccount = false;
     }
 
     // Générer un token JWT
@@ -66,11 +65,18 @@ export async function POST(req: Request) {
       email: user.email,
     });
 
-    // Envoyer l'email de bienvenue si nouvel utilisateur
+    // ======= ANTI-DOUBLON EMAIL =======
     if (isNewAccount) {
-      sendWelcomeEmail(user.email, user.username || undefined).catch(error => {
-        console.error('❌ Erreur envoi email de bienvenue:', error);
+      const claim = await prisma.user.updateMany({
+        where: { id: user.id, welcomeEmailSent: false },
+        data: { welcomeEmailSent: true },
       });
+
+      if (claim.count === 1) {
+        await sendWelcomeEmail(user.email, user.username || undefined).catch(error => {
+          console.error('❌ Erreur envoi email de bienvenue (payment):', error);
+        });
+      }
     }
 
     // Créer la réponse et y attacher le cookie
