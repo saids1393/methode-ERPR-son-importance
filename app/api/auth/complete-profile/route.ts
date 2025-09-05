@@ -10,13 +10,13 @@ export async function POST(req: Request) {
     const clientIP = getClientIP(req as any);
     const rateLimitResult = rateLimit(`complete-profile:${clientIP}`, {
       windowMs: 15 * 60 * 1000, // 15 minutes
-      maxAttempts: 10 // 10 tentatives max
+      maxAttempts: 10
     });
 
     if (!rateLimitResult.success) {
       secureLog('COMPLETE_PROFILE_RATE_LIMITED', { ip: clientIP });
       return NextResponse.json(
-        { 
+        {
           error: 'Trop de tentatives. Réessayez dans 15 minutes.',
           retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
         },
@@ -26,7 +26,6 @@ export async function POST(req: Request) {
 
     const { username, password, gender } = await req.json();
 
-    // Pour les mises à jour depuis l'espace élève, le genre n'est pas requis
     if (!username && !password && !gender) {
       secureLog('COMPLETE_PROFILE_MISSING_FIELDS', { ip: clientIP });
       return NextResponse.json(
@@ -35,9 +34,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Sanitiser et valider les entrées
     const cleanUsername = username ? sanitizeInput(username) : null;
-    
+
     if (cleanUsername) {
       const usernameValidation = validateUsername(cleanUsername);
       if (!usernameValidation.valid) {
@@ -60,7 +58,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // Valider le genre
     if (gender && !['HOMME', 'FEMME'].includes(gender)) {
       secureLog('COMPLETE_PROFILE_INVALID_GENDER', { ip: clientIP });
       return NextResponse.json(
@@ -69,7 +66,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Vérifier que l'utilisateur est connecté
     const user = await getAuthUserFromRequest(req as any);
     if (!user) {
       secureLog('COMPLETE_PROFILE_UNAUTHORIZED', { ip: clientIP });
@@ -81,16 +77,14 @@ export async function POST(req: Request) {
 
     secureLog('COMPLETE_PROFILE_ATTEMPT', { ip: clientIP, userId: user.id });
 
-    // Préparer les données de mise à jour
     const updateData: any = {};
     if (cleanUsername) updateData.username = cleanUsername;
     if (password) updateData.password = password;
     if (gender) updateData.gender = gender;
 
-    // Mettre à jour le profil
     const updatedUser = await updateUserProfile(user.id, updateData);
 
-    // S'assurer que l'utilisateur a des données de paiement (par défaut payant)
+    // Vérifier si l’utilisateur a une entrée Stripe, sinon en créer une par défaut
     const userWithStripe = await prisma.user.findUnique({
       where: { id: user.id },
       select: { stripeCustomerId: true }
@@ -106,16 +100,22 @@ export async function POST(req: Request) {
       });
     }
 
-    // Envoyer un email de bienvenue personnalisé avec le nouveau pseudo
-    if (username && username !== user.username) {
-      sendWelcomeEmail(updatedUser.email, updatedUser.username || undefined).catch(error => {
+    // 🚀 Envoyer l’email de bienvenue uniquement si pas encore envoyé
+    if (!updatedUser.welcomeEmailSent) {
+      await sendWelcomeEmail(updatedUser.email, updatedUser.username || undefined).catch(error => {
         console.error('❌ Erreur envoi email de bienvenue:', error);
+      });
+
+
+      await prisma.user.update({
+        where: { id: updatedUser.id },
+        data: { welcomeEmailSent: true }
       });
     }
 
     secureLog('COMPLETE_PROFILE_SUCCESS', { ip: clientIP, userId: user.id });
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       user: {
         id: updatedUser.id,
@@ -127,7 +127,6 @@ export async function POST(req: Request) {
       headers: getSecurityHeaders()
     });
 
-    return response;
   } catch (error: any) {
     console.error('Complete profile error:', error);
     secureLog('COMPLETE_PROFILE_ERROR', { error: error instanceof Error ? error.message : 'Unknown error' });

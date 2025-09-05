@@ -28,6 +28,7 @@ model User {
   professor         Professor? @relation(fields: [professorId], references: [id])
   homeworkSends     HomeworkSend[]
   payments Payment[]
+  welcomeEmailSent   Boolean  @default(false) 
 }
 
 
