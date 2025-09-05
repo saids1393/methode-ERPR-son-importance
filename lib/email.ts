@@ -49,7 +49,7 @@ const createWelcomeEmailTemplate = (username?: string) => `
 body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
 .container { max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 2px; border-radius: 16px; }
 .content { background: white; border-radius: 14px; overflow: hidden; padding: 40px 30px; }
-.header { background: linear-gradient(135deg, #ffffffff, #1900ffff); color: white; padding: 10px 100px; text-align: center; }
+.header { background: linear-gradient(135deg, #ffffffff, #1900ffff); color: white; padding: 100px 10px; text-align: center; }
 .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
 .header .subtitle { font-size: 16px; opacity: 0.9; }
 .cta-button { display: inline-block; background: #2365ffff; color: white; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px; }
@@ -95,19 +95,19 @@ h2 { text-align: center; }
             <strong>Suivi de progression</strong> - Visualisez vos progrès en temps réel avec graphique hebdomadaire et mensuel
         </div>
         <div class="feature-item">
-            <strong>Exercices d'écriture</strong> - Visualisez le temps passé sur l'application
+            <strong>Capteur de temps</strong> - Visualisez le temps passé sur l'application
         </div>
          <div class="feature-item">
-            <strong>Exercices d'écriture</strong> - Recevez vos devoirs automatiquement à chaque fin de chapitre
+            <strong>Devoirs</strong> - Recevez vos devoirs automatiquement à chaque fin de chapitre
         </div>
           <div class="feature-item">
-            <strong>Exercices d'écriture</strong> - Support numérique avec plus de 600 audios intégrés
+            <strong>Audios</strong> - Support numérique avec plus de 600 audios intégrés
         </div>
           <div class="feature-item">
-            <strong>Exercices d'écriture</strong> - Vidéos courtes explicatives pour chaque chapitre
+            <strong>Vidéos</strong> - Vidéos courtes explicatives pour chaque chapitre
         </div>
         <div class="feature-item">
-            <strong>Support pédagogique numérique</strong> - Accompagents instantannées via WhatsApp et email
+            <strong>Accompagenemts et support contact</strong> - Accompagents instantannées via WhatsApp et email
         </div>
     </div>
 
