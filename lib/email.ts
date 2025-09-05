@@ -49,12 +49,10 @@ const createWelcomeEmailTemplate = (username?: string) => `
 body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
 .container { max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 2px; border-radius: 16px; }
 .content { background: white; border-radius: 14px; overflow: hidden; padding: 40px 30px; }
-.header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 40px 30px; text-align: center; }
+.header { background: linear-gradient(135deg, #ffffffff, #6b6b6bff); color: white; padding: 10px 10px; text-align: center; }
 .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
 .header .subtitle { font-size: 16px; opacity: 0.9; }
 .cta-button { display: inline-block; background: #28a745; color: white; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px; }
-.footer { background: #1e293b; color: #94a3b8; padding: 30px; text-align: center; border-radius: 0 0 14px 14px; }
-.footer a { color: #667eea; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -68,9 +66,6 @@ body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; backgrou
     <p>Félicitations ! Vous venez de rejoindre la méthode ERPR</p>
     <div style="text-align:center; margin:40px 0;">
       <a href="${BASE_URL}/dashboard" class="cta-button">🚀 Accéder à mon tableau de bord</a>
-    </div>
-    <div class="footer">
-      <p><strong>Méthode ERPR</strong> - Excellence dans l'apprentissage</p>
     </div>
   </div>
 </div>
