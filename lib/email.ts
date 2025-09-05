@@ -72,6 +72,7 @@ body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; backgrou
     top: 0;
 }
 h2 { text-align: center; }
+h3 { color: #ffffffff; }
 </style>
 </head>
 <body>
