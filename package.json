@@ -2,12 +2,15 @@
   "name": "methode-lire-ecrire-e-learning",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node-esm prisma/seed.ts"
+    "seed": "ts-node-esm prisma/seed.ts",
+    "sync-chapters": "ts-node scripts/sync-chapters.ts",
+    "sync-videos": "node --loader ts-node/esm scripts/sync-videos.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -18,9 +21,12 @@
     "@types/pdfkit": "^0.17.2",
     "bcryptjs": "^3.0.2",
     "cookies-next": "^6.1.0",
+    "csv-parser": "^3.2.0",
     "dashjs": "^5.0.3",
     "dom-to-image-more": "^3.6.0",
+    "fast-csv": "^5.0.5",
     "framer-motion": "^12.23.6",
+    "fs": "^0.0.1-security",
     "hls.js": "^1.6.11",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",

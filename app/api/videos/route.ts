@@ -17,18 +17,35 @@ export async function GET(request: NextRequest) {
 
     const videos = await prisma.chapterVideo.findMany({
       where: { isActive: true },
-      orderBy: { chapterNumber: 'asc' },
-      select: {
-        id: true,
-        chapterNumber: true,
-        title: true,
-        cloudflareVideoId: true,
-        thumbnailUrl: true,
-        duration: true,
+      include: {
+        chapter: {
+          select: {
+            chapterNumber: true,
+            title: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json(videos);
+    // Trier les vidéos par chapterNumber côté application
+    const sortedVideos = videos.sort((a, b) => {
+      const chapterA = a.chapter?.chapterNumber || 0;
+      const chapterB = b.chapter?.chapterNumber || 0;
+      return chapterA - chapterB;
+    });
+
+    // Formater les données
+    const formattedVideos = sortedVideos.map(video => ({
+      id: video.id,
+      chapterNumber: video.chapter?.chapterNumber,
+      chapterTitle: video.chapter?.title,
+      title: video.title,
+      cloudflareVideoId: video.cloudflareVideoId,
+      thumbnailUrl: video.thumbnailUrl,
+      duration: video.duration,
+    }));
+
+    return NextResponse.json(formattedVideos);
   } catch (error) {
     console.error('Get videos error:', error);
     return NextResponse.json(
@@ -94,9 +111,29 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    // Vérifier si une vidéo existe déjà pour ce chapitre
-    const existingVideo = await prisma.chapterVideo.findUnique({
+
+    // 1. D'abord, trouver ou créer le chapitre
+    let chapter = await prisma.chapter.findUnique({
       where: { chapterNumber }
+    });
+
+    if (!chapter) {
+      // Créer le chapitre s'il n'existe pas
+      console.log('➕ [API] Création du chapitre', chapterNumber);
+      chapter = await prisma.chapter.create({
+        data: {
+          chapterNumber,
+          title: `Chapitre ${chapterNumber}`,
+          isActive: true,
+        },
+      });
+    }
+
+    // 2. Vérifier si une vidéo existe déjà pour ce chapitre
+    const existingVideo = await prisma.chapterVideo.findFirst({
+      where: { 
+        chapterId: chapter.id 
+      }
     });
 
     console.log('🔍 [API] Vidéo existante trouvée:', existingVideo ? 'Oui' : 'Non');
@@ -107,7 +144,7 @@ export async function POST(request: NextRequest) {
       // Mise à jour de la vidéo existante
       console.log('🔄 [API] Mise à jour de la vidéo existante pour le chapitre', chapterNumber);
       video = await prisma.chapterVideo.update({
-        where: { chapterNumber },
+        where: { id: existingVideo.id },
         data: {
           title: title.trim(),
           cloudflareVideoId: cloudflareVideoId.trim(),
@@ -122,7 +159,7 @@ export async function POST(request: NextRequest) {
       console.log('➕ [API] Création d\'une nouvelle vidéo pour le chapitre', chapterNumber);
       video = await prisma.chapterVideo.create({
         data: {
-          chapterNumber,
+          chapterId: chapter.id,
           title: title.trim(),
           cloudflareVideoId: cloudflareVideoId.trim(),
           thumbnailUrl: thumbnailUrl?.trim() || null,
@@ -132,8 +169,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log('✅ [API] Vidéo sauvegardée:', video);
-    return NextResponse.json(video);
+    // Récupérer la vidéo avec les données du chapitre pour la réponse
+    const videoWithChapter = await prisma.chapterVideo.findUnique({
+      where: { id: video.id },
+      include: {
+        chapter: {
+          select: {
+            chapterNumber: true,
+            title: true,
+          },
+        },
+      },
+    });
+
+    console.log('✅ [API] Vidéo sauvegardée:', videoWithChapter);
+    return NextResponse.json(videoWithChapter);
   } catch (error) {
     console.error('❌ [API] Erreur Create/Update video:', error);
     

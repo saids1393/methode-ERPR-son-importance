@@ -91,6 +91,7 @@ export default function AdminHomeworkPage() {
 
   const fetchHomeworks = async () => {
     try {
+      console.log('📚 [ADMIN UI] Chargement des devoirs...');
       const response = await fetch('/api/admin/homework');
       if (response.status === 403) {
         router.push('/dashboard');
@@ -98,13 +99,15 @@ export default function AdminHomeworkPage() {
       }
       if (response.ok) {
         const data = await response.json();
+        console.log('📚 [ADMIN UI] Devoirs chargés:', data);
         setHomeworks(data);
       } else {
+        console.log('❌ [ADMIN UI] Erreur chargement:', response.status);
         toast.error('Erreur lors du chargement des devoirs');
       }
     } catch (error) {
+      console.error('❌ [ADMIN UI] Erreur réseau:', error);
       toast.error('Erreur de connexion');
-      console.error('Error fetching homeworks:', error);
     } finally {
       setLoading(false);
     }
@@ -137,6 +140,9 @@ export default function AdminHomeworkPage() {
       return;
     }
 
+    console.log('📝 [ADMIN UI] Envoi formulaire:', formData);
+    console.log('📝 [ADMIN UI] Mode édition:', !!editingHomework);
+
     setFormLoading(true);
 
     try {
@@ -144,12 +150,16 @@ export default function AdminHomeworkPage() {
         method: editingHomework ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          chapterId: formData.chapterId,
+          title: formData.title.trim(),
+          content: formData.content.trim(),
           id: editingHomework?.id
         }),
       });
 
+      console.log('📡 [ADMIN UI] Réponse API:', response.status);
       const result = await response.json();
+      console.log('📊 [ADMIN UI] Données de réponse:', result);
 
       if (response.ok) {
         toast.success(editingHomework ? 'Devoir modifié avec succès !' : 'Devoir créé avec succès !');
@@ -158,11 +168,12 @@ export default function AdminHomeworkPage() {
         fetchHomeworks();
         fetchStats(); // Recharger les stats
       } else {
+        console.log('❌ [ADMIN UI] Erreur API:', result.error);
         toast.error(result.error || 'Erreur lors de la sauvegarde');
       }
     } catch (error) {
+      console.error('❌ [ADMIN UI] Erreur réseau:', error);
       toast.error('Erreur de connexion');
-      console.error('Save homework error:', error);
     } finally {
       setFormLoading(false);
     }
@@ -597,7 +608,11 @@ export default function AdminHomeworkPage() {
                   </label>
                   <select
                     value={formData.chapterId}
-                    onChange={(e) => setFormData(prev => ({ ...prev, chapterId: parseInt(e.target.value) }))}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      console.log('📝 [ADMIN UI] Changement chapitre:', value);
+                      setFormData(prev => ({ ...prev, chapterId: value }));
+                    }}
                     className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     required
                   >

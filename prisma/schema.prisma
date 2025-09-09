@@ -107,8 +107,9 @@ model PaymentLevelPurchase {
 model Chapter {
   id            Int      @id @default(autoincrement())
   levelId       Int?
-  chapterNumber Int      @unique
+  chapterNumber Int        @unique
   title         String
+  introduction  String?
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now())
@@ -126,6 +127,7 @@ model Chapter {
 model ChapterVideo {
   id                String   @id @default(cuid())
   chapterId         Int?
+  title             String
   cloudflareVideoId String   @unique
   thumbnailUrl      String?
   duration          Int?
