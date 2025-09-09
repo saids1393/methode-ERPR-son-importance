@@ -38,6 +38,7 @@ async function verifyJWTToken(token: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
 
   // Crée la réponse et ajoute les headers de sécurité
   const response = NextResponse.next();
@@ -47,7 +48,7 @@ export async function middleware(request: NextRequest) {
   });
 
   // Pages publiques
-  const publicPaths = ['/', '/checkout', '/merci', '/login', '/complete-profile', '/professor/auth'];
+  const publicPaths = ['/', '/checkout', '/merci', '/login', '/complete-profile', '/professor/auth', '/testEcriture'];
   if (publicPaths.includes(pathname)) {
     return response;
   }

@@ -37,6 +37,7 @@
     "react-hook-form": "^7.61.1",
     "react-hot-toast": "^2.5.2",
     "stripe": "^18.3.0",
+    "swiper": "^11.2.10",
     "zod": "^4.0.10"
   },
   "devDependencies": {

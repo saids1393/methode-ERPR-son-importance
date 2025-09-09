@@ -7,105 +7,156 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// -------------------------
+// UTILISATEURS
+// -------------------------
 model User {
-  id                String     @id @default(cuid())
-  email             String     @unique
-  username          String?    @unique
+  id                String           @id @default(cuid())
+  email             String           @unique
+  username          String?          @unique
   password          String?
-  isActive          Boolean    @default(false)
+  isActive          Boolean          @default(false)
   stripeCustomerId  String?
   stripeSessionId   String?
-  completedPages    Int[]      @default([])
-  completedQuizzes  Int[]      @default([])
-  studyTimeSeconds  Int        @default(0)
+  completedPages    Int[]            @default([])
+  completedQuizzes  Int[]            @default([])
+  studyTimeSeconds  Int              @default(0)
   resetToken        String?
   resetTokenExpires DateTime?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
   gender            Gender?
-  professorId       String?
-  sessions          Session[]
-  professor         Professor? @relation(fields: [professorId], references: [id])
+  welcomeEmailSent  Boolean          @default(false)
+
   homeworkSends     HomeworkSend[]
-  payments Payment[]
-  welcomeEmailSent   Boolean  @default(false) 
+  payments          Payment[]
+  quizAttempts      QuizAttempt[]
+  videoWatches      VideoWatch[]
+  whatsappMessages  WhatsAppMessage[]
+  levelPurchases    LevelPurchase[]
 }
 
+// -------------------------
+// NIVEAUX
+// -------------------------
+model Level {
+  id        Int       @id @default(autoincrement())
+  title     String
+  price     Int       @default(89)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
 
-model Professor {
-  id             String         @id @default(cuid())
-  email          String         @unique
-  name           String
-  gender         Gender
-  zoomMeetingId  String?
-  zoomPassword   String?
-  isActive       Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  password       String?
-  availabilities Availability[]
-  sessions       Session[]
-  students       User[]
+  chapters  Chapter[]
+  purchases LevelPurchase[]
 }
 
-model Availability {
-  id           String    @id @default(cuid())
-  professorId  String
-  dayOfWeek    Int
-  startTime    String
-  endTime      String
-  isRecurring  Boolean   @default(true)
-  specificDate DateTime?
-  maxSessions  Int       @default(1)
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  professor    Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
-  sessions     Session[]
+// -------------------------
+// ACHAT DE NIVEAUX
+// -------------------------
+model LevelPurchase {
+  id        String   @id @default(cuid())
+  userId    String
+  levelId   Int
+  purchasedAt DateTime @default(now())
 
-  @@index([professorId])
-  @@index([dayOfWeek])
+  user    User   @relation(fields: [userId], references: [id])
+  level   Level  @relation(fields: [levelId], references: [id])
+  payments PaymentLevelPurchase[]
+
+  @@unique([userId, levelId])
 }
 
-model Session {
-  id             String               @id @default(cuid())
-  userId         String
-  professorId    String
-  scheduledAt    DateTime
-  status         SessionStatus        @default(SCHEDULED)
-  zoomLink       String?
-  notes          String?
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  availabilityId String?
-  cancellationId String?
-  availability   Availability?        @relation(fields: [availabilityId], references: [id])
-  professor      Professor            @relation(fields: [professorId], references: [id], onDelete: Cascade)
-  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cancellation   SessionCancellation?
+// -------------------------
+// PAIEMENTS
+// -------------------------
+model Payment {
+  id                    String        @id @default(cuid())
+  stripeSessionId       String        @unique
+  stripePaymentIntentId String
+  amount                Int
+  currency              String
+  status                PaymentStatus @default(PENDING)
+  userId                String
+  createdAt             DateTime      @default(now())
 
-  @@index([availabilityId])
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  levelPurchases PaymentLevelPurchase[]
+
+  @@index([userId])
+  @@index([status])
 }
 
-model CancellationReason {
-  id            String                @id @default(cuid())
-  reason        String
-  category      String
-  isActive      Boolean               @default(true)
-  createdAt     DateTime              @default(now())
-  cancellations SessionCancellation[]
+// -------------------------
+// TABLE PIVOT POUR PAIEMENTS / NIVEAUX
+// -------------------------
+model PaymentLevelPurchase {
+  id              String        @id @default(cuid())
+  paymentId       String
+  levelPurchaseId String
+
+  payment        Payment       @relation(fields: [paymentId], references: [id])
+  levelPurchase  LevelPurchase @relation(fields: [levelPurchaseId], references: [id])
+
+  @@unique([paymentId, levelPurchaseId])
 }
 
+// -------------------------
+// CHAPITRES ET VIDÉOS
+// -------------------------
+model Chapter {
+  id            Int      @id @default(autoincrement())
+  levelId       Int?
+  chapterNumber Int      @unique
+  title         String
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+
+  level       Level?         @relation(fields: [levelId], references: [id])
+  videos      ChapterVideo[]
+  homeworks   Homework[]
+  quizzes     Quiz[]
+
+  @@index([levelId])
+  @@index([chapterNumber])
+  @@index([isActive])
+}
+
+model ChapterVideo {
+  id                String   @id @default(cuid())
+  chapterId         Int?
+  cloudflareVideoId String   @unique
+  thumbnailUrl      String?
+  duration          Int?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+
+  chapter   Chapter? @relation(fields: [chapterId], references: [id])
+  videoWatches VideoWatch[]
+
+  @@index([chapterId])
+  @@index([isActive])
+}
+
+// -------------------------
+// DEVOIRS
+// -------------------------
 model Homework {
   id        String   @id @default(cuid())
   chapterId Int
   title     String
   content   String
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations avec les envois
+  updatedAt DateTime @default(now())
+
+  chapter Chapter @relation(fields: [chapterId], references: [id])
   homeworkSends HomeworkSend[]
+
+  @@index([chapterId])
+  @@index([isActive])
 }
 
 model HomeworkSend {
@@ -114,64 +165,126 @@ model HomeworkSend {
   homeworkId String
   sentAt     DateTime @default(now())
   emailSent  Boolean  @default(false)
-  
-  // Relations
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
-  
-  // Index pour éviter les doublons
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Restrict)
+
   @@unique([userId, homeworkId])
   @@index([userId])
   @@index([homeworkId])
 }
 
-model SessionCancellation {
-  id           String             @id @default(cuid())
-  sessionId    String             @unique
-  cancelledBy  String
-  reasonId     String
-  customReason String?
-  cancelledAt  DateTime           @default(now())
-  reason       CancellationReason @relation(fields: [reasonId], references: [id])
-  session      Session            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+// -------------------------
+// QUIZ
+// -------------------------
+model Quiz {
+  id        String   @id @default(cuid())
+  chapterId Int
+  title     String
+  questions Json
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 
-  @@index([sessionId])
+  chapter Chapter @relation(fields: [chapterId], references: [id])
+  quizAttempts QuizAttempt[]
+
+  @@index([chapterId])
+  @@index([isActive])
 }
 
-model ChapterVideo {
-  id                String   @id @default(cuid())
-  chapterNumber     Int      @unique
-  title             String
-  cloudflareVideoId String   @unique
-  thumbnailUrl      String?
-  duration          Int?
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  quizId      String
+  userId      String
+  score       Int?
+  completedAt DateTime @default(now())
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([quizId])
+  @@index([userId])
 }
 
+// -------------------------
+// SUIVI DES VIDÉOS
+// -------------------------
+model VideoWatch {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  watchedAt DateTime @default(now())
+  durationWatched Int @default(0)
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  chapterVideo ChapterVideo @relation(fields: [videoId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([videoId])
+}
+
+// -------------------------
+// SUPPORT / MESSAGES
+// -------------------------
+model WhatsAppMessage {
+  id         String   @id @default(cuid())
+  userId     String
+  message    String
+  sentByUser Boolean  @default(true)
+  isDeleted  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([isDeleted])
+}
+
+// -------------------------
+// LOGS ET BACKUP
+// -------------------------
+model AuditLog {
+  id          String   @id @default(cuid())
+  tableName   String
+  recordId    String
+  action      String
+  oldValues   Json?
+  newValues   Json?
+  userId      String?
+  timestamp   DateTime @default(now())
+
+  @@index([tableName])
+  @@index([recordId])
+  @@index([action])
+  @@index([timestamp])
+}
+
+model DeletedRecord {
+  id          String   @id @default(cuid())
+  tableName   String
+  originalId  String
+  data        Json
+  deletedBy   String?
+  deletedAt   DateTime @default(now())
+  reason      String?
+
+  @@index([tableName])
+  @@index([originalId])
+  @@index([deletedAt])
+}
+
+// -------------------------
+// ENUMS
+// -------------------------
 enum Gender {
   HOMME
   FEMME
 }
 
-enum SessionStatus {
-  SCHEDULED
-  COMPLETED
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
   CANCELLED
-  NO_SHOW
-}
-
-
-model Payment {
-  id                   String   @id @default(cuid())
-  stripeSessionId      String   @unique
-  stripePaymentIntentId String
-  amount               Int
-  currency             String
-  userId               String
-  createdAt            DateTime @default(now())
-  user                 User     @relation(fields: [userId], references: [id])
-  
-  @@index([userId])
 }

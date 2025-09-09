@@ -35,8 +35,6 @@ const LettresAttacheesMilieu = () => {
     { letter: "ـهـ" },
     { letter: "ـو" },
     { letter: "ـيـ" },
-    { letter: "ء" },
-    { letter: "ة" },
   ];
 
   const emphaticLetters = [
@@ -78,16 +76,13 @@ const LettresAttacheesMilieu = () => {
     >
       {/* En-tête avec titre et bouton */}
       <div
-        className="text-white p-3 md:p-4 bg-white flex items-center justify-between"
-        style={{
-          background: "linear-gradient(to right, #a855f7, #3b82f6)",
-        }}
+          className="text-white p-3 md:p-4 bg-gray-800 flex items-center justify-between"
       >
         <div className="w-8 flex-shrink-0"></div>
 
         <div className="text-3xl sm:text-lg md:text-xl lg:text-2xl font-bold text-center flex-1 px-2 py-5">
-          <span className="hidden sm:inline">Écriture des lettres attachées au milieu d'un mot</span>
-          <span className="sm:hidden">Lettres attachées - milieu</span>
+          <span className="hidden sm:inline">Écrivez par dessus - lettres milieu d'un mot</span>
+          <span className="sm:hidden">Écrivez par dessus - lettres milieu d'un mot</span>
         </div>
 
         {/* Bouton de téléchargement dans l'en-tête */}

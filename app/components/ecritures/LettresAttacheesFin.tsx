@@ -6,30 +6,38 @@ import domtoimage from "dom-to-image-more";
 const LettresAttacheesFin = () => {
   const captureRef = useRef<HTMLDivElement>(null);
 
-  const lettersFinMot = [
-    { letter: "ـب" },
-    { letter: "ـت" },
-    { letter: "ـث" },
-    { letter: "ـج" },
-    { letter: "ـح" },
-    { letter: "ـخ" },
-    { letter: "ـس" },
-    { letter: "ـش" },
-    { letter: "ـص" },
-    { letter: "ـض" },
-    { letter: "ـط" },
-    { letter: "ـظ" },
-    { letter: "ـع" },
-    { letter: "ـغ" },
-    { letter: "ـف" },
-    { letter: "ـق" },
-    { letter: "ـك" },
-    { letter: "ـل" },
-    { letter: "ـم" },
-    { letter: "ـن" },
-    { letter: "ـه" },
-    { letter: "ـي" },
-  ];
+const lettersFinMot = [
+  { letter: "ـا" },  // Alif en fin de mot
+  { letter: "ـب" },
+  { letter: "ـت" },
+  { letter: "ـث" },
+  { letter: "ـج" },
+  { letter: "ـح" },
+  { letter: "ـخ" },
+  { letter: "ـد" }, // ne s’attache pas après
+  { letter: "ـذ" }, // ne s’attache pas après
+  { letter: "ـر" }, // ne s’attache pas après
+  { letter: "ـز" }, // ne s’attache pas après
+  { letter: "ـس" },
+  { letter: "ـش" },
+  { letter: "ـص" },
+  { letter: "ـض" },
+  { letter: "ـط" },
+  { letter: "ـظ" },
+  { letter: "ـع" },
+  { letter: "ـغ" },
+  { letter: "ـف" },
+  { letter: "ـق" },
+  { letter: "ـك" },
+  { letter: "ـل" },
+  { letter: "ـم" },
+  { letter: "ـن" },
+  { letter: "ـه" },
+  { letter: "ـو" }, // ne s’attache pas après
+  { letter: "ـي" },
+
+];
+
 
   const emphaticLetters = ["ـخ", "ـص", "ـض", "ـط", "ـظ", "ـغ", "ـق", "ـر"];
 
@@ -61,16 +69,13 @@ const LettresAttacheesFin = () => {
     >
       {/* En-tête avec titre et bouton */}
       <div
-        className="text-white p-3 md:p-4 bg-white flex items-center justify-between"
-        style={{
-          background: "linear-gradient(to right, #a855f7, #3b82f6)",
-        }}
+          className="text-white p-3 md:p-4 bg-gray-800 flex items-center justify-between"
       >
         <div className="w-8 flex-shrink-0"></div>
 
        <div className="text-3xl sm:text-lg md:text-xl lg:text-2xl font-bold text-center flex-1 px-2 py-5">
-          <span className="hidden sm:inline">Écriture des lettres attachées à la fin d’un mot</span>
-          <span className="sm:hidden">Lettres attachées - fin</span>
+          <span className="hidden sm:inline">Écrivez par dessus - lettres fin d'un mot</span>
+          <span className="sm:hidden">Écrivez par dessus - lettres fin d'un mot</span>
         </div>
 
         {/* Bouton de téléchargement */}

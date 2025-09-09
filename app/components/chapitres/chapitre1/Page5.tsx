@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import * as htmlToImage from "html-to-image";
 
+import VisuelEcriture from "@/app/components/ecritures/VisuelEcriture";
 import LettresAttacheesDebut from "@/app/components/ecritures/LettresAttacheesDebut";
 import LettresAttacheesMilieu from "@/app/components/ecritures/LettresAttacheesMilieu";
 import LettresAttacheesFin from "@/app/components/ecritures/LettresAttacheesFin";
@@ -48,27 +49,26 @@ const Page5 = () => {
   };
 
   return (
-    <div className="font-arabic min-h-screen bg-white relative" style={{ direction: "rtl" }}>
-      {/* Header avec bouton à gauche */}
+<>
+      {/* Visuel écriture */}
+      <div className="border-t border-gray-200">
+        <VisuelEcriture />
+      </div>
+
+      {/* Header avec bouton */}
       <div
-        className="text-white p-3 md:p-4 bg-white flex items-center justify-between"
-        style={{
-          background: "linear-gradient(to right, #a855f7, #3b82f6)",
-        }}
+      className="text-white p-3 md:p-4 bg-gray-800 flex items-center justify-between"
       >
-      
-        
-        {/* Espace vide à droite pour équilibrer */}
+        {/* Espace vide à droite */}
         <div className="w-8 flex-shrink-0"></div>
 
         {/* Titre centré */}
-<div className="text-3xl sm:text-lg md:text-xl lg:text-2xl font-bold text-center flex-1 px-2 py-5">
-  <span className="hidden sm:inline">Écriture des lettres seules</span>
-  <span className="sm:hidden">Lettres seules</span>
-</div>
+        <div className="text-3xl sm:text-lg md:text-xl lg:text-2xl font-bold text-center flex-1 px-2 py-5">
+          <span className="hidden sm:inline">Écrivez par dessus - lettres nons-attachées</span>
+          <span className="sm:hidden">Écrivez par dessus - lettres nons-attachées</span>
+        </div>
 
-
-         {/* Bouton à gauche */}
+        {/* Bouton téléchargement */}
         <button
           onClick={handleDownload}
           className="flex items-center justify-center w-8 h-8 bg-white/20 backdrop-blur-sm text-white rounded-md shadow-lg hover:bg-white/30 transition-all flex-shrink-0"
@@ -77,12 +77,13 @@ const Page5 = () => {
         >
           <DownloadIcon />
         </button>
-
       </div>
 
-      {/* Grille lettres seule */}
+      {/* Grille lettres seules */}
       <div ref={captureRef} className="p-8 bg-white">
-        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4"
+          dir="rtl"
+        >
           {allLetters.map((item, index) => (
             <Cell
               key={index}
@@ -94,20 +95,21 @@ const Page5 = () => {
       </div>
 
       {/* Lettres attachées - début */}
-      <div className="border-t border-gray-200 pt-8">
+      <div className="border-t border-gray-200 ">
         <LettresAttacheesDebut />
       </div>
 
       {/* Lettres attachées - milieu */}
-      <div className="border-t border-gray-200 pt-8">
+      <div className="border-t border-gray-200 ">
         <LettresAttacheesMilieu />
       </div>
 
       {/* Lettres attachées - fin */}
-      <div className="border-t border-gray-200 pt-8">
+      <div className="border-t border-gray-200 ">
         <LettresAttacheesFin />
       </div>
-    </div>
+     </>
+   
   );
 };
 
@@ -146,5 +148,6 @@ const DownloadIcon = () => (
     />
   </svg>
 );
+
 
 export default Page5;
