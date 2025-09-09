@@ -32,13 +32,8 @@ export default function VideoPage({ params }: VideoPageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-900 text-white">
-        <div className="bg-arabic-gradient text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">
-            Vidéo - {chapter.title}
-          </div>
-        </div>
-
+      <div className="min-h-screen bg-gray-900 text-white">
+       
         <div className="p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-400 mx-auto mb-6"></div>
@@ -51,8 +46,8 @@ export default function VideoPage({ params }: VideoPageProps) {
 
   if (error || !video) {
     return (
-      <div className="min-h-screen bg-zinc-900 text-white">
-        <div className="bg-arabic-gradient text-white p-6 text-center">
+      <div className="min-h-screen bg-gray-900 text-white">
+        <div className="bg-gray-900 text-white p-6 text-center">
           <div className="text-3xl font-bold mb-4">
             Vidéo - {chapter.title}
           </div>
@@ -67,7 +62,7 @@ export default function VideoPage({ params }: VideoPageProps) {
               </h3>
               <p className="text-zinc-300 text-lg leading-relaxed">
                 La vidéo pour ce chapitre sera ajoutée prochainement.
-                En attendant, vous pouvez consulter l'introduction et les leçons du chapitre.
+                En attendant, vous pouvez consulter la Synthèse textuel et les leçons du chapitre.
               </p>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
@@ -76,7 +71,7 @@ export default function VideoPage({ params }: VideoPageProps) {
                     href={`/chapitres/${chapterNumber}/introduction`}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
                   >
-                    📖 Lire l'introduction
+                    📖 Lire la Synthèse textuel
                   </a>
                 )}
 
@@ -97,9 +92,9 @@ export default function VideoPage({ params }: VideoPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      <div className="bg-arabic-gradient text-white p-6 text-center">
+      <div className="bg-gray-900 text-white p-6 text-center">
         <div className="text-3xl font-bold mb-4">
           {video.title}
         </div>

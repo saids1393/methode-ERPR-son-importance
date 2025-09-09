@@ -228,7 +228,7 @@ export default function SidebarContent() {
                           }`}
                         >
                           <Play size={14} className="text-blue-400" />
-                          <span className="font-semibold">Vidéo du chapitre</span>
+                          <span className="font-semibold">Vidéo explicative</span>
                         </Link>
                       </li>
                     )}
@@ -244,7 +244,7 @@ export default function SidebarContent() {
                           }`}
                         >
                           <BookOpen size={14} className="text-blue-400" />
-                          <span>Introduction</span>
+                          <span>Synthèse textuel</span>
                         </Link>
                       </li>
                     )}

@@ -21,18 +21,18 @@ export default async function IntroductionPage({ params }: Props) {
 
   return (
     <AutoProgressWrapper>
-      <div className="font-arabic min-h-screen bg-zinc-900 text-white text-center">
+      <div className="font-arabic min-h-screen bg-gray-900 text-white text-center">
         <div className="w-full h-full overflow-hidden">
           {/* Header avec le même style gradient */}
-          <div className="bg-arabic-gradient text-white p-6 text-center">
+          <div className="bg-gray-900 text-white p-6 text-center border-b border-white-700">
             <div className="text-3xl font-bold mb-4">
-              introduction : {chapter.title.toLowerCase()}
+              Synthèse textuel : {chapter.title.toLowerCase()}
             </div>
           </div>
 
           {/* Contenu de l'introduction */}
           <div className="p-8">
-            <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 md:p-8 shadow-lg">
+            <div className="bg-gray-800 border border-zinc-700 rounded-xl p-6 md:p-8 shadow-lg">
               <div className="prose prose-invert max-w-none">
                 {chapter.introduction.split('\n').map((paragraph, index) => (
                   <p key={index} className="mb-6 last:mb-0 text-lg leading-relaxed">
