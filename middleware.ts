@@ -71,10 +71,23 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Pages publiques (modifiées pour la production)
-  const publicPaths = isProduction 
-    ? ['/', '/login', '/complete-profile', '/professor/auth', '/testEcriture'] // Pas de /checkout ni /merci en prod
-    : ['/', '/checkout', '/merci', '/login', '/complete-profile', '/professor/auth', '/testEcriture']; // Tout autorisé en dev
+const publicPaths = isProduction 
+  ? [
+      '/',               // Accueil
+      '/login',          // Page de connexion
+      '/complete-profile', // Page de complétion du profil (toujours accessible)
+      '/professor/auth', // Authentification professeur
+      '/testEcriture'    // Page de test écriture
+    ]
+  : [
+      '/',               // Accueil
+      '/checkout',       // Page de paiement
+      '/merci',          // Page de remerciement
+      '/login',          // Page de connexion
+      '/complete-profile', // Page de complétion du profil
+      '/professor/auth', // Authentification professeur
+      '/testEcriture'    // Page de test écriture
+    ];
     
   if (publicPaths.includes(pathname)) {
     return response;

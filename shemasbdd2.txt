@@ -27,6 +27,7 @@ model User {
   updatedAt         DateTime         @updatedAt
   gender            Gender?
   welcomeEmailSent  Boolean          @default(false)
+
   homeworkSends     HomeworkSend[]
   payments          Payment[]
   quizAttempts      QuizAttempt[]
@@ -45,6 +46,7 @@ model Level {
   isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
+
   chapters  Chapter[]
   purchases LevelPurchase[]
 }
@@ -53,13 +55,15 @@ model Level {
 // ACHAT DE NIVEAUX
 // -------------------------
 model LevelPurchase {
-  id           String   @id @default(cuid())
-  userId       String
-  levelId      Int
-  purchasedAt  DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id])
-  level        Level    @relation(fields: [levelId], references: [id])
-  payments     PaymentLevelPurchase[]
+  id        String   @id @default(cuid())
+  userId    String
+  levelId   Int
+  purchasedAt DateTime @default(now())
+
+  user    User   @relation(fields: [userId], references: [id])
+  level   Level  @relation(fields: [levelId], references: [id])
+  payments PaymentLevelPurchase[]
+
   @@unique([userId, levelId])
 }
 
@@ -75,8 +79,10 @@ model Payment {
   status                PaymentStatus @default(PENDING)
   userId                String
   createdAt             DateTime      @default(now())
-  user                  User           @relation(fields: [userId], references: [id], onDelete: Restrict)
-  levelPurchases        PaymentLevelPurchase[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  levelPurchases PaymentLevelPurchase[]
+
   @@index([userId])
   @@index([status])
 }
@@ -88,8 +94,10 @@ model PaymentLevelPurchase {
   id              String        @id @default(cuid())
   paymentId       String
   levelPurchaseId String
-  payment         Payment       @relation(fields: [paymentId], references: [id])
-  levelPurchase   LevelPurchase @relation(fields: [levelPurchaseId], references: [id])
+
+  payment        Payment       @relation(fields: [paymentId], references: [id])
+  levelPurchase  LevelPurchase @relation(fields: [levelPurchaseId], references: [id])
+
   @@unique([paymentId, levelPurchaseId])
 }
 
@@ -99,16 +107,18 @@ model PaymentLevelPurchase {
 model Chapter {
   id            Int      @id @default(autoincrement())
   levelId       Int?
-  chapterNumber Int      @unique
+  chapterNumber Int        @unique
   title         String
   introduction  String?
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now())
-  level         Level?         @relation(fields: [levelId], references: [id])
-  videos        ChapterVideo[]
-  homeworks     Homework[]
-  quizzes       Quiz[]
+
+  level       Level?         @relation(fields: [levelId], references: [id])
+  videos      ChapterVideo[]
+  homeworks   Homework[]
+  quizzes     Quiz[]
+
   @@index([levelId])
   @@index([chapterNumber])
   @@index([isActive])
@@ -124,8 +134,10 @@ model ChapterVideo {
   isActive          Boolean  @default(true)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now())
-  chapter           Chapter? @relation(fields: [chapterId], references: [id])
-  videoWatches      VideoWatch[]
+
+  chapter   Chapter? @relation(fields: [chapterId], references: [id])
+  videoWatches VideoWatch[]
+
   @@index([chapterId])
   @@index([isActive])
 }
@@ -141,8 +153,10 @@ model Homework {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
-  chapter   Chapter   @relation(fields: [chapterId], references: [id])
+
+  chapter Chapter @relation(fields: [chapterId], references: [id])
   homeworkSends HomeworkSend[]
+
   @@index([chapterId])
   @@index([isActive])
 }
@@ -153,8 +167,10 @@ model HomeworkSend {
   homeworkId String
   sentAt     DateTime @default(now())
   emailSent  Boolean  @default(false)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
-  homework   Homework @relation(fields: [homeworkId], references: [id], onDelete: Restrict)
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Restrict)
+
   @@unique([userId, homeworkId])
   @@index([userId])
   @@index([homeworkId])
@@ -170,8 +186,10 @@ model Quiz {
   questions Json
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-  chapter   Chapter   @relation(fields: [chapterId], references: [id])
+
+  chapter Chapter @relation(fields: [chapterId], references: [id])
   quizAttempts QuizAttempt[]
+
   @@index([chapterId])
   @@index([isActive])
 }
@@ -182,8 +200,10 @@ model QuizAttempt {
   userId      String
   score       Int?
   completedAt DateTime @default(now())
-  quiz        Quiz      @relation(fields: [quizId], references: [id], onDelete: Restrict)
-  user        User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
   @@index([quizId])
   @@index([userId])
 }
@@ -192,13 +212,15 @@ model QuizAttempt {
 // SUIVI DES VIDÉOS
 // -------------------------
 model VideoWatch {
-  id            String   @id @default(cuid())
-  userId        String
-  videoId       String
-  watchedAt     DateTime @default(now())
-  durationWatched Int    @default(0)
-  user          User         @relation(fields: [userId], references: [id], onDelete: Restrict)
-  chapterVideo   ChapterVideo @relation(fields: [videoId], references: [id], onDelete: Restrict)
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  watchedAt DateTime @default(now())
+  durationWatched Int @default(0)
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  chapterVideo ChapterVideo @relation(fields: [videoId], references: [id], onDelete: Restrict)
+
   @@index([userId])
   @@index([videoId])
 }
@@ -213,7 +235,9 @@ model WhatsAppMessage {
   sentByUser Boolean  @default(true)
   isDeleted  Boolean  @default(false)
   createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
   @@index([userId])
   @@index([isDeleted])
 }
@@ -230,6 +254,7 @@ model AuditLog {
   newValues   Json?
   userId      String?
   timestamp   DateTime @default(now())
+
   @@index([tableName])
   @@index([recordId])
   @@index([action])
@@ -244,6 +269,7 @@ model DeletedRecord {
   deletedBy   String?
   deletedAt   DateTime @default(now())
   reason      String?
+
   @@index([tableName])
   @@index([originalId])
   @@index([deletedAt])
