@@ -22,34 +22,25 @@ export default function CheckoutPage() {
     setError('');
 
     try {
-      // Vérifier si l'utilisateur existe déjà et est actif
+      // Vérifier si l'utilisateur existe déjà
       const checkResponse = await fetch('/api/auth/check-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
+      
       const checkData = await checkResponse.json();
 
-      if (checkData.exists && checkData.isActive) {
-        // L'utilisateur a déjà payé, le connecter directement
-        const loginResponse = await fetch('/api/auth/login-existing', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-
-        if (loginResponse.ok) {
-          const loginData = await loginResponse.json();
-          if (loginData.success) {
-            setTimeout(() => {
-              window.location.replace('/dashboard');
-            }, 500);
-            return;
-          }
-        }
+      if (checkData.exists) {
+        // L'utilisateur existe déjà - rediriger vers login
+        setError('Un compte existe déjà avec cet email. Veuillez vous connecter.');
+        setTimeout(() => {
+          window.location.href = `/login?email=${encodeURIComponent(email)}`;
+        }, 2000);
+        return;
       }
 
-      // Créer une session Stripe
+      // L'utilisateur n'existe pas - procéder au paiement Stripe
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -161,7 +152,7 @@ export default function CheckoutPage() {
 
                 {/* Error message */}
                 {error && (
-                  <div className="text-red-500 text-sm text-center">
+                  <div className="text-red-500 text-sm text-center p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                     {error}
                   </div>
                 )}
@@ -179,8 +170,21 @@ export default function CheckoutPage() {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                     ) : null}
-                    {loading ? 'Paiement en cours...' : 'Payer avec Stripe'}
+                    {loading ? 'Vérification...' : 'Continuer avec Stripe'}
                   </button>
+                </div>
+
+                {/* Login link */}
+                <div className="text-center">
+                  <p className="text-sm text-gray-400">
+                    Vous avez déjà un compte ?{' '}
+                    <a 
+                      href="/login" 
+                      className="text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      Se connecter
+                    </a>
+                  </p>
                 </div>
               </form>
 
