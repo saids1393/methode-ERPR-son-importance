@@ -12,6 +12,12 @@ export async function POST(req: Request) {
       );
     }
 
+    // Déterminer l'URL de base selon l'environnement
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? process.env.NEXTAUTH_URL // ta prod
+        : 'http://localhost:3000'; // local
+
     // Créer la session Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -25,18 +31,16 @@ export async function POST(req: Request) {
               description: 'Apprenez à lire et écrire l\'arabe à votre rythme',
               images: ['https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg'],
             },
-            unit_amount: 8900, // 97€ en centimes
+            unit_amount: 8900, // 89€ en centimes
           },
           quantity: 1,
         },
       ],
       customer_email: email,
-      success_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/merci?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/checkout`,
-      metadata: {
-        email: email,
-      },
-      expires_at: Math.floor(Date.now() / 1000) + (30 * 60), // 30 minutes
+      success_url: `${baseUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/checkout`,
+      metadata: { email },
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes
     });
 
     return NextResponse.json({ sessionId: session.id });
