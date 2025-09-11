@@ -75,7 +75,8 @@ const publicPaths = isProduction
   ? [
       '/',               // Accueil
       '/login',          // Page de connexion
-      '/complete-profile', // Page de complétion du profil (toujours accessible)
+      '/complete-profile',
+      '/merci', // Page de complétion du profil (toujours accessible)
       '/professor/auth', // Authentification professeur
       '/testEcriture'    // Page de test écriture
     ]
