@@ -147,9 +147,9 @@ const chapter3Page13AudioMappings: { [key: string]: string } = {
   'يٍـ': 'chap3_pg12_case84',
   
   // Hamza avec voyelles doubles
-  'أً': 'chap3_pg12_case85',
-  'أٌ': 'chap3_pg12_case86',
-  'إٍ': 'chap3_pg12_case87'
+  'أً': 'chap3_pg12_case1',
+  'أٌ': 'chap3_pg12_case2',
+  'إٍ': 'chap3_pg12_case3'
 };
 
 const Page13 = () => {

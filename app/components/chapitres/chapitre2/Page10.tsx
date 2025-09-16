@@ -112,29 +112,29 @@ const chapter2Page10AudioMappings: { [key: string]: string } = {
   'ـهِـ': 'chap2_pg8_case78',
   // Waw avec voyelles (forme finale)
   'ـوَ': 'chap2_pg8_case79',
-  'ـوُ': 'chap2_pg8_case80',
-  'ـوِ': 'chap2_pg8_case81',
+  'ـوُ': 'wou-chap2',
+  'ـوِ': 'wi-chap2',
   // Ya avec voyelles (forme médiane)
-  'ـيَـ': 'chap2_pg8_case82',
-  'ـيُـ': 'chap2_pg8_case83',
-  'ـيِـ': 'chap2_pg8_case84'
+  'ـيَـ': 'ya-chap2',
+  'ـيُـ': 'you-chap2',
+  'ـيِـ': 'yi-chap2'
 };
 
 const Page10 = () => {
   // Fonction pour jouer l'audio avec le mapping spécifique
-const playLetterAudio = (vowelLetter: string) => {
-  const audioFileName = chapter2Page10AudioMappings[vowelLetter];
-  if (audioFileName) {
-    const audio = new Audio(`/audio/chapitre2/${audioFileName}.mp3`);
-    audio.play().catch(error => {
-      console.error('Erreur lors de la lecture audio:', error);
-    });
-  }
-};
+  const playLetterAudio = (vowelLetter: string) => {
+    const audioFileName = chapter2Page10AudioMappings[vowelLetter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre2/${audioFileName}.mp3`);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+      });
+    }
+  };
 
   const emphaticLetters = ['خ', 'ر', 'ص', 'ض', 'ط', 'ظ', 'غ', 'ق'];
   const nonConnectingLetters = ['ا', 'د', 'ذ', 'ر', 'ز', 'و']; // Lettres qui ne se connectent pas après elles
-  
+
   const letterGroups = [
     { letter: 'ا', name: 'أَلِف', vowels: ['ـاَ', 'ـاُ', 'ـاِ'] },
     { letter: 'ب', name: 'بَاء', vowels: ['ـبَـ', 'ـبُـ', 'ـبِـ'] },
@@ -146,13 +146,13 @@ const playLetterAudio = (vowelLetter: string) => {
     { letter: 'د', name: 'دَال', vowels: ['ـدَ', 'ـدُ', 'ـدِ'] },
     { letter: 'ذ', name: 'ذَال', vowels: ['ـذَ', 'ـذُ', 'ـذِ'] },
     { letter: 'ر', name: 'رَاء', vowels: ['ـرَ', 'ـرُ', 'ـرِ'] },
-    { letter: 'ز', name: 'زَاي', vowels: ['ـزَ', 'ـزُ', '��زِ'] },
+    { letter: 'ز', name: 'زَاي', vowels: ['ـزَ', 'ـزُ', 'زِ'] },
     { letter: 'س', name: 'سِين', vowels: ['ـسَـ', 'ـسُـ', 'ـسِـ'] },
     { letter: 'ش', name: 'شِين', vowels: ['ـشَـ', 'ـشُـ', 'ـشِـ'] },
     { letter: 'ص', name: 'صَاد', vowels: ['ـصَـ', 'ـصُـ', 'ـصِـ'] },
     { letter: 'ض', name: 'ضَاد', vowels: ['ـضَـ', 'ـضُـ', 'ـضِـ'] },
     { letter: 'ط', name: 'طَاء', vowels: ['ـطَـ', 'ـطُـ', 'ـطِـ'] },
-    { letter: 'ظ', name: 'ظَاء', vowels: ['ـظَ��', 'ـظُـ', 'ـظِـ'] },
+    { letter: 'ظ', name: 'ظَاء', vowels: ['ـظَـ', 'ـظُـ', 'ـظِـ'] },
     { letter: 'ع', name: 'عَين', vowels: ['ـعَـ', 'ـعُـ', 'ـعِـ'] },
     { letter: 'غ', name: 'غَين', vowels: ['ـغَـ', 'ـغُـ', 'ـغِـ'] },
     { letter: 'ف', name: 'فَاء', vowels: ['ـفَـ', 'ـفُـ', 'ـفِـ'] },
@@ -168,13 +168,13 @@ const playLetterAudio = (vowelLetter: string) => {
 
   const vowelNames = ['Fathah ( son : a )', 'Dammah ( son : ou )', 'Kassrah ( son : i )'];
 
-// Modifier handleLetterClick pour utiliser la nouvelle fonction
-const handleLetterClick = (vowelLetter: string) => {
-  playLetterAudio(vowelLetter);
-};
+  // Modifier handleLetterClick pour utiliser la nouvelle fonction
+  const handleLetterClick = (vowelLetter: string) => {
+    playLetterAudio(vowelLetter);
+  };
 
   return (
-    <div 
+    <div
       className="font-arabic min-h-screen"
       style={{ direction: 'rtl' }}
     >
@@ -185,13 +185,13 @@ const handleLetterClick = (vowelLetter: string) => {
             Leçon : lettres attachées au milieu d'un mot avec voyelles simples
           </div>
         </div>
-        
+
         {/* Letters with Vowels Grid */}
         <div className="p-8 bg-gray-900">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {letterGroups.map((group, index) => (
-              <LetterGroup 
-                key={index} 
+              <LetterGroup
+                key={index}
                 letter={group.letter}
                 vowels={group.vowels}
                 vowelNames={vowelNames}
@@ -201,7 +201,7 @@ const handleLetterClick = (vowelLetter: string) => {
               />
             ))}
           </div>
-          
+
           {/* Footer */}
           <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
             <div>Page 10</div>
@@ -214,15 +214,15 @@ const handleLetterClick = (vowelLetter: string) => {
 };
 
 // LetterGroup Component
-const LetterGroup = ({ 
-  letter, 
-  vowels, 
-  vowelNames, 
-  emphatic, 
-  nonConnecting, 
-  onLetterClick 
-}: { 
-  letter: string; 
+const LetterGroup = ({
+  letter,
+  vowels,
+  vowelNames,
+  emphatic,
+  nonConnecting,
+  onLetterClick
+}: {
+  letter: string;
   vowels: string[];
   vowelNames: string[];
   emphatic?: boolean;
@@ -235,21 +235,19 @@ const LetterGroup = ({
     </div>
     <div className="grid grid-cols-3 gap-3">
       {vowels.map((vowelLetter, index) => (
-        <div 
-          key={index} 
+        <div
+          key={index}
           className="bg-gray-900 border border-zinc-500 rounded-lg p-3 text-center hover:bg-zinc-600 transition-all duration-300 cursor-pointer"
           onClick={() => onLetterClick?.(vowelLetter)}
         >
-          <div className={`text-2xl md:text-3xl font-bold mb-2 ${
-            emphatic ? 'text-red-400' : 'text-white'
-          }`}>
+          <div className={`text-2xl md:text-3xl font-bold mb-2 ${emphatic ? 'text-red-400' : 'text-white'
+            }`}>
             {vowelLetter}
           </div>
-          <div className={`text-xs font-semibold px-2 py-1 rounded ${
-            index === 0 ? 'text-orange-400 bg-orange-900/30' :
-            index === 1 ? 'text-blue-400 bg-blue-900/30' :
-            'text-green-400 bg-green-900/30'
-          }`}>
+          <div className={`text-xs font-semibold px-2 py-1 rounded ${index === 0 ? 'text-orange-400 bg-orange-900/30' :
+              index === 1 ? 'text-blue-400 bg-blue-900/30' :
+                'text-green-400 bg-green-900/30'
+            }`}>
             {vowelNames[index]}
           </div>
           {/* Badge non-connection */}

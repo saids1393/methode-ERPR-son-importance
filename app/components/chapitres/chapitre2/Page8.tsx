@@ -112,20 +112,20 @@ const chapter2Page8AudioMappings: { [key: string]: string } = {
   'هِ': 'chap2_pg8_case78',
   // Waw avec voyelles
   'وَ': 'chap2_pg8_case79',
-  'وُ': 'chap2_pg8_case80',
-  'وِ': 'chap2_pg8_case81',
+  'وُ': 'wou-chap2',
+  'وِ': 'wi-chap2',
   // Ya avec voyelles
-  'يَ': 'chap2_pg8_case82',
-  'يُ': 'chap2_pg8_case83',
-  'يِ': 'chap2_pg8_case84',
+  'يَ': 'ya-chap2',
+  'يُ': 'you-chap2',
+  'يِ': 'yi-chap2',
   // Hamza avec voyelles
-  'ءَ': 'chap2_pg8_case85',
-  'ءُ': 'chap2_pg8_case86',
-  'ءِ': 'chap2_pg8_case87',
+  'ءَ': 'chap2_pg8_case1',
+  'ءُ': 'chap2_pg8_case2',
+  'ءِ': 'chap2_pg8_case3',
   // Ta marbuta avec voyelles
-  'ةَ': 'chap2_pg8_case88',
-  'ةُ': 'chap2_pg8_case89',
-  'ةِ': 'chap2_pg8_case90'
+  'ةَ': 'chap2_pg8_case7',
+  'ةُ': 'chap2_pg8_case8',
+  'ةِ': 'chap2_pg8_case9'
 };
 
 
