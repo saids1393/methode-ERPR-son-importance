@@ -47,6 +47,7 @@ export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
         { name: 'Ajouter Utilisateur', href: '/admin/users/create', icon: UserPlus },
         { name: 'Vidéos', href: '/admin/videos', icon: Settings },
         { name: 'Devoirs', href: '/admin/homework', icon: FileText },
+        { name: 'Tests Techniques', href: '/admin/tests', icon: Activity },
       ]
     },
     {
