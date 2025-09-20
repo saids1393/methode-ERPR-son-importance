@@ -1,3 +1,5 @@
+// lib/homework-email.ts
+
 import nodemailer from 'nodemailer';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { prisma } from './prisma';

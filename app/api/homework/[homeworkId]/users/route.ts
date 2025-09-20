@@ -1,3 +1,5 @@
+//app/api/homework/[homeworkId]/users/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';

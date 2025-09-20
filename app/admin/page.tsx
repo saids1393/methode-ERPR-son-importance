@@ -602,6 +602,25 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </button>
+
+            <Link
+              href="/admin/tests"
+              className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white p-4 sm:p-6 rounded-xl transition-all duration-300 transform hover:scale-105 group"
+            >
+              <div className="flex items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                <Activity className="h-6 w-6 sm:h-8 sm:w-8" />
+                <div>
+                  <h4 className="font-bold text-sm sm:text-base">Tests Techniques</h4>
+                  <p className="text-indigo-200 text-xs sm:text-sm hidden sm:block">Connexion & Assiduité</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm">Diagnostiquer</span>
+                <div className="bg-white/20 p-1 rounded-full group-hover:translate-x-1 transition-transform">
+                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                </div>
+              </div>
+            </Link>
           </div>
         </main>
       </div>

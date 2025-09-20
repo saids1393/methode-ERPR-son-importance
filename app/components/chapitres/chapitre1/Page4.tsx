@@ -14,7 +14,7 @@ const chapter1Page4AudioMappings: { [key: string]: string } = {
   'ـح': 'chap0_pg0_case6',
   'ـخ': 'chap0_pg0_case7',
   'ـد': 'chap0_pg0_case8',
-  // 'ـذ': 'chap0_pg0_case9',
+  'ـذ': 'chap0_pg0_case9',
   'ـر': 'chap0_pg0_case10',
   'ـز': 'chap0_pg0_case11',
   'ـس': 'chap0_pg0_case12',

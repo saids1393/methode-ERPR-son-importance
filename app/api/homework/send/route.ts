@@ -1,3 +1,5 @@
+//app/api/homework/send/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 import { checkAndSendHomework } from '@/lib/homework-email';
