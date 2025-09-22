@@ -83,13 +83,13 @@ const Page21 = () => {
     { word: "شُهُورٌ" },
 
     // Mots avec symboles spéciaux
-    { word: "عَبِدُونَ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
-    { word: "لَهٰ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
-    { word: "مَوَازِينُهُهٰ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
-    { word: "إِنْسَانٌ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
-    { word: "صَلَوٰةٌ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
-    { word: "سَفِلِينَ", symbol: "ۦ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
-    { word: "عِنْدَهٰ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
+    // { word: "عَبِدُونَ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
+    // { word: "لَهٰ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
+    // { word: "مَوَازِينُهُهٰ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
+    // { word: "إِنْسَانٌ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
+    // { word: "صَلَوٰةٌ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
+    // { word: "سَفِلِينَ", symbol: "ۦ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
+    // { word: "عِنْدَهٰ", symbol: "ٰ", symbolPosition: { position: "relative", letterStyle: "top-[-8px] right-[-5px]" } },
   ];
 
   return (

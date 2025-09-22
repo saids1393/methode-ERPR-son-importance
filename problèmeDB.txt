@@ -1,0 +1,83 @@
+⚠️ Les deux seuls points à revoir :
+
+Chapter.levelId → le rendre obligatoire (Int) si un chapitre appartient toujours à un niveau.
+
+Ajouter AuditLog, DeletedRecord et WhatsAppMessage dans ton MCD pour coller à ton schéma Prisma.
+
+
+3. CHAPTERS ↔ LEVEL
+
+Cardinalité : CHAPTERS 0-N — 1-1 LEVEL
+⚠️ Là, attention : dans Prisma, Chapter.levelId est défini en optionnel (Int?).
+
+Donc dans ton modèle Prisma, un chapitre peut exister sans niveau.
+
+Mais dans ton MCD, tu as mis obligatoire côté LEVEL.
+
+👉 Si dans ton métier tous les chapitres doivent toujours être rattachés à un niveau, alors il faut corriger Prisma (Int au lieu de Int?).
+👉 Sinon, ton MCD doit montrer que c’est optionnel (CHAPTER 0-N ↔ 0-1 LEVEL).
+
+
+✅ Conclusion
+
+Ton schéma est quasi nickel 🎉
+Les seules choses à revoir :
+
+Relation CHAPTER ↔ LEVEL :
+
+soit tu rends obligatoire dans Prisma (Int au lieu de Int?),
+
+soit tu modifies le MCD en 0-1 côté LEVEL.
+
+Audit / DeletedRecord (ton "AVOIR") : préciser un peu plus la relation sinon ce n’est pas très clair.
+
+
+------------------------------------
+
+MLD : 
+
+level_purchases
+
+Pivot entre USER et LEVEL.
+
+Contient id, purchased_at, user_id, level_id.
+✅ Exactement ce qu’on avait prévu → représente bien la relation N-N.
+⚠️ Vérifie dans ton implémentation Prisma que tu as bien la contrainte @@unique([userId, levelId]) pour éviter qu’un user rachète deux fois le même niveau.
+
+CHAPTERS
+
+Lié à LEVEL via level_id.
+⚠️ Ici je remarque que level_id est présent (donc obligatoire).
+
+Dans Prisma tu avais mis levelId Int? (optionnel).
+👉 Tu dois choisir :
+
+si chaque chapitre doit appartenir à un niveau → garde NOT NULL dans ton MLD et mets Int dans Prisma.
+
+si un chapitre peut exister sans niveau → mets NULL dans MLD et Int? dans Prisma.
+PAYMENT
+
+Lié à USER.
+
+Mais ❌ dans ton MLD actuel je ne vois pas le pivot PaymentLevelPurchase.
+👉 Dans Prisma tu avais bien PaymentLevelPurchase pour gérer les paiements groupés.
+Donc ton MLD est incomplet à ce niveau-là.
+
+
+✅ Conclusion
+
+Ton MLD est globalement correct et correspond à ton MCD… sauf deux points :
+
+Lien CHAPTER ↔ LEVEL
+
+Dans ton MLD, level_id est obligatoire.
+
+Dans ton Prisma, c’était optionnel (Int?).
+👉 Tu dois harmoniser (au choix selon la logique métier).
+
+Manque de PaymentLevelPurchase
+
+Dans ton Prisma, tu as une table pivot pour relier PAYMENT et level_purchases.
+
+Dans ton MLD actuel, ce pivot n’apparaît pas → donc paiement groupé impossible dans ton MLD.
+👉 Il faut rajouter la table PaymentLevelPurchase(payment_id, level_purchase_id).

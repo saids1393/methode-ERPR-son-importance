@@ -29,7 +29,7 @@ const chapter10Page25AudioMappings: { [key: string]: string } = {
   "فَكَّ": "chap10_pg25_case24",
   "ذَكَّ": "chap10_pg25_case25",
   "خَسَّ": "chap10_pg25_case26",
-  "هَجَّ": "chap10_pg25_case27",
+  // "هَجَّ": "chap10_pg25_case27",
   "جَلَّ": "chap10_pg25_case28",
   "فَضَّ": "chap10_pg25_case29",
   "سَبَّ": "chap10_pg25_case30",
@@ -40,10 +40,10 @@ const shaddaWords: string[] = [
   "شَدَّ","طُبَّ","قَطَّ","غَلَّ","نَبَّ","ذُبَّ",
   "حُجَّ","عَدَّ","بَلَّ",
   "ظَنَّ","زُرَّ","هَبَّ","كَنَّ","ضَرَّ","سَرَّ",
-  "نَمَّ","لَبَّ","فَكَّ","ذَكَّ","خَسَّ","هَجَّ",
+  "نَمَّ","لَبَّ","فَكَّ","ذَكَّ","خَسَّ",
   "جَلَّ","فَضَّ","سَبَّ",
 ];
-
+// "هَجَّ"
 const Page25 = () => {
   const playLetterAudio = (word: string) => {
     const audioFileName = chapter10Page25AudioMappings[word];

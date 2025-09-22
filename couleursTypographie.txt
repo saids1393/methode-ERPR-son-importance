@@ -1,0 +1,58 @@
+Palette de couleurs (Hexadécimal)
+Couleurs principales
+Noir principal : #000000 (arrière-plans sombres)
+Gris foncé : #111827 / #1f2937 (zinc-900/gray-900)
+Gris moyen : #374151 / #4b5563 (zinc-700/gray-700)
+Gris clair : #6b7280 / #9ca3af (zinc-500/gray-500)
+Blanc : #ffffff
+
+Mode Homme :
+
+Bleu principal : #3b82f6 (blue-500)
+Cyan : #06b6d4 (cyan-500)
+Bleu foncé : #2563eb (blue-600)
+Cyan foncé : #0891b2 (cyan-600)
+Couleurs fonctionnelles
+Succès : #10b981 (green-500)
+Erreur : #ef4444 (red-500)
+Attention : #f59e0b (yellow-500)
+Orange : #ea580c (orange-600)
+Couleurs spécifiques à l'arabe
+Lettres emphatiques : #f87171 (red-400)
+Lettres spéciales : #a78bfa (purple-400)
+Lettres normales : #ffffff (white)
+Typographie
+Polices principales
+Police système : 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+Police arabe : 'Scheherazade New', serif et 'Cairo', serif
+Police monospace : system-ui (pour les codes et temps)
+Hiérarchie des tailles
+Titres
+H1 principal : text-3xl (30px) à text-5xl (48px)
+H2 sections : text-2xl (24px) à text-3xl (30px)
+H3 sous-sections : text-xl (20px) à text-2xl (24px)
+H4 détails : text-lg (18px)
+Corps de texte
+Texte principal : text-base (16px)
+Texte secondaire : text-sm (14px)
+Petits textes : text-xs (12px)
+Texte arabe spécifique
+Lettres grandes : text-3xl à text-6xl (30px à 60px)
+Mots arabes : text-2xl à text-4xl (24px à 36px)
+Texte arabe courant : text-xl à text-2xl (20px à 24px)
+Styles et poids
+Gras principal : font-bold (700)
+Semi-gras : font-semibold (600)
+Moyen : font-medium (500)
+Normal : font-normal (400)
+Espacement et hauteur de ligne
+Interligne standard : leading-relaxed (1.625)
+Interligne serré : leading-tight (1.25)
+Espacement lettres : tracking-wider pour les titres
+Couleurs de texte par contexte
+Texte principal : text-white / text-gray-900
+Texte secondaire : text-slate-300 / text-gray-600
+Texte désactivé : text-slate-400 / text-gray-400
+Liens : text-blue-400 / text-purple-400 (selon le genre)
+Erreurs : text-red-400
+Succès : text-green-400

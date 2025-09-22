@@ -5,7 +5,7 @@ const chapter6Page19AudioMappings: { [key: string]: string } = {
   "بَٰ": "chap6_pg18_case1",
   "تَٰ": "chap6_pg18_case4",
   "جِۦ": "chap6_pg18_case12",
-  "مُۥ": "chap6_pg18_case2",
+  // "مُۥ": "chap6_pg18_case2",
   "ثِۦ": "chap6_pg18_case9",
   "حُۥ": "chap6_pg18_case14",
   "دَٰ": "chap6_pg18_case19",
