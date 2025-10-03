@@ -1,3 +1,4 @@
+// app/api/checkout/route.ts
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 
@@ -15,10 +16,10 @@ export async function POST(req: Request) {
     // Déterminer l'URL de base selon l'environnement
     const baseUrl =
       process.env.NODE_ENV === 'production'
-        ? process.env.NEXTAUTH_URL // ta prod
-        : 'http://localhost:3000'; // local
+        ? process.env.NEXTAUTH_URL // URL définie dans ton .env en prod
+        : 'http://localhost:6725'; // URL locale
 
-    // Créer la session Stripe Checkout
+    // Création de la session Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -27,20 +28,27 @@ export async function POST(req: Request) {
           price_data: {
             currency: 'eur',
             product_data: {
-              name: 'Méthode ERPR - Cours d\'arabe complet',
-              description: 'Apprenez à lire et écrire l\'arabe à votre rythme',
-              images: ['https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg'],
+              name: "Méthode ERPR - Cours d'arabe complet",
+              description:
+                "Apprenez à lire et écrire l'arabe à votre rythme",
+              images: [
+                'https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg',
+              ],
             },
-            unit_amount: 8900, // 89€ en centimes
+            unit_amount: 8900, // prix normal en centimes (89€)
           },
           quantity: 1,
         },
       ],
       customer_email: email,
+
+      // 🔹 Permet aux clients de saisir un code promo
+      allow_promotion_codes: true,
+
       success_url: `${baseUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout`,
       metadata: { email },
-      expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // expire dans 30 min
     });
 
     return NextResponse.json({ sessionId: session.id });

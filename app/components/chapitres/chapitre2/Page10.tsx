@@ -49,7 +49,7 @@ const chapter2Page10AudioMappings: { [key: string]: string } = {
   // Zay avec voyelles (forme finale)
   'ـزَ': 'chap2_pg8_case31',
   'ـزُ': 'chap2_pg8_case32',
-  'ـزِ': 'chap2_pg8_case33',
+  'ـزِ': 'chap2_pg8_case33', 
   // Sin avec voyelles (forme médiane)
   'ـسَـ': 'chap2_pg8_case34',
   'ـسُـ': 'chap2_pg8_case35',
