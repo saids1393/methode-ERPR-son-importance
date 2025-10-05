@@ -1,62 +1,128 @@
-// app/api/checkout/route.ts
-import { NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
+import { NextResponse } from "next/server";
+import { stripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json();
+    const { email, paymentPlan } = await req.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email requis' },
-        { status: 400 }
-      );
+      console.log("❌ Aucun email fourni");
+      return NextResponse.json({ error: "Email requis" }, { status: 400 });
     }
 
-    // Déterminer l'URL de base selon l'environnement
     const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? process.env.NEXTAUTH_URL // URL définie dans ton .env en prod
-        : 'http://localhost:6725'; // URL locale
+      process.env.NODE_ENV === "production"
+        ? process.env.NEXTAUTH_URL
+        : "http://localhost:6725";
 
-    // Création de la session Stripe Checkout
+    console.log("🔵 CREATE CHECKOUT SESSION");
+    console.log("📧 Email:", email);
+    console.log("💳 Payment Plan:", paymentPlan);
+
+    // 🚀 PAIEMENT EN 2X - Version corrigée
+    if (paymentPlan === "2x") {
+      // Créer ou récupérer le client Stripe
+      let customer;
+      const existingCustomers = await stripe.customers.list({
+        email: email,
+        limit: 1,
+      });
+
+      if (existingCustomers.data.length > 0) {
+        customer = existingCustomers.data[0];
+      } else {
+        customer = await stripe.customers.create({
+          email: email,
+          metadata: { paymentPlan: "2x" },
+        });
+      }
+
+      console.log("👤 Customer:", customer.id);
+
+      // Session pour le 1er paiement (44,50€)
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "eur",
+              product_data: {
+                name: "Méthode ERPR - 1er paiement (1/2)",
+                description: "Premier versement du paiement en 2 fois",
+              },
+              unit_amount: 4450, // 44,50€
+            },
+            quantity: 1,
+          },
+        ],
+        customer: customer.id,
+        success_url: `${baseUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/checkout`,
+        metadata: { 
+          email, 
+          paymentPlan: "2x", 
+          paymentNumber: "1",
+          customerId: customer.id 
+        },
+        // Sauvegarder la carte pour le 2ème paiement
+        payment_intent_data: {
+          setup_future_usage: "off_session",
+          metadata: { paymentPlan: "2x", paymentNumber: "1" },
+        },
+      });
+
+      console.log("✅ Session 2x créée (1/2):", session.id);
+
+      // Simulation du 2ème paiement en mode test
+      if (process.env.NODE_ENV !== "production") {
+        setTimeout(async () => {
+          console.log("⏳ Simulation du 2e paiement dans 60s...");
+          try {
+            await fetch(`${baseUrl}/api/stripe/charge-second-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                customerId: customer.id,
+                email: email 
+              }),
+            });
+          } catch (err) {
+            console.error("❌ Erreur simulation 2ème paiement:", err);
+          }
+        }, 60000);
+      }
+
+      return NextResponse.json({ sessionId: session.id });
+    }
+
+    // 🚀 PAIEMENT UNIQUE 1x
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: ['card'],
+      mode: "payment",
+      payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
-            currency: 'eur',
+            currency: "eur",
             product_data: {
-              name: "Méthode ERPR - Cours d'arabe complet",
-              description:
-                "Apprenez à lire et écrire l'arabe à votre rythme",
-              images: [
-                'https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg',
-              ],
+              name: "Méthode ERPR - Paiement 1x",
+              description: "Cours complet d'arabe",
             },
-            unit_amount: 8900, // prix normal en centimes (89€)
+            unit_amount: 8900,
           },
           quantity: 1,
         },
       ],
       customer_email: email,
-
-      // 🔹 Permet aux clients de saisir un code promo
-      allow_promotion_codes: true,
-
       success_url: `${baseUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout`,
-      metadata: { email },
-      expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // expire dans 30 min
+      metadata: { email, paymentPlan: "1x" },
     });
 
+    console.log("✅ Session 1x créée:", session.id);
     return NextResponse.json({ sessionId: session.id });
-  } catch (error) {
-    console.error('Stripe checkout error:', error);
-    return NextResponse.json(
-      { error: 'Erreur lors de la création de la session de paiement' },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    console.error("❌ Erreur création session:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

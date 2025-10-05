@@ -1,0 +1,113 @@
+import { NextResponse } from "next/server";
+import { stripe } from "@/lib/stripe";
+
+// Ce endpoint sera appelé tous les jours par un cron job
+export async function GET(req: Request) {
+  try {
+    // Vérifier l'authentification (secret token)
+    const authHeader = req.headers.get("authorization");
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log("🔄 Exécution du cron - Traitement des paiements 2x...");
+
+    // Date il y a exactement 30 jours
+    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 60; // Cherche les paiements des dernières 60 secondes
+
+    // Récupérer tous les Payment Intents du 1er paiement créés il y a 30 jours
+    const paymentIntents = await stripe.paymentIntents.list({
+      limit: 100,
+      created: {
+        gte: thirtyDaysAgo - 3600, // -1h de marge
+        lte: thirtyDaysAgo + 3600, // +1h de marge
+      },
+    });
+
+    console.log(`📊 ${paymentIntents.data.length} paiements à vérifier`);
+
+    const results = [];
+
+    for (const pi of paymentIntents.data) {
+      // Vérifier si c'est un 1er paiement 2x
+      if (
+        pi.metadata?.paymentPlan === "2x" &&
+        pi.metadata?.paymentNumber === "1" &&
+        pi.status === "succeeded"
+      ) {
+        const customerId = pi.customer as string;
+        const email = pi.metadata.email;
+
+        console.log(`💳 Traitement du 2e paiement pour ${email}`);
+
+        // Vérifier si le 2ème paiement n'a pas déjà été effectué
+        const existingSecondPayments = await stripe.paymentIntents.list({
+          customer: customerId,
+          limit: 10,
+        });
+
+        const alreadyPaid = existingSecondPayments.data.some(
+          (p) =>
+            p.metadata?.paymentPlan === "2x" &&
+            p.metadata?.paymentNumber === "2" &&
+            p.status === "succeeded"
+        );
+
+        if (alreadyPaid) {
+          console.log(`✅ ${email} : 2ème paiement déjà effectué, skip`);
+          continue;
+        }
+
+        // Effectuer le 2ème paiement
+        try {
+          const baseUrl =
+            process.env.NODE_ENV === "production"
+              ? process.env.NEXTAUTH_URL
+              : "http://localhost:6725";
+
+          const response = await fetch(
+            `${baseUrl}/api/stripe/charge-second-payment`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ customerId, email }),
+            }
+          );
+
+          const result = await response.json();
+
+          if (result.success) {
+            console.log(`✅ 2ème paiement réussi pour ${email} : ${result.amount}€`);
+            results.push({ email, status: "success", amount: result.amount });
+          } else {
+            console.error(`❌ Échec 2ème paiement pour ${email}:`, result.error);
+            results.push({ email, status: "failed", error: result.error });
+          }
+        } catch (err: any) {
+          console.error(`❌ Erreur lors du 2ème paiement pour ${email}:`, err.message);
+          results.push({ email, status: "error", error: err.message });
+        }
+      }
+    }
+
+    console.log(`🎉 Cron terminé : ${results.length} paiements traités`);
+
+    return NextResponse.json({
+      success: true,
+      processed: results.length,
+      results,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error("❌ Erreur cron job:", error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// Pour les tests manuels en développement (optionnel)
+export async function POST(req: Request) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "POST not allowed in production" }, { status: 405 });
+  }
+  return GET(req);
+}

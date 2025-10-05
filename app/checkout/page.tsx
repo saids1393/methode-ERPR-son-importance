@@ -1,3 +1,5 @@
+// app/checkout/page.tsx - Version avec 2 produits distincts
+
 'use client';
 import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
@@ -9,6 +11,7 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paymentPlan, setPaymentPlan] = useState<'1x' | '2x'>('1x');
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +35,6 @@ export default function CheckoutPage() {
       const checkData = await checkResponse.json();
 
       if (checkData.exists) {
-        // L'utilisateur existe déjà - rediriger vers login
         setError('Un compte existe déjà avec cet email. Veuillez vous connecter.');
         setTimeout(() => {
           window.location.href = `/login?email=${encodeURIComponent(email)}`;
@@ -40,11 +42,14 @@ export default function CheckoutPage() {
         return;
       }
 
-      // L'utilisateur n'existe pas - procéder au paiement Stripe
+      // Créer la session selon le plan choisi
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ 
+          email, 
+          paymentPlan // '1x' ou '2x'
+        })
       });
 
       const { sessionId, error: stripeError } = await response.json();
@@ -82,13 +87,8 @@ export default function CheckoutPage() {
 
       {/* Light effects on sides */}
       <div className="absolute inset-0">
-        {/* Left light effect */}
         <div className="absolute top-0 -left-40 w-96 h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
-
-        {/* Right light effect */}
         <div className="absolute top-0 -right-40 w-96 h-full bg-gradient-to-l from-transparent via-purple-500/10 to-transparent blur-3xl"></div>
-
-        {/* Top center subtle glow */}
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-white/5 to-transparent rounded-full blur-3xl"></div>
       </div>
 
@@ -101,26 +101,22 @@ export default function CheckoutPage() {
       ></div>
 
       <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
-<div className="flex flex-col items-center justify-center w-full mx-auto px-4 py-8 max-w-md">
-  {/* Logo centré - Taille adaptative avec valeurs par défaut et breakpoints */}
-  <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
-    <BookOpen className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-white" />
-  </div>
-  
-  {/* Titre centré - Taille de police responsive avec line-height adapté */}
-  <h2 className="mt-4 text-center text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
-    Accédez au cours d'arabe
-  </h2>
-  
-  {/* Sous-titre centré - Taille et espacement responsive */}
-  <p className="mt-3 sm:mt-4 text-center text-sm sm:text-base text-gray-400 max-w-xs sm:max-w-md">
-    Méthode ERPR – Apprenez à votre rythme et rapidement
-  </p>
-</div>
+        <div className="flex flex-col items-center justify-center w-full mx-auto px-4 py-8 max-w-md">
+          <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
+            <BookOpen className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-white" />
+          </div>
+          
+          <h2 className="mt-4 text-center text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
+            Accédez au cours d'arabe
+          </h2>
+          
+          <p className="mt-3 sm:mt-4 text-center text-sm sm:text-base text-gray-400 max-w-xs sm:max-w-md">
+            Méthode ERPR – Apprenez à votre rythme et rapidement
+          </p>
+        </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
           <div className="relative">
-            {/* Card with subtle glow */}
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-30"></div>
 
             <div className="relative bg-gray-950/90 backdrop-blur-xl py-8 px-6 rounded-2xl border border-gray-800 sm:px-10">
@@ -150,6 +146,86 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {/* Payment plan selector */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    Choisissez votre mode de paiement
+                  </label>
+                  <div className="space-y-3">
+                    {/* Option 1x - Card style */}
+                    <button
+                      type="button"
+                      onClick={() => setPaymentPlan('1x')}
+                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                        paymentPlan === '1x'
+                          ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
+                          : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-white">89€</span>
+                            <span className="px-2 py-0.5 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
+                              Recommandé
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-400 mt-1">Paiement en 1 fois</p>
+                          <p className="text-xs text-gray-500 mt-1">Accès immédiat complet</p>
+                        </div>
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          paymentPlan === '1x' 
+                            ? 'border-blue-500 bg-blue-500' 
+                            : 'border-gray-600'
+                        }`}>
+                          {paymentPlan === '1x' && (
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Option 2x - Card style */}
+                    <button
+                      type="button"
+                      onClick={() => setPaymentPlan('2x')}
+                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                        paymentPlan === '2x'
+                          ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
+                          : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-white">2 × 44,50€</span>
+                          </div>
+                          <p className="text-sm text-gray-400 mt-1">Paiement en 2 fois</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            44,50€ aujourd'hui + 44,50€ dans 30 jours
+                          </p>
+                        </div>
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          paymentPlan === '2x' 
+                            ? 'border-purple-500 bg-purple-500' 
+                            : 'border-gray-600'
+                        }`}>
+                          {paymentPlan === '2x' && (
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                  <p className="mt-3 text-xs text-center text-gray-500">
+                    💳 Aucun frais supplémentaire pour le paiement en 2 fois
+                  </p>
+                </div>
+
                 {/* Error message */}
                 {error && (
                   <div className="text-red-500 text-sm text-center p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -170,7 +246,7 @@ export default function CheckoutPage() {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                     ) : null}
-                    {loading ? 'Vérification...' : 'Continuer avec Stripe'}
+                    {loading ? 'Vérification...' : `Payer ${paymentPlan === '1x' ? '89€' : '44,50€ aujourd\'hui'}`}
                   </button>
                 </div>
 
