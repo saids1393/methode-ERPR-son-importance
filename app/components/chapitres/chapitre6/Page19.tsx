@@ -5,7 +5,6 @@ const chapter6Page19AudioMappings: { [key: string]: string } = {
   "بَٰ": "chap6_pg18_case1",
   "تَٰ": "chap6_pg18_case4",
   "جِۦ": "chap6_pg18_case12",
-  // "مُۥ": "chap6_pg18_case2",
   "ثِۦ": "chap6_pg18_case9",
   "حُۥ": "chap6_pg18_case14",
   "دَٰ": "chap6_pg18_case19",
@@ -37,7 +36,6 @@ const Page19 = () => {
   const letterData = [
     { letter: "بَ", specialSign: "ٰ", signType: "alif", position: "top", letterStyle: "" },
     { letter: "جِ", specialSign: "ۦ", signType: "ya", position: "bottom", letterStyle: "relative top-[-8px] right-[-5px]" },
-    { letter: "مُ", specialSign: "ۥ", signType: "waw", position: "bottom", letterStyle: "" },
     { letter: "تَ", specialSign: "ٰ", signType: "alif", position: "top", letterStyle: "" },
     { letter: "ثِ", specialSign: "ۦ", signType: "ya", position: "bottom", letterStyle: "relative top-[3px] right-[-7px]" },
     { letter: "حُ", specialSign: "ۥ", signType: "waw", position: "bottom", letterStyle: "relative top-[-3px] right-[-4px]" },

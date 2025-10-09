@@ -7,6 +7,7 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-
 // Vérifier si on est en production
 const isProduction = process.env.NODE_ENV === 'production';
 
+
 function getSecurityHeaders() {
   return {
     'Content-Security-Policy':

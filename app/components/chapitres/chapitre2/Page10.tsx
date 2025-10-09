@@ -49,7 +49,7 @@ const chapter2Page10AudioMappings: { [key: string]: string } = {
   // Zay avec voyelles (forme finale)
   'ـزَ': 'chap2_pg8_case31',
   'ـزُ': 'chap2_pg8_case32',
-  'ـزِ': 'chap2_pg8_case33', 
+  'ـزِ': 'chap2_pg8_case33',  
   // Sin avec voyelles (forme médiane)
   'ـسَـ': 'chap2_pg8_case34',
   'ـسُـ': 'chap2_pg8_case35',
@@ -146,7 +146,7 @@ const Page10 = () => {
     { letter: 'د', name: 'دَال', vowels: ['ـدَ', 'ـدُ', 'ـدِ'] },
     { letter: 'ذ', name: 'ذَال', vowels: ['ـذَ', 'ـذُ', 'ـذِ'] },
     { letter: 'ر', name: 'رَاء', vowels: ['ـرَ', 'ـرُ', 'ـرِ'] },
-    { letter: 'ز', name: 'زَاي', vowels: ['ـزَ', 'ـزُ', 'زِ'] },
+    { letter: 'ز', name: 'زَاي', vowels: ['ـزَ', 'ـزُ', 'ـزِ'] },
     { letter: 'س', name: 'سِين', vowels: ['ـسَـ', 'ـسُـ', 'ـسِـ'] },
     { letter: 'ش', name: 'شِين', vowels: ['ـشَـ', 'ـشُـ', 'ـشِـ'] },
     { letter: 'ص', name: 'صَاد', vowels: ['ـصَـ', 'ـصُـ', 'ـصِـ'] },

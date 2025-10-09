@@ -72,12 +72,15 @@ export default function DashboardHeader({
     const pathname = usePathname();
 
 
-    useEffect(() => {
+useEffect(() => {
+    if (user) {
         setEditForm(prev => ({
             ...prev,
             username: user.username || ''
         }));
-    }, [user]);
+    }
+}, [user]);
+
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -216,13 +219,11 @@ export default function DashboardHeader({
                             Accompagnement
                         </Link>
 
-                         <Link
-                            href="/devoirs"
+                        <button
                             className={`${pathname === "/devoirs" ? "text-gray-900 font-medium border-b-2 border-blue-800" : "text-gray-500 hover:text-gray-900"}`}
                         >
                             Devoirs
-                        </Link>
-
+                        </button>
                     </nav>
 
 
@@ -261,13 +262,15 @@ export default function DashboardHeader({
                                 className="flex items-center space-x-3"
                             >
                                 <div className="w-8 h-8 bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <span className="text-white text-sm font-medium">
-                                        {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
-                                    </span>
+                                  <span className="text-white text-sm font-medium">
+  {user?.username ? user.username.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
+</span>
+
                                 </div>
-                                <span className="text-gray-700 font-medium whitespace-nowrap">
-                                    {user.username || (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
-                                </span>
+                               <span className="text-gray-700 font-medium whitespace-nowrap">
+    {user?.username || (user?.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
+</span>
+
                                 <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             </button>
 
@@ -278,14 +281,22 @@ export default function DashboardHeader({
                                         <div className="flex items-center space-x-3">
                                             <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center">
                                                 <span className="text-white font-medium">
-                                                    {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
+                                                  {user?.username
+  ? user.username.charAt(0).toUpperCase()
+  : user?.email
+  ? user.email.charAt(0).toUpperCase()
+  : '?'}
+
                                                 </span>
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <p className="text-gray-900 font-semibold truncate">
-                                                    {user.username || (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
-                                                </p>
-                                                <p className="text-gray-500 text-sm truncate">{user.email}</p>
+                                               <p className="text-gray-900 font-semibold truncate">
+  {user?.username || (user?.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
+</p>
+<p className="text-gray-500 text-sm truncate">
+  {user?.email || ''}
+</p>
+
                                             </div>
                                         </div>
                                     </div>
