@@ -1,1 +1,6 @@
+// Réduction ≈ 33,7 % pour les 25 premiers s'inscrits : 1x et 2x
 ERPRMETHODE9113061393
+ERPRx2
+
+// Réduction de 15% du prix au lancement 1x et 2x: 
+ERPR15

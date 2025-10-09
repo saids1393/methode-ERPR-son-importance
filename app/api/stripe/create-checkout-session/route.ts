@@ -1,3 +1,4 @@
+// app/api/stripe/create-checkout-session/route.ts
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
@@ -39,6 +40,8 @@ export async function POST(req: Request) {
 
       console.log("👤 Customer:", customer.id);
 
+      console.log("🎟️ Codes promo configurés pour paiement 2x");
+
       // Session pour le 1er paiement (44,50€)
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
@@ -57,6 +60,8 @@ export async function POST(req: Request) {
           },
         ],
         customer: customer.id,
+        // 🔹 Permet aux clients de saisir un code promo
+        allow_promotion_codes: true,
         success_url: `${baseUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${baseUrl}/checkout`,
         metadata: { 
@@ -77,7 +82,7 @@ export async function POST(req: Request) {
       // Simulation du 2ème paiement en mode test
       if (process.env.NODE_ENV !== "production") {
         setTimeout(async () => {
-          console.log("⏳ Simulation du 2e paiement dans 60s...");
+          console.log("⏳ Simulation du 2e paiement dans 2 minutes...");
           try {
             await fetch(`${baseUrl}/api/stripe/charge-second-payment`, {
               method: "POST",
@@ -90,13 +95,15 @@ export async function POST(req: Request) {
           } catch (err) {
             console.error("❌ Erreur simulation 2ème paiement:", err);
           }
-        }, 60000);
+        }, 120000); // 120000 ms = 2 minutes
       }
 
       return NextResponse.json({ sessionId: session.id });
     }
 
     // 🚀 PAIEMENT UNIQUE 1x
+    console.log("🎟️ Codes promo configurés pour paiement 1x");
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
@@ -114,6 +121,8 @@ export async function POST(req: Request) {
         },
       ],
       customer_email: email,
+      // 🔹 Permet aux clients de saisir un code promo
+      allow_promotion_codes: true,
       success_url: `${baseUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/checkout`,
       metadata: { email, paymentPlan: "1x" },

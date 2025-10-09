@@ -1,3 +1,4 @@
+// app/api/cron/process-second-payments/route.ts
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
@@ -13,8 +14,10 @@ export async function GET(req: Request) {
     console.log("🔄 Exécution du cron - Traitement des paiements 2x...");
 
     // Date il y a exactement 30 jours
-    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 60; // Cherche les paiements des dernières 60 secondes
+    const thirtyDaysInSeconds = 30 * 24 * 60 * 60; // 30 jours en secondes
+    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - thirtyDaysInSeconds;
 
+    console.log(`📅 Recherche des paiements du ${new Date(thirtyDaysAgo * 1000).toLocaleDateString()}`);
     // Récupérer tous les Payment Intents du 1er paiement créés il y a 30 jours
     const paymentIntents = await stripe.paymentIntents.list({
       limit: 100,

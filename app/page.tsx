@@ -84,7 +84,7 @@ export default function Home() {
       <footer className="mt-20 max-w-md text-gray-500 dark:text-gray-400 text-sm">
         <p>© {new Date().getFullYear()} Méthode ERPR - Tous droits réservés</p>
         <p className="text-md sm:text-lg text-gray-600 dark:text-gray-400 mt-1">
-          Créé par <span className="font-semibold">Son Importance, Professeur Soidroudine</span>
+          Créé par <span className="font-semibold">ArabeImportance, Prof. Soidroudine</span>
         </p>
       </footer>
     </div>
