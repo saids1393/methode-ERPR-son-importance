@@ -148,16 +148,27 @@ model Homework {
 }
 
 model HomeworkSend {
-  id         String   @id @default(cuid())
-  userId     String
-  homeworkId String
-  sentAt     DateTime @default(now())
-  emailSent  Boolean  @default(false)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Restrict)
-  homework   Homework @relation(fields: [homeworkId], references: [id], onDelete: Restrict)
+  id           String     @id @default(cuid())
+  userId       String
+  homeworkId   String
+  sentAt       DateTime   @default(now())
+  emailSent    Boolean    @default(false)
+
+  // ➕ Ajouts pour gérer les rendus
+  type         HomeworkSendType @default(TEXT) // écrit ou audio
+  textContent  String?     // rendu écrit
+  audioUrl     String?     // rendu audio (fichier uploadé)
+  status       HomeworkStatus @default(PENDING) // suivi de la correction
+  feedback     String?     // commentaire du prof
+  correctedAt  DateTime?   // date de correction
+
+  user         User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  homework     Homework    @relation(fields: [homeworkId], references: [id], onDelete: Restrict)
+
   @@unique([userId, homeworkId])
   @@index([userId])
   @@index([homeworkId])
+  @@index([status])
 }
 
 // -------------------------
@@ -192,13 +203,13 @@ model QuizAttempt {
 // SUIVI DES VIDÉOS
 // -------------------------
 model VideoWatch {
-  id            String   @id @default(cuid())
-  userId        String
-  videoId       String
-  watchedAt     DateTime @default(now())
-  durationWatched Int    @default(0)
-  user          User         @relation(fields: [userId], references: [id], onDelete: Restrict)
-  chapterVideo   ChapterVideo @relation(fields: [videoId], references: [id], onDelete: Restrict)
+  id              String       @id @default(cuid())
+  userId          String
+  videoId         String
+  watchedAt       DateTime     @default(now())
+  durationWatched Int          @default(0)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  chapterVideo    ChapterVideo @relation(fields: [videoId], references: [id], onDelete: Restrict)
   @@index([userId])
   @@index([videoId])
 }
@@ -263,4 +274,16 @@ enum PaymentStatus {
   FAILED
   REFUNDED
   CANCELLED
+}
+
+// ➕ Nouveaux ENUMS pour les rendus de devoirs
+enum HomeworkSendType {
+  TEXT
+  AUDIO
+}
+
+enum HomeworkStatus {
+  PENDING
+  REVIEWED
+  CORRECTED
 }
