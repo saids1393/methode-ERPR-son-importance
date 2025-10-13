@@ -7,6 +7,7 @@ import React from "react";
 const chapter4Page16AudioMappings: { [key: string]: string } = {
   "قَالَ": "chap0_pg0_case1",
   "عُدْنَ": "chap0_pg0_case8",
+  "يَذْكُرُ": "chap0_pg0_case9",
   "فَرِحَ": "chap0_pg0_case10",
   "تَزَكَّىٰ": "chap0_pg0_case11",
   "خَوْفٌ": "chap0_pg0_case27",

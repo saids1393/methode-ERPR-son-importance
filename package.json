@@ -19,6 +19,7 @@
     "@stripe/stripe-js": "^7.6.1",
     "@types/nodemailer": "^6.4.17",
     "@types/pdfkit": "^0.17.2",
+    "@types/uuid": "^10.0.0",
     "bcryptjs": "^3.0.2",
     "cookies-next": "^6.1.0",
     "csv-parser": "^3.2.0",
@@ -44,6 +45,7 @@
     "react-hot-toast": "^2.5.2",
     "stripe": "^18.3.0",
     "swiper": "^11.2.10",
+    "uuid": "^13.0.0",
     "zod": "^4.0.10"
   },
   "devDependencies": {

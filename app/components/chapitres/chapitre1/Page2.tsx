@@ -1,9 +1,6 @@
-// components/chapitres/chapitre1/Page2.tsx
-
 "use client";
 
-import React from 'react';
-
+import React, { useState } from 'react';
 
 // Mapping audio pour le Chapitre 1, Page 2
 const chapter1Page2AudioMappings: { [key: string]: string } = {
@@ -36,6 +33,42 @@ const chapter1Page2AudioMappings: { [key: string]: string } = {
   'و': 'chap0_pg0_case27',
   'يـ': 'chap0_pg0_case28',
   'ء': 'chap0_pg0_case29'
+};
+
+// Liste des 6 lettres qui ne s'attachent jamais après elles
+const nonConnectingLetters = ['ا', 'د', 'ذ', 'ر', 'ز', 'و'];
+
+// Dictionnaire des mots exemples pour chaque lettre
+const letterExamples: { [key: string]: { word: string; translation: string } } = {
+  'ا': { word: 'أرنب', translation: 'Lapin' },
+  'بـ': { word: 'بطة', translation: 'Canard' },
+  'تـ': { word: 'تفاحة', translation: 'Pomme' },
+  'ثـ': { word: 'ثعلب', translation: 'Renard' },
+  'جـ': { word: 'جمل', translation: 'Chameau' },
+  'حـ': { word: 'حليب', translation: 'Lait' },
+  'خـ': { word: 'خروف', translation: 'Mouton' },
+  'د': { word: 'دجاجة', translation: 'Poule' },
+  'ذ': { word: 'ذهب', translation: 'Or' },
+  'ر': { word: 'وردة', translation: 'Rose' },
+  'ز': { word: 'زرافة', translation: 'Girafe' },
+  'سـ': { word: 'سيارة', translation: 'Voiture' },
+  'شـ': { word: 'شمس', translation: 'Soleil' },
+  'صـ': { word: 'صابون', translation: 'Savon' },
+  'ضـ': { word: 'ضفدع', translation: 'Grenouille' },
+  'طـ': { word: 'طائرة', translation: 'Avion' },
+  'ظـ': { word: 'ظبي', translation: 'Gazelle' },
+  'عـ': { word: 'عسل', translation: 'Miel' },
+  'غـ': { word: 'غيمة', translation: 'Nuage' },
+  'فـ': { word: 'فيل', translation: 'Éléphant' },
+  'قـ': { word: 'قلم', translation: 'Crayon' },
+  'كـ': { word: 'كتاب', translation: 'Livre' },
+  'لـ': { word: 'ليمون', translation: 'Citron' },
+  'مـ': { word: 'موز', translation: 'Banane' },
+  'نـ': { word: 'نحلة', translation: 'Abeille' },
+  'هـ': { word: 'هدية', translation: 'Cadeau' },
+  'و': { word: 'ورقة', translation: 'Feuille' },
+  'يـ': { word: 'يمامة', translation: 'Colombe' },
+  'ء': { word: 'أسد', translation: 'Lion' }
 };
 
 const Page2 = () => {
@@ -89,7 +122,6 @@ const Page2 = () => {
     { letter: 'و', emphatic: false, violet: false },
     { letter: 'يـ', emphatic: false, violet: false },
     { letter: 'ء', emphatic: false, violet: true }
-
   ];
 
   const handleLetterClick = (letter: string) => {
@@ -144,25 +176,152 @@ const Page2 = () => {
   );
 };
 
-// Cell Component adapté pour le thème sombre
+// Popup Component - MODIFIÉ pour toutes les lettres avec des mots spécifiques
+const InfoPopup = ({ letter, onClose }: { letter: string; onClose: () => void }) => {
+  const isNonConnecting = nonConnectingLetters.includes(letter);
+  const example = letterExamples[letter] || { word: 'كلمة', translation: 'Mot' };
+  
+  // Fonction pour diviser le mot arabe en lettres pour l'affichage coloré
+  const renderColoredWord = (word: string, targetLetter: string) => {
+    // Nettoyer la lettre cible des caractères de connexion
+    const cleanTargetLetter = targetLetter.replace('ـ', '');
+    
+    return word.split('').map((char, index) => {
+      // Pour l'alif, on vérifie aussi les formes similaires
+      const isTarget = cleanTargetLetter === 'ا' 
+        ? (char === 'ا' || char === 'أ' || char === 'إ' || char === 'آ')
+        : char === cleanTargetLetter;
+      
+      return (
+        <span 
+          key={index} 
+          className={isTarget ? 'text-red-400' : 'text-white'}
+        >
+          {char}
+        </span>
+      );
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div 
+        className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-[95vw] sm:max-w-md mx-2 shadow-2xl border-2 border-blue-500"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-3 sm:mb-4">
+          <h3 className="text-lg sm:text-xl font-bold text-white">Connexion au début d'un mot</h3>
+          <button 
+            onClick={onClose} 
+            className="text-gray-400 hover:text-white text-2xl sm:text-3xl font-bold leading-none"
+          >
+            &times;
+          </button>
+        </div>
+        
+        <div className="space-y-3 sm:space-y-4">
+          {/* Explication simple */}
+          <div className="border rounded-xl p-3 sm:p-4 shadow-lg">
+            <p className="text-white text-base sm:text-lg text-center">
+              <span className="text-red-400 text-2xl sm:text-3xl font-bold mx-2">{letter}</span>
+            </p>
+          </div>
+          
+          {/* Information spéciale pour les lettres non-attachantes */}
+          {isNonConnecting && (
+            <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl p-2 sm:p-3 shadow-lg">
+              <p className="text-white text-xs text-center font-semibold flex items-center justify-center gap-1">
+                <span className="text-lg">⚠️</span>
+                <span>Cette lettre fait partie des 6 lettres qui ne s'attacheront JAMAIS après elles : ا, د, ذ, ر, ز, و</span>
+              </p>
+            </div>
+          )}
+          
+          {/* Exemple en arabe */}
+          <div className="bg-gray-700 rounded-xl p-3 sm:p-4 shadow-lg">
+            <p className="text-gray-300 text-xs mb-2 text-center">📖 Exemple </p>
+            <div className="bg-gray-800 rounded-lg p-3 sm:p-4 mb-2">
+              <div className="text-3xl sm:text-4xl font-bold text-center" style={{ direction: 'rtl' }}>
+                {renderColoredWord(example.word, letter)}
+              </div>
+            </div>
+            
+            {/* Traduction française séparée */}
+            <div className="bg-blue-900 bg-opacity-40 rounded-lg p-2 sm:p-3 border-2 border-blue-500">
+              <p className="text-white text-lg sm:text-xl font-bold text-center">
+                {example.translation}
+              </p>
+            </div>
+          </div>
+          
+          {/* Info supplémentaire */}
+          <div className="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-xl p-2 sm:p-3 shadow-lg">
+            <p className="text-white text-xs text-center font-semibold flex items-center justify-center gap-1">
+              <span className="text-lg">💡</span>
+              <span>
+                {isNonConnecting 
+                  ? "Cette lettre ne se connecte pas à la lettre suivante, donc sa forme reste identique en début de mot"
+                  : "La lettre est connectée à la lettre suivante, donc sa forme change. C'est pour cela qu'on parle de 'lettre en début de mot' : cela fait référence à la manière dont elle s'écrit au début d'un mot"
+                }
+              </span>
+            </p>
+          </div>
+        </div>
+        
+        <button 
+          onClick={onClose}
+          className="mt-4 sm:mt-6 w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-2 sm:py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg text-base"
+        >
+          ✓ Compris
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Cell Component adapté pour le thème sombre - MODIFIÉ pour toutes les lettres
 const Cell = ({ letter, emphatic, violet, onClick }: { 
   letter: string; 
   emphatic?: boolean;
   violet?: boolean;
   onClick?: () => void;
-}) => (
-  <div 
-    className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
-    onClick={onClick}
-  >
-    <div className={`text-3xl md:text-4xl font-bold transition-colors ${
-      emphatic ? 'text-red-400' : 
-      violet ? 'text-purple-400' : 
-      'text-white'
-    }`}>
-      {letter}
-    </div>
-  </div>
-);
+}) => {
+  const [showPopup, setShowPopup] = useState(false);
+  
+  // Maintenant TOUTES les lettres ont le popup d'information
+  const hasInfo = true;
+
+  return (
+    <>
+      <div 
+        className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer relative"
+        onClick={onClick}
+      >
+        <div className={`text-3xl md:text-4xl font-bold transition-colors ${
+          emphatic ? 'text-red-400' : 
+          violet ? 'text-purple-400' : 
+          'text-white'
+        }`}>
+          {letter}
+        </div>
+        
+        {hasInfo && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowPopup(true);
+            }}
+            className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-sm transition-all hover:scale-110"
+            title="Plus d'infos"
+          >
+            ℹ️
+          </button>
+        )}
+      </div>
+      
+      {showPopup && <InfoPopup letter={letter} onClose={() => setShowPopup(false)} />}
+    </>
+  );
+};
 
 export default Page2;

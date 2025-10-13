@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 // -------------------------
 // UTILISATEURS
 // -------------------------
@@ -158,6 +159,7 @@ model HomeworkSend {
   type         HomeworkSendType @default(TEXT) // écrit ou audio
   textContent  String?     // rendu écrit
   audioUrl     String?     // rendu audio (fichier uploadé)
+  fileUrls     String?     // URLs des fichiers (JSON stringifié)
   status       HomeworkStatus @default(PENDING) // suivi de la correction
   feedback     String?     // commentaire du prof
   correctedAt  DateTime?   // date de correction
@@ -280,6 +282,7 @@ enum PaymentStatus {
 enum HomeworkSendType {
   TEXT
   AUDIO
+  FILE  
 }
 
 enum HomeworkStatus {
