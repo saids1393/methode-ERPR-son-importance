@@ -63,19 +63,19 @@ interface HomeworkSend {
 
 // Configuration des statuts
 const statusConfig = {
-  PENDING: { 
+  PENDING: {
     label: 'Envoyé',
-    color: 'bg-green-100 text-green-800 border-green-200', 
+    color: 'bg-green-100 text-green-800 border-green-200',
     description: 'Votre devoir a été envoyé avec succès et attend la correction'
   },
-  REVIEWED: { 
-    label: 'Correction en cours', 
-    color: 'bg-blue-100 text-blue-800 border-blue-200', 
+  REVIEWED: {
+    label: 'Correction en cours',
+    color: 'bg-blue-100 text-blue-800 border-blue-200',
     icon: Eye,
     description: 'Le professeur est en train de corriger votre devoir'
   },
-  CORRECTED: { 
-    label: 'Devoir corrigé', 
+  CORRECTED: {
+    label: 'Devoir corrigé',
     color: 'bg-purple-100 text-purple-800 border-purple-200',
     icon: Award,
     description: 'Votre devoir a été corrigé'
@@ -214,7 +214,7 @@ export default function DevoirsPage() {
           📄 {file.name}
         </a>
       );
-    } else if (ext && ['jpg','jpeg','png','gif','webp'].includes(ext)) {
+    } else if (ext && ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
       return <img key={idx} src={file.url} className="w-full rounded-lg max-h-64 object-contain" />;
     } else {
       return (
@@ -298,18 +298,18 @@ export default function DevoirsPage() {
                 {homeworks.map((homework) => {
                   const isExpanded = expanded === homework.id;
                   const type = submitType[homework.id] || homework.submission?.type || 'TEXT';
-                  
-                  // FIX: Vérifier si le devoir a réellement été soumis avec du contenu
-                 const hasSubmission =
-  homework.submission &&
-  (
-    (homework.submission.type === 'TEXT' && homework.submission.textContent) ||
-    (homework.submission.type === 'FILE' &&
-      (homework.submission.fileUrls ||
-        (homework.submission.files && homework.submission.files.length > 0)))
-  );
 
-                  
+                  // FIX: Vérifier si le devoir a réellement été soumis avec du contenu
+                  const hasSubmission =
+                    homework.submission &&
+                    (
+                      (homework.submission.type === 'TEXT' && homework.submission.textContent) ||
+                      (homework.submission.type === 'FILE' &&
+                        (homework.submission.fileUrls ||
+                          (homework.submission.files && homework.submission.files.length > 0)))
+                    );
+
+
                   const submissionStatus = homework.submission?.status;
                   const StatusConfig = submissionStatus ? statusConfig[submissionStatus] : null;
 
@@ -407,7 +407,7 @@ export default function DevoirsPage() {
                                     })}
                                   </>
                                 )}
-                                
+
                                 {/* Gérer files (ancien format) */}
                                 {homework.submission.files && homework.submission.files.length > 0 && (
                                   <>
@@ -417,7 +417,7 @@ export default function DevoirsPage() {
                                     })}
                                   </>
                                 )}
-                                
+
                                 {/* Message si aucun fichier trouvé */}
                                 {(!homework.submission.fileUrls && (!homework.submission.files || homework.submission.files.length === 0)) && (
                                   <p className="text-gray-500 text-sm">Aucun fichier disponible</p>
@@ -446,11 +446,10 @@ export default function DevoirsPage() {
                               <div className="flex space-x-2 mb-4">
                                 <button
                                   onClick={() => setSubmitType(prev => ({ ...prev, [homework.id]: 'TEXT' }))}
-                                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-all ${
-                                    type === 'TEXT'
+                                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-all ${type === 'TEXT'
                                       ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
                                       : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
-                                  }`}
+                                    }`}
                                 >
                                   <Type className="h-5 w-5" />
                                   <span>Rédaction texte</span>
@@ -458,64 +457,64 @@ export default function DevoirsPage() {
 
                                 <button
                                   onClick={() => setSubmitType(prev => ({ ...prev, [homework.id]: 'FILE' }))}
-                                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-all ${
-                                    type === 'FILE'
+                                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-all ${type === 'FILE'
                                       ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
                                       : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
-                                  }`}
+                                    }`}
                                 >
                                   <BookOpen className="h-5 w-5" />
                                   <span>Fichier / Audio / Image</span>
                                 </button>
                               </div>
 
-                           {type === 'TEXT' ? (
-  <textarea
-    value={textContent[homework.id] || ''}
-    onChange={(e) =>
-      setTextContent((prev) => ({ ...prev, [homework.id]: e.target.value }))
-    }
-    placeholder="Rédigez votre devoir ici..."
-    className="w-full h-32 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all text-black"
-  />
-) : (
-  <div>
-    {!files[homework.id] || files[homework.id].length === 0 ? (
-      <input
-        type="file"
-        multiple
-        onChange={(e) => {
-          if (!e.target.files) return;
-          setFiles((prev) => ({
-            ...prev,
-            [homework.id]: Array.from(e.target.files),
-          }));
-        }}
-        accept=".pdf,.doc,.docx,.txt,.mp3,.mp4,image/*"
-        className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-      />
-    ) : (
-      <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-        <p className="font-semibold mb-2">Fichiers sélectionnés :</p>
-        <ul className="list-disc pl-5 text-sm text-gray-700">
-          {files[homework.id].map((file, index) => (
-            <li key={index}>{file.name}</li>
-          ))}
-        </ul>
+                              {type === 'TEXT' ? (
+                                <textarea
+                                  value={textContent[homework.id] || ''}
+                                  onChange={(e) =>
+                                    setTextContent((prev) => ({ ...prev, [homework.id]: e.target.value }))
+                                  }
+                                  placeholder="Rédigez votre devoir ici..."
+                                  className="w-full h-32 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all text-black"
+                                />
+                              ) : (
+                                <div>
+                                  {!files[homework.id] || files[homework.id].length === 0 ? (
+                                    <input
+                                      type="file"
+                                      multiple
+                                      onChange={(e) => {
+                                        if (!e.target.files) return;
+                                        setFiles((prev) => ({
+                                          ...prev,
+                                          [homework.id]: Array.from(e.target.files!),
+                                        }));
+                                      }}
 
-        {/* Bouton pour changer de fichier */}
-        <button
-          onClick={() =>
-            setFiles((prev) => ({ ...prev, [homework.id]: [] }))
-          }
-          className="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-        >
-          Changer les fichiers
-        </button>
-      </div>
-    )}
-  </div>
-)}
+                                      accept=".pdf,.doc,.docx,.txt,.mp3,.mp4,image/*"
+                                      className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                    />
+                                  ) : (
+                                    <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                      <p className="font-semibold mb-2">Fichiers sélectionnés :</p>
+                                      <ul className="list-disc pl-5 text-sm text-gray-700">
+                                        {files[homework.id].map((file, index) => (
+                                          <li key={index}>{file.name}</li>
+                                        ))}
+                                      </ul>
+
+                                      {/* Bouton pour changer de fichier */}
+                                      <button
+                                        onClick={() =>
+                                          setFiles((prev) => ({ ...prev, [homework.id]: [] }))
+                                        }
+                                        className="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                                      >
+                                        Changer les fichiers
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
 
                               <button
                                 onClick={() => handleSubmit(homework.id)}
