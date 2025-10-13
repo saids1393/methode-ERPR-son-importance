@@ -3,7 +3,6 @@ import nodemailer from 'nodemailer';
 import juice from 'juice';
 import path from "path";
 import fs from "fs";
-import { BASE_URL, SENDER_INFO } from "@/lib/config";
 
 // ----------------------------
 // Transporteur email      

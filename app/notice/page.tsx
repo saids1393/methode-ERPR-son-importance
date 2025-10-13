@@ -101,97 +101,114 @@ export default function NoticePage() {
     return null;
   }
 
-  const noticeItems = [
-    {
-      id: 'support-dynamique',
-      title: 'Support dynamique',
-      icon: <Volume2 className="h-6 w-6 text-blue-600" />,
-      content: [
-        'Nous avons intégré plus de 530 audios à travers les lettres, les mots et les phrases.',
-        'Il vous suffit de cliquer sur la lettre, le mot ou la phrase pour écouter.',
-        'Vous pouvez cliquer en illimité.'
-      ],
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
-      iconBg: 'bg-blue-100'
-    },
-    {
-      id: 'validation-pages',
-      title: 'Validation des pages et chapitres',
-      icon: <CheckCircle className="h-6 w-6 text-green-600" />,
-      content: [
-        'Pour valider une page, vous devez rester en moyenne 6 secondes dessus.',
-        'Lors d\'une actualisation du site ou d\'un retour dans le tableau de bord, vous verrez les pages prises en compte avec un check vert ✅ à côté.',
-        'La validation d\'un chapitre est visible lorsque l\'intitulé du chapitre devient bleu.',
-        'Vous pouvez aussi valider une page manuellement en cliquant sur le rond associé à la page.'
-      ],
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
-      iconBg: 'bg-green-100'
-    },
-    {
-      id: 'devoirs-automatiques',
-      title: 'Devoirs automatiques',
-      icon: <Mail className="h-6 w-6 text-orange-600" />,
-      content: [
-        'L\'envoi de vos devoirs se fait automatiquement si toutes les pages (y compris le quiz) sont complétées.',
-        'Cela déclenche l\'envoi automatique de vos devoirs vers votre mail.',
-        '⚠️ Pensez à vérifier vos spams si vous ne recevez pas votre devoir.'
-      ],
-      bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200',
-      iconBg: 'bg-orange-100',
-      hasWarning: true
-    },
-    {
-      id: 'contact-support',
-      title: 'Contact support',
-      icon: <MessageCircle className="h-6 w-6 text-purple-600" />,
-      content: [
-        'Une bulle est disponible à côté du profil.',
-        'Vous pouvez poser vos questions ou signaler :',
-        '• Un problème technique (bug audio/vidéo)',
-        '• Une erreur constatée',
-        '• Une demande de nouvelle fonctionnalité',
-        'Toutes vos demandes seront envoyées directement sur ma boîte mail et je vous répondrai au plus vite.'
-      ],
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200',
-      iconBg: 'bg-purple-100'
-    },
-    {
-      id: 'accompagnements',
-      title: 'Accompagnements',
-      icon: <Users className="h-6 w-6 text-indigo-600" />,
-      content: [
-        'Vous pouvez demander un accompagnement personnalisé en me contactant via WhatsApp.',
-        'Selon la complexité de votre difficulté, vous aurez la possibilité d\'un suivi :',
-        '• Par messages vocaux à horaires fixes pour plus de fluidité',
-        '• Ou même par appel direct'
-      ],
-      bgColor: 'bg-indigo-50',
-      borderColor: 'border-indigo-200',
-      iconBg: 'bg-indigo-100'
-    },
-    {
-      id: 'niveaux',
-      title: 'Niveaux',
-      icon: <GraduationCap className="h-6 w-6 text-pink-600" />,
-      content: [
-        'De nouveaux niveaux arriveront progressivement :',
-        '• Tajwid',
-        '• Vocabulaire',
-        '• Conjugaison',
-        '• Grammaire (Sarf & Balaghah)',
-        'Vous serez notifiés par mail dès leur disponibilité.',
-        'Vous pourrez les débloquer en choisissant le niveau payant qui vous convient.'
-      ],
-      bgColor: 'bg-pink-50',
-      borderColor: 'border-pink-200',
-      iconBg: 'bg-pink-100',
-      hasNotification: true
-    }
-  ];
+ const noticeItems = [
+  {
+    id: 'support-dynamique',
+    title: 'Support dynamique',
+    icon: <Volume2 className="h-6 w-6 text-blue-600" />,
+    content: [
+      'Nous avons intégré plus de 530 audios à travers les lettres, les mots et les phrases.',
+      'Il vous suffit de cliquer sur la lettre, le mot ou la phrase pour écouter.',
+      'Vous pouvez cliquer en illimité.'
+    ],
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-200',
+    iconBg: 'bg-blue-100'
+  },
+  {
+    id: 'validation-pages',
+    title: 'Validation des pages et chapitres',
+    icon: <CheckCircle className="h-6 w-6 text-green-600" />,
+    content: [
+      'Pour valider une page, vous devez rester en moyenne 6 secondes dessus.',
+      'Lors d\'une actualisation du site ou d\'un retour dans le tableau de bord, vous verrez les pages prises en compte avec un check vert ✅ à côté.',
+      'La validation d\'un chapitre est visible lorsque l\'intitulé du chapitre devient bleu.',
+      'Vous pouvez aussi valider une page manuellement en cliquant sur le rond associé à la page.'
+    ],
+    bgColor: 'bg-green-50',
+    borderColor: 'border-green-200',
+    iconBg: 'bg-green-100'
+  },
+  {
+    id: 'devoirs-automatiques',
+    title: 'Devoirs automatiques',
+    icon: <Mail className="h-6 w-6 text-orange-600" />,
+    content: [
+      'L\'envoi de vos devoirs se fait automatiquement si toutes les pages (y compris le quiz) sont complétées.',
+      'Cela déclenche l\'envoi automatique de vos devoirs vers votre mail.',
+      '⚠️ Pensez à vérifier vos spams si vous ne recevez pas votre devoir.'
+    ],
+    bgColor: 'bg-orange-50',
+    borderColor: 'border-orange-200',
+    iconBg: 'bg-orange-100',
+    hasWarning: true
+  },
+  {
+    id: 'contact-support',
+    title: 'Contact support',
+    icon: <MessageCircle className="h-6 w-6 text-purple-600" />,
+    content: [
+      'Une bulle est disponible à côté du profil.',
+      'Vous pouvez poser vos questions ou signaler :',
+      '• Un problème technique (bug audio/vidéo)',
+      '• Une erreur constatée',
+      '• Une demande de nouvelle fonctionnalité',
+      'Toutes vos demandes seront envoyées directement sur ma boîte mail et je vous répondrai au plus vite.'
+    ],
+    bgColor: 'bg-purple-50',
+    borderColor: 'border-purple-200',
+    iconBg: 'bg-purple-100'
+  },
+  {
+    id: 'accompagnements',
+    title: 'Accompagnements',
+    icon: <Users className="h-6 w-6 text-indigo-600" />,
+    content: [
+      'Vous pouvez demander un accompagnement personnalisé en me contactant via WhatsApp.',
+      'Selon la complexité de votre difficulté, vous aurez la possibilité d\'un suivi :',
+      '• Par messages vocaux à horaires fixes pour plus de fluidité',
+      '• Ou même par appel direct'
+    ],
+    bgColor: 'bg-indigo-50',
+    borderColor: 'border-indigo-200',
+    iconBg: 'bg-indigo-100'
+  },
+  {
+    id: 'niveaux',
+    title: 'Niveaux',
+    icon: <GraduationCap className="h-6 w-6 text-pink-600" />,
+    content: [
+      'De nouveaux niveaux arriveront progressivement :',
+      '• Tajwid',
+      '• Vocabulaire',
+      '• Conjugaison',
+      '• Grammaire (Sarf & Balaghah)',
+      'Vous serez notifiés par mail dès leur disponibilité.',
+      'Vous pourrez les débloquer en choisissant le niveau payant qui vous convient.'
+    ],
+    bgColor: 'bg-pink-50',
+    borderColor: 'border-pink-200',
+    iconBg: 'bg-pink-100',
+    hasNotification: true
+  },
+  {
+    id: 'Rendu-devoirs',
+    title: 'Rendu de devoirs',
+    icon: <Award className="h-6 w-6 text-teal-600" />,
+    content: [
+      'À la fin de chaque devoir, vous trouverez les instructions pour le rendu de vos devoirs.',
+      'Le rendu de devoirs se fait via l’onglet accessible sur votre tableau de bord (Dashboard).',
+      'Vous pouvez accéder à cette section ici : https://methode-erpr-v1.vercel.app/devoirs',
+      'Vous avez la possibilité de rendre votre devoir sous différents formats : PDF, DOCS, ou tout autre fichier.',
+      'Vous pouvez également rendre votre devoir en audio 🎧 ou le rédiger directement en texte via le champ intégré.',
+      'Chaque rendu est automatiquement associé au devoir correspondant et stocké dans votre espace personnel.'
+    ],
+    bgColor: 'bg-teal-50',
+    borderColor: 'border-teal-200',
+    iconBg: 'bg-teal-100'
+  }
+];
+
 
   return (
     <div className="min-h-screen bg-gray-50">

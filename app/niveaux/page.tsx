@@ -64,7 +64,7 @@ export default function NiveauxPage() {
   const niveaux = [
     {
       id: 1,
-      title: 'Blog Tajwid',
+      title: 'Niveau Tajwid',
       icon: <BookOpen className="h-10 w-10 text-indigo-600" />,
       description:
         "Un espace d’apprentissage du Tajwid sous forme d’articles clairs et audio-guidés. Disponible avant le mois béni du Ramadan إن شاء الله.",
