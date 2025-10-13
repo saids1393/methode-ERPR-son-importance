@@ -13,6 +13,7 @@
     "sync-videos": "node --loader ts-node/esm scripts/sync-videos.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.908.0",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.2.0",
     "@prisma/client": "^6.13.0",
