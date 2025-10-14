@@ -589,7 +589,7 @@ export const chapters: Chapter[] = [
   },
   {
     title: "Évaluation finale",
-    chapterNumber: 10.5,
+    chapterNumber: 11,
     pages: [
       {
         title: "Examen final sur toute la méthode",
