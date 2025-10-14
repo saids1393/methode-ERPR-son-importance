@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import { 
   sendHomeworkSubmissionEmail,
   sendTeacherHomeworkNotification,
 } from '@/lib/email';
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     // --- Envoi des emails ---
     try {
-      const baseUrl = process.env.NEXTAUTH_URL || 'https://app.erpr.com';
+      const baseUrl = process.env.NEXTAUTH_URL || 'https://https://methode-erpr-v1.vercel.app';
       const fileLinks =
         fileUrls.length > 0
           ? fileUrls.map(f => `${baseUrl}${f.url}`).join('\n')
