@@ -1,14 +1,12 @@
-// app/api/download/[filename]/route.ts
+// app/api/uploads/[filename]/route.ts
 import { NextResponse } from 'next/server';
 
 declare const CLOUDFLARE_R2_BUCKET: R2Bucket;
 
-export async function GET(
-  req: Request,
-  { params }: { params: { filename: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const { filename } = params;
+    const url = new URL(req.url);
+    const filename = url.pathname.split('/').pop(); // récupère [filename]
 
     if (!filename) {
       return NextResponse.json({ error: 'Nom de fichier manquant' }, { status: 400 });
@@ -20,7 +18,6 @@ export async function GET(
       return NextResponse.json({ error: 'Fichier introuvable' }, { status: 404 });
     }
 
-    // Lire le contenu
     const arrayBuffer = await object.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
 
@@ -54,7 +51,7 @@ export async function GET(
       },
     });
   } catch (err) {
-    console.error('❌ Erreur GET /api/download :', err);
+    console.error('❌ Erreur GET /api/uploads :', err);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
