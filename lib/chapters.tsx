@@ -589,7 +589,7 @@ export const chapters: Chapter[] = [
   },
   {
     title: "Évaluation finale",
-    chapterNumber: 11,
+    chapterNumber: 10.5,
     pages: [
       {
         title: "Examen final sur toute la méthode",
@@ -598,7 +598,6 @@ export const chapters: Chapter[] = [
         status: 'completed'
       }
     ],
-   
   }
 ];
 
@@ -650,3 +649,4 @@ export const getPreviousPage = (currentChapter: number, currentPage: number): Pa
 
   return currentIndex > 0 ? allPages[currentIndex - 1] : undefined;
 };
+

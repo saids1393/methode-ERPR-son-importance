@@ -57,6 +57,7 @@ interface HomeworkSend {
   };
 }
 
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
