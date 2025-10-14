@@ -364,81 +364,62 @@ interface HomeworkSubmissionEmailParams {
   userName: string;
   homeworkTitle: string;
   chapterId: number;
-  submissionType: "TEXT" | "AUDIO";
+  submissionType: 'TEXT' | 'AUDIO';
   content: string;
+  fileUrls?: { name: string; path: string }[];
   submittedAt: Date;
 }
 
+// ----------------------------
+// Email soumission devoir (étudiant)
+// ----------------------------
 export async function sendHomeworkSubmissionEmail(
   params: HomeworkSubmissionEmailParams
 ): Promise<boolean> {
   try {
-    // ✅ Préparation des fichiers joints
+    // ✅ Si AUDIO → on attache les fichiers directement
     const attachments =
-      params.submissionType === "AUDIO"
-        ? params.content
-            .split("\n")
-            .filter((line) => line.trim().startsWith("http") || line.includes("/uploads/"))
-            .map((url) => {
-              const fileName = path.basename(url);
-              const filePath = url.startsWith("http")
-                ? path.join(process.cwd(), "public", url.replace(BASE_URL, "").replace(/^\//, ""))
-                : path.join(process.cwd(), "public", url.replace(/^\//, ""));
-              return fs.existsSync(filePath)
-                ? {
-                    filename: fileName,
-                    path: filePath,
-                  }
-                : null;
-            })
-            .filter(Boolean)
+      params.submissionType === "AUDIO" && params.fileUrls?.length
+        ? params.fileUrls.map((f) => ({
+            filename: f.name,
+            path: f.path, // fichier local
+          }))
         : [];
 
-    // ✅ Contenu HTML
     const html = `
-      <h2> Devoir soumis avec succès ✅</h2>
+      <h2>✅ Devoir soumis avec succès</h2>
       <p>Bonjour ${params.userName},</p>
-      <p>Votre devoir pour le chapitre <strong>${params.chapterId}</strong> a été soumis avec succès.</p>
+      <p>Votre devoir pour le chapitre <strong>${params.chapterId}</strong> a bien été soumis.</p>
       <p><strong>Titre :</strong> ${params.homeworkTitle}</p>
       <p><strong>Type :</strong> ${
-        params.submissionType === "TEXT" ? "Texte" : "Fichier(s)"
+        params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"
       }</p>
       <p><strong>Date :</strong> ${params.submittedAt.toLocaleDateString("fr-FR")} à ${params.submittedAt.toLocaleTimeString("fr-FR")}</p>
       ${
         params.submissionType === "TEXT"
-          ? `<div style="background:#f8f9fa;padding:15px;border-radius:8px;margin-top:10px;"><p>${params.content}</p></div>`
-          : `<div>
-              <p>Fichiers soumis :</p>
-              ${params.content
-                .split("\n")
-                .map(
-                  (url) =>
-                    `<p><a href="${url}" target="_blank">🔗 Ouvrir ou télécharger (${path.basename(
-                      url
-                    )})</a></p>`
-                )
-                .join("")}
-            </div>`
+          ? `<div style="background:#f8f9fa;padding:15px;border-radius:8px;margin-top:10px;">
+               <p>${params.content}</p>
+             </div>`
+          : `<p>📎 Les fichiers sont joints à cet email.</p>`
       }
-      <p>Votre professeur a été notifié. Vous recevrez un email dès que votre devoir sera corrigé.</p>
     `;
 
-    // ✅ Envoi de l'email
     await transporter.sendMail({
       from: SENDER_INFO,
       to: params.userEmail,
-      subject: `✅ Devoir envoyé - Chapitre ${params.chapterId} - ${params.homeworkTitle}`,
+      subject: `✅ Devoir envoyé - ${params.homeworkTitle}`,
       html: juice(html),
-      attachments: attachments as any, // Ajout des pièces jointes
+      attachments, // ✅ fichiers joints
     });
 
-    console.log(`✅ Email de soumission envoyé à ${params.userEmail}`);
+    console.log(`✅ Email étudiant envoyé avec fichiers joints`);
     return true;
   } catch (err) {
     console.error("❌ Erreur sendHomeworkSubmissionEmail:", err);
     return false;
   }
 }
+
 
 // ----------------------------
 // Email notification professeur
@@ -453,74 +434,51 @@ interface TeacherNotificationParams {
   submissionType: "TEXT" | "AUDIO";
   content: string;
   submittedAt: Date;
+  fileUrls?: { name: string; path: string }[]; // ✅ ajouté ici
 }
 
+
+// ----------------------------
+// Email notification professeur
+// ----------------------------
 export async function sendTeacherHomeworkNotification(
   params: TeacherNotificationParams
 ): Promise<boolean> {
   try {
-    // ✅ Préparation des pièces jointes
+    // ✅ Même logique : fichiers joints locaux
     const attachments =
-      params.submissionType === "AUDIO"
-        ? params.content
-            .split("\n")
-            .filter((line) => line.trim().startsWith("http") || line.includes("/uploads/"))
-            .map((url) => {
-              const fileName = path.basename(url);
-              const filePath = url.startsWith("http")
-                ? path.join(process.cwd(), "public", url.replace(BASE_URL, "").replace(/^\//, ""))
-                : path.join(process.cwd(), "public", url.replace(/^\//, ""));
-              return fs.existsSync(filePath)
-                ? {
-                    filename: fileName,
-                    path: filePath,
-                  }
-                : null;
-            })
-            .filter(Boolean)
+      params.submissionType === "AUDIO" && params.fileUrls?.length
+        ? params.fileUrls.map((f) => ({
+            filename: f.name,
+            path: f.path,
+          }))
         : [];
 
-    // ✅ Contenu HTML
     const html = `
       <h2>📬 Nouveau devoir soumis</h2>
-      <p>Un étudiant a soumis un nouveau devoir.</p>
+      <p>Un étudiant a soumis un devoir.</p>
       <ul>
         <li><strong>Nom :</strong> ${params.userName}</li>
         <li><strong>Email :</strong> ${params.userEmail}</li>
         <li><strong>Chapitre :</strong> ${params.chapterId}</li>
         <li><strong>Titre :</strong> ${params.homeworkTitle}</li>
-        <li><strong>Date :</strong> ${params.submittedAt.toLocaleDateString("fr-FR")}</li>
       </ul>
       ${
         params.submissionType === "TEXT"
           ? `<div style="background:#f9fafb;padding:15px;border-radius:8px;"><p>${params.content}</p></div>`
-          : `<div>
-              <p>Fichiers soumis :</p>
-              ${params.content
-                .split("\n")
-                .map(
-                  (url) =>
-                    `<p><a href="${url}" target="_blank">🔗 Ouvrir ou télécharger (${path.basename(
-                      url
-                    )})</a></p>`
-                )
-                .join("")}
-            </div>`
+          : `<p>📎 Les fichiers sont joints à cet email.</p>`
       }
-      <p>Accédez à votre espace de correction :</p>
-      <p><a href="${BASE_URL}/admin/homework">➡️ Ouvrir l’espace professeur</a></p>
     `;
 
-    // ✅ Envoi de l'email
     await transporter.sendMail({
       from: SENDER_INFO,
       to: params.teacherEmail,
       subject: `📬 Nouveau devoir - ${params.userName} (${params.homeworkTitle})`,
       html: juice(html),
-      attachments: attachments as any,
+      attachments,
     });
 
-    console.log(`✅ Email professeur envoyé à ${params.teacherEmail}`);
+    console.log(`✅ Email professeur envoyé avec fichiers joints`);
     return true;
   } catch (err) {
     console.error("❌ Erreur sendTeacherHomeworkNotification:", err);

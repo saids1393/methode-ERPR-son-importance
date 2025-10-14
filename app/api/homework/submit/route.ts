@@ -1,3 +1,4 @@
+// app/api/homework/submit/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -9,7 +10,7 @@ import {
   sendTeacherHomeworkNotification,
 } from '@/lib/email';
 
-// POST - Soumettre un rendu de devoir (texte ou fichiers)
+// ✅ POST - Soumettre un rendu de devoir (texte ou fichiers)
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUserFromRequest(request);
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Le contenu texte est requis' }, { status: 400 });
     }
     if (type === 'AUDIO' && (!files || files.length === 0)) {
-      return NextResponse.json({ error: 'Au moins un fichier audio est requis' }, { status: 400 });
+      return NextResponse.json({ error: 'Au moins un fichier est requis' }, { status: 400 });
     }
 
     // --- Vérification du devoir ---
@@ -55,12 +56,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Ce devoir ne vous a pas été assigné' }, { status: 404 });
     }
 
-    // --- Sauvegarde des fichiers ---
-    let fileUrls: { name: string; url: string }[] = [];
+    // --- Sauvegarde des fichiers localement ---
+    let savedFiles: { name: string; path: string }[] = [];
 
     if (type === 'AUDIO' && files.length > 0) {
-      // ✅ En prod (Vercel) : stockage temporaire dans /tmp
-      // ✅ En local : dans public/uploads/homeworks
       const uploadDir = process.env.VERCEL
         ? '/tmp/homeworks'
         : path.join(process.cwd(), 'public', 'uploads', 'homeworks');
@@ -74,16 +73,11 @@ export async function POST(request: NextRequest) {
         const fileName = `${uuidv4()}${fileExtension}`;
         const filePath = path.join(uploadDir, fileName);
         await writeFile(filePath, buffer);
-
-        const fileUrl = process.env.VERCEL
-          ? `/api/uploads/${fileName}` // Route proxy si hébergé sur Vercel
-          : `/uploads/homeworks/${fileName}`;
-
-        fileUrls.push({ name: file.name, url: fileUrl });
+        savedFiles.push({ name: file.name, path: filePath });
       }
     }
 
-    // --- Mise à jour base de données ---
+    // --- Mise à jour de la base ---
     const updatedSend = await prisma.homeworkSend.update({
       where: {
         userId_homeworkId: { userId: user.id, homeworkId },
@@ -92,38 +86,30 @@ export async function POST(request: NextRequest) {
         type,
         textContent: type === 'TEXT' ? textContent : null,
         audioUrl: null,
-        fileUrls: type === 'AUDIO' ? JSON.stringify(fileUrls) : null,
+        fileUrls: type === 'AUDIO' ? JSON.stringify(savedFiles) : null,
         status: 'PENDING',
         feedback: null,
         correctedAt: null,
       },
       include: {
-        homework: { select: { id: true, title: true, chapterId: true, content: true } },
+        homework: { select: { id: true, title: true, chapterId: true } },
         user: { select: { id: true, email: true, username: true } },
       },
     });
 
-    // --- Envoi des emails ---
+    // --- Envoi des emails (avec fichiers attachés) ---
     try {
-      const baseUrl =
-        process.env.NEXTAUTH_URL || 'https://methode-erpr-v1.vercel.app';
-      const fileLinks =
-        fileUrls.length > 0
-          ? fileUrls.map(f => `${baseUrl}${f.url}`).join('\n')
-          : '';
-
-      // Email à l’étudiant
       await sendHomeworkSubmissionEmail({
         userEmail: user.email,
         userName: user.username || 'Étudiant',
         homeworkTitle: updatedSend.homework.title,
         chapterId: updatedSend.homework.chapterId,
         submissionType: type as 'TEXT' | 'AUDIO',
-        content: type === 'TEXT' ? textContent : fileLinks,
+        content: type === 'TEXT' ? textContent : '',
+        fileUrls: type === 'AUDIO' ? savedFiles : [],
         submittedAt: updatedSend.sentAt,
       });
 
-      // Email au professeur
       await sendTeacherHomeworkNotification({
         teacherEmail: process.env.TEACHER_EMAIL || 'prof@erpr.com',
         userName: user.username || 'Étudiant',
@@ -132,28 +118,20 @@ export async function POST(request: NextRequest) {
         homeworkTitle: updatedSend.homework.title,
         chapterId: updatedSend.homework.chapterId,
         submissionType: type as 'TEXT' | 'AUDIO',
-        content: type === 'TEXT' ? textContent : fileLinks,
+        content: type === 'TEXT' ? textContent : '',
+        fileUrls: type === 'AUDIO' ? savedFiles : [],
         submittedAt: updatedSend.sentAt,
       });
 
-      console.log('📩 Emails envoyés avec succès');
+      console.log('📩 Emails envoyés avec pièces jointes');
     } catch (err) {
       console.error('❌ Erreur lors de l’envoi des emails :', err);
     }
 
-    // --- Réponse ---
     return NextResponse.json({
       success: true,
       message: 'Devoir soumis avec succès',
-      submission: {
-        id: updatedSend.id,
-        type: updatedSend.type,
-        status: updatedSend.status,
-        textContent: updatedSend.textContent,
-        fileUrls,
-        sentAt: updatedSend.sentAt,
-        homework: updatedSend.homework,
-      },
+      submission: updatedSend,
     });
   } catch (error) {
     console.error('❌ Erreur lors de la soumission du devoir :', error);
