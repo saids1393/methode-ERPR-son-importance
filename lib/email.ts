@@ -366,24 +366,23 @@ interface HomeworkSubmissionEmailParams {
   chapterId: number;
   submissionType: 'TEXT' | 'AUDIO';
   content: string;
-  fileUrls?: { name: string; path: string }[];
+  fileUrls?: { name: string; path?: string; url?: string }[]; // path ou url
   submittedAt: Date;
 }
 
-// ----------------------------
-// Email soumission devoir (étudiant)
-// ----------------------------
 export async function sendHomeworkSubmissionEmail(
   params: HomeworkSubmissionEmailParams
 ): Promise<boolean> {
   try {
-    // ✅ Si AUDIO → on attache les fichiers directement
+    // ✅ Si AUDIO → on attache les fichiers si path local disponible
     const attachments =
       params.submissionType === "AUDIO" && params.fileUrls?.length
-        ? params.fileUrls.map((f) => ({
-            filename: f.name,
-            path: f.path, // fichier local
-          }))
+        ? params.fileUrls
+            .filter(f => f.path) // ne garder que les fichiers avec path
+            .map(f => ({
+              filename: f.name,
+              path: f.path!, // chemin local
+            }))
         : [];
 
     const html = `
@@ -391,16 +390,17 @@ export async function sendHomeworkSubmissionEmail(
       <p>Bonjour ${params.userName},</p>
       <p>Votre devoir pour le chapitre <strong>${params.chapterId}</strong> a bien été soumis.</p>
       <p><strong>Titre :</strong> ${params.homeworkTitle}</p>
-      <p><strong>Type :</strong> ${
-        params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"
-      }</p>
+      <p><strong>Type :</strong> ${params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"}</p>
       <p><strong>Date :</strong> ${params.submittedAt.toLocaleDateString("fr-FR")} à ${params.submittedAt.toLocaleTimeString("fr-FR")}</p>
       ${
         params.submissionType === "TEXT"
           ? `<div style="background:#f8f9fa;padding:15px;border-radius:8px;margin-top:10px;">
                <p>${params.content}</p>
              </div>`
-          : `<p>📎 Les fichiers sont joints à cet email.</p>`
+          : `<p>📎 Les fichiers sont joints à cet email ou accessibles via les liens :</p>
+             <ul>
+               ${params.fileUrls?.map(f => `<li><a href="${f.url || '#'}">${f.name}</a></li>`).join('') || ''}
+             </ul>`
       }
     `;
 
@@ -409,7 +409,7 @@ export async function sendHomeworkSubmissionEmail(
       to: params.userEmail,
       subject: `✅ Devoir envoyé - ${params.homeworkTitle}`,
       html: juice(html),
-      attachments, // ✅ fichiers joints
+      attachments,
     });
 
     console.log(`✅ Email étudiant envoyé avec fichiers joints`);
@@ -419,7 +419,6 @@ export async function sendHomeworkSubmissionEmail(
     return false;
   }
 }
-
 
 // ----------------------------
 // Email notification professeur
@@ -434,24 +433,21 @@ interface TeacherNotificationParams {
   submissionType: "TEXT" | "AUDIO";
   content: string;
   submittedAt: Date;
-  fileUrls?: { name: string; path: string }[]; // ✅ ajouté ici
+  fileUrls?: { name: string; path?: string; url?: string }[];
 }
 
-
-// ----------------------------
-// Email notification professeur
-// ----------------------------
 export async function sendTeacherHomeworkNotification(
   params: TeacherNotificationParams
 ): Promise<boolean> {
   try {
-    // ✅ Même logique : fichiers joints locaux
     const attachments =
       params.submissionType === "AUDIO" && params.fileUrls?.length
-        ? params.fileUrls.map((f) => ({
-            filename: f.name,
-            path: f.path,
-          }))
+        ? params.fileUrls
+            .filter(f => f.path)
+            .map(f => ({
+              filename: f.name,
+              path: f.path!,
+            }))
         : [];
 
     const html = `
@@ -466,7 +462,10 @@ export async function sendTeacherHomeworkNotification(
       ${
         params.submissionType === "TEXT"
           ? `<div style="background:#f9fafb;padding:15px;border-radius:8px;"><p>${params.content}</p></div>`
-          : `<p>📎 Les fichiers sont joints à cet email.</p>`
+          : `<p>📎 Les fichiers sont joints ou accessibles :</p>
+             <ul>
+               ${params.fileUrls?.map(f => `<li><a href="${f.url || '#'}">${f.name}</a></li>`).join('') || ''}
+             </ul>`
       }
     `;
 
