@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { 
+import {
   sendHomeworkSubmissionEmail,
   sendTeacherHomeworkNotification,
 } from '@/lib/email';
@@ -13,7 +13,6 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUserFromRequest(request);
-
     if (!user) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
@@ -32,26 +31,20 @@ export async function POST(request: NextRequest) {
     if (!homeworkId || !type) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
     }
-
     if (type !== 'TEXT' && type !== 'AUDIO') {
       return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
     }
-
     if (type === 'TEXT' && !textContent) {
       return NextResponse.json({ error: 'Le contenu texte est requis' }, { status: 400 });
     }
-
     if (type === 'AUDIO' && (!files || files.length === 0)) {
       return NextResponse.json({ error: 'Au moins un fichier audio est requis' }, { status: 400 });
     }
 
-    // --- Vérifier que le devoir est bien assigné à l'utilisateur ---
+    // --- Vérification du devoir ---
     const existingSend = await prisma.homeworkSend.findUnique({
       where: {
-        userId_homeworkId: {
-          userId: user.id,
-          homeworkId: homeworkId,
-        },
+        userId_homeworkId: { userId: user.id, homeworkId },
       },
       include: {
         homework: { select: { id: true, title: true, chapterId: true } },
@@ -62,11 +55,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Ce devoir ne vous a pas été assigné' }, { status: 404 });
     }
 
-    // --- Sauvegarde des fichiers dans /public/uploads/homeworks ---
+    // --- Sauvegarde des fichiers ---
     let fileUrls: { name: string; url: string }[] = [];
 
     if (type === 'AUDIO' && files.length > 0) {
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'homeworks');
+      // ✅ En prod (Vercel) : stockage temporaire dans /tmp
+      // ✅ En local : dans public/uploads/homeworks
+      const uploadDir = process.env.VERCEL
+        ? '/tmp/homeworks'
+        : path.join(process.cwd(), 'public', 'uploads', 'homeworks');
+
       await mkdir(uploadDir, { recursive: true });
 
       for (const file of files) {
@@ -77,20 +75,18 @@ export async function POST(request: NextRequest) {
         const filePath = path.join(uploadDir, fileName);
         await writeFile(filePath, buffer);
 
-        fileUrls.push({
-          name: file.name,
-          url: `/uploads/homeworks/${fileName}`,
-        });
+        const fileUrl = process.env.VERCEL
+          ? `/api/uploads/${fileName}` // Route proxy si hébergé sur Vercel
+          : `/uploads/homeworks/${fileName}`;
+
+        fileUrls.push({ name: file.name, url: fileUrl });
       }
     }
 
-    // --- Mise à jour de la base ---
+    // --- Mise à jour base de données ---
     const updatedSend = await prisma.homeworkSend.update({
       where: {
-        userId_homeworkId: {
-          userId: user.id,
-          homeworkId: homeworkId,
-        },
+        userId_homeworkId: { userId: user.id, homeworkId },
       },
       data: {
         type,
@@ -109,13 +105,14 @@ export async function POST(request: NextRequest) {
 
     // --- Envoi des emails ---
     try {
-      const baseUrl = process.env.NEXTAUTH_URL || 'https://https://methode-erpr-v1.vercel.app';
+      const baseUrl =
+        process.env.NEXTAUTH_URL || 'https://methode-erpr-v1.vercel.app';
       const fileLinks =
         fileUrls.length > 0
           ? fileUrls.map(f => `${baseUrl}${f.url}`).join('\n')
           : '';
 
-      // Email étudiant
+      // Email à l’étudiant
       await sendHomeworkSubmissionEmail({
         userEmail: user.email,
         userName: user.username || 'Étudiant',
@@ -126,7 +123,7 @@ export async function POST(request: NextRequest) {
         submittedAt: updatedSend.sentAt,
       });
 
-      // Email prof
+      // Email au professeur
       await sendTeacherHomeworkNotification({
         teacherEmail: process.env.TEACHER_EMAIL || 'prof@erpr.com',
         userName: user.username || 'Étudiant',
@@ -144,7 +141,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erreur lors de l’envoi des emails :', err);
     }
 
-    // --- Réponse finale ---
+    // --- Réponse ---
     return NextResponse.json({
       success: true,
       message: 'Devoir soumis avec succès',
@@ -153,13 +150,16 @@ export async function POST(request: NextRequest) {
         type: updatedSend.type,
         status: updatedSend.status,
         textContent: updatedSend.textContent,
-        fileUrls: fileUrls,
+        fileUrls,
         sentAt: updatedSend.sentAt,
         homework: updatedSend.homework,
       },
     });
   } catch (error) {
     console.error('❌ Erreur lors de la soumission du devoir :', error);
-    return NextResponse.json({ error: 'Erreur interne serveur' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erreur interne serveur' },
+      { status: 500 }
+    );
   }
 }
