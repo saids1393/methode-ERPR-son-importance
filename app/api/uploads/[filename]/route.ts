@@ -1,57 +1,92 @@
 // app/api/uploads/[filename]/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { Readable } from "stream";
 
-declare const CLOUDFLARE_R2_BUCKET: R2Bucket;
+// ----------------------------
+// 🔹 Helper: Convert Readable stream to Buffer
+// ----------------------------
+function streamToBuffer(stream: Readable): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on("data", (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+    stream.on("error", reject);
+  });
+}
 
+// ----------------------------
+// ⚙️ Configuration Cloudflare R2
+// ----------------------------
+const r2Client = new S3Client({
+  region: "auto", // obligatoire pour R2
+  endpoint: process.env.CLOUDFLARE_R2_ENDPOINT, // exemple: "https://<account_id>.r2.cloudflarestorage.com"
+  credentials: {
+    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
+  },
+});
+
+const BUCKET_NAME = process.env.CLOUDFLARE_R2_BUCKET_NAME!;
+
+// ----------------------------
+// 📦 GET /api/uploads/[filename]
+// ----------------------------
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const filename = url.pathname.split('/').pop(); // récupère [filename]
+    const filename = url.pathname.split("/").pop();
 
     if (!filename) {
-      return NextResponse.json({ error: 'Nom de fichier manquant' }, { status: 400 });
+      return NextResponse.json({ error: "Nom de fichier manquant" }, { status: 400 });
     }
 
-    // Récupérer le fichier depuis R2
-    const object = await CLOUDFLARE_R2_BUCKET.get(`homeworks/${filename}`);
-    if (!object) {
-      return NextResponse.json({ error: 'Fichier introuvable' }, { status: 404 });
+    // Récupérer le fichier depuis Cloudflare R2
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: `homeworks/${filename}`,
+    });
+
+    const object = await r2Client.send(command);
+
+    if (!object || !object.Body) {
+      return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
     }
 
-    const arrayBuffer = await object.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
+    // Convertir le flux Readable en Buffer
+    const buffer = await streamToBuffer(object.Body as Readable);
 
-    // Déterminer le type MIME générique
-    const ext = filename.split('.').pop()?.toLowerCase();
-    const mimeType = (() => {
-      switch (ext) {
-        case 'mp3': return 'audio/mpeg';
-        case 'wav': return 'audio/wav';
-        case 'mp4': return 'video/mp4';
-        case 'pdf': return 'application/pdf';
-        case 'doc': return 'application/msword';
-        case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-        case 'xls': return 'application/vnd.ms-excel';
-        case 'xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        case 'ppt': return 'application/vnd.ms-powerpoint';
-        case 'pptx': return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-        case 'jpg':
-        case 'jpeg': return 'image/jpeg';
-        case 'png': return 'image/png';
-        case 'gif': return 'image/gif';
-        case 'txt': return 'text/plain';
-        default: return 'application/octet-stream';
-      }
-    })();
+    // Déterminer le type MIME
+    const ext = filename.split(".").pop()?.toLowerCase();
+    const mimeType =
+      {
+        mp3: "audio/mpeg",
+        wav: "audio/wav",
+        mp4: "video/mp4",
+        pdf: "application/pdf",
+        doc: "application/msword",
+        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        xls: "application/vnd.ms-excel",
+        xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ppt: "application/vnd.ms-powerpoint",
+        pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        png: "image/png",
+        gif: "image/gif",
+        txt: "text/plain",
+      }[ext || ""] || "application/octet-stream";
 
-    return new NextResponse(uint8Array, {
+    // Retourner le fichier
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
-        'Content-Type': mimeType,
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        "Content-Type": mimeType,
+        "Content-Disposition": `inline; filename="${filename}"`,
       },
     });
+
   } catch (err) {
-    console.error('❌ Erreur GET /api/uploads :', err);
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+    console.error("❌ Erreur GET /api/uploads :", err);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
