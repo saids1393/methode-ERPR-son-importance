@@ -77,12 +77,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // --- Générer URLs publiques compatibles avec /api/uploads/[filename] ---
-    const publicFiles = savedFiles.map((file) => ({
-      name: file.name,
-      url: `/api/uploads/${path.basename(file.path)}`,
-    }));
-
     // --- Mise à jour de la base ---
     const updatedSend = await prisma.homeworkSend.update({
       where: {
@@ -92,7 +86,7 @@ export async function POST(request: NextRequest) {
         type,
         textContent: type === 'TEXT' ? textContent : null,
         audioUrl: null,
-        fileUrls: type === 'AUDIO' ? JSON.stringify(publicFiles) : null,
+        fileUrls: type === 'AUDIO' ? JSON.stringify(savedFiles) : null,
         status: 'PENDING',
         feedback: null,
         correctedAt: null,
@@ -103,7 +97,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // --- Envoi des emails ---
+    // --- Envoi des emails (avec fichiers attachés) ---
     try {
       await sendHomeworkSubmissionEmail({
         userEmail: user.email,
@@ -112,7 +106,7 @@ export async function POST(request: NextRequest) {
         chapterId: updatedSend.homework.chapterId,
         submissionType: type as 'TEXT' | 'AUDIO',
         content: type === 'TEXT' ? textContent : '',
-        fileUrls: type === 'AUDIO' ? publicFiles : [],
+        fileUrls: type === 'AUDIO' ? savedFiles : [],
         submittedAt: updatedSend.sentAt,
       });
 
@@ -125,7 +119,7 @@ export async function POST(request: NextRequest) {
         chapterId: updatedSend.homework.chapterId,
         submissionType: type as 'TEXT' | 'AUDIO',
         content: type === 'TEXT' ? textContent : '',
-        fileUrls: type === 'AUDIO' ? publicFiles : [],
+        fileUrls: type === 'AUDIO' ? savedFiles : [],
         submittedAt: updatedSend.sentAt,
       });
 
@@ -134,16 +128,11 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erreur lors de l’envoi des emails :', err);
     }
 
-    // --- Réponse ---
     return NextResponse.json({
       success: true,
       message: 'Devoir soumis avec succès',
-      submission: {
-        ...updatedSend,
-        fileUrls: type === 'AUDIO' ? publicFiles : [],
-      },
+      submission: updatedSend,
     });
-
   } catch (error) {
     console.error('❌ Erreur lors de la soumission du devoir :', error);
     return NextResponse.json(
