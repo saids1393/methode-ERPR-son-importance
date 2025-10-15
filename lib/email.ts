@@ -419,7 +419,7 @@ const html = `
     await transporter.sendMail({
       from: SENDER_INFO,
       to: params.userEmail,
-      subject: `✅ Devoir envoyé - ${params.homeworkTitle}`,
+      subject: `🚀 Devoir envoyé - ${params.homeworkTitle}`,
       html: juice(html),
       attachments, // ✅ fichiers joints
     });
@@ -466,21 +466,40 @@ export async function sendTeacherHomeworkNotification(
           }))
         : [];
 
-    const html = `
-      <h2>📬 Nouveau devoir soumis</h2>
-      <p>Un étudiant a soumis un devoir.</p>
-      <ul>
+const html = `
+  <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <h2 style="color: #2196F3;">📬 Nouveau devoir soumis</h2>
+    <p>Bonjour,</p>
+    <p>Un étudiant vient de soumettre un devoir. Voici les détails :</p>
+
+    <div style="margin-top: 15px; padding: 15px; background-color: #f1f8ff; border-left: 4px solid #2196F3; border-radius: 6px;">
+      <ul style="list-style: none; padding: 0;">
         <li><strong>Nom :</strong> ${params.userName}</li>
         <li><strong>Email :</strong> ${params.userEmail}</li>
         <li><strong>Chapitre :</strong> ${params.chapterId}</li>
         <li><strong>Titre :</strong> ${params.homeworkTitle}</li>
+        <li><strong>Type :</strong> ${
+          params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"
+        }</li>
       </ul>
-      ${
-        params.submissionType === "TEXT"
-          ? `<div style="background:#f9fafb;padding:15px;border-radius:8px;"><p>${params.content}</p></div>`
-          : `<p>📎 Les fichiers sont joints à cet email.</p>`
-      }
-    `;
+    </div>
+
+    ${
+      params.submissionType === "TEXT"
+        ? `<div style="margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 6px; border: 1px solid #ddd;">
+             <p>${params.content}</p>
+           </div>`
+        : `<p style="margin-top: 15px;">📎 Les fichiers sont joints à cet email.</p>`
+    }
+
+    <p style="margin-top: 20px;">Merci de vérifier et de noter le devoir dès que possible.</p>
+
+    <p style="margin-top: 20px; font-size: 12px; color: #777;">
+      Ceci est un message automatique, merci de ne pas répondre.
+    </p>
+  </div>
+`;
+
 
     await transporter.sendMail({
       from: SENDER_INFO,
