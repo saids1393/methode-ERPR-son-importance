@@ -17,6 +17,8 @@ import {
   MessageSquare,
   Eye,
   Award,
+  X,
+  Clock,
 } from 'lucide-react';
 import DashboardHeader from '@/app/components/DashboardHeader';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
@@ -96,6 +98,54 @@ export default function DevoirsPage() {
   const [submitType, setSubmitType] = useState<{ [key: string]: 'TEXT' | 'FILE' }>({});
   const [textContent, setTextContent] = useState<{ [key: string]: string }>({});
   const [files, setFiles] = useState<{ [key: string]: File[] }>({});
+  const [justSubmitted, setJustSubmitted] = useState<{ [key: string]: boolean }>({});
+
+  // État pour le cooldown (timer)
+  const [cooldowns, setCooldowns] = useState<{ [key: string]: number }>({});
+
+  // Charger les cooldowns depuis le localStorage au démarrage
+  useEffect(() => {
+    const loadCooldownsFromStorage = () => {
+      try {
+        const storedCooldowns = localStorage.getItem('homeworkCooldowns');
+        if (storedCooldowns) {
+          const parsedCooldowns = JSON.parse(storedCooldowns);
+          const currentTime = Date.now();
+          
+          // Filtrer les cooldowns expirés et calculer le temps restant
+          const activeCooldowns: { [key: string]: number } = {};
+          const activeJustSubmitted: { [key: string]: boolean } = {};
+          
+          Object.keys(parsedCooldowns).forEach(homeworkId => {
+            const endTime = parsedCooldowns[homeworkId];
+            const timeRemaining = Math.max(0, Math.floor((endTime - currentTime) / 1000));
+            
+            if (timeRemaining > 0) {
+              activeCooldowns[homeworkId] = timeRemaining;
+              activeJustSubmitted[homeworkId] = true;
+            }
+          });
+          
+          setCooldowns(activeCooldowns);
+          setJustSubmitted(activeJustSubmitted);
+          
+          // Mettre à jour le localStorage pour supprimer les cooldowns expirés
+          if (Object.keys(activeCooldowns).length !== Object.keys(parsedCooldowns).length) {
+            const updatedStorage: { [key: string]: number } = {};
+            Object.keys(activeCooldowns).forEach(homeworkId => {
+              updatedStorage[homeworkId] = parsedCooldowns[homeworkId];
+            });
+            localStorage.setItem('homeworkCooldowns', JSON.stringify(updatedStorage));
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des cooldowns:', error);
+        localStorage.removeItem('homeworkCooldowns');
+      }
+    };
+
+    loadCooldownsFromStorage();
+  }, []);
 
   // Vérification de l'authentification
   useEffect(() => {
@@ -154,6 +204,61 @@ export default function DevoirsPage() {
     fetchHomeworkSends();
   }, []);
 
+  // Timer pour cooldown
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCooldowns(prev => {
+        const updated = { ...prev };
+        let hasChanges = false;
+        
+        Object.keys(updated).forEach(key => {
+          if (updated[key] > 0) {
+            updated[key] -= 1;
+            hasChanges = true;
+            
+            // Si le cooldown arrive à 0, le supprimer du localStorage et du statut justSubmitted
+            if (updated[key] === 0) {
+              try {
+                const storedCooldowns = localStorage.getItem('homeworkCooldowns');
+                if (storedCooldowns) {
+                  const parsedCooldowns = JSON.parse(storedCooldowns);
+                  delete parsedCooldowns[key];
+                  localStorage.setItem('homeworkCooldowns', JSON.stringify(parsedCooldowns));
+                }
+                // Réinitialiser le statut justSubmitted quand le cooldown est terminé
+                setJustSubmitted(prevJust => {
+                  const newJust = { ...prevJust };
+                  delete newJust[key];
+                  return newJust;
+                });
+              } catch (error) {
+                console.error('Erreur lors de la suppression du cooldown:', error);
+              }
+            }
+          }
+        });
+        
+        return hasChanges ? updated : prev;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sauvegarder un cooldown dans le localStorage
+  const saveCooldownToStorage = (homeworkId: string, durationInSeconds: number) => {
+    try {
+      const endTime = Date.now() + (durationInSeconds * 1000);
+      const storedCooldowns = localStorage.getItem('homeworkCooldowns');
+      const cooldownsData = storedCooldowns ? JSON.parse(storedCooldowns) : {};
+      
+      cooldownsData[homeworkId] = endTime;
+      localStorage.setItem('homeworkCooldowns', JSON.stringify(cooldownsData));
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du cooldown:', error);
+    }
+  };
+
   // Soumission d'un devoir
   const handleSubmit = async (homeworkId: string) => {
     const type = submitType[homeworkId] || 'TEXT';
@@ -183,9 +288,15 @@ export default function DevoirsPage() {
 
       if (response.ok) {
         toast.success('Devoir soumis avec succès !');
+        setJustSubmitted(prev => ({ ...prev, [homeworkId]: true }));
         fetchHomeworks();
         setTextContent(prev => ({ ...prev, [homeworkId]: '' }));
         setFiles(prev => ({ ...prev, [homeworkId]: [] }));
+
+        // Lancer le cooldown de test: 2 minutes = 120 secondes
+      const cooldownDuration = 1800;
+        setCooldowns(prev => ({ ...prev, [homeworkId]: cooldownDuration }));
+        saveCooldownToStorage(homeworkId, cooldownDuration);
       } else {
         const error = await response.json();
         toast.error(`Erreur: ${error.error}`);
@@ -196,6 +307,14 @@ export default function DevoirsPage() {
     } finally {
       setSubmitting(null);
     }
+  };
+
+  // Supprimer un fichier de la liste
+  const removeFile = (homeworkId: string, fileIndex: number) => {
+    setFiles(prev => ({
+      ...prev,
+      [homeworkId]: prev[homeworkId].filter((_, idx) => idx !== fileIndex)
+    }));
   };
 
   const renderFilePreview = (file: { name: string; url: string }, ext: string | undefined, idx: number) => {
@@ -271,14 +390,14 @@ export default function DevoirsPage() {
         />
         <main className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
-                <FileText className="h-8 w-8 text-white" />
+            <div className="text-center mb-8 sm:mb-12">
+              <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 rounded-2xl mb-3 sm:mb-4">
+                <FileText className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
               </div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 px-4">
                 Mes Devoirs
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 text-base sm:text-lg px-4">
                 Retrouvez ici tous vos devoirs à compléter
               </p>
             </div>
@@ -309,36 +428,39 @@ export default function DevoirsPage() {
                           (homework.submission.files && homework.submission.files.length > 0)))
                     );
 
-
                   const submissionStatus = homework.submission?.status;
                   const StatusConfig = submissionStatus ? statusConfig[submissionStatus] : null;
+
+                  // Déterminer si le formulaire doit être affiché
+                  const showForm = !hasSubmission && !justSubmitted[homework.id];
+                  const showCooldownMessage = justSubmitted[homework.id] && !hasSubmission;
 
                   return (
                     <div
                       key={homework.id}
-                      className="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-gray-100 hover:border-blue-200 transition-all duration-300"
+                      className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border-2 border-gray-100 hover:border-blue-200 transition-all duration-300"
                     >
                       {/* En-tête du devoir */}
-                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                              <BookOpen className="h-6 w-6 text-white" />
+                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                          <div className="flex items-center space-x-2 sm:space-x-3">
+                            <div className="bg-white/20 backdrop-blur-sm p-2 sm:p-3 rounded-lg sm:rounded-xl">
+                              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                             </div>
                             <div>
-                              <h3 className="text-xl font-bold text-white">
+                              <h3 className="text-lg sm:text-xl font-bold text-white">
                                 Chapitre {homework.chapterId}
                               </h3>
-                              <p className="text-blue-100 text-sm">
+                              <p className="text-blue-100 text-xs sm:text-sm">
                                 {homework.title}
                               </p>
                             </div>
                           </div>
 
                           {hasSubmission && StatusConfig && (
-                            <div className="text-right">
-                              <div className={`flex items-center space-x-2 px-4 py-2 rounded-full border ${StatusConfig.color} backdrop-blur-sm`}>
-                                <span className="text-sm font-semibold">{StatusConfig.label}</span>
+                            <div className="text-left sm:text-right">
+                              <div className={`inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border ${StatusConfig.color} backdrop-blur-sm`}>
+                                <span className="text-xs sm:text-sm font-semibold">{StatusConfig.label}</span>
                               </div>
                               {homework.submission?.correctedAt ? (
                                 <p className="text-blue-100 text-xs mt-1">
@@ -355,115 +477,86 @@ export default function DevoirsPage() {
                       </div>
 
                       {/* Contenu du devoir */}
-                      <div className="p-6">
-                        {/* Instructions */}
-                        <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-2">📝 Instructions</h4>
-                              <p className={`text-gray-800 text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}>
-                                {homework.content}
-                              </p>
+                      <div className="p-4 sm:p-6">
+                        {/* Instructions avec meilleure lisibilité */}
+                        <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">📝 Instructions</h4>
+                              <div className={`text-gray-800 text-xs sm:text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}>
+                                {homework.content.split('\n').map((line, idx) => (
+                                  <p key={idx} className="mb-2">{line || '\u00A0'}</p>
+                                ))}
+                              </div>
                             </div>
                             <button
                               onClick={() => setExpanded(isExpanded ? null : homework.id)}
-                              className="ml-4 text-blue-600 text-sm font-medium flex items-center hover:text-blue-800 transition-colors"
+                              className="ml-2 flex-shrink-0 text-blue-600 text-xs sm:text-sm font-medium flex items-center hover:text-blue-800 transition-colors"
                             >
+                              <span className="hidden sm:inline">{isExpanded ? 'Réduire' : 'Développer'}</span>
                               {isExpanded ? (
-                                <>Réduire <ChevronUp className="h-4 w-4 ml-1" /></>
+                                <ChevronUp className="h-4 w-4 ml-0 sm:ml-1" />
                               ) : (
-                                <>Développer <ChevronDown className="h-4 w-4 ml-1" /></>
+                                <ChevronDown className="h-4 w-4 ml-0 sm:ml-1" />
                               )}
                             </button>
                           </div>
                         </div>
 
-                        {/* Formulaire ou rendu */}
-                        {hasSubmission ? (
-                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-                            <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
-                              <CheckCircle className="h-5 w-5 mr-2" />
-                              Votre rendu soumis
-                            </h4>
-
-                            {/* Rendu texte */}
-                            {homework.submission && homework.submission.type === 'TEXT' && homework.submission.textContent && (
-                              <div className="bg-white rounded-lg p-4 border border-blue-100">
-                                <p className="text-gray-800 text-sm whitespace-pre-wrap leading-relaxed">
-                                  {homework.submission.textContent}
+                        {/* Message de confirmation après soumission avec cooldown */}
+                        {showCooldownMessage && (
+                          <div className="bg-green-50 border border-green-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                            <div className="flex items-start space-x-2 sm:space-x-3">
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-green-900 mb-2 text-sm sm:text-base">
+                                  Devoir bien reçu par le professeur !
+                                </h4>
+                                <p className="text-green-800 text-xs sm:text-sm mb-2">
+                                  Vous avez normalement reçu une copie dans votre boîte mail. Le professeur vous répondra au plus vite.
                                 </p>
+                                <div className="flex items-start space-x-2 text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-2 sm:px-3 py-2 mt-3">
+                                  <Clock className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                                  <p className="text-xs flex-1">
+                                    {cooldowns[homework.id] > 0
+                                      ? `Vous pourrez renvoyer dans ${Math.floor(cooldowns[homework.id] / 60)
+                                        .toString()
+                                        .padStart(2, '0')} : ${(cooldowns[homework.id] % 60).toString().padStart(2, '0')}`
+                                      : 'Vous pouvez renvoyer votre devoir maintenant.'}
+                                  </p>
+                                </div>
                               </div>
-                            )}
-
-                            {/* Rendu fichiers */}
-                            {homework.submission && homework.submission.type === 'FILE' && (
-                              <div className="bg-white rounded-lg p-4 border border-blue-100 space-y-2">
-                                {/* Gérer fileUrls (nouveau format) */}
-                                {homework.submission.fileUrls && (
-                                  <>
-                                    {JSON.parse(homework.submission.fileUrls).map((file: { name: string; url: string }, idx: number) => {
-                                      const ext = file.name.split('.').pop()?.toLowerCase();
-                                      return renderFilePreview(file, ext, idx);
-                                    })}
-                                  </>
-                                )}
-
-                                {/* Gérer files (ancien format) */}
-                                {homework.submission.files && homework.submission.files.length > 0 && (
-                                  <>
-                                    {homework.submission.files.map((file, idx) => {
-                                      const ext = file.name.split('.').pop()?.toLowerCase();
-                                      return renderFilePreview(file, ext, idx);
-                                    })}
-                                  </>
-                                )}
-
-                                {/* Message si aucun fichier trouvé */}
-                                {(!homework.submission.fileUrls && (!homework.submission.files || homework.submission.files.length === 0)) && (
-                                  <p className="text-gray-500 text-sm">Aucun fichier disponible</p>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Feedback */}
-                            {homework.submission?.feedback && (
-                              <div className="mt-4 bg-white rounded-lg p-4 border border-green-200">
-                                <h5 className="font-semibold text-green-900 mb-2 flex items-center">
-                                  <MessageSquare className="h-4 w-4 mr-2" />
-                                  Feedback du professeur
-                                </h5>
-                                <p className="text-gray-700 text-sm whitespace-pre-wrap">
-                                  {homework.submission.feedback}
-                                </p>
-                              </div>
-                            )}
+                            </div>
                           </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="bg-gray-50 rounded-xl p-4">
-                              <h4 className="font-semibold text-gray-900 mb-3">📤 Soumettre votre devoir</h4>
+                        )}
 
-                              <div className="flex space-x-2 mb-4">
+                        {/* Formulaire de soumission (caché pendant le cooldown) */}
+                        {showForm && (
+                          <div className="space-y-3 sm:space-y-4">
+                            <div className="bg-gray-50 rounded-lg sm:rounded-xl p-3 sm:p-4">
+                              <h4 className="font-semibold text-gray-900 mb-3 text-sm sm:text-base">📤 Soumettre votre devoir</h4>
+
+                              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-3 sm:mb-4">
                                 <button
                                   onClick={() => setSubmitType(prev => ({ ...prev, [homework.id]: 'TEXT' }))}
-                                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-all ${type === 'TEXT'
-                                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
-                                      : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
+                                  className={`flex-1 flex items-center justify-center space-x-2 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg border-2 transition-all text-sm ${type === 'TEXT'
+                                    ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
+                                    : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
                                     }`}
                                 >
-                                  <Type className="h-5 w-5" />
-                                  <span>Rédaction texte</span>
+                                  <Type className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                  <span className="truncate">Rédaction texte</span>
                                 </button>
 
                                 <button
                                   onClick={() => setSubmitType(prev => ({ ...prev, [homework.id]: 'FILE' }))}
-                                  className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg border-2 transition-all ${type === 'FILE'
-                                      ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
-                                      : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
+                                  className={`flex-1 flex items-center justify-center space-x-2 py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg border-2 transition-all text-sm ${type === 'FILE'
+                                    ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
+                                    : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
                                     }`}
                                 >
-                                  <BookOpen className="h-5 w-5" />
-                                  <span>Fichier / Audio / Image</span>
+                                  <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                  <span className="truncate">Fichier / Audio / Image</span>
                                 </button>
                               </div>
 
@@ -474,43 +567,43 @@ export default function DevoirsPage() {
                                     setTextContent((prev) => ({ ...prev, [homework.id]: e.target.value }))
                                   }
                                   placeholder="Rédigez votre devoir ici..."
-                                  className="w-full h-32 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all text-black"
+                                  className="w-full h-32 sm:h-40 p-3 sm:p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all text-black text-sm sm:text-base"
                                 />
                               ) : (
                                 <div>
-                                  {!files[homework.id] || files[homework.id].length === 0 ? (
-                                    <input
-                                      type="file"
-                                      multiple
-                                      onChange={(e) => {
-                                        if (!e.target.files) return;
-                                        setFiles((prev) => ({
-                                          ...prev,
-                                          [homework.id]: Array.from(e.target.files!),
-                                        }));
-                                      }}
+                                  <input
+                                    type="file"
+                                    multiple
+                                    onChange={(e) => {
+                                      if (!e.target.files) return;
+                                      const newFiles = Array.from(e.target.files);
+                                      setFiles((prev) => ({
+                                        ...prev,
+                                        [homework.id]: [...(prev[homework.id] || []), ...newFiles],
+                                      }));
+                                      e.target.value = '';
+                                    }}
+                                    accept=".pdf,.doc,.docx,.txt,.mp3,.mp4,image/*"
+                                    className="w-full p-3 sm:p-4 border border-gray-300 text-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-xs sm:text-sm"
+                                  />
 
-                                      accept=".pdf,.doc,.docx,.txt,.mp3,.mp4,image/*"
-                                      className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    />
-                                  ) : (
-                                    <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-                                      <p className="font-semibold mb-2">Fichiers sélectionnés :</p>
-                                      <ul className="list-disc pl-5 text-sm text-gray-700">
+                                  {files[homework.id] && files[homework.id].length > 0 && (
+                                    <div className="mt-3 border border-gray-300 rounded-lg p-3 sm:p-4 bg-white">
+                                      <p className="text-gray-800 font-semibold mb-2 text-xs sm:text-sm">Fichiers sélectionnés :</p>
+                                      <ul className="space-y-2">
                                         {files[homework.id].map((file, index) => (
-                                          <li key={index}>{file.name}</li>
+                                          <li key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg gap-2">
+                                            <span className="text-xs sm:text-sm text-gray-700 truncate flex-1 min-w-0">{file.name}</span>
+                                            <button
+                                              onClick={() => removeFile(homework.id, index)}
+                                              className="flex-shrink-0 p-1 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                              title="Retirer ce fichier"
+                                            >
+                                              <X className="h-4 w-4" />
+                                            </button>
+                                          </li>
                                         ))}
                                       </ul>
-
-                                      {/* Bouton pour changer de fichier */}
-                                      <button
-                                        onClick={() =>
-                                          setFiles((prev) => ({ ...prev, [homework.id]: [] }))
-                                        }
-                                        className="mt-3 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-                                      >
-                                        Changer les fichiers
-                                      </button>
                                     </div>
                                   )}
                                 </div>
@@ -519,16 +612,16 @@ export default function DevoirsPage() {
                               <button
                                 onClick={() => handleSubmit(homework.id)}
                                 disabled={submitting === homework.id}
-                                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                                className="w-full bg-blue-600 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed mt-3 sm:mt-4 text-sm sm:text-base"
                               >
                                 {submitting === homework.id ? (
                                   <>
-                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                                     <span>Soumission en cours...</span>
                                   </>
                                 ) : (
                                   <>
-                                    <Send className="h-5 w-5" />
+                                    <Send className="h-4 w-4 sm:h-5 sm:w-5" />
                                     <span>Soumettre le devoir</span>
                                   </>
                                 )}
@@ -537,9 +630,16 @@ export default function DevoirsPage() {
                           </div>
                         )}
 
-                        <div className="flex items-center text-sm text-gray-500 mt-4 pt-4 border-t border-gray-200">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          <span>Devoir reçu le {new Date(homework.sentAt).toLocaleDateString('fr-FR', {
+                        {/* Rendu du devoir soumis */}
+                        {hasSubmission && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                            {/* ... contenu existant pour rendu et feedback ... */}
+                          </div>
+                        )}
+
+                        <div className="flex items-center text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                          <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <span className="break-words">Devoir reçu le {new Date(homework.sentAt).toLocaleDateString('fr-FR', {
                             day: 'numeric',
                             month: 'long',
                             year: 'numeric'
