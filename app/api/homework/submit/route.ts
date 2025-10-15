@@ -1,3 +1,4 @@
+// app/api/homework/submit/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -13,30 +14,49 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUserFromRequest(request);
-    if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
 
     const formData = await request.formData();
     const homeworkId = formData.get('homeworkId') as string;
     let type = formData.get('type') as string;
 
+    // Harmonisation du type
     if (type === 'FILE') type = 'AUDIO';
 
     const textContent = formData.get('textContent') as string;
     const files = formData.getAll('files') as File[];
 
-    if (!homeworkId || !type) return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
-    if (type !== 'TEXT' && type !== 'AUDIO') return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
-    if (type === 'TEXT' && !textContent) return NextResponse.json({ error: 'Le contenu texte est requis' }, { status: 400 });
-    if (type === 'AUDIO' && (!files || files.length === 0)) return NextResponse.json({ error: 'Au moins un fichier est requis' }, { status: 400 });
+    // --- Validation ---
+    if (!homeworkId || !type) {
+      return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
+    }
+    if (type !== 'TEXT' && type !== 'AUDIO') {
+      return NextResponse.json({ error: 'Type invalide' }, { status: 400 });
+    }
+    if (type === 'TEXT' && !textContent) {
+      return NextResponse.json({ error: 'Le contenu texte est requis' }, { status: 400 });
+    }
+    if (type === 'AUDIO' && (!files || files.length === 0)) {
+      return NextResponse.json({ error: 'Au moins un fichier est requis' }, { status: 400 });
+    }
 
+    // --- Vérification du devoir ---
     const existingSend = await prisma.homeworkSend.findUnique({
-      where: { userId_homeworkId: { userId: user.id, homeworkId } },
-      include: { homework: { select: { id: true, title: true, chapterId: true } } },
+      where: {
+        userId_homeworkId: { userId: user.id, homeworkId },
+      },
+      include: {
+        homework: { select: { id: true, title: true, chapterId: true } },
+      },
     });
 
-    if (!existingSend) return NextResponse.json({ error: 'Ce devoir ne vous a pas été assigné' }, { status: 404 });
+    if (!existingSend) {
+      return NextResponse.json({ error: 'Ce devoir ne vous a pas été assigné' }, { status: 404 });
+    }
 
-    // --- Sauvegarde locale des fichiers ---
+    // --- Sauvegarde des fichiers localement ---
     let savedFiles: { name: string; path: string }[] = [];
 
     if (type === 'AUDIO' && files.length > 0) {
@@ -58,14 +78,16 @@ export async function POST(request: NextRequest) {
     }
 
     // --- Générer URLs publiques compatibles avec /api/uploads/[filename] ---
-    const publicFiles = savedFiles.map(file => ({
+    const publicFiles = savedFiles.map((file) => ({
       name: file.name,
       url: `/api/uploads/${path.basename(file.path)}`,
     }));
 
-    // --- Mise à jour base ---
+    // --- Mise à jour de la base ---
     const updatedSend = await prisma.homeworkSend.update({
-      where: { userId_homeworkId: { userId: user.id, homeworkId } },
+      where: {
+        userId_homeworkId: { userId: user.id, homeworkId },
+      },
       data: {
         type,
         textContent: type === 'TEXT' ? textContent : null,
@@ -112,14 +134,21 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erreur lors de l’envoi des emails :', err);
     }
 
+    // --- Réponse ---
     return NextResponse.json({
       success: true,
       message: 'Devoir soumis avec succès',
-      submission: { ...updatedSend, fileUrls: type === 'AUDIO' ? publicFiles : [] },
+      submission: {
+        ...updatedSend,
+        fileUrls: type === 'AUDIO' ? publicFiles : [],
+      },
     });
 
   } catch (error) {
     console.error('❌ Erreur lors de la soumission du devoir :', error);
-    return NextResponse.json({ error: 'Erreur interne serveur' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erreur interne serveur' },
+      { status: 500 }
+    );
   }
 }
