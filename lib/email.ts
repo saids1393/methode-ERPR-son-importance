@@ -386,23 +386,35 @@ export async function sendHomeworkSubmissionEmail(
           }))
         : [];
 
-    const html = `
-      <h2>✅ Devoir soumis avec succès</h2>
-      <p>Bonjour ${params.userName},</p>
-      <p>Votre devoir pour le chapitre <strong>${params.chapterId}</strong> a bien été soumis.</p>
+const html = `
+  <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <h2 style="color: #4CAF50;">✅ Devoir soumis avec succès !</h2>
+    <p>Bonjour <strong>${params.userName}</strong>,</p>
+    <p>Votre devoir pour le chapitre <strong>${params.chapterId}</strong> a été soumis avec succès.</p>
+    
+    <div style="margin-top: 15px; padding: 15px; background-color: #f1f8ff; border-left: 4px solid #4CAF50; border-radius: 6px;">
       <p><strong>Titre :</strong> ${params.homeworkTitle}</p>
       <p><strong>Type :</strong> ${
         params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"
       }</p>
-      <p><strong>Date :</strong> ${params.submittedAt.toLocaleDateString("fr-FR")} à ${params.submittedAt.toLocaleTimeString("fr-FR")}</p>
-      ${
-        params.submissionType === "TEXT"
-          ? `<div style="background:#f8f9fa;padding:15px;border-radius:8px;margin-top:10px;">
-               <p>${params.content}</p>
-             </div>`
-          : `<p>📎 Les fichiers sont joints à cet email.</p>`
-      }
-    `;
+    </div>
+
+    ${
+      params.submissionType === "TEXT"
+        ? `<div style="margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 6px; border: 1px solid #ddd;">
+             <p>${params.content}</p>
+           </div>`
+        : `<p style="margin-top: 15px;">📎 Vos fichiers sont joints à cet email. Assurez-vous de les conserver pour référence.</p>`
+    }
+
+    <p style="margin-top: 20px;">Merci pour votre travail et continuez comme ça ! 💪</p>
+
+    <p style="margin-top: 20px; font-size: 12px; color: #777;">
+      Ceci est un message automatique, merci de ne pas répondre.
+    </p>
+  </div>
+`;
+
 
     await transporter.sendMail({
       from: SENDER_INFO,
