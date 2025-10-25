@@ -10,7 +10,7 @@ const chapterPage6AudioMappings: { [key: string]: string } = {
   'ل': 'chap1_pg6_case5',
   'هو': 'chap1_pg6_case6',
   'ما': 'chap1_pg6_case7',
-  'أن': 'chap1_pg6_case8',
+  // 'أن': 'chap1_pg6_case8',
   'لم': 'chap1_pg6_case9',
   'كل': 'chap1_pg6_case10',
   'ثم': 'chap1_pg6_case11',
@@ -24,7 +24,7 @@ const chapterPage6AudioMappings: { [key: string]: string } = {
   'هم': 'chap1_pg6_case19',
   'نا': 'chap1_pg6_case20',
   'كم': 'chap1_pg6_case21',
-  'أي': 'chap1_pg6_case22',
+  // 'أي': 'chap1_pg6_case22',
   'ف': 'chap1_pg6_case23',
   'نور': 'chap1_pg6_case24',
   'عبد': 'chap1_pg6_case25',
@@ -51,29 +51,19 @@ const chapterPage6AudioMappings: { [key: string]: string } = {
   'نصر': 'chap1_pg6_case49',
   'س': 'chap1_pg6_case50',
   'سؤل': 'chap1_pg6_case51',
-  'أمر': 'chap1_pg6_case52',
+  // 'أمر': 'chap1_pg6_case52',
   'يئس': 'chap1_pg6_case53',
 };
-
-// Couleurs pour chaque lettre dans un mot
-const letterColors = [
-  'text-red-400',    // Première lettre
-  'text-green-400',  // Deuxième lettre
-  'text-blue-400',   // Troisième lettre
-  'text-yellow-400', // Quatrième lettre
-  'text-purple-400', // Cinquième lettre (au cas où)
-  'text-orange-400', // Sixième lettre (au cas où)
-];
 
 const Cell = ({ word, onClick }: {
   word: string;
   onClick?: () => void;
 }) => (
   <div
-    className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+    className="border border-zinc-500 rounded-xl p-3 md:p-4 text-center min-h-[110px] md:min-h-[120px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
     onClick={onClick}
   >
-    <div className="text-3xl md:text-4xl font-bold text-white">
+    <div className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
       {word}
     </div>
   </div>
@@ -81,9 +71,9 @@ const Cell = ({ word, onClick }: {
 
 const IntroductionPage = () => {
   return (
-    <div className="p-8 bg-gray-900">
-      <div className="w-full bg-gray-800 rounded-lg p-8">
-        <div className="text-white space-y-6 text-xl leading-relaxed">
+    <div className="p-4 md:p-8 bg-gray-900">
+      <div className="w-full bg-gray-800 rounded-lg p-6 md:p-8">
+        <div className="text-white space-y-6 text-lg md:text-xl leading-relaxed">
 
           <p>
             <span className="text-purple-400 font-semibold">Exercice pratique ! </span>
@@ -117,10 +107,10 @@ const IntroductionPage = () => {
             • Clique sur chaque mot pour entendre sa prononciation
           </p>
 
-          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-6 my-6">
+          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6 my-6">
             <p>
               💡 <span className="font-semibold">Astuce :</span>
-              Dans chaque mot, <span className="text-red-400">chaque lettre a une couleur différente</span> pour t'aider
+              Dans chaque mot, chaque lettre a une couleur différente pour t'aider
               à mieux les distinguer visuellement !
             </p>
           </div>
@@ -132,7 +122,7 @@ const IntroductionPage = () => {
         </div>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-6 mt-8 flex-shrink-0 font-semibold text-lg">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 flex-shrink-0 font-semibold text-base md:text-lg">
         <div>Exercice de Reconnaissance</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -140,74 +130,45 @@ const IntroductionPage = () => {
   );
 };
 
+
 const ExercisePage = ({ playWordAudio }: { playWordAudio: (word: string) => void }) => {
   const words = [
     'في', 'من', 'ق', 'قد', 'ل', 'هو',
-    'ما', 'أن', 'لم', 'كل', 'ثم', 'هل',
+    'ما', 'لم', 'كل', 'ثم', 'هل',
     'عن', 'ر', 'به', 'له', 'رب', 'قل',
-    'هم', 'نا', 'كم', 'أي', 'ف', 'نور',
+    'هم', 'نا', 'كم', 'ف', 'نور',
     'عبد', 'نار', 'يدع', 'ع', 'ملك',
     'نهر', 'قمر', 'غيب', 'رسل', 'نفس',
-    'صمت', 'ح', 'خير', 'علم', 'قلb',
+    'صمت', 'ح', 'خير', 'علم', 'قلب',
     'غفر', 'سجد', 'عدة', 'خوف', 'صدق', 'كفر',
-    'نصر', 'س', 'سؤل', 'أمر', 'يئس',
+    'نصر', 'س', 'سؤل', 'يئس',
   ];
 
-  // Fonction pour colorer chaque lettre individuellement
-  const renderColoredWord = (word: string) => {
-    return word.split('').map((letter, index) => (
-      <span
-        key={index}
-        className={letterColors[index] || 'text-white'}
-      >
-        {letter}
-      </span>
-    ));
-  };
-
   return (
-    <div className="p-8 bg-gray-900">
-      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6" dir="rtl">
+    <div className="p-2 md:p-4 lg:p-8 bg-gray-900">
+      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2 md:gap-3 lg:gap-4 mb-6" dir="rtl">
         {words.map((word, index) => (
           <div
             key={index}
-            className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+            className="border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
             onClick={() => playWordAudio(word)}
           >
-            <div className="text-3xl md:text-4xl font-bold transition-colors">
-              {renderColoredWord(word)}
+            <div className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight">
+              {word}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Légende pour les couleurs des lettres */}
-      <div className="bg-gray-800 rounded-lg p-4 mb-4">
-        <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-400 rounded-full"></div>
-            <span className="text-red-400">Première lettre</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-400 rounded-full"></div>
-            <span className="text-green-400">Deuxième lettre</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-            <span className="text-blue-400">Troisième lettre</span>
-          </div>
-        </div>
-      </div>
-
       {/* Instructions de l'exercice */}
-      <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-6 mb-6">
-        <p className="text-lg leading-relaxed text-white text-center">
+      <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-4 md:p-6 mb-6">
+        <p className="text-base md:text-lg leading-relaxed text-white text-center">
           <span className="font-semibold">🎯 Instructions :</span> Clique sur chaque mot pour écouter sa prononciation.
-          <span className="block mt-2">Chaque lettre a une couleur différente pour t'aider à mieux les distinguer !</span>
+          <span className="block mt-2">Chaque lettre est affichée en blanc pour une meilleure lisibilité !</span>
         </p>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
         <div>Exercice de Reconnaissance</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -250,44 +211,44 @@ const Page6 = () => {
       <div className="w-full h-full overflow-hidden bg-gray-900">
 
         {/* Header */}
-        <div className="text-white p-6 text-center border-b-2">
-          <div className="text-3xl font-bold mb-2">
+        <div className="text-white p-4 md:p-6 text-center border-b-2">
+          <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">
             {pageTitle}
           </div>
           {/* Phrase ajoutée seulement pour la page d'exercice */}
           {currentPage === 1 && (
-            <div className="text-lg text-amber-300">
+            <div className="text-sm md:text-lg text-amber-300">
               Cliquez pour écouter chaque lettre et répétez après.
             </div>
           )}
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center px-4 md:px-8 py-4">
+        <div className="flex justify-between items-center px-2 md:px-4 lg:px-8 py-4">
           <button
             onClick={goToPreviousPage}
             disabled={currentPage === 0}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === 0
+            className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === 0
                 ? 'border-gray-600 text-gray-600 cursor-not-allowed'
                 : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
               }`}
           >
-            <ChevronLeft size={20} className="md:w-6 md:h-6" />
+            <ChevronLeft size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
           </button>
 
-          <div className="text-white font-semibold text-sm md:text-base">
+          <div className="text-white font-semibold text-xs md:text-sm lg:text-base">
             Page {currentPage + 1} / {totalPages}
           </div>
 
           <button
             onClick={goToNextPage}
             disabled={currentPage === totalPages - 1}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === totalPages - 1
+            className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === totalPages - 1
                 ? 'border-gray-600 text-gray-600 cursor-not-allowed'
                 : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
               }`}
           >
-            <ChevronRight size={20} className="md:w-6 md:h-6" />
+            <ChevronRight size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
           </button>
         </div>
 

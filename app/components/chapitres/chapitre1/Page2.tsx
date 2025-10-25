@@ -36,21 +36,20 @@ const chapter1Page2AudioMappings: { [key: string]: string } = {
   'ء': 'chap0_pg0_case29'
 };
 
-const Cell = ({ letter, emphatic, violet, onClick }: { 
-  letter: string; 
+const Cell = ({ letter, emphatic, violet, onClick }: {
+  letter: string;
   emphatic?: boolean;
   violet?: boolean;
   onClick?: () => void;
 }) => (
-  <div 
-    className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+  <div
+    className="border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
     onClick={onClick}
   >
-    <div className={`text-3xl md:text-4xl font-bold transition-colors ${
-      emphatic ? 'text-red-400' : 
-      violet ? 'text-purple-400' : 
-      'text-white'
-    }`}>
+    <div className={`text-5xl md:text-5xl lg:text-5xl xl:text-6xl font-bold transition-colors leading-tight ${emphatic ? 'text-red-400' :
+      violet ? 'text-purple-400' :
+        'text-white'
+      }`}>
       {letter}
     </div>
   </div>
@@ -58,15 +57,15 @@ const Cell = ({ letter, emphatic, violet, onClick }: {
 
 const IntroductionPage = () => {
   return (
-    <div className="p-8 bg-gray-900">
-      <div className="w-full bg-gray-800 rounded-lg p-8">
-        <div className="text-white space-y-6 text-xl leading-relaxed"> {/* ← police agrandie */}
-          
+    <div className="p-4 md:p-8 bg-gray-900">
+      <div className="w-full bg-gray-800 rounded-lg p-6 md:p-8">
+        <div className="text-white space-y-6 text-lg md:text-xl leading-relaxed">
+
           <p>
             En arabe, chaque lettre peut avoir <span className="text-purple-400 font-semibold">trois formes principales</span> :
             <br />
-            ➤ au <span className="font-semibold">début</span> d'un mot,  
-            ➤ au <span className="font-semibold">milieu</span> d'un mot,  
+            ➤ au <span className="font-semibold">début</span> d'un mot,
+            ➤ au <span className="font-semibold">milieu</span> d'un mot,
             ➤ à la <span className="font-semibold">fin</span> d'un mot.
           </p>
 
@@ -76,15 +75,15 @@ const IntroductionPage = () => {
             Cette forme est appelée <span className="font-semibold">forme initiale</span>.
           </p>
 
-<p>
-  🧩 <span className="font-semibold">Exemples :</span>
-  <br />
-  • La lettre ب (b) devient بـ au début du mot → <span className="font-semibold">بيت</span> (bayt = maison)
-  <br />
-  • La lettre س (s) devient سـ au début → <span className="font-semibold">سلام</span> (salām = paix)
-  <br />
-  • La lettre م (m) devient مـ au début → <span className="font-semibold">مدرسة</span> (madrasa = école)
-</p>
+          <p>
+            🧩 <span className="font-semibold">Exemples :</span>
+            <br />
+            • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block">بـ</span> → <span dir="rtl" className="font-semibold inline-block">بيت</span>
+            <br />
+            • La lettre س devient <span dir="rtl" className="text-yellow-400 inline-block">سـ </span> → <span dir="rtl" className="font-semibold inline-block">سلام</span>
+            <br />
+            • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block">مـ </span> → <span dir="rtl" className="font-semibold inline-block">مدرسة</span>
+          </p>
 
           <p>
             Cependant, il existe <span className="text-purple-400 font-semibold">6 lettres spéciales</span> qui <span className="underline">ne s'attachent jamais après elles</span> :
@@ -92,7 +91,7 @@ const IntroductionPage = () => {
             Ces lettres gardent toujours leur forme isolée, même au début d'un mot.
           </p>
 
-          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-6 my-6">
+          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6 my-6">
             <p>
               💡 <span className="font-semibold">Astuce :</span> Même si les lettres changent de forme selon leur position, on peut toujours les reconnaître grâce à leurs <span className="font-semibold">points</span> et à leur <span className="font-semibold">structure générale</span>.
               En les observant bien, tu apprendras à les distinguer facilement !
@@ -106,15 +105,13 @@ const IntroductionPage = () => {
         </div>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-6 mt-8 flex-shrink-0 font-semibold text-lg">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 flex-shrink-0 font-semibold text-base md:text-lg">
         <div>Leçon 2</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
     </div>
   );
 };
-
-
 
 const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) => void }) => {
   const letters = [
@@ -125,7 +122,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
     { letter: 'ثـ', emphatic: false, violet: false },
     { letter: 'جـ', emphatic: false, violet: false },
     { letter: 'حـ', emphatic: false, violet: false },
-    
+
     // Row 2
     { letter: 'خـ', emphatic: true, violet: false },
     { letter: 'د', emphatic: false, violet: false },
@@ -133,7 +130,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
     { letter: 'ر', emphatic: true, violet: false },
     { letter: 'ز', emphatic: false, violet: false },
     { letter: 'سـ', emphatic: false, violet: false },
-    
+
     // Row 3
     { letter: 'شـ', emphatic: false, violet: false },
     { letter: 'صـ', emphatic: true, violet: false },
@@ -141,7 +138,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
     { letter: 'طـ', emphatic: true, violet: false },
     { letter: 'ظـ', emphatic: true, violet: false },
     { letter: 'عـ', emphatic: false, violet: false },
-    
+
     // Row 4
     { letter: 'غـ', emphatic: true, violet: false },
     { letter: 'فـ', emphatic: false, violet: false },
@@ -149,7 +146,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
     { letter: 'كـ', emphatic: false, violet: false },
     { letter: 'لـ', emphatic: false, violet: false },
     { letter: 'مـ', emphatic: false, violet: false },
-    
+
     // Row 5
     { letter: 'نـ', emphatic: false, violet: false },
     { letter: 'هـ', emphatic: false, violet: false },
@@ -159,19 +156,19 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
   ];
 
   return (
-    <div className="p-8 bg-gray-900">
-      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6" dir="rtl">
+    <div className="p-2 md:p-4 lg:p-8 bg-gray-900">
+      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2 md:gap-3 lg:gap-4 mb-6" dir="rtl">
         {letters.map((item, index) => (
-          <Cell 
-            key={index} 
-            letter={item.letter} 
+          <Cell
+            key={index}
+            letter={item.letter}
             emphatic={item.emphatic}
             violet={item.violet}
             onClick={() => playLetterAudio(item.letter)}
           />
         ))}
       </div>
-      
+
       {/* Légende simplifiée */}
       <div className="bg-gray-800 rounded-lg p-4 mb-4">
         <div className="flex items-center justify-center gap-4 text-sm">
@@ -187,13 +184,13 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
       </div>
 
       {/* Information sur les lettres non-attachantes */}
-      <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-6 mb-6">
-        <p className="text-lg leading-relaxed text-white text-center">
+      <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-4 md:p-6 mb-6">
+        <p className="text-base md:text-lg leading-relaxed text-white text-center">
           <span className="font-semibold">📝 Note importante :</span> Les lettres <span className="font-bold">ا, د, ذ, ر, ز, و</span> ne s'attachent jamais après elles et conservent leur forme isolée en début de mot.
         </p>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
         <div>Leçon 2</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -227,49 +224,47 @@ const Page2 = () => {
     }
   };
 
-  const pageTitle = currentPage === 0 
+  const pageTitle = currentPage === 0
     ? "Leçon 2 : Lettres attachées au début d'un mot"
     : "Leçon 2 : Tableau des lettres en position initiale";
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
       <div className="w-full h-full overflow-hidden bg-gray-900">
-        
+
         {/* Header */}
-        <div className="text-white p-6 text-center border-b-2">
-          <div className="text-3xl font-bold mb-4">
+        <div className="text-white p-4 md:p-6 text-center border-b-2">
+          <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">
             {pageTitle}
           </div>
         </div>
-        
+
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center px-4 md:px-8 py-4">
+        <div className="flex justify-between items-center px-2 md:px-4 lg:px-8 py-4">
           <button
             onClick={goToPreviousPage}
             disabled={currentPage === 0}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
-              currentPage === 0
-                ? 'border-gray-600 text-gray-600 cursor-not-allowed'
-                : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
-            }`}
+            className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === 0
+              ? 'border-gray-600 text-gray-600 cursor-not-allowed'
+              : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
+              }`}
           >
-            <ChevronLeft size={20} className="md:w-6 md:h-6" />
+            <ChevronLeft size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
           </button>
 
-          <div className="text-white font-semibold text-sm md:text-base">
+          <div className="text-white font-semibold text-xs md:text-sm lg:text-base">
             Page {currentPage + 1} / {totalPages}
           </div>
 
           <button
             onClick={goToNextPage}
             disabled={currentPage === totalPages - 1}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
-              currentPage === totalPages - 1
-                ? 'border-gray-600 text-gray-600 cursor-not-allowed'
-                : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
-            }`}
+            className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === totalPages - 1
+              ? 'border-gray-600 text-gray-600 cursor-not-allowed'
+              : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
+              }`}
           >
-            <ChevronRight size={20} className="md:w-6 md:h-6" />
+            <ChevronRight size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
           </button>
         </div>
 

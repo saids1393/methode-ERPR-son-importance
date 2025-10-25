@@ -37,21 +37,20 @@ const chapter1Page4AudioMappings: { [key: string]: string } = {
   'ـة': 'chap0_pg0_case30'
 };
 
-const Cell = ({ letter, emphatic, violet, onClick }: { 
-  letter: string; 
+const Cell = ({ letter, emphatic, violet, onClick }: {
+  letter: string;
   emphatic?: boolean;
   violet?: boolean;
   onClick?: () => void;
 }) => (
-  <div 
-    className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+  <div
+    className="border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
     onClick={onClick}
   >
-    <div className={`text-3xl md:text-4xl font-bold transition-colors ${
-      emphatic ? 'text-red-400' : 
-      violet ? 'text-purple-400' : 
-      'text-white'
-    }`}>
+    <div className={`text-5xl md:text-5xl lg:text-5xl xl:text-6xl font-bold transition-colors leading-tight ${emphatic ? 'text-red-400' :
+      violet ? 'text-purple-400' :
+        'text-white'
+      }`}>
       {letter}
     </div>
   </div>
@@ -59,10 +58,10 @@ const Cell = ({ letter, emphatic, violet, onClick }: {
 
 const IntroductionPage = () => {
   return (
-    <div className="p-8 bg-gray-900">
-      <div className="w-full bg-gray-800 rounded-lg p-8">
-        <div className="text-white space-y-6 text-xl leading-relaxed">
-          
+    <div className="p-4 md:p-8 bg-gray-900">
+      <div className="w-full bg-gray-800 rounded-lg p-6 md:p-8">
+        <div className="text-white space-y-6 text-lg md:text-xl leading-relaxed">
+
           <p>
             Terminons notre exploration des formes des lettres arabes avec la <span className="text-purple-400 font-semibold">position à la fin du mot</span>.
             Cette forme est particulièrement importante car elle montre comment les lettres se terminent.
@@ -76,30 +75,27 @@ const IntroductionPage = () => {
           <p>
             🧩 <span className="font-semibold">Exemples :</span>
             <br />
-            • La lettre <span className="text-yellow-400 font-bold">ب</span> (b) devient <span className="text-yellow-400 font-bold">ـب</span> à la fin du mot → 
-            <span className="font-semibold"> كت<span className="text-yellow-400">ـب</span></span> (kitab = livre)
+            • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block">بـ</span> → <span dir="rtl" className="font-semibold inline-block">كتاب</span>
             <br />
-            • La lettre <span className="text-yellow-400 font-bold">م</span> (m) devient <span className="text-yellow-400 font-bold">ـم</span> à la fin → 
-            <span className="font-semibold"> قل<span className="text-yellow-400">ـم</span></span> (qalam = crayon)
+            • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block">مـ</span> → <span dir="rtl" className="font-semibold inline-block">قلم</span>
             <br />
-            • La lettre <span className="text-yellow-400 font-bold">ل</span> (l) devient <span className="text-yellow-400 font-bold">ـل</span> à la fin → 
-            <span className="font-semibold"> جب<span className="text-yellow-400">ـل</span></span> (jabal = montagne)
+            • La lettre ل devient <span dir="rtl" className="text-yellow-400 inline-block">لـ</span> → <span dir="rtl" className="font-semibold inline-block">جبل</span>
           </p>
 
           <p>
-            Comme pour les autres positions, les <span className="text-purple-400 font-semibold">6 lettres spéciales</span> : 
+            Comme pour les autres positions, les <span className="text-purple-400 font-semibold">6 lettres spéciales</span> :
             <span className="font-bold"> ا, د, ذ, ر, ز, و</span> ne s'attachent jamais avant elles, même en fin de mot.
             Elles conservent donc leur forme isolée.
           </p>
 
           <p>
-            <span className="text-purple-400 font-semibold">Note spéciale :</span> La lettre <span className="font-bold">ـة</span> (tā' marbūṭa) 
+            <span className="text-purple-400 font-semibold">Note spéciale :</span> La lettre <span className="font-bold">ـة</span> (tā' marbūṭa)
             est une forme particulière qui n'apparaît qu'à la fin des mots et indique souvent un nom féminin.
           </p>
 
-          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-6 my-6">
+          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6 my-6">
             <p>
-              💡 <span className="font-semibold">Astuce :</span> La forme finale est souvent reconnaissable par sa "queue" ou son extension vers la gauche. 
+              💡 <span className="font-semibold">Astuce :</span> La forme finale est souvent reconnaissable par sa "queue" ou son extension vers la gauche.
               C'est comme si la lettre s'étirait pour se connecter à la précédente mais s'arrêtait net à la fin du mot.
             </p>
           </div>
@@ -111,7 +107,7 @@ const IntroductionPage = () => {
         </div>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-6 mt-8 flex-shrink-0 font-semibold text-lg">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 flex-shrink-0 font-semibold text-base md:text-lg">
         <div>Leçon 4</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -128,7 +124,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
     { letter: 'ـث', emphatic: false, violet: false },
     { letter: 'ـج', emphatic: false, violet: false },
     { letter: 'ـح', emphatic: false, violet: false },
-    
+
     // Row 2
     { letter: 'ـخ', emphatic: true, violet: false },
     { letter: 'ـد', emphatic: false, violet: false },
@@ -136,7 +132,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
     { letter: 'ـر', emphatic: true, violet: false },
     { letter: 'ـز', emphatic: false, violet: false },
     { letter: 'ـس', emphatic: false, violet: false },
-    
+
     // Row 3
     { letter: 'ـش', emphatic: false, violet: false },
     { letter: 'ـص', emphatic: true, violet: false },
@@ -144,7 +140,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
     { letter: 'ـط', emphatic: true, violet: false },
     { letter: 'ـظ', emphatic: true, violet: false },
     { letter: 'ـع', emphatic: false, violet: false },
-    
+
     // Row 4
     { letter: 'ـغ', emphatic: true, violet: false },
     { letter: 'ـف', emphatic: false, violet: false },
@@ -152,7 +148,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
     { letter: 'ـك', emphatic: false, violet: false },
     { letter: 'ـل', emphatic: false, violet: false },
     { letter: 'ـم', emphatic: false, violet: false },
-    
+
     // Row 5
     { letter: 'ـن', emphatic: false, violet: false },
     { letter: 'ـه', emphatic: false, violet: false },
@@ -163,19 +159,19 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
   ];
 
   return (
-    <div className="p-8 bg-gray-900">
-      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6" dir="rtl">
+    <div className="p-2 md:p-4 lg:p-8 bg-gray-900">
+      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2 md:gap-3 lg:gap-4 mb-6" dir="rtl">
         {letters.map((item, index) => (
-          <Cell 
-            key={index} 
-            letter={item.letter} 
+          <Cell
+            key={index}
+            letter={item.letter}
             emphatic={item.emphatic}
             violet={item.violet}
             onClick={() => playLetterAudio(item.letter)}
           />
         ))}
       </div>
-      
+
       {/* Légende simplifiée */}
       <div className="bg-gray-800 rounded-lg p-4 mb-4">
         <div className="flex items-center justify-center gap-4 text-sm">
@@ -191,20 +187,20 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
       </div>
 
       {/* Information sur les lettres non-attachantes */}
-      <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-6 mb-6">
-        <p className="text-lg leading-relaxed text-white text-center">
+      <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-4 md:p-6 mb-6">
+        <p className="text-base md:text-lg leading-relaxed text-white text-center">
           <span className="font-semibold">📝 Note importante :</span> Les lettres <span className="font-bold">ا, د, ذ, ر, ز, و</span> ne s'attachent jamais avant elles et conservent leur forme isolée même en fin de mot.
         </p>
       </div>
 
       {/* Information sur le tā' marbūṭa */}
-      <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-6 mb-6">
-        <p className="text-lg leading-relaxed text-white text-center">
+      <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4 md:p-6 mb-6">
+        <p className="text-base md:text-lg leading-relaxed text-white text-center">
           <span className="font-semibold">✨ Particularité :</span> La lettre <span className="font-bold">ـة</span> (tā' marbūṭa) n'apparaît qu'à la fin des mots et indique souvent un nom féminin.
         </p>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
         <div>Leçon 4</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -238,49 +234,47 @@ const Page4 = () => {
     }
   };
 
-  const pageTitle = currentPage === 0 
+  const pageTitle = currentPage === 0
     ? "Leçon 4 : Lettres attachées à la fin d'un mot"
     : "Leçon 4 : Tableau des lettres en position finale";
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
       <div className="w-full h-full overflow-hidden bg-gray-900">
-        
+
         {/* Header */}
-        <div className="text-white p-6 text-center border-b-2">
-          <div className="text-3xl font-bold mb-4">
+        <div className="text-white p-4 md:p-6 text-center border-b-2">
+          <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">
             {pageTitle}
           </div>
         </div>
-        
+
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center px-4 md:px-8 py-4">
+        <div className="flex justify-between items-center px-2 md:px-4 lg:px-8 py-4">
           <button
             onClick={goToPreviousPage}
             disabled={currentPage === 0}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
-              currentPage === 0
-                ? 'border-gray-600 text-gray-600 cursor-not-allowed'
-                : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
-            }`}
+            className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === 0
+              ? 'border-gray-600 text-gray-600 cursor-not-allowed'
+              : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
+              }`}
           >
-            <ChevronLeft size={20} className="md:w-6 md:h-6" />
+            <ChevronLeft size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
           </button>
 
-          <div className="text-white font-semibold text-sm md:text-base">
+          <div className="text-white font-semibold text-xs md:text-sm lg:text-base">
             Page {currentPage + 1} / {totalPages}
           </div>
 
           <button
             onClick={goToNextPage}
             disabled={currentPage === totalPages - 1}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
-              currentPage === totalPages - 1
-                ? 'border-gray-600 text-gray-600 cursor-not-allowed'
-                : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
-            }`}
+            className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === totalPages - 1
+              ? 'border-gray-600 text-gray-600 cursor-not-allowed'
+              : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
+              }`}
           >
-            <ChevronRight size={20} className="md:w-6 md:h-6" />
+            <ChevronRight size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
           </button>
         </div>
 

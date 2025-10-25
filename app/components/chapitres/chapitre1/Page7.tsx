@@ -130,7 +130,7 @@ const ExercisePage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
               className="bg-gray-900 border border-zinc-500 rounded-xl p-4 text-center min-h-[120px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
               onClick={() => playLetterAudio(letters)}
             >
-              <div className={`text-2xl md:text-3xl font-bold transition-colors ${colorClass}`}>
+              <div className={`text-5xl md:text-6xl font-bold transition-colors ${colorClass}`}>
                 {letters}
               </div>
             </div>
