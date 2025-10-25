@@ -43,10 +43,10 @@ const Cell = ({ letter, emphatic, violet, onClick }: {
   onClick?: () => void;
 }) => (
   <div 
-    className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+    className="border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
     onClick={onClick}
   >
-    <div className={`text-3xl md:text-4xl font-bold transition-colors ${
+    <div className={`text-5xl md:text-5xl lg:text-5xl xl:text-6xl font-bold transition-colors leading-tight ${
       emphatic ? 'text-red-400' : 
       violet ? 'text-purple-400' : 
       'text-white'
@@ -58,34 +58,34 @@ const Cell = ({ letter, emphatic, violet, onClick }: {
 
 const IntroductionPage = () => {
   return (
-    <div className="p-8 bg-gray-900">
-      <div className="w-full bg-gray-800 rounded-lg p-8">
-        <div className="text-white space-y-6">
-          <p className="text-lg leading-relaxed">
+    <div className="p-4 md:p-8 bg-gray-900">
+      <div className="w-full bg-gray-800 rounded-lg p-6 md:p-8">
+        <div className="text-white space-y-6 text-lg md:text-xl leading-relaxed">
+          <p>
             Nous avons vu la prononciation des lettres de base qui sont les lettres non attachées et que chacune d'elles avaient leur propre point de sortie.
           </p>
           
-          <p className="text-lg leading-relaxed">
+          <p>
             Parmi les 28 lettres de l'alphabet arabe, il y a <span className="text-red-400 font-semibold">8 lettres emphatiques</span> qu'on doit prononcer d'un son grave (colorées en rouge) et <span className="text-purple-400 font-semibold">2 lettres en violet</span> qui sont des lettres qui ne font pas partie des lettres de l'alphabet arabe mais qui jouent un rôle important.
           </p>
           
-          <p className="text-lg leading-relaxed">
+          <p>
             Ces lettres sont à apprendre par cœur comme l'alphabet français. Fiez-vous au son et à l'image pour essayer de les sortir de votre mieux.
           </p>
           
-          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-6 my-6">
-            <p className="text-lg leading-relaxed">
+          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6 my-6">
+            <p>
               💡 <span className="font-semibold">Astuce :</span> Vous avez la possibilité pendant votre rendu de devoirs de m'envoyer un audio de votre prononciation pour que je puisse corriger par derrière.
             </p>
           </div>
           
-          <p className="text-lg leading-relaxed">
+          <p>
             Voici à la page précédente un tableau des lettres seules dans l'ordre où vous pourrez cliquer en illimité en essayant de répéter après et de les mémoriser.
           </p>
         </div>
       </div>
       
-      <footer className="border-t-1 text-white text-center p-6 mt-8 flex-shrink-0 font-semibold text-sm">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 flex-shrink-0 font-semibold text-base md:text-lg">
         <div>Leçon 1</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -136,8 +136,8 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
   ];
 
   return (
-    <div className="p-8 bg-gray-900">
-      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6" dir="rtl">
+    <div className="p-2 md:p-4 lg:p-8 bg-gray-900">
+      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-2 md:gap-3 lg:gap-4 mb-6" dir="rtl">
         {letters.map((item, index) => (
           <Cell 
             key={index} 
@@ -163,7 +163,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
         </div>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
         <div>Leçon 1</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -206,40 +206,46 @@ const Page1 = () => {
       <div className="w-full h-full overflow-hidden bg-gray-900">
         
         {/* Header */}
-        <div className="text-white p-6 text-center border-b-2">
-          <div className="text-3xl font-bold mb-4">
+        <div className="text-white p-4 md:p-6 text-center border-b-2">
+          <div className="text-2xl md:text-3xl font-bold mb-2">
             {pageTitle}
           </div>
+          {/* Phrase ajoutée seulement pour la page d'exercice */}
+          {currentPage === 1 && (
+            <div className="text-md md:text-lg text-amber-300">
+              Cliquez pour écouter chaque lettre et répétez après.
+            </div>
+          )}
         </div>
         
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center px-4 md:px-8 py-4">
+        <div className="flex justify-between items-center px-2 md:px-4 lg:px-8 py-4">
           <button
             onClick={goToPreviousPage}
             disabled={currentPage === 0}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
+            className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
               currentPage === 0
                 ? 'border-gray-600 text-gray-600 cursor-not-allowed'
                 : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
             }`}
           >
-            <ChevronLeft size={20} className="md:w-6 md:h-6" />
+            <ChevronLeft size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
           </button>
 
-          <div className="text-white font-semibold text-sm md:text-base">
+          <div className="text-white font-semibold text-xs md:text-sm lg:text-base">
             Page {currentPage + 1} / {totalPages}
           </div>
 
           <button
             onClick={goToNextPage}
             disabled={currentPage === totalPages - 1}
-            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
+            className={`w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
               currentPage === totalPages - 1
                 ? 'border-gray-600 text-gray-600 cursor-not-allowed'
                 : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
             }`}
           >
-            <ChevronRight size={20} className="md:w-6 md:h-6" />
+            <ChevronRight size={16} className="md:w-5 md:h-5 lg:w-6 lg:h-6" />
           </button>
         </div>
 

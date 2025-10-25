@@ -230,9 +230,15 @@ const Page3 = () => {
 
         {/* Header */}
         <div className="text-white p-4 md:p-6 text-center border-b-2">
-          <div className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">
+          <div className="text-2xl md:text-3xl font-bold mb-2">
             {pageTitle}
           </div>
+          {/* Phrase ajoutée seulement pour la page d'exercice */}
+          {currentPage === 1 && (
+            <div className="text-md md:text-lg text-amber-300">
+              Cliquez pour écouter chaque lettre et répétez après.
+            </div>
+          )}
         </div>
 
         {/* Navigation Buttons */}
