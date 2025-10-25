@@ -73,13 +73,13 @@ const IntroductionPage = () => {
           </p>
 
           <p>
-            🧩 <span className="font-semibold">Exemples :</span>
+            🧩 <span className="font-semibold">Exemples (lettre en fin de mot) :</span>
             <br />
-            • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block">بـ</span> → <span dir="rtl" className="font-semibold inline-block">كتاب</span>
+            • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block">ـب</span> → <span dir="rtl" className="font-semibold inline-block">كلب</span>
             <br />
-            • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block">مـ</span> → <span dir="rtl" className="font-semibold inline-block">قلم</span>
+            • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block">ـم</span> → <span dir="rtl" className="font-semibold inline-block">قلم</span>
             <br />
-            • La lettre ل devient <span dir="rtl" className="text-yellow-400 inline-block">لـ</span> → <span dir="rtl" className="font-semibold inline-block">جبل</span>
+            • La lettre ل devient <span dir="rtl" className="text-yellow-400 inline-block">ـل</span> → <span dir="rtl" className="font-semibold inline-block">جبل</span>
           </p>
 
           <p>

@@ -71,16 +71,15 @@ const IntroductionPage = () => {
             Cette forme est appelée <span className="font-semibold">forme médiane</span>.
           </p>
 
-<p>
-  🧩 <span className="font-semibold">Exemples :</span>
-  <br />
-  • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block">ـب</span> → <span dir="rtl" className="font-semibold inline-block">كلب</span>
-  <br />
-  • La lettre س devient <span dir="rtl" className="text-yellow-400 inline-block">ـس</span> → <span dir="rtl" className="font-semibold inline-block">شمس</span>
-  <br />
-  • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block">ـم</span> → <span dir="rtl" className="font-semibold inline-block">قلم</span>
-</p>
-
+          <p>
+            🧩 <span className="font-semibold">Exemples :</span>
+            <br />
+            • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block"> ـبـ </span> → <span dir="rtl" className="font-semibold inline-block"> كبير </span>
+            <br />
+            • La lettre س devient <span dir="rtl" className="text-yellow-400 inline-block"> ـسـ </span> → <span dir="rtl" className="font-semibold inline-block"> مسلم </span>
+            <br />
+            • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block"> ـمـ </span> → <span dir="rtl" className="font-semibold inline-block"> كمال </span>
+          </p>
 
           <p>
             Comme pour la forme initiale, les <span className="text-purple-400 font-semibold">6 lettres spéciales</span> :
