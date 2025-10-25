@@ -33,22 +33,32 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
   return (
     <div className="md:hidden flex flex-col h-screen w-full bg-zinc-950">
       {/* Header mobile */}
-      <header className="sticky top-0 z-30 p-4 bg-zinc-900 flex items-center border-b border-zinc-700">
-        <button 
-          onClick={() => setSidebarOpen(!sidebarOpen)} 
-          className="mr-4 text-zinc-300 hover:text-white transition-colors"
-          aria-label={sidebarOpen ? "Fermer le menu" : "Ouvrir le menu"}
-        >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <BookOpen className="text-blue-400" size={20} />
-          <span>Sommaire</span>
+<header className="sticky top-0 z-30 bg-gray-900 border-b border-white-100 backdrop-blur-sm">
+  <div className="px-4 py-3 flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <button 
+        onClick={() => setSidebarOpen(!sidebarOpen)} 
+        className="p-2 -ml-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all duration-200 active:scale-95"
+        aria-label={sidebarOpen ? "Fermer le menu" : "Ouvrir le menu"}
+      >
+        {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
+      </button>
+      
+      <div className="flex items-center gap-2">
+        <div className="p-1.5 bg-blue-500/10 rounded-lg">
+          <BookOpen className="text-blue-400" size={18} />
+        </div>
+        <h1 className="text-lg font-semibold text-white">
+          Méthode ERPR
         </h1>
-      </header>
+      </div>
+    </div>
+    
+  </div>
+</header>
 
       {/* Contenu principal scrollable */}
-      <main className="flex-1 overflow-y-auto p-4 w-full">
+      <main className="flex-1 overflow-y-auto w-full">
         <div className="w-full h-full">
           {children}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Mapping audio pour le Chapitre 1, Page 2
 const chapter1Page2AudioMappings: { [key: string]: string } = {
@@ -35,54 +36,90 @@ const chapter1Page2AudioMappings: { [key: string]: string } = {
   'ء': 'chap0_pg0_case29'
 };
 
-// Liste des 6 lettres qui ne s'attachent jamais après elles
-const nonConnectingLetters = ['ا', 'د', 'ذ', 'ر', 'ز', 'و'];
+const Cell = ({ letter, emphatic, violet, onClick }: { 
+  letter: string; 
+  emphatic?: boolean;
+  violet?: boolean;
+  onClick?: () => void;
+}) => (
+  <div 
+    className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+    onClick={onClick}
+  >
+    <div className={`text-3xl md:text-4xl font-bold transition-colors ${
+      emphatic ? 'text-red-400' : 
+      violet ? 'text-purple-400' : 
+      'text-white'
+    }`}>
+      {letter}
+    </div>
+  </div>
+);
 
-// Dictionnaire des mots exemples pour chaque lettre
-const letterExamples: { [key: string]: { word: string; translation: string } } = {
-  'ا': { word: 'أرنب', translation: 'Lapin' },
-  'بـ': { word: 'بطة', translation: 'Canard' },
-  'تـ': { word: 'تفاحة', translation: 'Pomme' },
-  'ثـ': { word: 'ثعلب', translation: 'Renard' },
-  'جـ': { word: 'جمل', translation: 'Chameau' },
-  'حـ': { word: 'حليب', translation: 'Lait' },
-  'خـ': { word: 'خروف', translation: 'Mouton' },
-  'د': { word: 'دجاجة', translation: 'Poule' },
-  'ذ': { word: 'ذهب', translation: 'Or' },
-  'ر': { word: 'وردة', translation: 'Rose' },
-  'ز': { word: 'زرافة', translation: 'Girafe' },
-  'سـ': { word: 'سيارة', translation: 'Voiture' },
-  'شـ': { word: 'شمس', translation: 'Soleil' },
-  'صـ': { word: 'صابون', translation: 'Savon' },
-  'ضـ': { word: 'ضفدع', translation: 'Grenouille' },
-  'طـ': { word: 'طائرة', translation: 'Avion' },
-  'ظـ': { word: 'ظبي', translation: 'Gazelle' },
-  'عـ': { word: 'عسل', translation: 'Miel' },
-  'غـ': { word: 'غيمة', translation: 'Nuage' },
-  'فـ': { word: 'فيل', translation: 'Éléphant' },
-  'قـ': { word: 'قلم', translation: 'Crayon' },
-  'كـ': { word: 'كتاب', translation: 'Livre' },
-  'لـ': { word: 'ليمون', translation: 'Citron' },
-  'مـ': { word: 'موز', translation: 'Banane' },
-  'نـ': { word: 'نحلة', translation: 'Abeille' },
-  'هـ': { word: 'هدية', translation: 'Cadeau' },
-  'و': { word: 'ورقة', translation: 'Feuille' },
-  'يـ': { word: 'يمامة', translation: 'Colombe' },
-  'ء': { word: 'أسد', translation: 'Lion' }
+const IntroductionPage = () => {
+  return (
+    <div className="p-8 bg-gray-900">
+      <div className="w-full bg-gray-800 rounded-lg p-8">
+        <div className="text-white space-y-6 text-xl leading-relaxed"> {/* ← police agrandie */}
+          
+          <p>
+            En arabe, chaque lettre peut avoir <span className="text-purple-400 font-semibold">trois formes principales</span> :
+            <br />
+            ➤ au <span className="font-semibold">début</span> d’un mot,  
+            ➤ au <span className="font-semibold">milieu</span> d’un mot,  
+            ➤ à la <span className="font-semibold">fin</span> d’un mot.
+          </p>
+
+          <p>
+            Dans cette leçon, nous allons nous concentrer sur les <span className="text-purple-400 font-semibold">lettres en début de mot</span>.
+            Leur forme change légèrement pour pouvoir se relier à la lettre suivante.
+            Cette forme est appelée <span className="font-semibold">forme initiale</span>.
+          </p>
+
+          <p>
+            🧩 <span className="font-semibold">Exemples :</span>
+            <br />
+            • La lettre <span className="text-yellow-400 font-bold">ب</span> (b) devient <span className="text-yellow-400 font-bold">بـ</span> au début du mot → 
+            <span className="font-semibold"> <span className="text-yellow-400">بـ</span>يت</span> (bayt = maison)
+            <br />
+            • La lettre <span className="text-yellow-400 font-bold">س</span> (s) devient <span className="text-yellow-400 font-bold">سـ</span> au début → 
+            <span className="font-semibold"> <span className="text-yellow-400">سـ</span>لام</span> (salām = paix)
+            <br />
+            • La lettre <span className="text-yellow-400 font-bold">م</span> (m) devient <span className="text-yellow-400 font-bold">مـ</span> au début → 
+            <span className="font-semibold"> <span className="text-yellow-400">مـ</span>درسة</span> (madrasa = école)
+          </p>
+
+          <p>
+            Cependant, il existe <span className="text-purple-400 font-semibold">6 lettres spéciales</span> qui <span className="underline">ne s’attachent jamais après elles</span> :
+            <span className="font-bold"> ا, د, ذ, ر, ز, و</span>.
+            Ces lettres gardent toujours leur forme isolée, même au début d’un mot.
+          </p>
+
+          <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-6 my-6">
+            <p>
+              💡 <span className="font-semibold">Astuce :</span> Même si les lettres changent de forme selon leur position, on peut toujours les reconnaître grâce à leurs <span className="text-yellow-400 font-semibold">points</span> et à leur <span className="text-yellow-400 font-semibold">structure générale</span>.
+              En les observant bien, tu apprendras à les distinguer facilement !
+            </p>
+          </div>
+
+          <p>
+            À la page suivante, tu verras le <span className="text-purple-400 font-semibold">tableau complet</span> des lettres arabes dans leur forme initiale.
+            Clique sur chaque lettre pour écouter sa prononciation et t’habituer à sa forme lorsqu’elle apparaît au début d’un mot.
+          </p>
+        </div>
+      </div>
+
+      <footer className="border-t-1 text-white text-center p-6 mt-8 flex-shrink-0 font-semibold text-lg">
+        <div>Leçon 2</div>
+        <div className="mt-1">© 2025 Tous droits réservés</div>
+      </footer>
+    </div>
+  );
 };
 
-const Page2 = () => {
-  // Fonction pour jouer l'audio avec le mapping spécifique
-  const playLetterAudio = (letter: string) => {
-    const audioFileName = chapter1Page2AudioMappings[letter];
-    if (audioFileName) {
-      const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
-      audio.play().catch(error => {
-        console.error('Erreur lors de la lecture audio:', error);
-      });
-    }
-  };
 
+
+const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) => void }) => {
   const letters = [
     // Row 1
     { letter: 'ا', emphatic: false, violet: false },
@@ -124,203 +161,126 @@ const Page2 = () => {
     { letter: 'ء', emphatic: false, violet: true }
   ];
 
-  const handleLetterClick = (letter: string) => {
-    // Utiliser directement la lettre avec ses attachements pour le mapping
-    playLetterAudio(letter);
+  return (
+    <div className="p-8 bg-gray-900">
+      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6" dir="rtl">
+        {letters.map((item, index) => (
+          <Cell 
+            key={index} 
+            letter={item.letter} 
+            emphatic={item.emphatic}
+            violet={item.violet}
+            onClick={() => playLetterAudio(item.letter)}
+          />
+        ))}
+      </div>
+      
+      {/* Légende simplifiée */}
+      <div className="bg-gray-800 rounded-lg p-4 mb-4">
+        <div className="flex items-center justify-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-400 rounded-full"></div>
+            <span className="text-red-400">Lettres emphatiques</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-purple-400 rounded-full"></div>
+            <span className="text-purple-400">Lettres spéciales</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Information sur les lettres non-attachantes */}
+      <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-6 mb-6">
+        <p className="text-lg leading-relaxed text-white text-center">
+          <span className="font-semibold">📝 Note importante :</span> Les lettres <span className="font-bold">ا, د, ذ, ر, ز, و</span> ne s'attachent jamais après elles et conservent leur forme isolée en début de mot.
+        </p>
+      </div>
+
+      <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+        <div>Leçon 2</div>
+        <div className="mt-1">© 2025 Tous droits réservés</div>
+      </footer>
+    </div>
+  );
+};
+
+const Page2 = () => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const totalPages = 2;
+
+  const playLetterAudio = (letter: string) => {
+    const audioFileName = chapter1Page2AudioMappings[letter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+      });
+    }
   };
 
+  const goToNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const pageTitle = currentPage === 0 
+    ? "Leçon 2 : Lettres attachées au début d'un mot"
+    : "Leçon 2 : Tableau des lettres en position initiale";
+
   return (
-    <div className="font-arabic min-h-screen bg-gray-900" style={{ direction: 'rtl' }}>
+    <div className="font-arabic min-h-screen bg-gray-900">
       <div className="w-full h-full overflow-hidden bg-gray-900">
+        
         {/* Header */}
         <div className="text-white p-6 text-center border-b-2">
           <div className="text-3xl font-bold mb-4">
-            Leçon : lettres attachées au début d'un mot
+            {pageTitle}
           </div>
         </div>
         
-        {/* Alphabet Grid */}
-        <div className="p-8 bg-gray-900">
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-4 mb-6">
-            {letters.map((item, index) => (
-              <Cell 
-                key={index} 
-                letter={item.letter} 
-                emphatic={item.emphatic}
-                violet={item.violet}
-                onClick={() => handleLetterClick(item.letter)}
-              />
-            ))}
-          </div>
-          {/* Légende simplifiée */}
-          <div className="bg-gray-800 rounded-lg p-4 mb-4">
-            <div className="flex items-center justify-center gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-red-400 rounded-full"></div>
-                <span className="text-red-400">Lettres emphatiques</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-purple-400 rounded-full"></div>
-                <span className="text-purple-400">Lettres spéciales</span>
-              </div>
-            </div>
-          </div>
-          {/* Footer */}
-          <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
-            <div>Page 2</div>
-            <div className="mt-1">© 2025 Tous droits réservés</div>
-          </footer>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Popup Component - MODIFIÉ pour toutes les lettres avec des mots spécifiques
-const InfoPopup = ({ letter, onClose }: { letter: string; onClose: () => void }) => {
-  const isNonConnecting = nonConnectingLetters.includes(letter);
-  const example = letterExamples[letter] || { word: 'كلمة', translation: 'Mot' };
-  
-  // Fonction pour diviser le mot arabe en lettres pour l'affichage coloré
-  const renderColoredWord = (word: string, targetLetter: string) => {
-    // Nettoyer la lettre cible des caractères de connexion
-    const cleanTargetLetter = targetLetter.replace('ـ', '');
-    
-    return word.split('').map((char, index) => {
-      // Pour l'alif, on vérifie aussi les formes similaires
-      const isTarget = cleanTargetLetter === 'ا' 
-        ? (char === 'ا' || char === 'أ' || char === 'إ' || char === 'آ')
-        : char === cleanTargetLetter;
-      
-      return (
-        <span 
-          key={index} 
-          className={isTarget ? 'text-red-400' : 'text-white'}
-        >
-          {char}
-        </span>
-      );
-    });
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div 
-        className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl sm:rounded-3xl p-4 sm:p-6 w-full max-w-[95vw] sm:max-w-md mx-2 shadow-2xl border-2 border-blue-500"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-3 sm:mb-4">
-          <h3 className="text-lg sm:text-xl font-bold text-white">Connexion au début d'un mot</h3>
-          <button 
-            onClick={onClose} 
-            className="text-gray-400 hover:text-white text-2xl sm:text-3xl font-bold leading-none"
-          >
-            &times;
-          </button>
-        </div>
-        
-        <div className="space-y-3 sm:space-y-4">
-          {/* Explication simple */}
-          <div className="border rounded-xl p-3 sm:p-4 shadow-lg">
-            <p className="text-white text-base sm:text-lg text-center">
-              <span className="text-red-400 text-2xl sm:text-3xl font-bold mx-2">{letter}</span>
-            </p>
-          </div>
-          
-          {/* Information spéciale pour les lettres non-attachantes */}
-          {isNonConnecting && (
-            <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl p-2 sm:p-3 shadow-lg">
-              <p className="text-white text-xs text-center font-semibold flex items-center justify-center gap-1">
-                <span className="text-lg">⚠️</span>
-                <span>Cette lettre fait partie des 6 lettres qui ne s'attacheront JAMAIS après elles : ا, د, ذ, ر, ز, و</span>
-              </p>
-            </div>
-          )}
-          
-          {/* Exemple en arabe */}
-          <div className="bg-gray-700 rounded-xl p-3 sm:p-4 shadow-lg">
-            <p className="text-gray-300 text-xs mb-2 text-center">📖 Exemple </p>
-            <div className="bg-gray-800 rounded-lg p-3 sm:p-4 mb-2">
-              <div className="text-3xl sm:text-4xl font-bold text-center" style={{ direction: 'rtl' }}>
-                {renderColoredWord(example.word, letter)}
-              </div>
-            </div>
-            
-            {/* Traduction française séparée */}
-            <div className="bg-blue-900 bg-opacity-40 rounded-lg p-2 sm:p-3 border-2 border-blue-500">
-              <p className="text-white text-lg sm:text-xl font-bold text-center">
-                {example.translation}
-              </p>
-            </div>
-          </div>
-          
-          {/* Info supplémentaire */}
-          <div className="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-xl p-2 sm:p-3 shadow-lg">
-            <p className="text-white text-xs text-center font-semibold flex items-center justify-center gap-1">
-              <span className="text-lg">💡</span>
-              <span>
-                {isNonConnecting 
-                  ? "Cette lettre ne se connecte pas à la lettre suivante, donc sa forme reste identique en début de mot"
-                  : "La lettre est connectée à la lettre suivante, donc sa forme change. C'est pour cela qu'on parle de 'lettre en début de mot' : cela fait référence à la manière dont elle s'écrit au début d'un mot"
-                }
-              </span>
-            </p>
-          </div>
-        </div>
-        
-        <button 
-          onClick={onClose}
-          className="mt-4 sm:mt-6 w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-2 sm:py-3 rounded-lg transition-all transform hover:scale-105 shadow-lg text-base"
-        >
-          ✓ Compris
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Cell Component adapté pour le thème sombre - MODIFIÉ pour toutes les lettres
-const Cell = ({ letter, emphatic, violet, onClick }: { 
-  letter: string; 
-  emphatic?: boolean;
-  violet?: boolean;
-  onClick?: () => void;
-}) => {
-  const [showPopup, setShowPopup] = useState(false);
-  
-  // Maintenant TOUTES les lettres ont le popup d'information
-  const hasInfo = true;
-
-  return (
-    <>
-      <div 
-        className="border border-zinc-500 rounded-xl p-4 text-center min-h-[100px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer relative"
-        onClick={onClick}
-      >
-        <div className={`text-3xl md:text-4xl font-bold transition-colors ${
-          emphatic ? 'text-red-400' : 
-          violet ? 'text-purple-400' : 
-          'text-white'
-        }`}>
-          {letter}
-        </div>
-        
-        {hasInfo && (
+        {/* Navigation Buttons */}
+        <div className="flex justify-between items-center px-4 md:px-8 py-4">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowPopup(true);
-            }}
-            className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-sm transition-all hover:scale-110"
-            title="Plus d'infos"
+            onClick={goToPreviousPage}
+            disabled={currentPage === 0}
+            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
+              currentPage === 0
+                ? 'border-gray-600 text-gray-600 cursor-not-allowed'
+                : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
+            }`}
           >
-            ℹ️
+            <ChevronLeft size={20} className="md:w-6 md:h-6" />
           </button>
-        )}
+
+          <div className="text-white font-semibold text-sm md:text-base">
+            Page {currentPage + 1} / {totalPages}
+          </div>
+
+          <button
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages - 1}
+            className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
+              currentPage === totalPages - 1
+                ? 'border-gray-600 text-gray-600 cursor-not-allowed'
+                : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
+            }`}
+          >
+            <ChevronRight size={20} className="md:w-6 md:h-6" />
+          </button>
+        </div>
+
+        {/* Content */}
+        {currentPage === 0 && <IntroductionPage />}
+        {currentPage === 1 && <AlphabetPage playLetterAudio={playLetterAudio} />}
       </div>
-      
-      {showPopup && <InfoPopup letter={letter} onClose={() => setShowPopup(false)} />}
-    </>
+    </div>
   );
 };
 

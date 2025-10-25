@@ -29,9 +29,30 @@ export default function QuizPage({ params }: QuizPageProps) {
   if (!chapter || !chapter.quiz) return notFound();
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">Quiz – {chapter.title}</h1>
-      <Quiz quiz={chapter.quiz} chapterNumber={chapterNumber} />
+    <div className="font-arabic min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+      <div className="w-full h-full overflow-hidden">
+        {/* Header avec le même style gradient */}
+        <div className="bg-gray-900 text-white p-6 text-center border-b border-white-700">
+          <div className="text-3xl font-bold mb-4">
+            Quiz : {chapter.title.toLowerCase()}
+          </div>
+        </div>
+
+        {/* Contenu du quiz */}
+        <div className="p-4 md:p-8">
+          <div className="bg-gray-800/80 border border-white/10 rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-sm">
+            <div className="max-w-4xl mx-auto">
+              <Quiz quiz={chapter.quiz} chapterNumber={chapterNumber} />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <footer className="border-t border-white/10 text-center p-4 text-sm text-gray-500">
+          <div>Méthode d'apprentissage de l'arabe</div>
+          <div className="mt-1">© 2025 Tous droits réservés</div>
+        </footer>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import LayoutSwitcher from "@/app/components/layout/LayoutSwitcher";
 import { Toaster } from 'react-hot-toast';
@@ -6,6 +6,20 @@ import { Toaster } from 'react-hot-toast';
 export const metadata: Metadata = {
   title: "Méthode ERPR",
   description: "Cours de lecture arabe",
+  manifest: '/manifest.json',
+  themeColor: '#18181b',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Méthode ERPR',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

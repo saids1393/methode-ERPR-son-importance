@@ -359,16 +359,6 @@ export default function DashboardPage() {
         ></div>
       )}
 
-      {/* Mobile Sidebar Toggle */}
-      <div className="lg:hidden fixed p-2 text-gray-600">
-        <button
-          className="p-2 bg-white rounded-lg shadow-md"
-          onClick={() => setMobileMenuOpen(true)}
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-      </div>
-
       {/* Main Content */}
       <div className="lg:ml-64">
         {/* Header Component */}

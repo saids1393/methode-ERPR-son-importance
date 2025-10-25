@@ -72,6 +72,7 @@ const Quiz: React.FC<QuizProps> = ({ quiz, chapterNumber }) => {
       toggleQuizCompletion(chapterNumber);
     }
   };
+
   const score = getScore();
   const percentage = Math.round((score / quiz.length) * 100);
   const isSuccess = percentage >= 75;
@@ -80,101 +81,102 @@ const Quiz: React.FC<QuizProps> = ({ quiz, chapterNumber }) => {
   );
 
   return (
-    <div className="font-arabic min-h-screen text-white py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl sm:text-4xl font-bold text-center text-white"
-        >
-          Test de connaissances
-        </motion.h1>
+    <div className="w-full space-y-8">
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-3xl font-bold text-center text-white mb-8"
+      >
+        Test de connaissances
+      </motion.h1>
 
-        {!submitted ? (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentQuestion}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.4 }}
-              className="p-6 bg-zinc-800 border border-zinc-700 rounded-2xl shadow-lg"
-            >
-              <h2 className="text-lg sm:text-xl font-semibold text-neutral-200 mb-4">
-                Question {currentQuestion + 1} sur {quiz.length}
-              </h2>
-              <p className="text-base sm:text-lg font-medium text-white mb-6">
-                {quiz[currentQuestion].question}
-              </p>
-
-              <div className="space-y-4">
-                {quiz[currentQuestion].choices.map((choice, index) => {
-                  const isSelected = selectedAnswers[currentQuestion] === index;
-
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswerSelect(index)}
-                      className={`w-full text-left px-4 py-3 rounded-lg border transition-all font-medium duration-300 ${
-                        isSelected
-                          ? "bg-indigo-600 border-indigo-400 text-white"
-                          : "bg-zinc-900 border-zinc-700 text-neutral-200 hover:bg-zinc-800"
-                      }`}
-                    >
-                      {choice}
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        ) : (
+      {!submitted ? (
+        <AnimatePresence mode="wait">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className={`text-center p-8 border rounded-2xl shadow-lg ${
-              isSuccess
-                ? "bg-emerald-700/10 border-emerald-600"
-                : "bg-orange-700/10 border-orange-600"
+            key={currentQuestion}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.4 }}
+            className="p-6 bg-gray-700/50 border border-white/10 rounded-2xl shadow-lg backdrop-blur-sm"
+          >
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-200 mb-4">
+              Question {currentQuestion + 1} sur {quiz.length}
+            </h2>
+            <p className="text-base sm:text-lg font-medium text-white mb-6 leading-relaxed">
+              {quiz[currentQuestion].question}
+            </p>
+
+            <div className="space-y-4">
+              {quiz[currentQuestion].choices.map((choice, index) => {
+                const isSelected = selectedAnswers[currentQuestion] === index;
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    className={`w-full text-left px-4 py-3 rounded-lg border transition-all font-medium duration-300 ${
+                      isSelected
+                        ? "bg-amber-600 border-amber-400 text-white shadow-lg"
+                        : "bg-gray-600/50 border-gray-500 text-gray-100 hover:bg-gray-600 hover:border-gray-400"
+                    }`}
+                  >
+                    {choice}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className={`text-center p-8 border rounded-2xl shadow-2xl backdrop-blur-sm ${
+            isSuccess
+              ? "bg-emerald-900/30 border-emerald-500/30"
+              : "bg-orange-900/30 border-orange-500/30"
+          }`}
+        >
+          <p
+            className={`text-2xl sm:text-3xl font-semibold mb-4 ${
+              isSuccess ? "text-emerald-300" : "text-orange-300"
             }`}
           >
-            <p
-              className={`text-2xl sm:text-3xl font-semibold mb-2 ${
-                isSuccess ? "text-emerald-400" : "text-orange-400"
-              }`}
-            >
-              {isSuccess
-                ? "🎉 Excellent travail !"
-                : "Tu peux faire encore mieux en jetant un coup d'œil aux difficultés dans ce chapitre !"}
+            {isSuccess
+              ? "🎉 Excellent travail !"
+              : "📚 Continue tes efforts !"}
+          </p>
+
+          <p className="text-xl sm:text-2xl text-white font-medium mb-6">
+            Score : {score} / {quiz.length} ({percentage}%)
+          </p>
+
+          {!isSuccess && (
+            <p className="text-base text-gray-300 mb-6 max-w-md mx-auto leading-relaxed">
+              Ce n'est pas grave, continue à t'entraîner pour progresser !
             </p>
+          )}
 
-            <p className="text-xl sm:text-2xl text-white font-medium mb-4">
-              Score : {score} / {quiz.length} ({percentage}%)
-            </p>
-
-            {!isSuccess && (
-              <p className="text-base text-neutral-300 mb-4 max-w-md mx-auto">
-                Ce n’est pas grave, continue à t’entraîner pour progresser !
-              </p>
-            )}
-
+          <div className="flex flex-wrap justify-center gap-4 mt-6">
             {/* Bouton de marquage manuel si le score n'est pas suffisant */}
             {!isSuccess && chapterNumber !== undefined && (
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleManualComplete}
-                className="mt-4 mr-4 inline-block px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all"
+                className="px-6 py-3 bg-blue-600/80 text-white rounded-xl font-semibold hover:bg-blue-700/80 transition-all border border-blue-500/30"
               >
-                Marquer comme complété quand même
+                Marquer comme complété
               </motion.button>
             )}
+            
             {hasErrors && (
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowRecap(!showRecap)}
-                className="mt-4 mr-4 inline-block px-6 py-3 bg-rose-600 text-white rounded-xl font-semibold hover:bg-rose-700 transition-all"
+                className="px-6 py-3 bg-rose-600/80 text-white rounded-xl font-semibold hover:bg-rose-700/80 transition-all border border-rose-500/30"
               >
                 {showRecap ? "Masquer les erreurs" : "Voir les erreurs"}
               </motion.button>
@@ -183,50 +185,50 @@ const Quiz: React.FC<QuizProps> = ({ quiz, chapterNumber }) => {
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={handleRestart}
-              className="mt-4 inline-block px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all"
+              className="px-6 py-3 bg-amber-600/80 text-white rounded-xl font-semibold hover:bg-amber-700/80 transition-all border border-amber-500/30"
             >
               Recommencer le quiz
             </motion.button>
+          </div>
 
-            {showRecap && (
-              <div className="mt-8 text-left space-y-4">
-                <h3 className="text-xl font-semibold text-white mb-4">Récapitulatif :</h3>
-                {quiz.map((question, index) => {
-                  const userAnswer = selectedAnswers[index];
-                  const isCorrect = userAnswer === question.correctAnswerIndex;
-                  return (
-                    <div
-                      key={index}
-                      className={`p-4 rounded-lg border ${
-                        isCorrect
-                          ? "border-emerald-500 bg-emerald-800/10"
-                          : "border-rose-500 bg-rose-800/10"
-                      }`}
+          {showRecap && (
+            <div className="mt-8 text-left space-y-4">
+              <h3 className="text-xl font-semibold text-white mb-4 text-center">Récapitulatif :</h3>
+              {quiz.map((question, index) => {
+                const userAnswer = selectedAnswers[index];
+                const isCorrect = userAnswer === question.correctAnswerIndex;
+                return (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border backdrop-blur-sm ${
+                      isCorrect
+                        ? "border-emerald-500/50 bg-emerald-900/20"
+                        : "border-rose-500/50 bg-rose-900/20"
+                    }`}
+                  >
+                    <p className="text-white font-medium mb-2">
+                      <span className="font-semibold">Question {index + 1} :</span>{" "}
+                      {question.question}
+                    </p>
+                    <p
+                      className={`${
+                        isCorrect ? "text-emerald-300" : "text-rose-300"
+                      } font-semibold mb-1`}
                     >
-                      <p className="text-white font-medium mb-1">
-                        <span className="font-semibold">Question {index + 1} :</span>{" "}
-                        {question.question}
+                      Ta réponse : {question.choices[userAnswer] || "Aucune réponse"}
+                    </p>
+                    {!isCorrect && (
+                      <p className="text-emerald-300 font-medium">
+                        Bonne réponse : {question.choices[question.correctAnswerIndex]}
                       </p>
-                      <p
-                        className={`${
-                          isCorrect ? "text-emerald-400" : "text-rose-400"
-                        } font-semibold`}
-                      >
-                        Ta réponse : {question.choices[userAnswer] || "Aucune réponse"}
-                      </p>
-                      {!isCorrect && (
-                        <p className="text-emerald-300 font-medium">
-                          Bonne réponse : {question.choices[question.correctAnswerIndex]}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </motion.div>
+      )}
     </div>
   );
 };

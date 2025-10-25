@@ -244,7 +244,7 @@ export default function SidebarContent() {
                           }`}
                         >
                           <BookOpen size={14} className="text-blue-400" />
-                          <span>Synthèse textuel</span>
+                          <span>Synthèse</span>
                         </Link>
                       </li>
                     )}
