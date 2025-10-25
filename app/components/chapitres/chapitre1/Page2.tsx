@@ -65,9 +65,9 @@ const IntroductionPage = () => {
           <p>
             En arabe, chaque lettre peut avoir <span className="text-purple-400 font-semibold">trois formes principales</span> :
             <br />
-            ➤ au <span className="font-semibold">début</span> d’un mot,  
-            ➤ au <span className="font-semibold">milieu</span> d’un mot,  
-            ➤ à la <span className="font-semibold">fin</span> d’un mot.
+            ➤ au <span className="font-semibold">début</span> d'un mot,  
+            ➤ au <span className="font-semibold">milieu</span> d'un mot,  
+            ➤ à la <span className="font-semibold">fin</span> d'un mot.
           </p>
 
           <p>
@@ -76,35 +76,32 @@ const IntroductionPage = () => {
             Cette forme est appelée <span className="font-semibold">forme initiale</span>.
           </p>
 
-          <p>
-            🧩 <span className="font-semibold">Exemples :</span>
-            <br />
-            • La lettre <span className="text-yellow-400 font-bold">ب</span> (b) devient <span className="text-yellow-400 font-bold">بـ</span> au début du mot → 
-            <span className="font-semibold"> <span className="text-yellow-400">بـ</span>يت</span> (bayt = maison)
-            <br />
-            • La lettre <span className="text-yellow-400 font-bold">س</span> (s) devient <span className="text-yellow-400 font-bold">سـ</span> au début → 
-            <span className="font-semibold"> <span className="text-yellow-400">سـ</span>لام</span> (salām = paix)
-            <br />
-            • La lettre <span className="text-yellow-400 font-bold">م</span> (m) devient <span className="text-yellow-400 font-bold">مـ</span> au début → 
-            <span className="font-semibold"> <span className="text-yellow-400">مـ</span>درسة</span> (madrasa = école)
-          </p>
+<p>
+  🧩 <span className="font-semibold">Exemples :</span>
+  <br />
+  • La lettre ب (b) devient بـ au début du mot → <span className="font-semibold">بيت</span> (bayt = maison)
+  <br />
+  • La lettre س (s) devient سـ au début → <span className="font-semibold">سلام</span> (salām = paix)
+  <br />
+  • La lettre م (m) devient مـ au début → <span className="font-semibold">مدرسة</span> (madrasa = école)
+</p>
 
           <p>
-            Cependant, il existe <span className="text-purple-400 font-semibold">6 lettres spéciales</span> qui <span className="underline">ne s’attachent jamais après elles</span> :
+            Cependant, il existe <span className="text-purple-400 font-semibold">6 lettres spéciales</span> qui <span className="underline">ne s'attachent jamais après elles</span> :
             <span className="font-bold"> ا, د, ذ, ر, ز, و</span>.
-            Ces lettres gardent toujours leur forme isolée, même au début d’un mot.
+            Ces lettres gardent toujours leur forme isolée, même au début d'un mot.
           </p>
 
           <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-6 my-6">
             <p>
-              💡 <span className="font-semibold">Astuce :</span> Même si les lettres changent de forme selon leur position, on peut toujours les reconnaître grâce à leurs <span className="text-yellow-400 font-semibold">points</span> et à leur <span className="text-yellow-400 font-semibold">structure générale</span>.
+              💡 <span className="font-semibold">Astuce :</span> Même si les lettres changent de forme selon leur position, on peut toujours les reconnaître grâce à leurs <span className="font-semibold">points</span> et à leur <span className="font-semibold">structure générale</span>.
               En les observant bien, tu apprendras à les distinguer facilement !
             </p>
           </div>
 
           <p>
             À la page suivante, tu verras le <span className="text-purple-400 font-semibold">tableau complet</span> des lettres arabes dans leur forme initiale.
-            Clique sur chaque lettre pour écouter sa prononciation et t’habituer à sa forme lorsqu’elle apparaît au début d’un mot.
+            Clique sur chaque lettre pour écouter sa prononciation et t'habituer à sa forme lorsqu'elle apparaît au début d'un mot.
           </p>
         </div>
       </div>
