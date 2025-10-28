@@ -4,10 +4,6 @@ import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
 
-// Vérifier si on est en production
-const isProduction = process.env.NODE_ENV === 'production';
-
-
 function getSecurityHeaders() {
   return {
     'Content-Security-Policy':
@@ -43,6 +39,7 @@ async function verifyJWTToken(token: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+
   // Crée la réponse et ajoute les headers de sécurité
   const response = NextResponse.next();
   const securityHeaders = getSecurityHeaders();
@@ -50,44 +47,14 @@ export async function middleware(request: NextRequest) {
     response.headers.set(key, value);
   });
 
-  // BLOQUER STRIPE EN PRODUCTION
-  if (isProduction) {
-    // Bloquer complètement /checkout en production
-    if (pathname === '/checkout') {
-      return new NextResponse('Access Denied', { status: 403 });
-    }
-    
-    // Bloquer les pages de merci (après paiement) en production
-    if (pathname === '/merci') {
-      return new NextResponse('Access Denied', { status: 403 });
-    }
-    
-    // Bloquer les APIs Stripe en production (sauf webhooks si nécessaire)
-    if (pathname.startsWith('/api/stripe')) {
-      // Autoriser seulement les webhooks si vous en avez besoin
-      if (pathname === '/api/stripe/webhook') {
-        return response; // Autoriser les webhooks
-      }
-      return new NextResponse('Access Denied', { status: 403 });
-    }
-  }
-
-  // Pages publiques (modifiées pour la production)
-  const publicPaths = isProduction 
-    ? ['/', '/login', '/complete-profile', '/professor/auth', '/testEcriture'] // Pas de /checkout ni /merci en prod
-    : ['/', '/checkout', '/merci', '/login', '/complete-profile', '/professor/auth', '/testEcriture']; // Tout autorisé en dev
-    
+  // Pages publiques
+  const publicPaths = ['/', '/checkout', '/merci', '/login', '/complete-profile', '/professor/auth', '/testEcriture'];
   if (publicPaths.includes(pathname)) {
     return response;
   }
 
-  // API publiques (modifiées pour la production)
-  if (pathname.startsWith('/api/auth')) {
-    return response;
-  }
-  
-  // En développement seulement : autoriser les APIs Stripe
-  if (!isProduction && pathname.startsWith('/api/stripe')) {
+  // API publiques
+  if (pathname.startsWith('/api/stripe') || pathname.startsWith('/api/auth')) {
     return response;
   }
 

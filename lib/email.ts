@@ -24,7 +24,7 @@ const SENDER_INFO = {
   name: 'Méthode ERPR',
   address: process.env.SMTP_FROM || process.env.SMTP_USER || 'arabeimportance@gmail.com',
 };
-const BASE_URL = process.env.NEXTAUTH_URL || 'http://localhost:6700';
+const BASE_URL = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 // ----------------------------
 // Helper greeting

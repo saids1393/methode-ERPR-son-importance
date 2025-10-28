@@ -70,16 +70,28 @@ const IntroductionPage = () => {
           <p>
             Lorsqu'une lettre se trouve à la <span className="font-semibold">fin d'un mot</span>, elle ne s'attache qu'à la lettre précédente mais pas à la suivante (puisqu'il n'y en a pas).
             Cette forme est appelée <span className="font-semibold">forme finale</span>.
+            <br />
+            👉 Et comme l’arabe se lit <span className="text-yellow-400 font-semibold">de droite vers la gauche</span>,
+            la <span className="font-semibold">lettre de fin</span> sera donc <span className="underline">la dernière lettre, placée tout à gauche du mot</span>.
+            <br />
+            🧠 <span className="font-semibold">Technique :</span> repère toujours <span className="text-yellow-400 font-semibold">la lettre la plus à gauche</span> :
+            c’est elle qu’on appelle <span className="text-purple-400 font-semibold">lettre attachée à la fin du mot</span>.
           </p>
 
           <p>
             🧩 <span className="font-semibold">Exemples (lettre en fin de mot) :</span>
             <br />
-            • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block">ـب</span> → <span dir="rtl" className="font-semibold inline-block">كلب</span>
+            • La lettre ب (Baa) devient <span dir="rtl" className="text-yellow-400 inline-block">ـب</span> → <span dir="rtl" className="font-semibold inline-block">كلب</span>
             <br />
-            • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block">ـم</span> → <span dir="rtl" className="font-semibold inline-block">قلم</span>
+            • La lettre م (Miim) devient <span dir="rtl" className="text-yellow-400 inline-block">ـم</span> → <span dir="rtl" className="font-semibold inline-block">قلم</span>
             <br />
-            • La lettre ل devient <span dir="rtl" className="text-yellow-400 inline-block">ـل</span> → <span dir="rtl" className="font-semibold inline-block">جبل</span>
+            • La lettre ل (Laam) devient <span dir="rtl" className="text-yellow-400 inline-block">ـل</span> → <span dir="rtl" className="font-semibold inline-block">جبل</span>
+            <br />
+            <br />
+            🚂 <span className="font-semibold">Comme un wagon :</span> la lettre finale est le dernier wagon du train 🚃, celui qui termine la chaîne.
+            <br />
+            Exemple : <span dir="rtl" className="font-semibold inline-block text-green-400">قـ + ل + ـم = قلم</span>  
+            → Le dernier wagon (م) se trouve <span className="underline">à gauche</span>, car en arabe on lit toujours <span className="text-yellow-400 font-semibold">de droite vers la gauche</span>.
           </p>
 
           <p>
@@ -89,7 +101,7 @@ const IntroductionPage = () => {
           </p>
 
           <p>
-            <span className="text-purple-400 font-semibold">Note spéciale :</span> La lettre <span className="font-bold">ـة</span> (tā' marbūṭa)
+            <span className="text-purple-400 font-semibold">Note spéciale :</span> La lettre <span className="font-bold"> ـة </span> (Taa' marrboutah, dite en français “Taa liée/fermée”)
             est une forme particulière qui n'apparaît qu'à la fin des mots et indique souvent un nom féminin.
           </p>
 
@@ -114,6 +126,7 @@ const IntroductionPage = () => {
     </div>
   );
 };
+
 
 const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) => void }) => {
   const letters = [
@@ -196,7 +209,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
       {/* Information sur le tā' marbūṭa */}
       <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4 md:p-6 mb-6">
         <p className="text-base md:text-lg leading-relaxed text-white text-center">
-          <span className="font-semibold">✨ Particularité :</span> La lettre <span className="font-bold">ـة</span> (tā' marbūṭa) n'apparaît qu'à la fin des mots et indique souvent un nom féminin.
+          <span className="font-semibold">✨ Particularité :</span> La lettre <span className="font-bold">ـة </span> (Taa' marrboutah dit en français Taa lié/fermé) n'apparaît qu'à la fin des mots et indique souvent un nom féminin.
         </p>
       </div>
 

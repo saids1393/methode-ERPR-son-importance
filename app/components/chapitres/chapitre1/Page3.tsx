@@ -69,16 +69,28 @@ const IntroductionPage = () => {
           <p>
             Lorsqu'une lettre se trouve au <span className="font-semibold">milieu d'un mot</span>, elle doit s'attacher à la fois à la lettre précédente et à la lettre suivante.
             Cette forme est appelée <span className="font-semibold">forme médiane</span>.
+            <br />
+            👉 Et comme l’arabe se lit <span className="text-yellow-400 font-semibold">de droite vers la gauche</span>, 
+            la <span className="font-semibold">lettre du milieu</span> sera donc <span className="underline">la deuxième lettre en partant de la droite</span>.
+            <br />
+            🧠 <span className="font-semibold">Technique :</span> repère toujours la <span className="text-yellow-400 font-semibold">2ᵉ lettre à partir de la droite</span> :
+            c’est elle qu’on appelle <span className="text-purple-400 font-semibold">lettre attachée au milieu d’un mot</span>.
           </p>
 
           <p>
             🧩 <span className="font-semibold">Exemples :</span>
             <br />
-            • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block"> ـبـ </span> → <span dir="rtl" className="font-semibold inline-block"> كبير </span>
+            • La lettre ب (Baa) devient <span dir="rtl" className="text-yellow-400 inline-block"> ـبـ </span> → <span dir="rtl" className="font-semibold inline-block"> كبير </span>
             <br />
-            • La lettre س devient <span dir="rtl" className="text-yellow-400 inline-block"> ـسـ </span> → <span dir="rtl" className="font-semibold inline-block"> مسلم </span>
+            • La lettre س (Siin) devient <span dir="rtl" className="text-yellow-400 inline-block"> ـسـ </span> → <span dir="rtl" className="font-semibold inline-block"> مسلم </span>
             <br />
-            • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block"> ـمـ </span> → <span dir="rtl" className="font-semibold inline-block"> كمال </span>
+            • La lettre م (Miim) devient <span dir="rtl" className="text-yellow-400 inline-block"> ـمـ </span> → <span dir="rtl" className="font-semibold inline-block"> كمال </span>
+            <br />
+            <br />
+            🚂 <span className="font-semibold">Comme un wagon :</span> au milieu du mot, cette lettre relie le “wagon de droite” et celui de “gauche”, créant une chaîne continue.
+            <br />
+            Exemple : <span dir="rtl" className="font-semibold inline-block text-green-400">كـ + ب + يـ = كبير</span>  
+            → On voit que la lettre du milieu (ب) s’attache aux deux côtés, mais toujours <span className="underline">en lisant de droite vers la gauche</span>.
           </p>
 
           <p>
@@ -108,6 +120,7 @@ const IntroductionPage = () => {
     </div>
   );
 };
+
 
 const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) => void }) => {
   const letters = [

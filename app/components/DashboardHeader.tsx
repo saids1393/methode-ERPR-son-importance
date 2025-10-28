@@ -11,7 +11,9 @@ import {
     ChevronDown,
     Edit3,
     LogOut,
-    X
+    X,
+    Eye,
+    EyeOff
 } from 'lucide-react';
 
 interface User {
@@ -55,6 +57,9 @@ export default function DashboardHeader({
         newPassword: '',
         confirmPassword: ''
     });
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [editLoading, setEditLoading] = useState(false);
     const [showContactModal, setShowContactModal] = useState(false);
     const [contactForm, setContactForm] = useState({
@@ -103,6 +108,11 @@ export default function DashboardHeader({
     const handleEditProfile = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (editForm.newPassword && !editForm.currentPassword) {
+            alert('Veuillez entrer votre ancien mot de passe pour modifier votre mot de passe');
+            return;
+        }
+
         if (editForm.newPassword && editForm.newPassword !== editForm.confirmPassword) {
             alert('Les mots de passe ne correspondent pas');
             return;
@@ -123,6 +133,7 @@ export default function DashboardHeader({
             }
 
             if (editForm.newPassword) {
+                updateData.currentPassword = editForm.currentPassword;
                 updateData.password = editForm.newPassword;
             }
 
@@ -407,15 +418,46 @@ export default function DashboardHeader({
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Ancien mot de passe
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showCurrentPassword ? "text" : "password"}
+                                        value={editForm.currentPassword}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12"
+                                        placeholder="Ancien mot de passe"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                        {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Nouveau mot de passe
                                 </label>
-                                <input
-                                    type="password"
-                                    value={editForm.newPassword}
-                                    onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                    placeholder="Nouveau mot de passe"
-                                />
+                                <div className="relative">
+                                    <input
+                                        type={showNewPassword ? "text" : "password"}
+                                        value={editForm.newPassword}
+                                        onChange={(e) => setEditForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12"
+                                        placeholder="Nouveau mot de passe"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                        {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    </button>
+                                </div>
                             </div>
 
                             {editForm.newPassword && (
@@ -423,13 +465,22 @@ export default function DashboardHeader({
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Confirmer le nouveau mot de passe
                                     </label>
-                                    <input
-                                        type="password"
-                                        value={editForm.confirmPassword}
-                                        onChange={(e) => setEditForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                        placeholder="Confirmer le mot de passe"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            value={editForm.confirmPassword}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12"
+                                            placeholder="Confirmer le mot de passe"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        >
+                                            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 

@@ -73,16 +73,29 @@ const IntroductionPage = () => {
             Dans cette leçon, nous allons nous concentrer sur les <span className="text-purple-400 font-semibold">lettres en début de mot</span>.
             Leur forme change légèrement pour pouvoir se relier à la lettre suivante.
             Cette forme est appelée <span className="font-semibold">forme initiale</span>.
+            <br />
+            👉 Et comme l’arabe se lit <span className="text-yellow-400 font-semibold">de droite vers la gauche</span>, 
+            le <span className="font-semibold">wagon du début</span> se trouve donc à <span className="underline">droite</span> du mot.
+            <br />
+            🧠 <span className="font-semibold">Technique :</span> ce sera toujours <span className="text-yellow-400 font-semibold">la première lettre en partant de la droite</span>,
+            appelée <span className="text-purple-400 font-semibold">lettre attachée au début d’un mot</span>.
           </p>
 
           <p>
             🧩 <span className="font-semibold">Exemples :</span>
             <br />
-            • La lettre ب devient <span dir="rtl" className="text-yellow-400 inline-block">بـ</span> → <span dir="rtl" className="font-semibold inline-block">بيت</span>
+            • La lettre ب (Baa) devient <span dir="rtl" className="text-yellow-400 inline-block">بـ</span> → <span dir="rtl" className="font-semibold inline-block">بيت</span>
             <br />
-            • La lettre س devient <span dir="rtl" className="text-yellow-400 inline-block">سـ </span> → <span dir="rtl" className="font-semibold inline-block">سلام</span>
+            • La lettre س (Siin) devient <span dir="rtl" className="text-yellow-400 inline-block">سـ </span> → <span dir="rtl" className="font-semibold inline-block">سلام</span>
             <br />
-            • La lettre م devient <span dir="rtl" className="text-yellow-400 inline-block">مـ </span> → <span dir="rtl" className="font-semibold inline-block">مدرسة</span>
+            • La lettre م (Miim) devient <span dir="rtl" className="text-yellow-400 inline-block">مـ </span> → <span dir="rtl" className="font-semibold inline-block">مدرسة</span>
+            <br />
+            <br />
+            🚂 <span className="font-semibold">Comme un wagon :</span> Les lettres s’attachent entre elles, formant une chaîne continue.
+            <br />
+            Exemple : <span dir="rtl" className="font-semibold inline-block text-green-400">بـ + سـ + م = بسم</span> (Bism)  
+            → On voit que chaque lettre s’accroche à la suivante comme les wagons d’un train 🚃🚃🚃,
+            mais <span className="underline">en partant de la droite vers la gauche</span>, car en arabe on lit de droite à gauche.
           </p>
 
           <p>
@@ -112,6 +125,8 @@ const IntroductionPage = () => {
     </div>
   );
 };
+
+
 
 const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) => void }) => {
   const letters = [

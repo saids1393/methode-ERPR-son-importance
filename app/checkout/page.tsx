@@ -3,7 +3,6 @@
 'use client';
 import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { BookOpen } from 'lucide-react';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -101,18 +100,25 @@ export default function CheckoutPage() {
       ></div>
 
       <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center w-full mx-auto px-4 py-8 max-w-md">
+        <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full sm:max-w-md">
+          {/* Logo avec image */}
           <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
-            <BookOpen className="h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12 text-white" />
+            <img
+              src="/img/logo_ecrit_blanc-point.png"
+              alt="Logo Méthode ERPR"
+              className="w-14 h-13 object-contain"
+            />
           </div>
-          
-          <h2 className="mt-4 text-center text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
-            Accédez au cours d'arabe
+
+          {/* Titre principal */}
+          <h2 className="mt-4 text-center text-3xl font-bold text-white">
+            Méthode ERPR
           </h2>
-          
-          <p className="mt-3 sm:mt-4 text-center text-sm sm:text-base text-gray-400 max-w-xs sm:max-w-md">
-            Méthode ERPR – Apprenez à votre rythme et rapidement
-          </p>
+
+          {/* Sous-titre centré */}
+          <h3 className="mt-2 text-center text-xl font-bold text-white-900">
+            Créer un compte
+          </h3>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
@@ -281,7 +287,7 @@ export default function CheckoutPage() {
                 <div className="flex flex-col items-center">
                   <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900/50 border border-gray-800">
                     <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0110 1.944 11.954 11.954 0 0117.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <span className="mt-2 text-xs text-gray-500">Sécurisé</span>

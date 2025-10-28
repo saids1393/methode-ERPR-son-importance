@@ -179,7 +179,7 @@ export async function updateUserProfile(
         });
         
         if (existingUser && existingUser.id !== userId) {
-          throw new Error('Username already taken');
+          throw new Error('Pseudo utilisé veuillez choisir un autre pseudo ou ajoutez des chiffres ou des lettres'); // Message d'erreur si le pseudo est déjà pris
         }
         
         updateData.username = data.username;
@@ -342,7 +342,6 @@ export async function createPasswordResetRequest(email: string): Promise<{ succe
     const user = await getUserByEmail(email);
     
     if (!user || !user.isActive) {
-      // Pour des raisons de sécurité, on ne révèle pas si l'email existe ou non
       return {
         success: true,
         message: 'Si cet email existe dans notre système, vous recevrez un lien de réinitialisation.'
@@ -351,9 +350,8 @@ export async function createPasswordResetRequest(email: string): Promise<{ succe
 
     const resetToken = generateResetToken();
     const resetExpires = new Date();
-    resetExpires.setHours(resetExpires.getHours() + 1); // Expire dans 1 heure
+    resetExpires.setHours(resetExpires.getHours() + 1);
 
-    // Sauvegarder le token dans la base de données
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -362,8 +360,12 @@ export async function createPasswordResetRequest(email: string): Promise<{ succe
       },
     });
 
-    // Envoyer l'email de réinitialisation
-    const emailSent = await sendPasswordResetEmail(user.email, resetToken, user.username || undefined);
+    // ✅ CORRECTION : Construire l'URL complète
+    const BASE_URL = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const resetUrl = `${BASE_URL}/reset-password?token=${resetToken}`;
+
+    // ✅ Passer l'URL complète au lieu du token brut
+    const emailSent = await sendPasswordResetEmail(user.email, resetUrl, user.username || undefined);
     
     if (!emailSent) {
       console.error('Erreur lors de l\'envoi de l\'email de réinitialisation');

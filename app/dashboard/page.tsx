@@ -346,9 +346,9 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar Component */}
-      <DashboardSidebar 
-        mobileMenuOpen={mobileMenuOpen} 
-        setMobileMenuOpen={setMobileMenuOpen} 
+      <DashboardSidebar
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
       />
 
       {/* Mobile Menu Overlay */}
@@ -373,7 +373,7 @@ export default function DashboardPage() {
         <main className="p-4 lg:p-8">
           {/* Welcome Section */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{ fontFamily: "'Spectral', sans serif", fontSize: "1.7rem" }}>
               Salut, {user.username || (user.gender === 'FEMME' ? 'Étudiante' : 'Étudiant')} !
             </h1>
             <p className="text-gray-500">Prêt à progresser ? Voici votre Tableau de bord !</p>
@@ -810,7 +810,12 @@ export default function DashboardPage() {
                   <h3 className="text-lg font-semibold text-gray-900">
                     Devoirs <span className="text-gray-400">(10)</span>
                   </h3>
-                  <span className="text-blue-800 text-sm font-medium">À contrôler</span>
+                  <Link
+                    href="/devoirs"
+                    className="text-blue-800 text-sm font-medium hover:underline cursor-pointer"
+                  >
+                   Voir plus
+                  </Link>
                 </div>
 
                 {/* Container avec scrollbar */}

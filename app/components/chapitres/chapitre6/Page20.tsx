@@ -1,5 +1,7 @@
 "use client";
-import React from "react";
+
+import React, { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const chapter6Page20AudioMappings: { [key: string]: string } = {
   // Ba
@@ -75,77 +77,124 @@ const chapter6Page20AudioMappings: { [key: string]: string } = {
   "غَيْ": "chap6_pg20_case36",
 };
 
-const Page20 = () => {
-  const playLetterAudio = (vowelLetter: string) => {
-    const audioFileName = chapter6Page20AudioMappings[vowelLetter];
-    if (audioFileName) {
-      const audio = new Audio(`/audio/chapitre6/${audioFileName}.mp3`);
-      audio.play().catch((error) => {
-        console.error("Erreur lors de la lecture audio:", error);
-      });
-    }
-  };
+const words = [
+  "بَوْ", "بَيْ",
+  "تَوْ", "تَيْ",
+  "ثَوْ", "ثَيْ",
+  "جَوْ", "جَيْ",
+  "حَوْ", "حَيْ",
+  "خَوْ", "خَيْ",
+  "دَوْ", "دَيْ",
+  "ذَوْ", "ذَيْ",
+  "رَوْ", "رَيْ",
+  "زَوْ", "زَيْ",
+  "سَوْ", "سَيْ",
+  "شَوْ", "شَيْ",
+  "صَوْ", "صَيْ",
+  "ضَوْ", "ضَيْ",
+  "طَوْ", "طَيْ",
+  "ظَوْ", "ظَيْ",
+  "عَوْ", "عَيْ",
+  "غَوْ", "غَيْ",
+];
 
-  const words = [
-    "بَوْ", "بَيْ",
-    "تَوْ", "تَيْ",
-    "ثَوْ", "ثَيْ",
-    "جَوْ", "جَيْ",
-    "حَوْ", "حَيْ",
-    "خَوْ", "خَيْ",
-    "دَوْ", "دَيْ",
-    "ذَوْ", "ذَيْ",
-    "رَوْ", "رَيْ",
-    "زَوْ", "زَيْ",
-    "سَوْ", "سَيْ",
-    "شَوْ", "شَيْ",
-    "صَوْ", "صَيْ",
-    "ضَوْ", "ضَيْ",
-    "طَوْ", "طَيْ",
-    "ظَوْ", "ظَيْ",
-    "عَوْ", "عَيْ",
-    "غَوْ", "غَيْ",
-  ];
-
-  return (
-    <div className="font-arabic min-h-screen" style={{ direction: "rtl" }}>
-      <div className="w-full h-full bg-gray-900 overflow-hidden">
-        {/* Header */}
-        <div className="text-white p-6 text-center border-b-2 border-gray-700">
-          <div className="text-3xl md:text-3xl font-bold">Leçon : lettres douces</div>
-        </div>
-
-        {/* Content */}
-        <div className="p-8 bg-gray-900">
-          <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
-            {words.map((word, index) => (
-              <DiphthongCard
-                key={index}
-                word={word}
-                onClick={() => playLetterAudio(word)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <footer className="border-t border-gray-700 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
-          <div>Page 20</div>
-          <div className="mt-1">© 2025 Tous droits réservés</div>
-        </footer>
-      </div>
-    </div>
-  );
+const playLetterAudio = (word: string) => {
+  const audioFileName = chapter6Page20AudioMappings[word];
+  if (audioFileName) {
+    const audio = new Audio(`/audio/chapitre6/${audioFileName}.mp3`);
+    audio.play().catch((err) => console.error("Erreur audio:", err));
+  }
 };
 
-// Carte pour chaque combinaison (lettre + fatha + lettre douce)
+// === 📘 Introduction Page ===
+const IntroductionPage = () => (
+  <div className="p-4 md:p-8 bg-gray-900">
+    <div className="w-full bg-gray-800 rounded-lg p-6 md:p-8">
+      <div className="text-white space-y-6 text-lg md:text-xl leading-relaxed">
+        <p>
+          Vous vous souvenez des lettres de prolongation ? Nous avons appris que
+          <span className="text-cyan-400 font-semibold"> Fatha + Alif</span>,{" "}
+          <span className="text-cyan-400 font-semibold">Damma + Waw</span>, et{" "}
+          <span className="text-cyan-400 font-semibold">Kasra + Ya</span> allongent le son.
+        </p>
+
+        <p>
+          Mais que se passe-t-il si la lettre de prolongation <span className="font-semibold">ne correspond pas</span> à
+          la voyelle précédente ? Par exemple : <span className="text-yellow-400 font-semibold">Fatha + Waw</span> ou{" "}
+          <span className="text-yellow-400 font-semibold">Fatha + Ya</span> ?
+        </p>
+
+        <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6">
+          <p>
+            ✨ <span className="font-semibold">La réponse : Les lettres douces (Layyinah) !</span>
+            <br />
+            <br />
+            Quand la lettre de prolongation ne correspond pas à la voyelle, elle ne servira
+            <span className="font-semibold"> PAS à allonger</span> le son. Au lieu de cela,
+            elle devient une <span className="text-orange-400 font-semibold">lettre douce</span>.
+            <br />
+            <br />
+            On <span className="font-semibold">arrête leur son en douceur</span> au lieu de le prolonger.
+            <br />
+            <br />
+            Il n'y en a que deux : <span className="text-orange-400 font-bold text-3xl inline-block">ي</span> (Ya) et{" "}
+            <span className="text-blue-400 font-bold text-3xl inline-block">و</span> (Waw)
+            <br />
+            <br />
+            <span className="text-gray-300">Exemples :</span>
+            <br />
+            • <span className="text-yellow-400 text-lg">بَوْ</span> = « baw » (son arrêté doucement, pas prolongé)
+            <br />
+            • <span className="text-yellow-400 text-lg">بَيْ</span> = « bay » (son arrêté doucement, pas prolongé)
+            <br />
+            • <span className="text-yellow-400 text-lg">حَوْ</span> = « haw » (son arrêté doucement, pas prolongé)
+            <br />
+            • <span className="text-yellow-400 text-lg">حَيْ</span> = « hay » (son arrêté doucement, pas prolongé)
+          </p>
+        </div>
+
+        <p>
+          🎯 <span className="font-semibold">Comment les identifier :</span>
+          <br />
+          • Une lettre avec une <span className="text-yellow-400">Fatha</span>
+          <br />
+          • Suivie d'un <span className="text-blue-400">Ya (ي)</span> ou <span className="text-blue-400">Waw (و)</span> avec un Sukun
+          <br />
+          • La voyelle ne correspond <span className="font-semibold">PAS</span> à la lettre douce
+          <br />
+          • Le son s'arrête doucement, sans prolongation
+        </p>
+
+        <p>
+          💡 <span className="font-semibold">Différence clé :</span>
+          <br />
+          <span className="text-cyan-400">Prolongation</span> : La voyelle est allongée sur 2 temps
+          <br />
+          <span className="text-orange-400">Lettre douce</span> : Le son s'arrête doucement sur 1 temps
+        </p>
+
+        <p>
+          Pratiquez les lettres douces ci-dessous. Écoutez bien la différence
+          entre un son prolongé et un son qui s'arrête doucement !
+        </p>
+      </div>
+    </div>
+
+    <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-base md:text-lg">
+      <div>Leçon 20 : Lettres douces</div>
+      <div className="mt-1">© 2025 Tous droits réservés</div>
+    </footer>
+  </div>
+);
+
+// === 🧱 Diphthong Card ===
 const DiphthongCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
   <div
-    className="bg-gray-800 border border-zinc-500 rounded-xl p-3 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[90px] flex items-center justify-center cursor-pointer"
+    className="bg-gray-800 border border-zinc-500 rounded-xl p-3 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[120px] flex items-center justify-center cursor-pointer"
     onClick={onClick}
   >
     <div
-      className="text-2xl md:text-3xl font-bold leading-relaxed text-white group-hover:scale-105 transition-transform duration-300 break-keep"
+      className="text-4xl md:text-5xl font-bold leading-relaxed text-white group-hover:scale-105 transition-transform duration-300 break-keep"
       dir="rtl"
       lang="ar"
       style={{ fontFeatureSettings: '"calt" 1, "liga" 1' }}
@@ -154,5 +203,79 @@ const DiphthongCard = ({ word, onClick }: { word: string; onClick?: () => void }
     </div>
   </div>
 );
+
+// === 📖 Exercise Page ===
+const ExercisePage = () => (
+  <div className="p-4 md:p-8 bg-gray-900" dir="rtl">
+    <div className="max-w-6xl mx-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
+        {words.map((word, index) => (
+          <DiphthongCard key={index} word={word} onClick={() => playLetterAudio(word)} />
+        ))}
+      </div>
+    </div>
+
+    <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-sm md:text-base">
+      <div>Page 20</div>
+      <div className="mt-1">© 2025 Tous droits réservés</div>
+    </footer>
+  </div>
+);
+
+// === 📖 Main Component ===
+const Page20 = () => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const totalPages = 2;
+
+  return (
+    <div className="font-arabic min-h-screen bg-gray-900">
+      <div className="text-white p-4 md:p-6 text-center border-b-2">
+        <div className="text-2xl md:text-3xl font-bold mb-2">
+          {currentPage === 0
+            ? "Leçon 20 : Lettres douces"
+            : "Leçon 20 : Pratique des lettres douces"}
+        </div>
+        {currentPage === 1 && (
+          <div className="text-md md:text-lg text-amber-300">
+            Cliquez sur chaque combinaison pour écouter les lettres douces.
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <div className="flex justify-between items-center px-4 py-4">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+          disabled={currentPage === 0}
+          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
+            currentPage === 0
+              ? "border-gray-600 text-gray-600 cursor-not-allowed"
+              : "border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110"
+          }`}
+        >
+          <ChevronLeft size={18} />
+        </button>
+
+        <div className="text-white font-semibold text-sm md:text-base">
+          Page {currentPage + 1} / {totalPages}
+        </div>
+
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+          disabled={currentPage === totalPages - 1}
+          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
+            currentPage === totalPages - 1
+              ? "border-gray-600 text-gray-600 cursor-not-allowed"
+              : "border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110"
+          }`}
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
+
+      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage />}
+    </div>
+  );
+};
 
 export default Page20;

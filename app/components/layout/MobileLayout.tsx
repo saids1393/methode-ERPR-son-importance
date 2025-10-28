@@ -44,14 +44,19 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
         {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
       
-      <div className="flex items-center gap-2">
-        <div className="p-1.5 bg-blue-500/10 rounded-lg">
-          <BookOpen className="text-blue-400" size={18} />
-        </div>
-        <h1 className="text-lg font-semibold text-white">
-          Méthode ERPR
-        </h1>
-      </div>
+      <div className="flex items-center gap-1">
+  <div className="p-1.5 rounded-lg">
+    <img
+      src="/img/logo_ecrit_blanc-point.png" // 👉 remplace par ton chemin d’image
+      alt="Logo Méthode ERPR"
+      className="w-9 h-8 object-contain "
+    />
+  </div>
+  <h1 className="md:text-xl sm:text-md font-bold text-white-900" style={{ fontFamily: "'Spectral', serif" }}>
+    Méthode ERPR
+  </h1>
+</div>
+
     </div>
     
   </div>

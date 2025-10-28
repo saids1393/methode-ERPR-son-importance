@@ -66,7 +66,7 @@ export async function GET(req: Request) {
           const baseUrl =
             process.env.NODE_ENV === "production"
               ? process.env.NEXTAUTH_URL
-              : "http://localhost:6725";
+              : "http://localhost:3000";
 
           const response = await fetch(
             `${baseUrl}/api/stripe/charge-second-payment`,

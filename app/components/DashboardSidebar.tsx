@@ -24,25 +24,33 @@ export default function DashboardSidebar({
     setMobileMenuOpen
 }: DashboardSidebarProps) {
     const pathname = usePathname(); // URL active
-
+    const isDesktop = window.innerWidth >= 1024;
     return (
         <div className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-30 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="p-6">
-                {/* Logo */}
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center">
-                            <BookOpen className="h-5 w-5 text-white " />
-                        </div>
-                        <span className="md:text-xl sm:text-sm font-bold text-gray-900">Méthode ERPR</span>
-                    </div>
-                    <button
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="lg:hidden text-gray-500 hover:text-gray-700"
-                    >
-                        <X className="h-6 w-6" />
-                    </button>
-                </div>
+{/* Logo */}
+<div className="flex items-center justify-between mb-8">
+    <div className="flex items-center space-x-1">
+        <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
+            <img
+                src="/img/logo-bleu-fonce-point.png" // 👉 remplace par ton chemin d’image
+                alt="Logo Méthode ERPR"
+                className="w-full h-full object-cover"
+            />
+        </div>
+        <span className="md:text-xl sm:text-sm font-bold text-gray-900"style={{
+    fontFamily: "'Spectral', serif",
+    fontSize: isDesktop ? "1.5rem" : "1.2rem",
+  }}>Méthode ERPR</span>
+    </div>
+    <button
+        onClick={() => setMobileMenuOpen(false)}
+        className="lg:hidden text-gray-500 hover:text-gray-700"
+    >
+        <X className="h-6 w-6" />
+    </button>
+</div>
+
 
                 {/* Search */}
                 <div className="relative mb-8">
