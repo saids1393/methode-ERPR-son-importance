@@ -1,8 +1,7 @@
-// app/api/cron/process-second-payments/route.ts
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
-// Ce endpoint sera appelé tous les jours par un cron job
+// Ce endpoint sera appelé régulièrement (par un cron job ou manuellement)
 export async function GET(req: Request) {
   try {
     // Vérifier l'authentification (secret token)
@@ -11,19 +10,24 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("🔄 Exécution du cron - Traitement des paiements 2x...");
+    console.log("🔄 Exécution du cron - Traitement des paiements 2x (TEST 2 MIN)...");
 
-    // Date il y a exactement 30 jours
-    const thirtyDaysInSeconds = 30 * 24 * 60 * 60; // 30 jours en secondes
-    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - thirtyDaysInSeconds;
+    // 🧪 Test : 2 minutes après le 1er paiement
+    const twoMinutesInSeconds = 2 * 60; // 2 minutes
+    const twoMinutesAgo = Math.floor(Date.now() / 1000) - twoMinutesInSeconds;
 
-    console.log(`📅 Recherche des paiements du ${new Date(thirtyDaysAgo * 1000).toLocaleDateString()}`);
-    // Récupérer tous les Payment Intents du 1er paiement créés il y a 30 jours
+    console.log(
+      `📅 Recherche des paiements du ${new Date(
+        twoMinutesAgo * 1000
+      ).toLocaleTimeString()} (±30 secondes)`
+    );
+
+    // Récupérer tous les PaymentIntents créés il y a environ 2 minutes
     const paymentIntents = await stripe.paymentIntents.list({
       limit: 100,
       created: {
-        gte: thirtyDaysAgo - 3600, // -1h de marge
-        lte: thirtyDaysAgo + 3600, // +1h de marge
+        gte: twoMinutesAgo - 30, // marge de 30 sec avant
+        lte: twoMinutesAgo + 30, // marge de 30 sec après
       },
     });
 
@@ -32,7 +36,7 @@ export async function GET(req: Request) {
     const results = [];
 
     for (const pi of paymentIntents.data) {
-      // Vérifier si c'est un 1er paiement 2x
+      // Vérifier si c'est un 1er paiement 2x réussi
       if (
         pi.metadata?.paymentPlan === "2x" &&
         pi.metadata?.paymentNumber === "1" &&
@@ -43,7 +47,7 @@ export async function GET(req: Request) {
 
         console.log(`💳 Traitement du 2e paiement pour ${email}`);
 
-        // Vérifier si le 2ème paiement n'a pas déjà été effectué
+        // Vérifier si le 2ème paiement a déjà été effectué
         const existingSecondPayments = await stripe.paymentIntents.list({
           customer: customerId,
           limit: 10,
@@ -61,7 +65,7 @@ export async function GET(req: Request) {
           continue;
         }
 
-        // Effectuer le 2ème paiement
+        // Lancer le 2e paiement
         try {
           const baseUrl =
             process.env.NODE_ENV === "production"
@@ -107,10 +111,13 @@ export async function GET(req: Request) {
   }
 }
 
-// Pour les tests manuels en développement (optionnel)
+// Pour tests manuels en développement
 export async function POST(req: Request) {
   if (process.env.NODE_ENV === "production") {
-    return NextResponse.json({ error: "POST not allowed in production" }, { status: 405 });
+    return NextResponse.json(
+      { error: "POST not allowed in production" },
+      { status: 405 }
+    );
   }
   return GET(req);
 }
