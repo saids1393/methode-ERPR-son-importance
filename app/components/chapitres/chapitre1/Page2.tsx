@@ -72,7 +72,6 @@ const IntroductionPage = () => {
           <p>
             Dans cette leçon, nous allons nous concentrer sur les <span className="text-purple-400 font-semibold">lettres en début de mot</span>.
             Leur forme change légèrement pour pouvoir se relier à la lettre suivante.
-            Cette forme est appelée <span className="font-semibold">forme initiale</span>.
             <br />
             👉 Et comme l’arabe se lit <span className="text-yellow-400 font-semibold">de droite vers la gauche</span>, 
             le <span className="font-semibold">wagon du début</span> se trouve donc à <span className="underline">droite</span> du mot.

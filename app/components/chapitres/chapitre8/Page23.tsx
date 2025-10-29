@@ -88,8 +88,6 @@ const IntroductionPage = () => (
             avec Soukoun. En écoutant et en prononçant ces mots, vous allez :
             <br />
             <br />
-            • Recognizing the Soukoun in real context
-            <br />
             • Pratiquer la prononciation correcte des sons arrêtés
             <br />
             • Consolider votre compréhension de ce diacritique crucial

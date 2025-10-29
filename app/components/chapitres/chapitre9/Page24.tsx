@@ -3,6 +3,40 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+// === 🎧 Mapping audio lettres isolées (repris du modèle de la page 1) ===
+const letterAudioMappings: { [key: string]: string } = {
+  "ا": "chap0_pg0_case1",
+  "ب": "chap0_pg0_case2",
+  "ت": "chap0_pg0_case3",
+  "ث": "chap0_pg0_case4",
+  "ج": "chap0_pg0_case5",
+  "ح": "chap0_pg0_case6",
+  "خ": "chap0_pg0_case7",
+  "د": "chap0_pg0_case8",
+  "ذ": "chap0_pg0_case9",
+  "ر": "chap0_pg0_case10",
+  "ز": "chap0_pg0_case11",
+  "س": "chap0_pg0_case12",
+  "ش": "chap0_pg0_case13",
+  "ص": "chap0_pg0_case14",
+  "ض": "chap0_pg0_case15",
+  "ط": "chap0_pg0_case16",
+  "ظ": "chap0_pg0_case17",
+  "ع": "chap0_pg0_case18",
+  "غ": "chap0_pg0_case19",
+  "ف": "chap0_pg0_case20",
+  "ق": "chap0_pg0_case21",
+  "ك": "chap0_pg0_case22",
+  "ل": "chap0_pg0_case23",
+  "م": "chap0_pg0_case24",
+  "ن": "chap0_pg0_case25",
+  "ه": "chap0_pg0_case26",
+  "و": "chap0_pg0_case27",
+  "ي": "chap0_pg0_case28",
+  "ء": "chap0_pg0_case29",
+};
+
+// === 🎧 Mapping audio Chapitre 9, Page 24 (mots) ===
 const chapter9Page24AudioMappings: { [key: string]: string } = {
   "الشَّمْسُ": "chap9_pg24_case15",
   "النَّهْرُ": "chap9_pg24_case16",
@@ -14,16 +48,29 @@ const chapter9Page24AudioMappings: { [key: string]: string } = {
   "الْمَاءُ": "chap9_pg24_case22",
 };
 
+// === 🌞 Lettres et exemples ===
 const solarLetters = ["ت", "ث", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ل", "ن"];
 const lunarLetters = ["ا", "ب", "ج", "ح", "خ", "ع", "غ", "ف", "ق", "ك", "م", "و", "ه", "ي"];
 const solarExamples = ["الشَّمْسُ", "النَّهْرُ", "الدَّرْسُ", "التِّينُ"];
 const lunarExamples = ["الْقَمَرُ", "الْبَيْتُ", "الْكِتَابُ", "الْمَاءُ"];
 
-const playLetterAudio = (word: string) => {
-  const audioFileName = chapter9Page24AudioMappings[word];
+// === 🔊 Fonction de lecture audio ===
+const playLetterAudio = (item: string) => {
+  // On vérifie d'abord dans les audios de lettres
+  let audioFileName = letterAudioMappings[item];
+  let folder = "/audio/chapitre0_1/";
+
+  // Sinon on vérifie dans les audios de la page 24
+  if (!audioFileName) {
+    audioFileName = chapter9Page24AudioMappings[item];
+    folder = "/audio/chapitre9/";
+  }
+
   if (audioFileName) {
-    const audio = new Audio(`/audio/chapitre9/${audioFileName}.mp3`);
+    const audio = new Audio(`${folder}${audioFileName}.mp3`);
     audio.play().catch((err) => console.error("Erreur audio:", err));
+  } else {
+    console.warn("Aucun audio trouvé pour :", item);
   }
 };
 
@@ -69,7 +116,6 @@ const IntroductionPage = () => (
             <span className="text-gray-300">ا ب ج ح خ ع غ ف ق ك م و ه ي</span>
             <br />
             Avec les lettres lunaires, on <span className="text-cyan-400 font-semibold">prononce le Lam</span> avec un Soukoun.
-            Le Soukoun est bien visible au-dessus du Lam, ce qui indique sa prononciation claire.
           </p>
         </div>
 
@@ -83,90 +129,23 @@ const IntroductionPage = () => (
             <br />
             • Marquées par une <span className="text-orange-400 font-bold">Chaddah (ّ)</span> sur la lettre après le Lam
             <br />
-            • Le Chaddah indique l'assimilation du Lam avec la lettre
-            <br />
-            • <span className="text-yellow-400 text-lg">الشَّمْسُ</span> = Ach-chams (remarquez le Chaddah sur le Sheen)
-            <br />
-            • <span className="text-yellow-400 text-lg">الدَّرْسُ</span> = Ad-dars (remarquez le Chaddah sur le Dal)
+            • <span className="text-yellow-400 text-lg">الشَّمْسُ</span> = Ach-chams
           </p>
 
           <p>
             <span className="text-blue-400 font-bold">Lettres lunaires :</span>
             <br />
-            • <span className="text-cyan-400 font-bold">Pas de Chaddah</span> sur la lettre après le Lam
+            • Le Lam porte un <span className="text-cyan-400 font-bold">Soukoun (ْ)</span>
             <br />
-            • Le Lam porte un <span className="text-cyan-400 font-bold">Soukoun (ْ)</span> bien visible
-            <br />
-            • <span className="text-yellow-400 text-lg">الْقَمَرُ</span> = Al-qamar (remarquez le Soukoun du Lam)
-            <br />
-            • <span className="text-yellow-400 text-lg">الْكِتَابُ</span> = Al-kitaab (remarquez le Soukoun du Lam)
+            • <span className="text-yellow-400 text-lg">الْقَمَرُ</span> = Al-qamar
           </p>
         </div>
-
-        <p>
-          💡 <span className="font-semibold">Pourquoi est-ce important ?</span>
-        </p>
-
-        <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4 md:p-6 space-y-2">
-          <p>
-            • Pour éviter la question : "Pourquoi ne prononce-t-on pas le Lam ?"
-            <br />
-            → <span className="text-amber-300">Parce que le Lam s'assimile avec la lettre solaire !</span>
-          </p>
-          <p>
-            • Cela vous aide quand vous atteindrez un niveau avancé en arabe
-            <br />
-            → <span className="text-amber-300">Vous pourrez lire des phrases sans voyelles ni Chaddah</span>
-          </p>
-          <p>
-            • C'est essentiel pour une récitation correcte du Coran
-            <br />
-            → <span className="text-amber-300">Vous prononcerez chaque mot avec la fluidité correcte</span>
-          </p>
-        </div>
-
-        <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-4 md:p-6 space-y-3">
-          <p>
-            <span className="font-semibold text-amber-300">Exemples avec lettres solaires :</span>
-            <br />
-            • <span className="text-yellow-400 text-lg">الشَّمْسُ</span> = Ach-chams (le soleil)
-            <br />
-            • <span className="text-yellow-400 text-lg">الدَّرْسُ</span> = Ad-dars (la leçon)
-            <br />
-            • <span className="text-yellow-400 text-lg">النَّهْرُ</span> = An-nahr (le fleuve)
-            <br />
-            • <span className="text-yellow-400 text-lg">التِّينُ</span> = At-tin (la figue)
-          </p>
-
-          <p>
-            <span className="font-semibold text-amber-300">Exemples avec lettres lunaires :</span>
-            <br />
-            • <span className="text-yellow-400 text-lg">الْقَمَرُ</span> = Al-qamar (la lune)
-            <br />
-            • <span className="text-yellow-400 text-lg">الْكِتَابُ</span> = Al-kitaab (le livre)
-            <br />
-            • <span className="text-yellow-400 text-lg">الْبَيْتُ</span> = Al-bayt (la maison)
-            <br />
-            • <span className="text-yellow-400 text-lg">الْمَاءُ</span> = Al-maa (l'eau)
-          </p>
-        </div>
-
-        <p>
-          💡 <span className="font-semibold">Pourquoi « solaires » et « lunaires » ?</span>
-          <br />
-          • <span className="text-yellow-400">Solaire (Shamsiyah)</span> : parce que le mot « soleil »
-          (الشَّمْس) contient une lettre solaire qui assimile le « L »
-          <br />
-          • <span className="text-blue-400">Lunaire (Qamariyah)</span> : parce que le mot « lune »
-          (الْقَمَرُ) contient une lettre lunaire où le « L » se prononce normalement
-        </p>
 
         <p>
           🌟 <span className="font-semibold">Impact en Tajweed :</span>
           <br />
-          Cette distinction est essentielle pour une prononciation correcte du Coran.
-          Elle affecte la fluidité et la clarté de votre récitation. Écoutez bien la différence
-          entre les deux catégories dans la page suivante !
+          Cette distinction est essentielle pour une récitation correcte du Coran.
+          Écoutez bien la différence entre les deux catégories dans la page suivante !
         </p>
       </div>
     </div>
@@ -178,7 +157,7 @@ const IntroductionPage = () => (
   </div>
 );
 
-// === 🧱 Letter Card ===
+// === 🧱 Carte Lettre ===
 const LetterCard = ({
   letter,
   color,
@@ -196,7 +175,7 @@ const LetterCard = ({
   </div>
 );
 
-// === 🧱 Example Card ===
+// === 🧱 Carte Exemple ===
 const ExampleCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
   <div
     className="bg-gray-800 border border-gray-700 rounded-xl p-6 text-center hover:bg-gray-700 transition-all duration-300 cursor-pointer min-h-[120px] flex items-center justify-center"
@@ -213,7 +192,7 @@ const ExampleCard = ({ word, onClick }: { word: string; onClick?: () => void }) 
   </div>
 );
 
-// === 📖 Exercise Page ===
+// === 📖 Page d’exercice ===
 const ExercisePage = () => (
   <div className="p-4 md:p-8 bg-gray-900" dir="rtl">
     <div className="max-w-6xl mx-auto space-y-12">
@@ -224,7 +203,12 @@ const ExercisePage = () => (
         </h2>
         <div className="flex flex-wrap gap-3 mb-8 justify-center">
           {solarLetters.map((letter, index) => (
-            <LetterCard key={index} letter={letter} color="text-yellow-400" onClick={() => playLetterAudio(letter)} />
+            <LetterCard
+              key={index}
+              letter={letter}
+              color="text-yellow-400"
+              onClick={() => playLetterAudio(letter)}
+            />
           ))}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -241,7 +225,12 @@ const ExercisePage = () => (
         </h2>
         <div className="flex flex-wrap gap-3 mb-8 justify-center">
           {lunarLetters.map((letter, index) => (
-            <LetterCard key={index} letter={letter} color="text-blue-400" onClick={() => playLetterAudio(letter)} />
+            <LetterCard
+              key={index}
+              letter={letter}
+              color="text-blue-400"
+              onClick={() => playLetterAudio(letter)}
+            />
           ))}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -259,7 +248,7 @@ const ExercisePage = () => (
   </div>
 );
 
-// === 📖 Main Component ===
+// === 📖 Composant Principal ===
 const Page24 = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const totalPages = 2;
@@ -316,3 +305,5 @@ const Page24 = () => {
 };
 
 export default Page24;
+
+

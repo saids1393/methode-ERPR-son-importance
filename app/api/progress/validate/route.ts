@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logPageCompletion, logQuizCompletion } from '@/lib/progressTracking';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,8 +42,12 @@ export async function POST(request: NextRequest) {
           data: { completedPages: updatedPages },
         });
 
-        return NextResponse.json({ 
-          success: true, 
+        // 📊 TRACKING: Enregistrer la complétion de la page pour les graphiques
+        await logPageCompletion(user.id, pageNumber, chapterNumber);
+        console.log(`📊 [TRACKING] Page ${pageNumber} enregistrée dans l'historique`);
+
+        return NextResponse.json({
+          success: true,
           type: 'page',
           pageNumber,
           completedPages: updatedPages,
@@ -73,8 +78,12 @@ export async function POST(request: NextRequest) {
           data: { completedQuizzes: updatedQuizzes },
         });
 
-        return NextResponse.json({ 
-          success: true, 
+        // 📊 TRACKING: Enregistrer la complétion du quiz pour les graphiques
+        await logQuizCompletion(user.id, quizNumber);
+        console.log(`📊 [TRACKING] Quiz ${quizNumber} enregistré dans l'historique`);
+
+        return NextResponse.json({
+          success: true,
           type: 'quiz',
           quizNumber,
           completedQuizzes: updatedQuizzes,

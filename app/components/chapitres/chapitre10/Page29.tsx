@@ -40,7 +40,7 @@ const IntroductionPage = () => (
 
         <p>
           Maintenant que vous maîtrisez toutes les bases du Tajweed, il est temps de mettre en pratique
-          ce que vous avez appris ! Cette leçon vous demande de <span className="text-yellow-400 font-semibold">rendre les mots coraniques</span>
+          ce que vous avez appris ! Cette leçon vous demande de <span className="text-yellow-400 font-semibold">rendre les mots coraniques </span>
           en écrivant leurs lettres <span className="text-cyan-400 font-semibold">de droite à gauche</span>, en appliquant
           le sens de chaque lettre que vous avez étudié au début.
         </p>
@@ -150,13 +150,6 @@ const ExercisePage = () => (
             <WordCard key={index} word={word} onClick={() => playLetterAudio(word)} />
           ))}
         </div>
-      </div>
-
-      {/* Practice Note */}
-      <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-4 md:p-6 text-center">
-        <p className="text-white text-base md:text-lg">
-          💡 <span className="text-amber-300">Conseil :</span> Cliquez sur chaque mot pour l'écouter, puis écrivez-le sur papier.
-        </p>
       </div>
     </div>
 

@@ -68,7 +68,6 @@ const IntroductionPage = () => {
 
           <p>
             Lorsqu'une lettre se trouve au <span className="font-semibold">milieu d'un mot</span>, elle doit s'attacher à la fois à la lettre précédente et à la lettre suivante.
-            Cette forme est appelée <span className="font-semibold">forme médiane</span>.
             <br />
             👉 Et comme l’arabe se lit <span className="text-yellow-400 font-semibold">de droite vers la gauche</span>, 
             la <span className="font-semibold">lettre du milieu</span> sera donc <span className="underline">la deuxième lettre en partant de la droite</span>.

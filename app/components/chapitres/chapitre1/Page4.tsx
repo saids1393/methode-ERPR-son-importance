@@ -69,7 +69,6 @@ const IntroductionPage = () => {
 
           <p>
             Lorsqu'une lettre se trouve à la <span className="font-semibold">fin d'un mot</span>, elle ne s'attache qu'à la lettre précédente mais pas à la suivante (puisqu'il n'y en a pas).
-            Cette forme est appelée <span className="font-semibold">forme finale</span>.
             <br />
             👉 Et comme l’arabe se lit <span className="text-yellow-400 font-semibold">de droite vers la gauche</span>,
             la <span className="font-semibold">lettre de fin</span> sera donc <span className="underline">la dernière lettre, placée tout à gauche du mot</span>.

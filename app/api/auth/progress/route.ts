@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logPageCompletion, logQuizCompletion } from '@/lib/progressTracking';
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,9 +53,9 @@ export async function POST(request: NextRequest) {
     console.log('👤 [API] PROGRESS - Utilisateur authentifié:', user.id);
 
     const body = await request.json();
-    const { pageNumber, quizNumber, action } = body;
+    const { pageNumber, quizNumber, action, chapterNumber } = body;
 
-    console.log('📊 [API] PROGRESS - Demande de mise à jour:', { pageNumber, quizNumber, action, userId: user.id });
+    console.log('📊 [API] PROGRESS - Demande de mise à jour:', { pageNumber, quizNumber, action, chapterNumber, userId: user.id });
     
     if (pageNumber !== undefined) {
       const currentUser = await prisma.user.findUnique({
@@ -84,9 +85,15 @@ export async function POST(request: NextRequest) {
         data: { completedPages: updatedPages },
       });
 
-      return NextResponse.json({ 
-        success: true, 
-        completedPages: updatedPages 
+      // 📊 TRACKING: Enregistrer seulement les ajouts de pages pour l'historique
+      if (action === 'add' && chapterNumber) {
+        await logPageCompletion(user.id, pageNumber, chapterNumber);
+        console.log(`📊 [TRACKING] Page ${pageNumber} du chapitre ${chapterNumber} enregistrée dans l'historique`);
+      }
+
+      return NextResponse.json({
+        success: true,
+        completedPages: updatedPages
       });
     }
 
@@ -118,9 +125,15 @@ export async function POST(request: NextRequest) {
         data: { completedQuizzes: updatedQuizzes },
       });
 
-      return NextResponse.json({ 
-        success: true, 
-        completedQuizzes: updatedQuizzes 
+      // 📊 TRACKING: Enregistrer seulement les ajouts de quiz pour l'historique
+      if (action === 'add') {
+        await logQuizCompletion(user.id, quizNumber);
+        console.log(`📊 [TRACKING] Quiz ${quizNumber} enregistré dans l'historique`);
+      }
+
+      return NextResponse.json({
+        success: true,
+        completedQuizzes: updatedQuizzes
       });
     }
 
