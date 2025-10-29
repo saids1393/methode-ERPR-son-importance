@@ -103,7 +103,6 @@ export default function CloudflareVideoPlayer({
             className={`transition-all duration-300 ${isLoading ? 'opacity-60' : 'opacity-100'}`}
           />
         </button>
-
         {/* Texte de chargement */}
         {isLoading && (
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-sm animate-pulse whitespace-nowrap">
