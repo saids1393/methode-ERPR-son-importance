@@ -47,8 +47,8 @@ export default function VideoPage({ params }: VideoPageProps) {
   if (error || !video) {
     return (
       <div className="min-h-screen bg-gray-900 text-white">
-        <div className="bg-gray-900 text-white p-6 text-center">
-          <div className="text-3xl font-bold mb-4">
+        <div className="text-white p-4 md:p-6 text-center border-b-2">
+          <div className="text-2xl md:text-3xl font-bold mb-2">
             Vidéo - {chapter.title}
           </div>
         </div>
@@ -93,23 +93,22 @@ export default function VideoPage({ params }: VideoPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <div className="bg-gray-900 text-white p-6 text-center">
-        <div className="text-3xl font-bold mb-4">
+      {/* Header - Design identique à Page1 */}
+      <div className="text-white p-4 md:p-6 text-center border-b-2">
+        <div className="text-2xl md:text-3xl font-bold mb-2">
           {video.title}
         </div>
       </div>
 
       {/* Lecteur vidéo pleine largeur */}
-      <div className="w-full h-[50vh] md:h-[60vh] lg:h-[80vh]">
+      <div className="w-full">
         <CloudflareVideoPlayer
           videoId={video.cloudflareVideoId}
           title={video.title}
           thumbnailUrl={video.thumbnailUrl}
-          controls={true}
+          className="w-full"
         />
       </div>
-
     </div>
   );
 }
