@@ -21,7 +21,7 @@ const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<nu
 
   const totalItems = totalPages + totalQuizzes;
 
-  const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30);
+  const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 30);
   const completedQuizzesFiltered = Array.from(completedQuizzes).filter(quizNum => quizNum !== 11);
 
   const completedItems = completedPagesFiltered.length + completedQuizzesFiltered.length;

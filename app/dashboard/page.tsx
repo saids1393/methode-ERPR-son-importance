@@ -104,7 +104,8 @@ export default function DashboardPage() {
       .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 11)
       .length;
     const totalItems = totalPages + totalQuizzes;
-    const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30);
+    // Page 0 est maintenant incluse dans le calcul, on exclut seulement la page 30 (évaluation finale)
+    const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 30);
     const completedItems = completedPagesFiltered.length + completedQuizzes.size;
     return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
   };
@@ -333,12 +334,12 @@ export default function DashboardPage() {
               a 15.9155 15.9155 0 0 1 0 -31.831"
                       fill="none"
                       stroke={
-                        (Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length / 29 * 100) === 100
+                        (Array.from(completedPages).filter(pageNum => pageNum !== 30).length / 30 * 100) === 100
                           ? "#10b981"
                           : "#1e40af"
                       }
                       strokeWidth="2"
-                      strokeDasharray={`${Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length / 29 * 100}, 100`}
+                      strokeDasharray={`${Array.from(completedPages).filter(pageNum => pageNum !== 30).length / 30 * 100}, 100`}
                       strokeLinecap="round"
                     />
                   </svg>
@@ -349,7 +350,7 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-gray-500 text-sm">Pages complétées</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {Array.from(completedPages).filter(pageNum => pageNum !== 0 && pageNum !== 30).length}/29
+                    {Array.from(completedPages).filter(pageNum => pageNum !== 30).length}/30
                   </p>
                 </div>
               </div>
@@ -552,7 +553,7 @@ export default function DashboardPage() {
 
                 {(() => {
                   const getNextPageToComplete = () => {
-                    const completedPagesArray = Array.from(completedPages).filter(p => p !== 0 && p !== 30);
+                    const completedPagesArray = Array.from(completedPages).filter(p => p !== 30);
 
                     if (completedPagesArray.length === 0) {
                       return { chapterNumber: 1, pageNumber: 1, isFirstPage: true };

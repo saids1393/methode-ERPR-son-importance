@@ -16,21 +16,38 @@ interface DayProgress {
 
 export async function GET(request: NextRequest) {
   try {
-    // ✅ Récupère l’utilisateur authentifié à partir du cookie JWT
+    console.log('📡 [API /progress/history] Requête reçue');
+
+    // ✅ Récupère l'utilisateur authentifié à partir du cookie JWT
     const user = await getAuthUserFromRequest(request);
 
     if (!user) {
+      console.warn('⚠️ [API /progress/history] Utilisateur non authentifié');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log(`👤 [API /progress/history] Utilisateur: ${user.id}`);
+
     // ✅ Récupère les snapshots réels depuis la base
+    console.log('📊 [API /progress/history] Récupération des snapshots...');
     const weekSnapshots = await getWeeklyProgressData(user.id);
     const monthSnapshots = await getMonthlyProgressData(user.id);
     const monthlyComparison = await getMonthlyComparison(user.id);
 
+    console.log(`✅ [API /progress/history] Snapshots récupérés:`, {
+      weekCount: weekSnapshots.length,
+      monthCount: monthSnapshots.length,
+      comparison: monthlyComparison
+    });
+
     // ✅ Formate les données pour les graphiques
     const weekData = formatWeekData(weekSnapshots);
     const monthData = formatMonthData(monthSnapshots);
+
+    console.log(`📈 [API /progress/history] Données formatées:`, {
+      weekDataLength: weekData.length,
+      monthDataLength: monthData.length
+    });
 
     return NextResponse.json({
       weekData,
@@ -40,9 +57,9 @@ export async function GET(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Erreur API progression:', error);
+    console.error('❌ [API /progress/history] Erreur:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
@@ -78,7 +95,7 @@ function formatWeekData(snapshots: any[]): DayProgress[] {
     weekData.push({
       day: dayName,
       completed: dataToUse?.pagesCompletedCount || 0,
-      total: 29, // TODO : Remplace par le nombre réel de chapitres/pages
+      total: 30, // 30 pages (page 0 incluse)
       percentage: dataToUse?.progressPercentage || 0,
     });
   }
@@ -118,7 +135,7 @@ function formatMonthData(snapshots: any[]): DayProgress[] {
     monthData.push({
       day: weekLabel,
       completed: lastSnapshot?.pagesCompletedCount || 0,
-      total: 29,
+      total: 30, // 30 pages (page 0 incluse)
       percentage: lastSnapshot?.progressPercentage || 0,
     });
   }

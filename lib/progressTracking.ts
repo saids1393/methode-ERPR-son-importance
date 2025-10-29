@@ -12,7 +12,9 @@ export async function logPageCompletion(
   chapterId: number
 ) {
   try {
-    await (prisma as any).userProgressLog.create({
+    console.log(`📝 [TRACKING] Tentative d'enregistrement page: userId=${userId}, page=${pageNumber}, chapter=${chapterId}`);
+
+    const log = await (prisma as any).userProgressLog.create({
       data: {
         userId,
         actionType: 'PAGE_COMPLETED',
@@ -22,10 +24,15 @@ export async function logPageCompletion(
       },
     });
 
+    console.log(`✅ [TRACKING] Log créé avec succès:`, log.id);
+
     // Créer/mettre à jour le snapshot quotidien
     await updateDailySnapshot(userId);
+
+    console.log(`✅ [TRACKING] Snapshot mis à jour pour userId=${userId}`);
   } catch (error) {
-    console.error('Erreur enregistrement page complétée:', error);
+    console.error('❌ [TRACKING] Erreur enregistrement page complétée:', error);
+    throw error;
   }
 }
 
@@ -37,7 +44,9 @@ export async function logQuizCompletion(
   chapterId: number
 ) {
   try {
-    await (prisma as any).userProgressLog.create({
+    console.log(`📝 [TRACKING] Tentative d'enregistrement quiz: userId=${userId}, chapter=${chapterId}`);
+
+    const log = await (prisma as any).userProgressLog.create({
       data: {
         userId,
         actionType: 'QUIZ_COMPLETED',
@@ -46,10 +55,15 @@ export async function logQuizCompletion(
       },
     });
 
+    console.log(`✅ [TRACKING] Quiz log créé avec succès:`, log.id);
+
     // Créer/mettre à jour le snapshot quotidien
     await updateDailySnapshot(userId);
+
+    console.log(`✅ [TRACKING] Snapshot mis à jour pour userId=${userId}`);
   } catch (error) {
-    console.error('Erreur enregistrement quiz complété:', error);
+    console.error('❌ [TRACKING] Erreur enregistrement quiz complété:', error);
+    throw error;
   }
 }
 
@@ -59,6 +73,8 @@ export async function logQuizCompletion(
  */
 async function updateDailySnapshot(userId: string) {
   try {
+    console.log(`📸 [SNAPSHOT] Mise à jour snapshot pour userId=${userId}`);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -67,23 +83,33 @@ async function updateDailySnapshot(userId: string) {
       select: { completedPages: true, completedQuizzes: true },
     });
 
-    if (!user) return;
+    if (!user) {
+      console.warn(`⚠️ [SNAPSHOT] Utilisateur ${userId} non trouvé`);
+      return;
+    }
 
-    // Filtrer les données réelles (pas les 0 et 30)
-    const validPages = user.completedPages.filter(p => p !== 0 && p !== 30);
-    
+    // Filtrer les données réelles (pas la page 30 qui est l'évaluation finale)
+    const validPages = user.completedPages.filter(p => p !== 30);
+
     // Calculer la progression réelle
-    // À adapter selon votre logique de totaux
-    const totalPages = 29; // À récupérer depuis vos chapitres réels
-    const totalQuizzes = 11; // À adapter
+    // Page 0 est maintenant incluse, donc 30 pages au total (0 à 29)
+    const totalPages = 30;
+    const totalQuizzes = 11;
     const totalItems = totalPages + totalQuizzes;
     const completedItems = validPages.length + user.completedQuizzes.length;
-    const progressPercentage = totalItems > 0 
-      ? Math.round((completedItems / totalItems) * 100) 
+    const progressPercentage = totalItems > 0
+      ? Math.round((completedItems / totalItems) * 100)
       : 0;
 
+    console.log(`📊 [SNAPSHOT] Stats calculées:`, {
+      validPages: validPages.length,
+      completedQuizzes: user.completedQuizzes.length,
+      progressPercentage,
+      date: today.toISOString()
+    });
+
     // Créer ou mettre à jour le snapshot
-    await (prisma as any).dailyProgressSnapshot.upsert({
+    const snapshot = await (prisma as any).dailyProgressSnapshot.upsert({
       where: {
         userId_snapshotDate: {
           userId,
@@ -103,8 +129,11 @@ async function updateDailySnapshot(userId: string) {
         progressPercentage,
       },
     });
+
+    console.log(`✅ [SNAPSHOT] Snapshot enregistré:`, snapshot.id);
   } catch (error) {
-    console.error('Erreur mise à jour snapshot quotidien:', error);
+    console.error('❌ [SNAPSHOT] Erreur mise à jour snapshot quotidien:', error);
+    throw error;
   }
 }
 
