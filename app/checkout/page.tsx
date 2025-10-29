@@ -1,16 +1,90 @@
-// app/checkout/page.tsx - Version avec 2 produits distincts
-
 'use client';
 import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
+// Liste blanche des domaines d'email fiables et utilisés en France (sans spam)
+const ALLOWED_EMAIL_DOMAINS = [
+  // Fournisseurs internationaux fiables
+  'gmail.com',
+  'yahoo.com',
+  'outlook.com',
+  'hotmail.com',
+  'icloud.com',
+  'protonmail.com',
+  'proton.me',
+
+  // Fournisseurs français grand public
+  'orange.fr',
+  'wanadoo.fr',
+  'sfr.fr',
+  'neuf.fr',
+  'bbox.fr',
+  'laposte.net',
+  'free.fr',
+  'numericable.fr',
+
+  // Fournisseurs français sécurisés / respectueux de la vie privée
+  'mailo.com',        // ex-netcourrier
+  'mail.fr',
+
+  // Aliases sécurisés
+  'pm.me',            // ProtonMail alias
+
+  // Adresses académiques françaises
+  'ac-paris.fr',
+  'ac-versailles.fr',
+  'ac-lyon.fr',
+  'ac-toulouse.fr',
+  'ac-aix-marseille.fr',
+  'ac-nice.fr',
+  'ac-lille.fr',
+  'ac-bordeaux.fr',
+  'ac-strasbourg.fr',
+  'ac-nantes.fr',
+];
+
+function validateEmailDomain(email: string): { valid: boolean; error?: string } {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { valid: false, error: 'Format email invalide' };
+  }
+
+  const domain = email.split('@')[1].toLowerCase();
+  
+  if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+    return { 
+      valid: false, 
+      error: `Le domaine ${domain} n'est pas autorisé` 
+    };
+  }
+
+  return { valid: true };
+}
+
 export default function CheckoutPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [paymentPlan, setPaymentPlan] = useState<'1x' | '2x'>('1x');
+
+  // Validation en temps réel de l'email
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    
+    if (value.includes('@')) {
+      const validation = validateEmailDomain(value);
+      if (!validation.valid) {
+        setEmailError(validation.error || '');
+      } else {
+        setEmailError('');
+      }
+    } else {
+      setEmailError('');
+    }
+  };
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,6 +94,16 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Validation finale avant envoi
+    const validation = validateEmailDomain(email);
+    if (!validation.valid) {
+      setError(validation.error ?? '');
+      return;
+    }
+
+    // Normaliser l'email
+    const normalizedEmail = email.toLowerCase().trim();
+
     setLoading(true);
     setError('');
 
@@ -28,15 +112,20 @@ export default function CheckoutPage() {
       const checkResponse = await fetch('/api/auth/check-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email: normalizedEmail })
       });
       
       const checkData = await checkResponse.json();
 
+      if (checkData.error) {
+        setError(checkData.error ?? '');
+        return;
+      }
+
       if (checkData.exists) {
         setError('Un compte existe déjà avec cet email. Veuillez vous connecter.');
         setTimeout(() => {
-          window.location.href = `/login?email=${encodeURIComponent(email)}`;
+          window.location.href = `/login?email=${encodeURIComponent(normalizedEmail)}`;
         }, 2000);
         return;
       }
@@ -46,7 +135,7 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          email, 
+          email: normalizedEmail, 
           paymentPlan // '1x' ou '2x'
         })
       });
@@ -54,7 +143,7 @@ export default function CheckoutPage() {
       const { sessionId, error: stripeError } = await response.json();
 
       if (stripeError) {
-        setError(stripeError);
+        setError(stripeError ?? '');
         return;
       }
 
@@ -145,11 +234,16 @@ export default function CheckoutPage() {
                       autoComplete="email"
                       required
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-3 bg-gray-900/50 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200"
+                      onChange={(e) => handleEmailChange(e.target.value)}
+                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 ${
+                        emailError ? 'border-red-500' : 'border-gray-800'
+                      }`}
                       placeholder="votre@email.com"
                     />
                   </div>
+                  {emailError && (
+                    <p className="mt-2 text-sm text-red-500">{emailError}</p>
+                  )}
                 </div>
 
                 {/* Payment plan selector */}
@@ -243,7 +337,7 @@ export default function CheckoutPage() {
                 <div>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !!emailError}
                     className="relative group w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (

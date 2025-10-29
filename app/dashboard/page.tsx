@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -35,6 +35,7 @@ import {
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
 import { useSimpleTimer } from '@/hooks/useSimpleTimer';
+import useRealProgressChart from '@/hooks/useRealProgressChart';
 import Logo from '@/app/components/Logo';
 import DashboardHeader from '@/app/components/DashboardHeader';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
@@ -85,6 +86,15 @@ export default function DashboardPage() {
     refreshTime
   } = useSimpleTimer();
 
+  // ✨ NOUVEAU : Récupérer les VRAIES données du graphique
+  const {
+    weekData,
+    monthData,
+    monthlyStats,
+    isLoading: chartDataLoading,
+    dataSource
+  } = useRealProgressChart();
+
   // Calculer la progression
   const calculateProgress = () => {
     const totalPages = chapters
@@ -113,124 +123,14 @@ export default function DashboardPage() {
   const progressPercentage = calculateProgress();
   const { totalPages, totalQuizzes } = getTotals();
 
-  // État pour les données de progression réelles
-  const [progressData, setProgressData] = useState<Array<{
-    day: string;
-    completed: number;
-    total: number;
-    percentage: number;
-  }>>([]);
-  const [monthlyProgressData, setMonthlyProgressData] = useState<Array<{
-    day: string;
-    completed: number;
-    total: number;
-    percentage: number;
-  }>>([]);
-  const [monthlyProgress, setMonthlyProgress] = useState<{
-    currentMonth: number;
-    previousMonth: number;
-    trend: 'up' | 'down' | 'stable';
-  }>({ currentMonth: 0, previousMonth: 0, trend: 'stable' });
-
-  // Calculer les vraies données de progression
-  const calculateRealProgressData = () => {
-    const today = new Date();
-    const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-    const weekData = [];
-
-    // Calculer la progression pour chaque jour de la semaine actuelle
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      const dayName = days[date.getDay()];
-
-      // Calculer la progression réelle pour ce jour
-      // Simulation basée sur la progression actuelle avec variation quotidienne réaliste
-      const dayProgress = Math.min(progressPercentage + (i * 2), 100); // Progression graduelle
-      const completed = Math.round((dayProgress / 100) * totalPages);
-      const total = totalPages;
-      const percentage = Math.round((completed / total) * 100);
-
-      weekData.push({
-        day: dayName,
-        completed,
-        total,
-        percentage
-      });
-    }
-
-    return weekData;
-  };
-
-  // Calculer les vraies données de progression mensuelle
-  const calculateRealMonthlyProgressData = () => {
-    const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-    const monthData = [];
-
-    // Obtenir le nombre de jours dans le mois actuel
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const startOfMonth = new Date(currentYear, currentMonth, 1);
-
-    // Calculer la progression pour chaque semaine du mois
-    const weeksInMonth = Math.ceil(daysInMonth / 7);
-
-    for (let week = 0; week < weeksInMonth; week++) {
-      const weekStart = week * 7 + 1;
-      const weekEnd = Math.min((week + 1) * 7, daysInMonth);
-      const weekLabel = `S${week + 1}`;
-
-      // Calculer la progression pour cette semaine
-      // Plus on avance dans le mois, plus la progression augmente
-      const weekProgressFactor = (week + 1) / weeksInMonth;
-      const weekProgress = Math.min(progressPercentage * weekProgressFactor, progressPercentage);
-      const completed = Math.round((weekProgress / 100) * totalPages);
-      const total = totalPages;
-      const percentage = Math.round((completed / total) * 100);
-
-      monthData.push({
-        day: weekLabel,
-        completed,
-        total,
-        percentage
-      });
-    }
-
-    return monthData;
-  };
-  // Calculer la progression mensuelle
-  const calculateMonthlyProgress = () => {
-    const currentDate = new Date();
-
-    // Progression du mois actuel = progression réelle actuelle
-    const currentMonthProgress = Math.min(progressPercentage, 100);
-
-    // Calculer la progression du mois précédent basée sur les données
-    // Si l'utilisateur a une progression élevée, le mois précédent était forcément plus bas
-    const progressionRate = Math.max(5, Math.min(25, currentMonthProgress * 0.3)); // Entre 5% et 25%
-    const previousMonthProgress = Math.max(0, currentMonthProgress - progressionRate);
-
-    let trend: 'up' | 'down' | 'stable' = 'stable';
-    const difference = currentMonthProgress - previousMonthProgress;
-    if (difference > 5) trend = 'up';
-    else if (difference < -5) trend = 'down';
-
-    return {
-      currentMonth: currentMonthProgress,
-      previousMonth: Math.round(previousMonthProgress),
-      trend
-    };
-  };
-
-  // Mettre à jour les données quand la progression change
+  // ✨ NOUVEAU : Logging pour vérifier la source des données
   useEffect(() => {
-    if (!progressLoading && progressPercentage !== undefined) {
-      setProgressData(calculateRealProgressData());
-      setMonthlyProgressData(calculateRealMonthlyProgressData());
-      setMonthlyProgress(calculateMonthlyProgress());
+    if (dataSource === 'REAL_DATA') {
+      console.log('✅ Dashboard utilise les VRAIES données du serveur');
+    } else if (dataSource === 'FALLBACK') {
+      console.warn('⚠️ Dashboard en mode FALLBACK (données en attente)');
     }
-  }, [progressPercentage, progressLoading, totalPages]);
+  }, [dataSource]);
 
   const getHomeworkStatuses = () => {
     const statuses: Array<{
@@ -534,21 +434,30 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Progress Section */}
             <div className="lg:col-span-2">
-              {/* Progress Chart Section */}
+              {/* Progress Chart Section - AVEC VRAIES DONNÉES */}
               <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Progression</h3>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Progression</h3>
+                    {/* ✨ NOUVEAU : Afficher la source des données */}
+                    {dataSource === 'REAL_DATA' && (
+                      <p className="text-xs text-green-600 mt-1">✅ Données réelles du serveur</p>
+                    )}
+                    {dataSource === 'FALLBACK' && (
+                      <p className="text-xs text-orange-600 mt-1">⚠️ Données en attente de mise à jour</p>
+                    )}
+                  </div>
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
                       <div className="text-sm text-gray-500">Ce mois</div>
-                      <div className={`text-lg font-bold ${monthlyProgress.trend === 'up' ? 'text-green-600' :
-                        monthlyProgress.trend === 'down' ? 'text-red-600' :
+                      <div className={`text-lg font-bold ${monthlyStats.trend === 'up' ? 'text-green-600' :
+                        monthlyStats.trend === 'down' ? 'text-red-600' :
                           'text-gray-600'
                         }`}>
-                        {monthlyProgress.currentMonth}%
-                        {monthlyProgress.trend === 'up' && ' ↗️'}
-                        {monthlyProgress.trend === 'down' && ' ↘️'}
-                        {monthlyProgress.trend === 'stable' && ' →'}
+                        {monthlyStats.currentMonth}%
+                        {monthlyStats.trend === 'up' && ' ↗️'}
+                        {monthlyStats.trend === 'down' && ' ↘️'}
+                        {monthlyStats.trend === 'stable' && ' →'}
                       </div>
                     </div>
                     <select
@@ -563,36 +472,45 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Chart Container */}
-                <div className="relative h-64">
-                  {/* Y-axis labels */}
-                  <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-4">
-                    <span>{totalPages}</span>
-                    <span>{Math.round(totalPages * 0.75)}</span>
-                    <span>{Math.round(totalPages * 0.5)}</span>
-                    <span>{Math.round(totalPages * 0.25)}</span>
-                    <span>0</span>
+                {chartDataLoading ? (
+                  <div className="h-64 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                      <p className="text-gray-500 text-sm">Chargement des données...</p>
+                    </div>
                   </div>
+                ) : (
+                  <div className="relative h-64">
+                    {/* Y-axis labels */}
+                    <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-400 pr-4">
+                      <span>{totalPages}</span>
+                      <span>{Math.round(totalPages * 0.75)}</span>
+                      <span>{Math.round(totalPages * 0.5)}</span>
+                      <span>{Math.round(totalPages * 0.25)}</span>
+                      <span>0</span>
+                    </div>
 
-                  {/* Chart area */}
-                  <div className="ml-8 h-full flex items-end justify-between space-x-2">
-                    {/* Barres basées sur la période sélectionnée */}
-                    {(selectedPeriod === 'week' ? progressData : monthlyProgressData).map((day, index) => (
-                      <div key={index} className="flex flex-col items-center space-y-2">
-                        {/* Bar container */}
-                        <div className="relative h-48 w-8 bg-gray-100 rounded-t-lg overflow-hidden">
-                          {/* Portion bleue (progression réelle) */}
-                          <div
-                            className="absolute bottom-0 w-full bg-blue-800 rounded-t-lg transition-all duration-1000"
-                            style={{ height: `${day.percentage}%` }}
-                            title={`${day.completed}/${day.total} (${day.percentage}%)`}
-                          ></div>
+                    {/* Chart area - UTILISE LES VRAIES DONNÉES */}
+                    <div className="ml-8 h-full flex items-end justify-between space-x-2">
+                      {/* Barres basées sur les VRAIES données */}
+                      {(selectedPeriod === 'week' ? weekData : monthData).map((day: { percentage: any; completed: any; total: any; day: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; }, index: Key | null | undefined) => (
+                        <div key={index} className="flex flex-col items-center space-y-2">
+                          {/* Bar container */}
+                          <div className="relative h-48 w-8 bg-gray-100 rounded-t-lg overflow-hidden">
+                            {/* Portion bleue (progression réelle) */}
+                            <div
+                              className="absolute bottom-0 w-full bg-blue-800 rounded-t-lg transition-all duration-1000"
+                              style={{ height: `${day.percentage}%` }}
+                              title={`${day.completed}/${day.total} (${day.percentage}%)`}
+                            ></div>
+                          </div>
+                          {/* Day label */}
+                          <span className="text-xs text-gray-500 font-medium">{day.day}</span>
                         </div>
-                        {/* Day label */}
-                        <span className="text-xs text-gray-500 font-medium">{day.day}</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Légende et statistiques */}
                 <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
@@ -607,15 +525,15 @@ export default function DashboardPage() {
                   <div className="text-right">
                     <div>
                       Moyenne: {Math.round(
-                        (selectedPeriod === 'week' ? progressData : monthlyProgressData)
-                          .reduce((sum, d) => sum + d.percentage, 0) /
-                        (selectedPeriod === 'week' ? progressData : monthlyProgressData).length
+                        (selectedPeriod === 'week' ? weekData : monthData)
+                          .reduce((sum: any, d: { percentage: any; }) => sum + d.percentage, 0) /
+                        ((selectedPeriod === 'week' ? weekData : monthData).length || 1)
                       )}%
                     </div>
                     <div className="text-xs">
-                      {monthlyProgress.trend === 'up' && `+${monthlyProgress.currentMonth - monthlyProgress.previousMonth}% vs mois dernier`}
-                      {monthlyProgress.trend === 'down' && `${monthlyProgress.currentMonth - monthlyProgress.previousMonth}% vs mois dernier`}
-                      {monthlyProgress.trend === 'stable' && 'Stable vs mois dernier'}
+                      {monthlyStats.trend === 'up' && `+${monthlyStats.difference}% vs mois dernier`}
+                      {monthlyStats.trend === 'down' && `${monthlyStats.difference}% vs mois dernier`}
+                      {monthlyStats.trend === 'stable' && 'Stable vs mois dernier'}
                     </div>
                   </div>
                 </div>
@@ -873,4 +791,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-};
+}

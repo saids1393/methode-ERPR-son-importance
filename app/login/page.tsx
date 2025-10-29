@@ -5,12 +5,90 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
+// Liste blanche des domaines d'email fiables et utilisés en France (sans spam)
+const ALLOWED_EMAIL_DOMAINS = [
+  // Fournisseurs internationaux fiables
+  'gmail.com',
+  'yahoo.com',
+  'outlook.com',
+  'hotmail.com',
+  'icloud.com',
+  'protonmail.com',
+  'proton.me',
+
+  // Fournisseurs français grand public
+  'orange.fr',
+  'wanadoo.fr',
+  'sfr.fr',
+  'neuf.fr',
+  'bbox.fr',
+  'laposte.net',
+  'free.fr',
+  'numericable.fr',
+
+  // Fournisseurs français sécurisés / respectueux de la vie privée
+  'mailo.com',        // ex-netcourrier
+  'mail.fr',
+
+  // Aliases sécurisés
+  'pm.me',            // ProtonMail alias
+
+  // Adresses académiques françaises
+  'ac-paris.fr',
+  'ac-versailles.fr',
+  'ac-lyon.fr',
+  'ac-toulouse.fr',
+  'ac-aix-marseille.fr',
+  'ac-nice.fr',
+  'ac-lille.fr',
+  'ac-bordeaux.fr',
+  'ac-strasbourg.fr',
+  'ac-nantes.fr',
+];
+
+// Fonction de validation d'email front
+function validateEmailDomain(email: string): { valid: boolean; error?: string } {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { valid: false, error: 'Format email invalide' };
+  }
+
+  const domain = email.split('@')[1].toLowerCase();
+  
+  if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+    return { 
+      valid: false, 
+      error: `Le domaine ${domain} n'est pas autorisé` 
+    };
+  }
+
+  return { valid: true };
+}
+
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState(''); 
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
   const router = useRouter();
+
+  // Validation en temps réel lors de la saisie d'email
+  const handleIdentifierChange = (value: string) => {
+    setIdentifier(value);
+    
+    // Si c'est un email, valider le domaine
+    if (value.includes('@')) {
+      const validation = validateEmailDomain(value);
+      if (!validation.valid) {
+        setEmailError(validation.error || '');
+      } else {
+        setEmailError('');
+      }
+    } else {
+      setEmailError(''); // C'est un username, pas de validation de domaine
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +96,15 @@ export default function LoginPage() {
     if (!identifier || !password) {
       toast.error('Veuillez remplir tous les champs');
       return;
+    }
+
+    // Validation finale avant envoi
+    if (identifier.includes('@')) {
+      const validation = validateEmailDomain(identifier);
+      if (!validation.valid) {
+        toast.error(validation.error || 'Domaine email non autorisé');
+        return;
+      }
     }
 
     setLoading(true);
@@ -75,26 +162,26 @@ export default function LoginPage() {
       ></div>
 
       <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
-<div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full sm:max-w-md">
-  {/* Logo avec image */}
-  <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
-    <img
-      src="/img/logo_ecrit_blanc-point.png"
-      alt="Logo Méthode ERPR"
-      className="w-14 h-13 object-contain"
-    />
-  </div>
+        <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full sm:max-w-md">
+          {/* Logo avec image */}
+          <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
+            <img
+              src="/img/logo_ecrit_blanc-point.png"
+              alt="Logo Méthode ERPR"
+              className="w-14 h-13 object-contain"
+            />
+          </div>
 
-  {/* Titre principal */}
-  <h2 className="mt-4 text-center text-3xl font-bold text-white">
-    Méthode ERPR
-  </h2>
+          {/* Titre principal */}
+          <h2 className="mt-4 text-center text-3xl font-bold text-white">
+            Méthode ERPR
+          </h2>
 
-  {/* Sous-titre centré */}
-  <h3 className="mt-2 text-center text-xl font-bold text-white-900">
-    Connexion
-  </h3>
-</div>
+          {/* Sous-titre centré */}
+          <h3 className="mt-2 text-center text-xl font-bold text-white-900">
+            Connexion
+          </h3>
+        </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
           <div className="relative">
@@ -121,11 +208,16 @@ export default function LoginPage() {
                       autoComplete="username"
                       required
                       value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-3 bg-gray-900/50 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200"
+                      onChange={(e) => handleIdentifierChange(e.target.value)}
+                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 ${
+                        emailError ? 'border-red-500' : 'border-gray-800'
+                      }`}
                       placeholder="Pseudo ou email"
                     />
                   </div>
+                  {emailError && (
+                    <p className="mt-2 text-sm text-red-500">{emailError}</p>
+                  )}
                 </div>
 
                 {/* Password field */}
@@ -192,7 +284,7 @@ export default function LoginPage() {
                 <div>
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !!emailError}
                     className="relative group w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (

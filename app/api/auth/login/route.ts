@@ -1,7 +1,72 @@
+//app/api/auth/login/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateToken, verifyPassword } from '@/lib/auth';
 import { rateLimit, getClientIP, sanitizeInput, validateEmail, secureLog, getSecurityHeaders } from '@/lib/security';
+
+// Liste blanche des domaines d'email fiables et utilisés en France (sans spam)
+const ALLOWED_EMAIL_DOMAINS = [
+  // Fournisseurs internationaux fiables
+  'gmail.com',
+  'yahoo.com',
+  'outlook.com',
+  'hotmail.com',
+  'icloud.com',
+  'protonmail.com',
+  'proton.me',
+
+  // Fournisseurs français grand public
+  'orange.fr',
+  'wanadoo.fr',
+  'sfr.fr',
+  'neuf.fr',
+  'bbox.fr',
+  'laposte.net',
+  'free.fr',
+  'numericable.fr',
+
+  // Fournisseurs français sécurisés / respectueux de la vie privée
+  'mailo.com',        // ex-netcourrier
+  'mail.fr',
+
+  // Aliases sécurisés
+  'pm.me',            // ProtonMail alias
+
+  // Adresses académiques françaises
+  'ac-paris.fr',
+  'ac-versailles.fr',
+  'ac-lyon.fr',
+  'ac-toulouse.fr',
+  'ac-aix-marseille.fr',
+  'ac-nice.fr',
+  'ac-lille.fr',
+  'ac-bordeaux.fr',
+  'ac-strasbourg.fr',
+  'ac-nantes.fr',
+];
+
+
+// Fonction de validation d'email stricte
+function validateEmailDomain(email: string): { valid: boolean; error?: string } {
+  // Format basique
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { valid: false, error: 'Format email invalide' };
+  }
+
+  // Extraire le domaine
+  const domain = email.split('@')[1].toLowerCase();
+  
+  // Vérifier si le domaine est dans la liste blanche
+  if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+    return { 
+      valid: false, 
+      error: `Le domaine ${domain} n'est pas autorisé. Domaines acceptés: ${ALLOWED_EMAIL_DOMAINS.join(', ')}` 
+    };
+  }
+
+  return { valid: true };
+}
 
 export async function POST(req: Request) {
   try {
@@ -33,9 +98,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Sanitiser les entrées
-    const cleanIdentifier = sanitizeInput(identifier);
-    const cleanPassword = password; // Le mot de passe ne doit pas être sanitisé
+    // Sanitiser les entrées - convertir en minuscules et trimmer
+    const cleanIdentifier = sanitizeInput(identifier).toLowerCase().trim();
+    const cleanPassword = password;
 
     // Validation basique
     if (cleanIdentifier.length === 0 || cleanPassword.length === 0) {
@@ -44,6 +109,21 @@ export async function POST(req: Request) {
         { error: 'Données invalides' },
         { status: 400 }
       );
+    }
+
+    // Si l'identifiant ressemble à un email, valider son domaine
+    if (cleanIdentifier.includes('@')) {
+      const emailValidation = validateEmailDomain(cleanIdentifier);
+      if (!emailValidation.valid) {
+        secureLog('LOGIN_INVALID_EMAIL_DOMAIN', { 
+          ip: clientIP, 
+          email: cleanIdentifier 
+        });
+        return NextResponse.json(
+          { error: emailValidation.error },
+          { status: 400 }
+        );
+      }
     }
 
     // Chercher l'utilisateur par email ou username

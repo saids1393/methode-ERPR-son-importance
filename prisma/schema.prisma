@@ -34,6 +34,8 @@ model User {
   videoWatches      VideoWatch[]
   whatsappMessages  WhatsAppMessage[]
   levelPurchases    LevelPurchase[]
+  progressLogs      UserProgressLog[]        // ✨ NOUVEAU
+  dailySnapshots    DailyProgressSnapshot[]  // ✨ NOUVEAU
 }
 
 // -------------------------
@@ -260,6 +262,57 @@ model DeletedRecord {
   @@index([tableName])
   @@index([originalId])
   @@index([deletedAt])
+}
+
+// =====================================================
+// ✨ NOUVEAU : HISTORIQUE DE PROGRESSION RÉELLE
+// =====================================================
+model UserProgressLog {
+  id            String   @id @default(cuid())
+  userId        String
+  
+  // Type d'action tracée
+  actionType    String   // "PAGE_COMPLETED", "QUIZ_COMPLETED"
+  
+  // Contexte
+  pageNumber    Int?
+  chapterId     Int?
+  
+  // Timestamp réel de l'action
+  completedAt   DateTime @default(now())
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([completedAt])
+  @@index([userId, completedAt])
+}
+
+// =====================================================
+// ✨ NOUVEAU : SNAPSHOT QUOTIDIEN DE PROGRESSION
+// =====================================================
+model DailyProgressSnapshot {
+  id                  String   @id @default(cuid())
+  userId              String
+  
+  // Stats du jour
+  pagesCompletedCount Int      @default(0)
+  quizzesCompletedCount Int    @default(0)
+  progressPercentage  Int      @default(0)
+  
+  // Date du snapshot (minuit UTC)
+  snapshotDate        DateTime
+  
+  // Timestamps
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, snapshotDate])
+  @@index([userId])
+  @@index([snapshotDate])
+  @@index([userId, snapshotDate])
 }
 
 // -------------------------
