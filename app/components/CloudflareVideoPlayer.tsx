@@ -12,6 +12,7 @@ interface CloudflareVideoPlayerProps {
 
 interface StreamResponse {
   hlsUrl: string;
+  dashUrl: string;
 }
 
 export default function CloudflareVideoPlayer({
@@ -39,8 +40,11 @@ export default function CloudflareVideoPlayer({
 
       const data: StreamResponse = await response.json();
 
-      // 🔗 Ouvrir l'URL HLS dans un nouvel onglet
-      window.open(data.hlsUrl, '_blank', 'noopener,noreferrer');
+      // ✅ SOLUTION SANS POPUP : Redirection dans le même onglet
+      const streamUrl = `https://customer-5yz20vgnhpok0kcp.cloudflarestream.com/${videoId}/watch`;
+      
+      // Redirection simple et fiable
+      window.location.href = streamUrl;
 
     } catch (err) {
       console.error('❌ Erreur:', err);
@@ -63,10 +67,10 @@ export default function CloudflareVideoPlayer({
         }}
       />
 
-      {/* Overlay noir - Plus opaque par défaut */}
+      {/* Overlay noir */}
       <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-all duration-300" />
 
-      {/* Contenu centré - Flexbox parfait */}
+      {/* Contenu centré */}
       <div className="absolute inset-0 flex items-center justify-center p-4 z-10">
         
         {/* Erreur */}
@@ -77,7 +81,7 @@ export default function CloudflareVideoPlayer({
           </div>
         )}
 
-        {/* Bouton Play - Parfaitement centré et responsive */}
+        {/* Bouton Play */}
         <button
           onClick={handlePlayVideo}
           disabled={isLoading}
@@ -103,10 +107,11 @@ export default function CloudflareVideoPlayer({
             className={`transition-all duration-300 ${isLoading ? 'opacity-60' : 'opacity-100'}`}
           />
         </button>
+
         {/* Texte de chargement */}
         {isLoading && (
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-white text-sm animate-pulse whitespace-nowrap">
-            ⏳ Ouverture...
+            ⏳ Chargement...
           </div>
         )}
       </div>
