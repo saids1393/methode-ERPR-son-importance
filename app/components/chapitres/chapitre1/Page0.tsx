@@ -51,7 +51,7 @@ const associations: { [key: string]: { phonetique: string; explication: string }
 
 // ✅ Images pour les lettres
 const letterImages: { [key: string]: string } = {
-  'ا': '/img/ALIF.PNG',
+  'ا': '/img/lettres/alif.png',
   'ب': '/img/lettres/baa.png',
   'ت': '/img/lettres/taa.png',
   'ث': '/img/lettres/thaa.png',
@@ -79,8 +79,8 @@ const letterImages: { [key: string]: string } = {
   'ه': '/img/lettres/haa2.png',
   'و': '/img/lettres/waaw.png',
   'ي': '/img/lettres/yaa.png',
-  'ء': '/img/lettres/hamza.png',
-  'ة': '/img/lettres/taa_marbouta.png',
+  'ء': '/img/lettres/haa2.png',
+  'ة': '/img/lettres/taa.png',
 };
 
 // ✅ Nouveaux popups pour prononciation
@@ -142,7 +142,7 @@ const Page0 = () => {
       
       {/* ✅ Titre + instruction */}
       <div className="text-center border-b-2 p-6">
-        <div className="text-3xl font-bold mb-2">Leçon : lettres seules isolées (non attachées)</div>
+        <div className="text-3xl font-bold mb-2">Leçon : Prononciation des lettres arabes</div>
         <div className="text-lg text-amber-300">Cliquez pour écouter chaque lettre et répétez après.</div>
       </div>
 
