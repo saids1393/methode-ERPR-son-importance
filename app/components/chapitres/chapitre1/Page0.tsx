@@ -83,7 +83,6 @@ const letterImages: { [key: string]: string } = {
   'ة': '/img/lettres/taa.png',
 };
 
-// ✅ Nouveaux popups pour prononciation
 const pronunciationInfo: { [key: string]: { mot: string; emoji?: string } } = {
   'ا': { mot: '(A)beille', emoji: '🐝' },
   'ب': { mot: '(Ba)teau', emoji: '🚤' },
