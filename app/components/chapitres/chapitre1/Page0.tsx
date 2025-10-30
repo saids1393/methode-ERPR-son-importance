@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Info, X } from 'lucide-react';
 
-// ✅ Audio mappings
 const chapter0Page0AudioMappings: { [key: string]: string } = {
   'ا': 'chap0_pg0_case1','ب': 'chap0_pg0_case2','ت': 'chap0_pg0_case3','ث': 'chap0_pg0_case4',
   'ج': 'chap0_pg0_case5','ح': 'chap0_pg0_case6','خ': 'chap0_pg0_case7','د': 'chap0_pg0_case8',
