@@ -140,19 +140,19 @@ const Page0 = () => {
   return (
     <div className="font-arabic min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white p-4 md:p-6 space-y-6">
       
-      {/* ✅ Titre + instruction */}
+      {/* Titre + instruction */}
       <div className="text-center border-b-2 p-6">
         <div className="text-3xl font-bold mb-2">Leçon : Prononciation des lettres arabes</div>
         <div className="text-lg text-amber-300">Cliquez pour écouter chaque lettre et répétez après.</div>
       </div>
 
-      {/* ✅ Légende */}
+      {/*  Légende */}
       <div className="text-center text-sm text-gray-300">
         <span className="text-red-400 font-bold">Lettres rouges = sons graves</span> |{" "}
         <span className="text-purple-400 font-bold">Lettres violettes = lettres auxiliaires (qui ne font pas partie des lettres de l'alphabet)</span>
       </div>
 
-      {/* ✅ Liste des lettres */}
+      {/* Liste des lettres */}
       <div className="space-y-4">
         {allLetters.map((letter, index) => {
           const assoc = associations[letter];
