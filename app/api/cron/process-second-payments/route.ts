@@ -12,21 +12,21 @@ export async function GET(req: Request) {
 
     console.log("🔄 Exécution du cron - Traitement des paiements 2x...");
 
-    // 📅 Chercher les 1ers paiements réussis depuis 24h
-    const oneDayInSeconds = 24 * 60 * 60; // 24 heures
-    const oneDayAgo = Math.floor(Date.now() / 1000) - oneDayInSeconds;
+    // 📅 Chercher les 1ers paiements réussis depuis 30 jours
+    const thirtyDaysInSeconds = 30 * 24 * 60 * 60; // 30 jours
+    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - thirtyDaysInSeconds;
 
     console.log(
       `📅 Recherche des paiements depuis ${new Date(
-        oneDayAgo * 1000
+        thirtyDaysAgo * 1000
       ).toLocaleString()}`
     );
 
-    // Récupérer tous les PaymentIntents créés dans les dernières 24h
+    // Récupérer tous les PaymentIntents créés dans les dernières 30 jours
     const paymentIntents = await stripe.paymentIntents.list({
       limit: 100,
       created: {
-        gte: oneDayAgo,
+        gte: thirtyDaysAgo,
         lte: Math.floor(Date.now() / 1000),
       },
     });
