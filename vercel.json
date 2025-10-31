@@ -2,7 +2,7 @@
    "crons": [
     {
       "path": "/api/cron/process-second-payments",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 10 * * *"
     }
   ],
   "headers": [
