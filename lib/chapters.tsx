@@ -3,9 +3,9 @@ import React, { JSX } from "react";
 
 export type Page = {
   title: string;
-  href: string;        // URL vers la page dynamique
-  pageNumber: number;  // Numéro de page
-  status?: 'completed' | 'pending'; // Statut de la page
+  href: string;
+  pageNumber: number;
+  status?: 'completed' | 'pending';
 };
 
 export type QuizQuestion = {
@@ -16,12 +16,11 @@ export type QuizQuestion = {
 
 export type Chapter = {
   title: string;
-  chapterNumber: number; // Numéro du chapitre
+  chapterNumber: number;
   pages: Page[];
   introduction?: string;
   quiz?: QuizQuestion[];
 };
-
 
 export const chapters: Chapter[] = [
   {
@@ -650,3 +649,154 @@ export const getPreviousPage = (currentChapter: number, currentPage: number): Pa
   return currentIndex > 0 ? allPages[currentIndex - 1] : undefined;
 };
 
+// Types pour la navigation universelle
+export type ContentType = 'introduction' | 'video' | 'page' | 'quiz';
+
+export interface NavigationItem {
+  type: ContentType;
+  href: string;
+  label: string;
+  chapterNumber?: number;
+  pageNumber?: number;
+}
+
+export const getNextContent = (
+  currentChapter: number,
+  currentType: ContentType,
+  currentPage?: number
+): NavigationItem | undefined => {
+  const chapter = getChapterByNumber(currentChapter);
+  if (!chapter) return undefined;
+
+  switch (currentType) {
+    // Après la vidéo → introduction
+    case 'video':
+      if (chapter.introduction) {
+        return {
+          type: 'introduction',
+          href: `/chapitres/${currentChapter}/introduction`,
+          label: 'Lire la synthèse',
+          chapterNumber: currentChapter
+        };
+      } else if (chapter.pages.length > 0) {
+        return {
+          type: 'page',
+          href: chapter.pages[0].href,
+          label: 'Commencer les leçons',
+          chapterNumber: currentChapter,
+          pageNumber: chapter.pages[0].pageNumber
+        };
+      } else if (chapter.quiz) {
+        return {
+          type: 'quiz',
+          href: `/chapitres/${currentChapter}/quiz`,
+          label: 'Faire le quiz',
+          chapterNumber: currentChapter
+        };
+      }
+      break;
+
+    // Après introduction → pages ou quiz
+    case 'introduction':
+      if (chapter.pages.length > 0) {
+        return {
+          type: 'page',
+          href: chapter.pages[0].href,
+          label: 'Commencer les leçons',
+          chapterNumber: currentChapter,
+          pageNumber: chapter.pages[0].pageNumber
+        };
+      } else if (chapter.quiz) {
+        return {
+          type: 'quiz',
+          href: `/chapitres/${currentChapter}/quiz`,
+          label: 'Faire le quiz',
+          chapterNumber: currentChapter
+        };
+      }
+      break;
+
+    // Navigation entre pages → quiz ou chapitre suivant
+    case 'page':
+      if (currentPage === undefined) return undefined;
+
+      const currentPageIndex = chapter.pages.findIndex(p => p.pageNumber === currentPage);
+      if (currentPageIndex !== -1 && currentPageIndex < chapter.pages.length - 1) {
+        const nextPage = chapter.pages[currentPageIndex + 1];
+        return {
+          type: 'page',
+          href: nextPage.href,
+          label: 'Suivante',
+          chapterNumber: currentChapter,
+          pageNumber: nextPage.pageNumber
+        };
+      }
+
+      if (chapter.quiz) {
+        return {
+          type: 'quiz',
+          href: `/chapitres/${currentChapter}/quiz`,
+          label: 'Faire le quiz',
+          chapterNumber: currentChapter
+        };
+      }
+
+      const nextChapterAfterPage = getChapterByNumber(currentChapter + 1);
+      if (nextChapterAfterPage) {
+        if (nextChapterHasVideo(nextChapterAfterPage)) {
+          return {
+            type: 'video',
+            href: `/chapitres/${nextChapterAfterPage.chapterNumber}/video`,
+            label: 'Chapitre suivant',
+            chapterNumber: nextChapterAfterPage.chapterNumber
+          };
+        } else if (nextChapterAfterPage.introduction) {
+          return {
+            type: 'introduction',
+            href: `/chapitres/${nextChapterAfterPage.chapterNumber}/introduction`,
+            label: 'Chapitre suivant',
+            chapterNumber: nextChapterAfterPage.chapterNumber
+          };
+        }
+      }
+      break;
+
+    // Après le quiz → chapitre suivant
+    case 'quiz':
+      const nextChapterAfterQuiz = getChapterByNumber(currentChapter + 1);
+      if (nextChapterAfterQuiz) {
+        if (nextChapterHasVideo(nextChapterAfterQuiz)) {
+          return {
+            type: 'video',
+            href: `/chapitres/${nextChapterAfterQuiz.chapterNumber}/video`,
+            label: 'Chapitre suivant',
+            chapterNumber: nextChapterAfterQuiz.chapterNumber
+          };
+        } else if (nextChapterAfterQuiz.introduction) {
+          return {
+            type: 'introduction',
+            href: `/chapitres/${nextChapterAfterQuiz.chapterNumber}/introduction`,
+            label: 'Chapitre suivant',
+            chapterNumber: nextChapterAfterQuiz.chapterNumber
+          };
+        } else if (nextChapterAfterQuiz.pages.length > 0) {
+          return {
+            type: 'page',
+            href: nextChapterAfterQuiz.pages[0].href,
+            label: 'Chapitre suivant',
+            chapterNumber: nextChapterAfterQuiz.chapterNumber,
+            pageNumber: nextChapterAfterQuiz.pages[0].pageNumber
+          };
+        }
+      }
+      break;
+  }
+
+  return undefined;
+};
+
+// 🔹 Helper pour vérifier si un chapitre possède une vidéo (logique extensible)
+const nextChapterHasVideo = (chapter: Chapter): boolean => {
+  // Pour le moment, supposons que chaque chapitre a une vidéo
+  return true;
+};

@@ -5,6 +5,7 @@ import { getChapterByNumber } from "@/lib/chapters";
 import Quiz from "@/app/components/quiz/QuestionReponse";
 import { notFound } from "next/navigation";
 import { useAutoProgress } from "@/hooks/useAutoProgress";
+import UniversalNavigation from "@/app/components/UniversalNavigation";
 
 interface QuizPageProps {
   params: Promise<{
@@ -44,6 +45,15 @@ export default function QuizPage({ params }: QuizPageProps) {
             <div className="max-w-4xl mx-auto">
               <Quiz quiz={chapter.quiz} chapterNumber={chapterNumber} />
             </div>
+          </div>
+
+          {/* Navigation */}
+          <div className="max-w-4xl mx-auto mt-6">
+            <UniversalNavigation
+              currentChapter={chapterNumber}
+              currentType="quiz"
+              className="mb-4"
+            />
           </div>
         </div>
 

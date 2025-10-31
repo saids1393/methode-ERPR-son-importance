@@ -1,6 +1,7 @@
 import { getChapterByNumber } from '@/lib/chapters';
 import { notFound } from 'next/navigation';
 import AutoProgressWrapper from '@/app/components/AutoProgressWrapper';
+import UniversalNavigation from '@/app/components/UniversalNavigation';
 
 type Props = {
   params: Promise<{ chapitres: string }>;
@@ -65,6 +66,15 @@ export default async function IntroductionPage({ params }: Props) {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Navigation */}
+            <div className="max-w-4xl mx-auto mt-6">
+              <UniversalNavigation
+                currentChapter={chapNum}
+                currentType="introduction"
+                className="mb-4"
+              />
             </div>
           </div>
 

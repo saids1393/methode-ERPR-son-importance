@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Info, X } from 'lucide-react';
+import PageNavigation from '@/app/components/PageNavigation';
 
 const chapter0Page0AudioMappings: { [key: string]: string } = {
   'ا': 'chap0_pg0_case1','ب': 'chap0_pg0_case2','ت': 'chap0_pg0_case3','ث': 'chap0_pg0_case4',
@@ -126,8 +127,10 @@ const auxiliaryLetters = ['ء', 'ة'];
 
 const Page0 = () => {
   const [openPopup, setOpenPopup] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  const playLetterAudio = (letter: string) => {
+  const playLetterAudio = (letter: string, index: number) => {
+    setActiveIndex(index);
     const audioFileName = chapter0Page0AudioMappings[letter];
     if (audioFileName) {
       const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
@@ -159,9 +162,11 @@ const Page0 = () => {
           return (
             <div
               key={index}
-              className="bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl p-4 cursor-pointer transition flex items-center gap-4 relative"
+              className={`bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-xl p-4 cursor-pointer transition flex items-center gap-4 relative ${
+                activeIndex === index ? 'pulse-active' : ''
+              }`}
             >
-              <div onClick={() => playLetterAudio(letter)} className="flex items-center gap-4 flex-1">
+              <div onClick={() => playLetterAudio(letter, index)} className="flex items-center gap-4 flex-1">
                 <span
                   className="text-4xl font-bold"
                   style={{
@@ -266,7 +271,10 @@ const Page0 = () => {
               </div>
 
               <button
-                onClick={() => playLetterAudio(openPopup)}
+                onClick={() => {
+                  const letterIndex = allLetters.indexOf(openPopup);
+                  playLetterAudio(openPopup, letterIndex);
+                }}
                 className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition"
               >
                 🔊 Appuie pour écouter le son de la lettre
@@ -275,6 +283,8 @@ const Page0 = () => {
           </div>
         </div>
       )}
+
+      <PageNavigation currentChapter={1} currentPage={0} className="mt-6 mb-4" />
 
       <footer className="text-center text-gray-400 text-sm py-6">
         © 2025 - Page 0 - الصَّفْحَة ٠

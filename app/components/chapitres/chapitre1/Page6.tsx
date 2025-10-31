@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import PageNavigation from '@/app/components/PageNavigation';
 
 const chapterPage6AudioMappings: { [key: string]: string } = {
   'في': 'chap1_pg6_case1',
@@ -168,7 +169,10 @@ const ExercisePage = ({ playWordAudio }: { playWordAudio: (word: string) => void
         </p>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
+      
+      <PageNavigation currentChapter={1} currentPage={6} className="mt-6 mb-4" />
+
+<footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
         <div>Exercice de Reconnaissance</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>

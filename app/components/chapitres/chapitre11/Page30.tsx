@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import PageNavigation from '@/app/components/PageNavigation';
 
 const Page30 = () => {
   const handleWhatsAppClick = () => {
@@ -81,7 +82,10 @@ const Page30 = () => {
       </div>
 
       {/* FOOTER */}
-      <footer className="bg-gray-900 text-white text-center p-4 sm:p-6 mt-6 font-semibold text-xs sm:text-sm">
+      
+      <PageNavigation currentChapter={11} currentPage={30} className="mt-6 mb-4" />
+
+<footer className="bg-gray-900 text-white text-center p-4 sm:p-6 mt-6 font-semibold text-xs sm:text-sm">
         <div>Page 30</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -90,8 +94,6 @@ const Page30 = () => {
 };
 
 export default Page30;
-
-
 
 
 

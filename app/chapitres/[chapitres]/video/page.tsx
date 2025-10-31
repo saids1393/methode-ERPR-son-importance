@@ -4,8 +4,10 @@ import { use } from 'react';
 import { getChapterByNumber } from "@/lib/chapters";
 import { useChapterVideo } from "@/hooks/useChapterVideos";
 import CloudflareVideoPlayer from "@/app/components/CloudflareVideoPlayer";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { useAutoProgress } from "@/hooks/useAutoProgress";
+import UniversalNavigation from "@/app/components/UniversalNavigation";
+import { useEffect } from "react";
 
 interface VideoPageProps {
   params: Promise<{
@@ -17,6 +19,7 @@ export default function VideoPage({ params }: VideoPageProps) {
   const resolvedParams = use(params);
   const chapterNumber = parseInt(resolvedParams.chapitres, 10);
 
+  const router = useRouter();
   const chapter = getChapterByNumber(chapterNumber);
   const { video, isLoading, error } = useChapterVideo(chapterNumber);
 
@@ -26,14 +29,29 @@ export default function VideoPage({ params }: VideoPageProps) {
     enabled: true
   });
 
+  // 🔴 Si le chapitre n'existe pas → 404
   if (!chapter) {
     return notFound();
   }
 
+  // 🔁 Si le chapitre n’a pas de vidéo → redirection automatique
+  useEffect(() => {
+    if (!isLoading && (!video || error)) {
+      // Si le chapitre a des leçons, redirige vers la première
+      if (chapter.pages && chapter.pages.length > 0) {
+        router.replace(chapter.pages[0].href);
+      }
+      // Sinon, s’il a une introduction
+      else if (chapter.introduction) {
+        router.replace(`/chapitres/${chapterNumber}/introduction`);
+      }
+    }
+  }, [isLoading, video, error, chapter, chapterNumber, router]);
+
+  // Tant qu'on vérifie la vidéo → affichage de chargement
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 text-white">
-       
         <div className="p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-400 mx-auto mb-6"></div>
@@ -44,63 +62,26 @@ export default function VideoPage({ params }: VideoPageProps) {
     );
   }
 
-  if (error || !video) {
+  // Pendant la redirection (petit écran vide pour éviter clignotement)
+  if (!video || error) {
     return (
-      <div className="min-h-screen bg-gray-900 text-white">
-        <div className="text-white p-4 md:p-6 text-center border-b-2">
-          <div className="text-2xl md:text-3xl font-bold mb-2">
-            Vidéo - {chapter.title}
-          </div>
-        </div>
-
-        <div className="p-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-8">
-              <div className="text-yellow-400 text-6xl mb-4">🎬</div>
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Vidéo bientôt disponible
-              </h3>
-              <p className="text-zinc-300 text-lg leading-relaxed">
-                La vidéo pour ce chapitre sera ajoutée prochainement.
-                En attendant, vous pouvez consulter la Synthèse textuel et les leçons du chapitre.
-              </p>
-
-              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                {chapter.introduction && (
-                  <a
-                    href={`/chapitres/${chapterNumber}/introduction`}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
-                  >
-                    📖 Lire la Synthèse textuel
-                  </a>
-                )}
-
-                {chapter.pages.length > 0 && (
-                  <a
-                    href={chapter.pages[0].href}
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
-                  >
-                    🚀 Commencer les leçons
-                  </a>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        <p className="text-gray-400 animate-pulse">Redirection en cours...</p>
       </div>
     );
   }
 
+  // ✅ Affichage normal si vidéo trouvée
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Header - Design identique à Page1 */}
+      {/* Header */}
       <div className="text-white p-4 md:p-6 text-center border-b-2">
         <div className="text-2xl md:text-3xl font-bold mb-2">
           {video.title}
         </div>
       </div>
 
-      {/* Lecteur vidéo pleine largeur */}
+      {/* Lecteur vidéo */}
       <div className="w-full">
         <CloudflareVideoPlayer
           videoId={video.cloudflareVideoId}
@@ -108,6 +89,17 @@ export default function VideoPage({ params }: VideoPageProps) {
           thumbnailUrl={video.thumbnailUrl}
           className="w-full"
         />
+      </div>
+
+      {/* Navigation */}
+      <div className="p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          <UniversalNavigation
+            currentChapter={chapterNumber}
+            currentType="video"
+            className="mt-6 mb-4"
+          />
+        </div>
       </div>
     </div>
   );

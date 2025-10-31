@@ -45,82 +45,274 @@ const createWelcomeEmailTemplate = (username?: string) => `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bienvenue</title>
-<style>
-body { font-family: 'Inter', sans-serif; line-height: 1.6; color: #333; background: #f8fafc; }
-.container { max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 2px; border-radius: 16px; }
-.content { background: white; border-radius: 14px; overflow: hidden; padding: 10px 10px; }
-.header { background: linear-gradient(135deg, #ffffffff, #1900ffff); color: white; padding: 100px 10px; text-align: center; }
-.header h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
-.header .subtitle { font-size: 16px; opacity: 0.9; }
-.cta-button { display: inline-block; background: #2365ffff; color: white; text-decoration: none; padding: 16px 32px; border-radius: 12px; font-weight: 600; font-size: 16px; }
-
-.feature-list {
-    background: #f8f9fa;
-    padding: 25px;
-    border-radius: 8px;
-    margin: 30px 0;
-}
-.feature-item {
-    margin-bottom: 15px;
-    padding-left: 30px;
-    position: relative;
-}
-.feature-item::before {
-    content: "✅";
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-h2 { text-align: center; }
-h3 { color: #ffffffff; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue - Méthode ERPR</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f3f4f6;
+    }
+    
+    .wrapper {
+      width: 100%;
+      background: #f3f4f6;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      padding: 48px 32px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    
+    .header p {
+      font-size: 14px;
+      opacity: 0.95;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+    
+    .body {
+      padding: 40px 32px;
+    }
+    
+    .greeting {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 24px;
+    }
+    
+    .description {
+      font-size: 15px;
+      color: #4b5563;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+    
+    .features {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .feature {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .feature:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    
+    .feature-icon {
+      flex-shrink: 0;
+      font-size: 20px;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    
+    .feature-content {
+      flex: 1;
+    }
+    
+    .feature-title {
+      font-weight: 600;
+      color: #111827;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    
+    .feature-desc {
+      font-size: 13px;
+      color: #6b7280;
+    }
+    
+    .cta-section {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      text-decoration: none;
+      padding: 14px 40px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    }
+    
+    .footer {
+      background: #f9fafb;
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    
+    .footer a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    
+    @media (max-width: 600px) {
+      .header {
+        padding: 32px 24px;
+      }
+      
+      .header h1 {
+        font-size: 26px;
+      }
+      
+      .body {
+        padding: 24px;
+      }
+      
+      .greeting {
+        font-size: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <div class="content">
-    <div class="header">
-      <h1>✨ Méthode ERPR</h1>
-      <p class="subtitle">Ecoute • Répétition • Pratique • Régularité</p>
-    </div>
-    <h2>${getWelcomeGreeting(username, 'welcome')}</h2>
-
-    <div class="feature-list">
-        <h3 style="margin-top: 0; color: #ffffffff;">🎯 Ce qui vous attend :</h3>
-        <div class="feature-item">
-            <strong>10 chapitres progressifs</strong> - De l'alphabet aux règles avancées
+  <div class="wrapper">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>Méthode ERPR</h1>
+        <p>ECOUTE • RÉPÉTITION • PRATIQUE • RÉGULARITÉ</p>
+      </div>
+      
+      <!-- Body -->
+      <div class="body">
+        <div class="greeting">
+          ${username ? `Bienvenue, ${username} ! 👋` : 'Bienvenue ! 👋'}
         </div>
-        <div class="feature-item">
-            <strong>Quiz interactifs</strong> - Testez vos connaissances à chaque étape
+        
+        <p class="description">
+          Vous venez de rejoindre la Méthode ERPR. Préparez-vous à transformer votre apprentissage avec une approche structurée, progressive et moderne.
+        </p>
+        
+        <!-- Features -->
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">📚</div>
+            <div class="feature-content">
+              <div class="feature-title">10 chapitres progressifs</div>
+              <div class="feature-desc">De l'alphabet jusqu'à la maîtrise</div>
+            </div>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-content">
+              <div class="feature-title">Quiz interactifs</div>
+              <div class="feature-desc">Testez vos connaissances à chaque étape</div>
+            </div>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">📊</div>
+            <div class="feature-content">
+              <div class="feature-title">Suivi de progression</div>
+              <div class="feature-desc">Graphiques hebdomadaires et mensuels en temps réel</div>
+            </div>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">⏱️</div>
+            <div class="feature-content">
+              <div class="feature-title">Capteur de temps</div>
+              <div class="feature-desc">Visualisez chaque minute d'apprentissage</div>
+            </div>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">✏️</div>
+            <div class="feature-content">
+              <div class="feature-title">Devoirs et rendus</div>
+              <div class="feature-desc">Exercices pratique</div>
+            </div>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">🎧</div>
+            <div class="feature-content">
+              <div class="feature-title">+500 audios intégrés dans les lettres mots et phrases</div>
+              <div class="feature-desc">Support numérique et vivant par des audios</div>
+            </div>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">🎬</div>
+            <div class="feature-content">
+              <div class="feature-title">Vidéos explicatives</div>
+              <div class="feature-desc">Contenu court et efficace pour chaque chapitre</div>
+            </div>
+          </div>
+          
+          <div class="feature">
+            <div class="feature-icon">💬</div>
+            <div class="feature-content">
+              <div class="feature-title">Support instantané</div>
+              <div class="feature-desc">Accompagnement via WhatsApp et groupe privé Telegram</div>
+            </div>
+          </div>
         </div>
-        <div class="feature-item">
-            <strong>Suivi de progression</strong> - Visualisez vos progrès en temps réel avec graphique hebdomadaire et mensuel
+        
+        <!-- CTA -->
+        <div class="cta-section">
+          <a href="arabeimportance.fr" class="cta-button">🚀 Accéder aux infos</a>
         </div>
-        <div class="feature-item">
-            <strong>Capteur de temps</strong> - Visualisez le temps passé sur l'application
-        </div>
-         <div class="feature-item">
-            <strong>Devoirs</strong> - Recevez vos devoirs automatiquement à chaque fin de chapitre
-        </div>
-          <div class="feature-item">
-            <strong>Audios</strong> - Support numérique avec plus de 600 audios intégrés
-        </div>
-          <div class="feature-item">
-            <strong>Vidéos</strong> - Vidéos courtes explicatives pour chaque chapitre
-        </div>
-        <div class="feature-item">
-            <strong>Accompagenemts et support contact</strong> - Accompagents instantannées via WhatsApp et email
-        </div>
-    </div>
-
-    <p>Félicitations ! Vous venez de rejoindre la méthode ERPR</p>
-    <div style="text-align:center; margin:40px 0;">
-      <a href="${BASE_URL}/dashboard" class="cta-button">🚀 Accéder à mon tableau de bord</a>
+      </div>
+      
+      <!-- Footer -->
+      <div class="footer">
+        <p>© 2025 Méthode ERPR. Tous droits réservés.</p>
+      </div>
     </div>
   </div>
-</div>
 </body>
 </html>
 `;

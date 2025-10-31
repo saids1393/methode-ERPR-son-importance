@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import PageNavigation from '@/app/components/PageNavigation';
 
 const chapterPage7AudioMappings: { [key: string]: string } = {
   // Row 1
@@ -147,7 +148,10 @@ const ExercisePage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
         </p>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
+      
+      <PageNavigation currentChapter={1} currentPage={7} className="mt-6 mb-4" />
+
+<footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
         <div>Exercice des Lettres Séparées</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>

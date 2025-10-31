@@ -348,7 +348,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Pages complétées</p>
+                  <p className="text-gray-500 text-sm">Leçons complétées</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Array.from(completedPages).filter(pageNum => pageNum !== 30).length}/30
                   </p>

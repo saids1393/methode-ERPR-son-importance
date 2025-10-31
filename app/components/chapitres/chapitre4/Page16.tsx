@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import PageNavigation from '@/app/components/PageNavigation';
 
 // === 🎧 Mapping audio Chapitre 4, Page 16 ===
 const chapter4Page16AudioMappings: { [key: string]: string } = {
@@ -166,7 +167,10 @@ const ExamplesPage = () => (
       </div>
     </div>
 
-    <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-sm md:text-base">
+    
+      <PageNavigation currentChapter={4} currentPage={16} className="mt-6 mb-4" />
+
+<footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-sm md:text-base">
       <div>Page 16</div>
       <div className="mt-1">© 2025 Tous droits réservés</div>
     </footer>

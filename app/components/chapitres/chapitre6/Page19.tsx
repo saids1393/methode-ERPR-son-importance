@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import PageNavigation from '@/app/components/PageNavigation';
 
 // 🟢 On réutilise les clés audio de la page 18
 const chapter6Page19AudioMappings: { [key: string]: string } = {
@@ -160,7 +161,10 @@ const IntroductionPage = () => (
         la bonne prononciation.
       </p>
     </div>
-    <footer className="border-t text-white text-center p-4 md:p-6 mt-8 font-semibold text-base md:text-lg">
+    
+      <PageNavigation currentChapter={6} currentPage={19} className="mt-6 mb-4" />
+
+<footer className="border-t text-white text-center p-4 md:p-6 mt-8 font-semibold text-base md:text-lg">
       <div>Leçon 19 : Les symboles Alif saghirah - Ya saghirah - Waw saghirah</div>
       <div className="mt-1">© 2025 Tous droits réservés</div>
     </footer>

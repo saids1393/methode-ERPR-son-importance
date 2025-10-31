@@ -163,3 +163,17 @@ body {
   background-color: #f3f4f6;
   border-radius: 6px;
 }
+
+/* Animation de clignotement pour les éléments cliquables */
+@keyframes pulse-glow {
+  0%, 100% {
+    background-color: rgba(59, 130, 246, 0);
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.5);
+  }
+}
+
+.pulse-active {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}

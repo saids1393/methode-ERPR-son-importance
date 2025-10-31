@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import PageNavigation from '@/app/components/PageNavigation';
 
 const chapter10Page29AudioMappings: { [key: string]: string } = {
   "ٱلْمُصَّدِّقِينَ": "chap10_pg29_case1",
@@ -153,7 +154,10 @@ const ExercisePage = () => (
       </div>
     </div>
 
-    <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-12 font-semibold text-sm md:text-base">
+    
+      <PageNavigation currentChapter={10} currentPage={29} className="mt-6 mb-4" />
+
+<footer className="border-t-1 text-white text-center p-4 md:p-6 mt-12 font-semibold text-sm md:text-base">
       <div>Page 29 - Exercice d'écriture et rendu des mots</div>
       <div className="mt-1">© 2025 Tous droits réservés</div>
     </footer>

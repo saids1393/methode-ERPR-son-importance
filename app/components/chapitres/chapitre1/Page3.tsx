@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import PageNavigation from '@/app/components/PageNavigation';
 
 // Mapping audio pour le Chapitre 1, Page 3
 const chapter1Page3AudioMappings: { [key: string]: string } = {
@@ -36,14 +37,17 @@ const chapter1Page3AudioMappings: { [key: string]: string } = {
   'ء': 'chap0_pg0_case29'
 };
 
-const Cell = ({ letter, emphatic, violet, onClick }: {
+const Cell = ({ letter, emphatic, violet, onClick, isActive }: {
   letter: string;
   emphatic?: boolean;
   violet?: boolean;
   onClick?: () => void;
+  isActive?: boolean;
 }) => (
   <div
-    className="border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
+    className={`border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1 ${
+      isActive ? 'pulse-active' : ''
+    }`}
     onClick={onClick}
   >
     <div className={`text-5xl md:text-5xl lg:text-5xl xl:text-6xl font-bold transition-colors leading-tight ${emphatic ? 'text-red-400' :
@@ -121,7 +125,11 @@ const IntroductionPage = () => {
 };
 
 
-const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) => void }) => {
+const AlphabetPage = ({ playLetterAudio, activeIndex, setActiveIndex }: {
+  playLetterAudio: (letter: string) => void;
+  activeIndex: number;
+  setActiveIndex: (index: number) => void;
+}) => {
   const letters = [
     // Row 1
     { letter: 'ـا', emphatic: false, violet: false },
@@ -172,7 +180,11 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
             letter={item.letter}
             emphatic={item.emphatic}
             violet={item.violet}
-            onClick={() => playLetterAudio(item.letter)}
+            isActive={activeIndex === index}
+            onClick={() => {
+              setActiveIndex(index);
+              playLetterAudio(item.letter);
+            }}
           />
         ))}
       </div>
@@ -198,7 +210,10 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
         </p>
       </div>
 
-      <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
+      
+      <PageNavigation currentChapter={1} currentPage={3} className="mt-6 mb-4" />
+
+<footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
         <div>Leçon 3</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -208,6 +223,7 @@ const AlphabetPage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
 
 const Page3 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
   const totalPages = 2;
 
   const playLetterAudio = (letter: string) => {
@@ -284,7 +300,7 @@ const Page3 = () => {
 
         {/* Content */}
         {currentPage === 0 && <IntroductionPage />}
-        {currentPage === 1 && <AlphabetPage playLetterAudio={playLetterAudio} />}
+        {currentPage === 1 && <AlphabetPage playLetterAudio={playLetterAudio} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />}
       </div>
     </div>
   );

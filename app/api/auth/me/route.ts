@@ -1,45 +1,24 @@
-// app/api/auth/me/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUserFromRequest, getUserById, verifyToken } from '@/lib/auth';
+import { getAuthUserFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth-token')?.value;
+    const user = await getAuthUserFromRequest(request);
 
-    if (!token) {
+    if (!user || !user.isActive) {
       return NextResponse.json(
         { error: 'Non autorisé' },
         { status: 401 }
       );
     }
 
-    const decoded = await verifyToken(token);
-    const user = await getUserById(decoded.userId);
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      );
-    }
-
-    if (!user.isActive) {
-      return NextResponse.json(
-        { error: 'Compte inactif' },
-        { status: 401 }
-      );
-    }
-
-    // Vérifier si l'utilisateur a un mot de passe défini
-    const userWithPassword = await prisma.user.findUnique({
+    // ⭐ OPTIMISÉ : Fetch seulement gender et password
+    // Au lieu de refetcher tout l'user
+    const userExtra = await prisma.user.findUnique({
       where: { id: user.id },
       select: {
-        id: true,
-        email: true,
-        username: true,
         gender: true,
-        isActive: true,
         password: true,
       },
     });
@@ -48,9 +27,9 @@ export async function GET(request: NextRequest) {
       id: user.id,
       email: user.email,
       username: user.username,
-      gender: userWithPassword?.gender,
+      gender: userExtra?.gender || null,
       isActive: user.isActive,
-      hasPassword: userWithPassword?.password !== null
+      hasPassword: userExtra?.password !== null
     });
   } catch (error) {
     console.error('Auth me error:', error);

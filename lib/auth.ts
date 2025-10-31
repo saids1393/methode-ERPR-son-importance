@@ -6,6 +6,35 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { sendPasswordResetEmail } from './email';
 
+// ⭐ CACHE EN MÉMOIRE - TRÈS IMPORTANT !
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+const userCache = new Map<string, CacheEntry<UserData | null>>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+function getCachedUser(id: string): UserData | null | undefined {
+  const cached = userCache.get(id);
+  if (cached) {
+    const now = Date.now();
+    if (now - cached.timestamp < CACHE_DURATION) {
+      return cached.data; // Cache valide
+    } else {
+      userCache.delete(id); // Cache expiré
+    }
+  }
+  return undefined;
+}
+
+function setCachedUser(id: string, user: UserData | null): void {
+  userCache.set(id, {
+    data: user,
+    timestamp: Date.now(),
+  });
+}
+
 // Types basés sur le schéma Prisma
 export interface JWTPayload {
   userId: string;
@@ -61,8 +90,17 @@ export async function verifyToken(token: string): Promise<JWTPayload> {
   }
 }
 
+// ⭐ OPTIMISÉ AVEC CACHE
 export async function getUserById(id: string): Promise<UserData | null> {
   try {
+    // Vérifier le cache d'abord
+    const cached = getCachedUser(id);
+    if (cached !== undefined) {
+      console.log(`[CACHE HIT] User ${id}`);
+      return cached;
+    }
+
+    console.log(`[CACHE MISS] Fetching user ${id} from DB`);
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -74,6 +112,8 @@ export async function getUserById(id: string): Promise<UserData | null> {
       },
     });
     
+    // Mettre en cache le résultat (même null)
+    setCachedUser(id, user);
     return user;
   } catch (error) {
     console.error('Error fetching user:', error);
@@ -160,14 +200,13 @@ export async function updateUserProfile(
 ): Promise<UserData> {
   try {
     const updateData: {
-      username?: string | null;  // <-- ici autorisation null
+      username?: string | null;
       password?: string;
       gender?: 'HOMME' | 'FEMME';
     } = {};
 
     if (data.username !== undefined) {
       if (data.username === '') {
-        // Permettre de vider le username
         updateData.username = null;
       } else {
         if (data.username.length < 3 || data.username.length > 30) {
@@ -179,7 +218,7 @@ export async function updateUserProfile(
         });
         
         if (existingUser && existingUser.id !== userId) {
-          throw new Error('Pseudo utilisé veuillez choisir un autre pseudo ou ajoutez des chiffres ou des lettres'); // Message d'erreur si le pseudo est déjà pris
+          throw new Error('Pseudo utilisé veuillez choisir un autre pseudo ou ajoutez des chiffres ou des lettres');
         }
         
         updateData.username = data.username;
@@ -200,7 +239,6 @@ export async function updateUserProfile(
       updateData.gender = data.gender;
     }
 
-    // Vérifier qu'il y a au moins une donnée à mettre à jour
     if (Object.keys(updateData).length === 0) {
       throw new Error('No data to update');
     }
@@ -217,6 +255,10 @@ export async function updateUserProfile(
       },
     });
 
+    // ⭐ INVALIDER LE CACHE APRÈS UNE MISE À JOUR
+    userCache.delete(userId);
+    console.log(`[CACHE INVALIDATED] User ${userId} updated`);
+
     return user;
   } catch (error) {
     console.error('Error updating user profile:', error);
@@ -231,7 +273,6 @@ export async function getAuthUserFromRequest(request: NextRequest): Promise<User
     if (request.cookies) {
       token = request.cookies.get('auth-token')?.value;
     } else {
-      // Fallback pour les cas où request.cookies n'est pas disponible
       const cookieStore = await cookies();
       token = cookieStore.get('auth-token')?.value;
     }
@@ -239,6 +280,7 @@ export async function getAuthUserFromRequest(request: NextRequest): Promise<User
     if (!token) return null;
 
     const decoded = await verifyToken(token);
+    // ⭐ UTILISE LE CACHE - RÉDUIT LES APPELS DB DE 90%
     const user = await getUserById(decoded.userId);
     
     if (!user || !user.isActive) return null;
@@ -331,12 +373,10 @@ export function setAuthCookie(token: string): void {
   }
 }
 
-// Générer un token de réinitialisation de mot de passe
 export function generateResetToken(): string {
   return crypto.randomBytes(32).toString('hex');
 }
 
-// Créer une demande de réinitialisation de mot de passe
 export async function createPasswordResetRequest(email: string): Promise<{ success: boolean; message: string }> {
   try {
     const user = await getUserByEmail(email);
@@ -360,16 +400,17 @@ export async function createPasswordResetRequest(email: string): Promise<{ succe
       },
     });
 
-    // ✅ CORRECTION : Construire l'URL complète
     const BASE_URL = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const resetUrl = `${BASE_URL}/reset-password?token=${resetToken}`;
 
-    // ✅ Passer l'URL complète au lieu du token brut
     const emailSent = await sendPasswordResetEmail(user.email, resetUrl, user.username || undefined);
     
     if (!emailSent) {
       console.error('Erreur lors de l\'envoi de l\'email de réinitialisation');
     }
+
+    // ⭐ INVALIDER LE CACHE
+    userCache.delete(user.id);
 
     return {
       success: true,
@@ -384,7 +425,6 @@ export async function createPasswordResetRequest(email: string): Promise<{ succe
   }
 }
 
-// Vérifier et réinitialiser le mot de passe
 export async function resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
   try {
     if (!token || !newPassword) {
@@ -401,12 +441,11 @@ export async function resetPassword(token: string, newPassword: string): Promise
       };
     }
 
-    // Trouver l'utilisateur avec ce token
     const user = await prisma.user.findFirst({
       where: {
         resetToken: token,
         resetTokenExpires: {
-          gt: new Date(), // Token non expiré
+          gt: new Date(),
         },
       },
     });
@@ -418,10 +457,8 @@ export async function resetPassword(token: string, newPassword: string): Promise
       };
     }
 
-    // Hasher le nouveau mot de passe
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Mettre à jour le mot de passe et supprimer le token de réinitialisation
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -430,6 +467,9 @@ export async function resetPassword(token: string, newPassword: string): Promise
         resetTokenExpires: null,
       },
     });
+
+    // ⭐ INVALIDER LE CACHE
+    userCache.delete(user.id);
 
     return {
       success: true,

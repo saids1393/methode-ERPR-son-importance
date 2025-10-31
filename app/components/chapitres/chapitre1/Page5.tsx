@@ -2,6 +2,7 @@
 import React, { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as htmlToImage from "html-to-image";
+import PageNavigation from '@/app/components/PageNavigation';
 
 import VisuelEcriture from "@/app/components/ecritures/VisuelEcriture";
 import LettresAttacheesDebut from "@/app/components/ecritures/LettresAttacheesDebut";
@@ -139,7 +140,10 @@ const WritingGuidePage = () => {
         <VisuelEcriture />
       </div>
 
-      <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-xs md:text-sm">
+      
+      <PageNavigation currentChapter={1} currentPage={5} className="mt-6 mb-4" />
+
+<footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-xs md:text-sm">
         <div>Modèle d'écriture - Tableau complet à copier</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
