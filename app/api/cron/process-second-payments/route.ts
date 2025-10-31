@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
-// Ce endpoint sera appelé régulièrement (par un cron job ou manuellement)
 export async function GET(req: Request) {
   try {
     // Vérifier l'authentification (secret token)
@@ -11,24 +10,24 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("🔄 Exécution du cron - Traitement des paiements 2x (TEST 2 MIN)...");
+    console.log("🔄 Exécution du cron - Traitement des paiements 2x...");
 
-    // 🧪 Test : 2 minutes après le 1er paiement
-    const twoMinutesInSeconds = 2 * 60; // 2 minutes
-    const twoMinutesAgo = Math.floor(Date.now() / 1000) - twoMinutesInSeconds;
+    // 📅 Chercher les 1ers paiements réussis depuis 24h
+    const oneDayInSeconds = 24 * 60 * 60; // 24 heures
+    const oneDayAgo = Math.floor(Date.now() / 1000) - oneDayInSeconds;
 
     console.log(
-      `📅 Recherche des paiements du ${new Date(
-        twoMinutesAgo * 1000
-      ).toLocaleTimeString()} (±30 secondes)`
+      `📅 Recherche des paiements depuis ${new Date(
+        oneDayAgo * 1000
+      ).toLocaleString()}`
     );
 
-    // Récupérer tous les PaymentIntents créés il y a environ 2 minutes
+    // Récupérer tous les PaymentIntents créés dans les dernières 24h
     const paymentIntents = await stripe.paymentIntents.list({
       limit: 100,
       created: {
-        gte: twoMinutesAgo - 30, // marge de 30 sec avant
-        lte: twoMinutesAgo + 30, // marge de 30 sec après
+        gte: oneDayAgo,
+        lte: Math.floor(Date.now() / 1000),
       },
     });
 

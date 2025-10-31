@@ -79,10 +79,12 @@ export async function POST(req: Request) {
 
       console.log("✅ Session 2x créée (1/2):", session.id);
 
-      // Simulation du 2ème paiement en mode test
-      if (process.env.NODE_ENV !== "production") {
+      // ⚠️ UNIQUEMENT EN LOCAL POUR TESTER
+      if (process.env.NODE_ENV === "development") {
+        console.log("🧪 [DEV ONLY] Simulation du 2e paiement dans 2 minutes...");
+        
         setTimeout(async () => {
-          console.log("⏳ Simulation du 2e paiement dans 2 minutes...");
+          console.log("⏳ [DEV] Lancement du 2ème paiement...");
           try {
             await fetch(`${baseUrl}/api/stripe/charge-second-payment`, {
               method: "POST",
@@ -95,7 +97,9 @@ export async function POST(req: Request) {
           } catch (err) {
             console.error("❌ Erreur simulation 2ème paiement:", err);
           }
-        }, 120000); // 120000 ms = 2 minutes
+        }, 120000); // 2 minutes
+      } else {
+        console.log("📌 [PROD] Le cron job Vercel s'en charge");
       }
 
       return NextResponse.json({ sessionId: session.id });
