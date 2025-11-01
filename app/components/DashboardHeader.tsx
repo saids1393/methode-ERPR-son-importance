@@ -41,8 +41,6 @@ interface DashboardHeaderProps {
     homeworkSends: HomeworkSend[];
 }
 
-
-
 export default function DashboardHeader({
     user,
     mobileMenuOpen,
@@ -55,11 +53,14 @@ export default function DashboardHeader({
         username: '',
         currentPassword: '',
         newPassword: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        passwordForUsernameChange: ''
     });
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showPasswordForUsernameChange, setShowPasswordForUsernameChange] = useState(false);
+    const [usernameChanged, setUsernameChanged] = useState(false);
     const [editLoading, setEditLoading] = useState(false);
     const [showContactModal, setShowContactModal] = useState(false);
     const [contactForm, setContactForm] = useState({
@@ -68,6 +69,7 @@ export default function DashboardHeader({
     const [contactLoading, setContactLoading] = useState(false);
     const [contactSuccess, setContactSuccess] = useState(false);
     const [showNotificationModal, setShowNotificationModal] = useState(false);
+    const [editError, setEditError] = useState('');
     const router = useRouter();
 
     const getSentHomeworkCount = () => {
@@ -75,7 +77,6 @@ export default function DashboardHeader({
     };
 
     const pathname = usePathname();
-
 
     useEffect(() => {
         setEditForm(prev => ({
@@ -107,19 +108,29 @@ export default function DashboardHeader({
 
     const handleEditProfile = async (e: React.FormEvent) => {
         e.preventDefault();
+        setEditError('');
 
+        const usernameIsChanged = editForm.username !== user?.username;
+
+        // Validation du changement de pseudo
+        if (usernameIsChanged && !editForm.passwordForUsernameChange) {
+            setEditError('Veuillez entrer votre mot de passe pour modifier votre pseudo');
+            return;
+        }
+
+        // Validation du changement de mot de passe
         if (editForm.newPassword && !editForm.currentPassword) {
-            alert('Veuillez entrer votre ancien mot de passe pour modifier votre mot de passe');
+            setEditError('Veuillez entrer votre ancien mot de passe pour modifier votre mot de passe');
             return;
         }
 
         if (editForm.newPassword && editForm.newPassword !== editForm.confirmPassword) {
-            alert('Les mots de passe ne correspondent pas');
+            setEditError('Les mots de passe ne correspondent pas');
             return;
         }
 
         if (editForm.newPassword && editForm.newPassword.length < 8) {
-            alert('Le mot de passe doit contenir au moins 8 caractères');
+            setEditError('Le mot de passe doit contenir au moins 8 caractères');
             return;
         }
 
@@ -128,8 +139,9 @@ export default function DashboardHeader({
         try {
             const updateData: any = {};
 
-            if (editForm.username !== user?.username) {
+            if (usernameIsChanged) {
                 updateData.username = editForm.username;
+                updateData.passwordForUsernameChange = editForm.passwordForUsernameChange;
             }
 
             if (editForm.newPassword) {
@@ -149,17 +161,20 @@ export default function DashboardHeader({
                 setShowEditProfile(false);
                 setEditForm(prev => ({
                     ...prev,
+                    username: data.user?.username || prev.username,
                     currentPassword: '',
                     newPassword: '',
-                    confirmPassword: ''
+                    confirmPassword: '',
+                    passwordForUsernameChange: ''
                 }));
+                setUsernameChanged(false);
                 alert('Profil mis à jour avec succès !');
             } else {
-                alert(data.error || 'Erreur lors de la mise à jour');
+                setEditError(data.error || 'Erreur lors de la mise à jour');
             }
         } catch (error) {
             console.error('Update profile error:', error);
-            alert('Erreur de connexion');
+            setEditError('Erreur de connexion');
         } finally {
             setEditLoading(false);
         }
@@ -282,47 +297,61 @@ export default function DashboardHeader({
                                 <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             </button>
 
-                            {/* Dropdown Menu */}
-                            {showProfileMenu && (
-                                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
-                                    <div className="p-4 border-b border-gray-100">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center">
-                                                <span className="text-white font-medium">
-                                                    {user.username ? user.username.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <p className="text-gray-900 font-semibold truncate">
-                                                    {user.username || (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
-                                                </p>
-                                                <p className="text-gray-500 text-sm truncate">{user.email}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+{/* Dropdown Menu */}
+{showProfileMenu && (
+  <div
+    className="
+      absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 
+      rounded-xl shadow-lg overflow-hidden z-50
+      will-change-transform will-change-opacity
+      md:transition-none
+    "
+    style={{
+      transform: 'translateZ(0)', // accélération matérielle
+    }}
+  >
+    <div className="p-4 border-b border-gray-100">
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center">
+          <span className="text-white font-medium">
+            {user.username
+              ? user.username.charAt(0).toUpperCase()
+              : user.email.charAt(0).toUpperCase()}
+          </span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-gray-900 font-semibold truncate">
+            {user.username ||
+              (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
+          </p>
+          <p className="text-gray-500 text-sm truncate">{user.email}</p>
+        </div>
+      </div>
+    </div>
 
-                                    <div className="p-2">
-                                        <button
-                                            onClick={() => {
-                                                setShowEditProfile(true);
-                                                setShowProfileMenu(false);
-                                            }}
-                                            className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
-                                        >
-                                            <Edit3 className="h-4 w-4 text-gray-400" />
-                                            <span className="text-gray-700">Modifier le profil</span>
-                                        </button>
+    <div className="p-2">
+      <button
+        onClick={() => {
+          setShowEditProfile(true);
+          setShowProfileMenu(false);
+        }}
+        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
+      >
+        <Edit3 className="h-4 w-4 text-gray-400" />
+        <span className="text-gray-700">Modifier le profil</span>
+      </button>
 
-                                        <button
-                                            onClick={handleLogout}
-                                            className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
-                                        >
-                                            <LogOut className="h-4 w-4 text-gray-400" />
-                                            <span className="text-gray-700">Se déconnecter</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+      <button
+        onClick={handleLogout}
+        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
+      >
+        <LogOut className="h-4 w-4 text-gray-400" />
+        <span className="text-gray-700">Se déconnecter</span>
+      </button>
+    </div>
+  </div>
+)}
+
                         </div>
                         {/* Modal Notifications */}
                         {showNotificationModal && (
@@ -341,7 +370,6 @@ export default function DashboardHeader({
                                     </div>
 
                                     <div className="max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                                        {/* Dans le modal, remplacez cette partie : */}
                                         {homeworkSends.length > 0 ? (
                                             <div className="space-y-3">
                                                 {homeworkSends.map((send) => (
@@ -393,7 +421,10 @@ export default function DashboardHeader({
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-gray-900">Modifier le profil</h3>
                             <button
-                                onClick={() => setShowEditProfile(false)}
+                                onClick={() => {
+                                    setShowEditProfile(false);
+                                    setEditError('');
+                                }}
                                 className="text-gray-400 hover:text-gray-600 transition-colors"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -401,6 +432,13 @@ export default function DashboardHeader({
                                 </svg>
                             </button>
                         </div>
+
+                        {/* Message d'erreur */}
+                        {editError && (
+                            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <p className="text-sm text-red-600">{editError}</p>
+                            </div>
+                        )}
 
                         <form onSubmit={handleEditProfile} className="space-y-6">
                             <div>
@@ -410,11 +448,39 @@ export default function DashboardHeader({
                                 <input
                                     type="text"
                                     value={editForm.username}
-                                    onChange={(e) => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                                    onChange={(e) => {
+                                        setEditForm(prev => ({ ...prev, username: e.target.value }));
+                                        setUsernameChanged(e.target.value !== user.username);
+                                    }}
                                     className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                     placeholder="Votre pseudo"
                                 />
                             </div>
+
+                            {/* Mot de passe pour changement de pseudo */}
+                            {usernameChanged && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Mot de passe (requis pour modifier le pseudo)
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPasswordForUsernameChange ? "text" : "password"}
+                                            value={editForm.passwordForUsernameChange}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, passwordForUsernameChange: e.target.value }))}
+                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12"
+                                            placeholder="Votre mot de passe"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPasswordForUsernameChange(!showPasswordForUsernameChange)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        >
+                                            {showPasswordForUsernameChange ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -487,7 +553,10 @@ export default function DashboardHeader({
                             <div className="flex space-x-4 pt-4">
                                 <button
                                     type="button"
-                                    onClick={() => setShowEditProfile(false)}
+                                    onClick={() => {
+                                        setShowEditProfile(false);
+                                        setEditError('');
+                                    }}
                                     className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-200"
                                 >
                                     Annuler
@@ -500,6 +569,27 @@ export default function DashboardHeader({
                                     {editLoading ? 'Mise à jour...' : 'Sauvegarder'}
                                 </button>
                             </div>
+
+                       {/* Section Suppression de compte */}
+<div className="pt-6 border-t border-gray-200">
+  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+    <h4 className="text-sm font-semibold text-red-900 mb-2">
+      Supprimer mon compte
+    </h4>
+    <p className="text-sm text-red-800">
+      Pour supprimer votre compte, contactez le support :
+    </p>
+    <div className="mt-2 text-sm text-red-700">
+      <p>
+        📧 <a href="mailto:arabeimportance@gmail.com" className="font-semibold hover:underline">
+          arabeimportance@gmail.com
+        </a>
+      </p>
+      <p>💬 Ou utilisez le formulaire de contact ci-dessus.</p>
+    </div>
+  </div>
+</div>
+
                         </form>
                     </div>
                 </div>
