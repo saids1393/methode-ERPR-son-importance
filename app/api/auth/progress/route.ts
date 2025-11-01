@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { logPageCompletion, logQuizCompletion } from '@/lib/progressTracking';
 
 export async function GET(request: NextRequest) {
   try {
@@ -72,21 +73,26 @@ export async function POST(request: NextRequest) {
         console.log(`➖ [API] PROGRESS - Suppression page ${pageNumber}`);
       }
 
-      console.log('📚 [API] PROGRESS - Mise à jour pages:', { 
-        before: currentUser?.completedPages, 
+      console.log('📚 [API] PROGRESS - Mise à jour pages:', {
+        before: currentUser?.completedPages,
         after: updatedPages,
         pageNumber,
-        action 
+        action
       });
-      
+
       await prisma.user.update({
         where: { id: user.id },
         data: { completedPages: updatedPages },
       });
 
-      return NextResponse.json({ 
-        success: true, 
-        completedPages: updatedPages 
+      if (action === 'add') {
+        const chapterId = getChapterIdFromPage(pageNumber);
+        await logPageCompletion(user.id, pageNumber, chapterId);
+      }
+
+      return NextResponse.json({
+        success: true,
+        completedPages: updatedPages
       });
     }
 
@@ -106,21 +112,25 @@ export async function POST(request: NextRequest) {
         console.log(`➖ [API] PROGRESS - Suppression quiz ${quizNumber}`);
       }
 
-      console.log('🏆 [API] PROGRESS - Mise à jour quiz:', { 
-        before: currentUser?.completedQuizzes, 
+      console.log('🏆 [API] PROGRESS - Mise à jour quiz:', {
+        before: currentUser?.completedQuizzes,
         after: updatedQuizzes,
         quizNumber,
-        action 
+        action
       });
-      
+
       await prisma.user.update({
         where: { id: user.id },
         data: { completedQuizzes: updatedQuizzes },
       });
 
-      return NextResponse.json({ 
-        success: true, 
-        completedQuizzes: updatedQuizzes 
+      if (action === 'add') {
+        await logQuizCompletion(user.id, quizNumber);
+      }
+
+      return NextResponse.json({
+        success: true,
+        completedQuizzes: updatedQuizzes
       });
     }
 
@@ -135,4 +145,28 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+function getChapterIdFromPage(pageNumber: number): number {
+  const chapterPages: { [key: number]: number[] } = {
+    1: [0, 1, 2, 3, 4, 5, 6, 7],
+    2: [8, 9, 10, 11],
+    3: [12, 13, 14, 15],
+    4: [16],
+    5: [17],
+    6: [18, 19, 20],
+    7: [21],
+    8: [22, 23],
+    9: [24],
+    10: [25, 26, 27, 28, 29],
+    11: [30]
+  };
+
+  for (const [chapterId, pages] of Object.entries(chapterPages)) {
+    if (pages.includes(pageNumber)) {
+      return parseInt(chapterId);
+    }
+  }
+
+  return 1;
 }
