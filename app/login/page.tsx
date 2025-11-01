@@ -1,52 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-// Liste blanche des domaines d'email fiables et utilisés en France (sans spam)
+// --- CONFIGURATION DE SÉCURITÉ (ALIGNÉE AVEC LE BACKEND) ---
+
+// Fournisseurs français grand public et sécurisés
 const ALLOWED_EMAIL_DOMAINS = [
-  // Fournisseurs internationaux fiables
-  'gmail.com',
-  'yahoo.com',
-  'outlook.com',
-  'hotmail.com',
-  'icloud.com',
-  'protonmail.com',
-  'proton.me',
-
-  // Fournisseurs français grand public
-  'orange.fr',
-  'wanadoo.fr',
-  'sfr.fr',
-  'neuf.fr',
-  'bbox.fr',
-  'laposte.net',
-  'free.fr',
-  'numericable.fr',
-
-  // Fournisseurs français sécurisés / respectueux de la vie privée
-  'mailo.com',        // ex-netcourrier
-  'mail.fr',
-
-  // Aliases sécurisés
-  'pm.me',            // ProtonMail alias
-
-  // Adresses académiques françaises
-  'ac-paris.fr',
-  'ac-versailles.fr',
-  'ac-lyon.fr',
-  'ac-toulouse.fr',
-  'ac-aix-marseille.fr',
-  'ac-nice.fr',
-  'ac-lille.fr',
-  'ac-bordeaux.fr',
-  'ac-strasbourg.fr',
-  'ac-nantes.fr',
+  'orange.fr', 'wanadoo.fr', 'sfr.fr', 'neuf.fr', 'bbox.fr',
+  'laposte.net', 'free.fr', 'numericable.fr', 'mailo.com', 'mail.fr',
+  'pm.me', 'proton.me'
 ];
 
-// Fonction de validation d'email front
+// Fournisseurs internationaux de confiance
+const TRUSTED_PROVIDERS = [
+  'gmail', 'yahoo', 'outlook', 'hotmail', 'live', 'msn',
+  'icloud', 'protonmail'
+];
+
+// Extensions de domaines européens (TLD)
+const TRUSTED_TLDS = [
+  'fr', 'de', 'es', 'it', 'be', 'nl', 'ch', 'pt', 'uk', 'ie',
+  'pl', 'cz', 'se', 'no', 'fi', 'dk', 'at'
+];
+
+// Domaines jetables connus
+const BLOCKED_DOMAINS = [
+  'tempmail.com', 'mailinator.com', '10minutemail.com',
+  'yopmail.com', 'guerrillamail.com', 'trashmail.com'
+];
+
+// --- VALIDATION EMAIL AVANCÉE (IDENTIQUE AU BACKEND) ---
 function validateEmailDomain(email: string): { valid: boolean; error?: string } {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -54,29 +40,58 @@ function validateEmailDomain(email: string): { valid: boolean; error?: string } 
   }
 
   const domain = email.split('@')[1].toLowerCase();
-  
-  if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
-    return { 
-      valid: false, 
-      error: `Le domaine ${domain} n'est pas autorisé` 
-    };
+  const base = domain.split('.')[0];
+  const tld = domain.split('.').pop();
+
+  // Bloquer les domaines jetables
+  if (BLOCKED_DOMAINS.includes(domain)) {
+    return { valid: false, error: 'Adresse email jetable non autorisée' };
   }
 
-  return { valid: true };
+  // Accepter domaines explicitement whitelistés
+  if (ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+    return { valid: true };
+  }
+
+  // Accepter les grands fournisseurs connus (toutes extensions locales)
+  if (TRUSTED_PROVIDERS.some(p => domain.startsWith(p + '.') || base === p)) {
+    return { valid: true };
+  }
+
+  // Accepter les TLD européens
+  if (TRUSTED_TLDS.includes(tld || '')) {
+    return { valid: true };
+  }
+
+  return {
+    valid: false,
+    error: `Le domaine ${domain} n'est pas autorisé.`
+  };
+}
+
+// Sanitisation des entrées
+function sanitizeInput(input: string): string {
+  if (!input) return '';
+  return input
+    .trim()
+    .slice(0, 255) // Limiter la longueur
+    .replace(/[<>\"']/g, ''); // Supprimer caractères dangereux
 }
 
 export default function LoginPage() {
-  const [identifier, setIdentifier] = useState(''); 
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [generalError, setGeneralError] = useState('');
   const router = useRouter();
 
-  // Validation en temps réel lors de la saisie d'email
-  const handleIdentifierChange = (value: string) => {
+  // Validation en temps réel lors de la saisie d'email (débouncée)
+  const handleIdentifierChange = useCallback((value: string) => {
     setIdentifier(value);
-    
+    setGeneralError(''); // Effacer l'erreur générale en cas de nouvelle saisie
+
     // Si c'est un email, valider le domaine
     if (value.includes('@')) {
       const validation = validateEmailDomain(value);
@@ -88,49 +103,116 @@ export default function LoginPage() {
     } else {
       setEmailError(''); // C'est un username, pas de validation de domaine
     }
+  }, []);
+
+  const handlePasswordChange = useCallback((value: string) => {
+    setPassword(value);
+    setGeneralError(''); // Effacer l'erreur en cas de nouvelle saisie
+  }, []);
+
+  // Validation avant envoi
+  const validateBeforeSubmit = (): boolean => {
+    // Vérifier les champs vides
+    if (!identifier.trim() || !password) {
+      setGeneralError('Identifiant et mot de passe requis');
+      toast.error('Veuillez remplir tous les champs');
+      return false;
+    }
+
+    // Vérifier la longueur minimale
+    if (password.length < 1) {
+      setGeneralError('Mot de passe invalide');
+      toast.error('Mot de passe invalide');
+      return false;
+    }
+
+    // Vérifier le domaine email si applicable
+    if (identifier.includes('@')) {
+      const emailValidation = validateEmailDomain(identifier);
+      if (!emailValidation.valid) {
+        setEmailError(emailValidation.error || 'Domaine email non autorisé');
+        toast.error(emailValidation.error || 'Domaine email non autorisé');
+        return false;
+      }
+    }
+
+    return true;
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!identifier || !password) {
-      toast.error('Veuillez remplir tous les champs');
-      return;
-    }
+    setGeneralError('');
+    setEmailError('');
 
-    // Validation finale avant envoi
-    if (identifier.includes('@')) {
-      const validation = validateEmailDomain(identifier);
-      if (!validation.valid) {
-        toast.error(validation.error || 'Domaine email non autorisé');
-        return;
-      }
+    // Validation préalable
+    if (!validateBeforeSubmit()) {
+      return;
     }
 
     setLoading(true);
 
     try {
+      // Sanitiser les données avant envoi
+      const cleanIdentifier = sanitizeInput(identifier).toLowerCase().trim();
+      const cleanPassword = password;
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, password })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Pour les cookies
+        body: JSON.stringify({
+          identifier: cleanIdentifier,
+          password: cleanPassword,
+        })
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
         toast.success('Connexion réussie !');
-        router.push('/dashboard');
+        // Petit délai pour que le toast s'affiche avant la redirection
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 500);
+      } else if (response.status === 429) {
+        // Rate limiting
+        const retryAfter = data.retryAfter || 900;
+        const minutes = Math.ceil(retryAfter / 60);
+        setGeneralError(`Trop de tentatives. Réessayez dans ${minutes} minutes.`);
+        toast.error(`Trop de tentatives. Réessayez dans ${minutes} minutes.`);
+      } else if (response.status === 400) {
+        // Erreur de validation
+        setEmailError(data.error || 'Données invalides');
+        toast.error(data.error || 'Données invalides');
+      } else if (response.status === 401) {
+        // Identifiants incorrects
+        setGeneralError(data.error || 'Identifiants incorrects');
+        toast.error('Identifiants incorrects ou compte inactif');
       } else {
-        toast.error(data.error || 'Erreur de connexion');
+        // Erreur serveur
+        setGeneralError('Erreur serveur. Veuillez réessayer.');
+        toast.error('Erreur serveur. Veuillez réessayer.');
       }
     } catch (error) {
-      toast.error('Erreur de connexion');
       console.error('Login error:', error);
+      setGeneralError('Erreur de connexion réseau');
+      toast.error('Erreur de connexion');
     } finally {
       setLoading(false);
     }
   };
+
+  // Le formulaire est valide si :
+  // - identifier et password sont remplis
+  // - si identifier contient @, il n'y a pas d'emailError
+  // - pas en cours de chargement
+  const isFormValid = 
+    identifier.trim() && 
+    password && 
+    (identifier.includes('@') ? !emailError : true) && 
+    !loading;
 
   return (
     <div className="login-page-dark min-h-screen relative overflow-hidden bg-black">
@@ -140,24 +222,24 @@ export default function LoginPage() {
           color: #ffffff !important;
         }
       `}</style>
-      
+
       {/* Light effects on sides */}
       <div className="absolute inset-0">
         {/* Left light effect */}
         <div className="absolute top-0 -left-40 w-96 h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
-        
+
         {/* Right light effect */}
         <div className="absolute top-0 -right-40 w-96 h-full bg-gradient-to-l from-transparent via-purple-500/10 to-transparent blur-3xl"></div>
-        
+
         {/* Top center subtle glow */}
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-white/5 to-transparent rounded-full blur-3xl"></div>
       </div>
 
       {/* Grid pattern overlay */}
-      <div 
-        className="absolute inset-0" 
+      <div
+        className="absolute inset-0"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.05'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.05'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`,
         }}
       ></div>
 
@@ -187,8 +269,15 @@ export default function LoginPage() {
           <div className="relative">
             {/* Card with subtle glow */}
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-30"></div>
-            
+
             <div className="relative bg-gray-950/90 backdrop-blur-xl py-8 px-6 rounded-2xl border border-gray-800 sm:px-10">
+              {/* Erreur générale */}
+              {generalError && (
+                <div className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                  <p className="text-sm text-red-400">{generalError}</p>
+                </div>
+              )}
+
               <form onSubmit={handleLogin} className="space-y-6">
                 {/* Email/Username field */}
                 <div>
@@ -207,9 +296,10 @@ export default function LoginPage() {
                       type="text"
                       autoComplete="username"
                       required
+                      disabled={loading}
                       value={identifier}
                       onChange={(e) => handleIdentifierChange(e.target.value)}
-                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 ${
+                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                         emailError ? 'border-red-500' : 'border-gray-800'
                       }`}
                       placeholder="Pseudo ou email"
@@ -237,15 +327,17 @@ export default function LoginPage() {
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="current-password"
                       required
+                      disabled={loading}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full pl-10 pr-10 py-3 bg-gray-900/50 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200"
+                      onChange={(e) => handlePasswordChange(e.target.value)}
+                      className="block w-full pl-10 pr-10 py-3 bg-gray-900/50 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
+                      disabled={loading}
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="h-5 w-5 text-gray-500 hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         {showPassword ? (
@@ -265,7 +357,8 @@ export default function LoginPage() {
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="h-4 w-4 bg-gray-900 border-gray-700 rounded text-blue-500 focus:ring-blue-500/50 focus:ring-offset-0"
+                      disabled={loading}
+                      className="h-4 w-4 bg-gray-900 border-gray-700 rounded text-blue-500 focus:ring-blue-500/50 focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
                       Se souvenir de moi
@@ -284,16 +377,20 @@ export default function LoginPage() {
                 <div>
                   <button
                     type="submit"
-                    disabled={loading || !!emailError}
-                    className="relative group w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!isFormValid}
+                    className="relative group w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : null}
-                    {loading ? 'Connexion...' : 'Se connecter'}
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Connexion...
+                      </>
+                    ) : (
+                      'Se connecter'
+                    )}
                   </button>
                 </div>
               </form>
@@ -313,7 +410,7 @@ export default function LoginPage() {
                 <div className="mt-6">
                   <Link
                     href="/checkout"
-                    className="group relative w-full flex justify-center items-center py-3 px-4 border border-gray-700 rounded-lg text-sm font-medium text-gray-300 bg-transparent hover:bg-gray-900/50 hover:border-gray-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-gray-500 transition-all duration-200"
+                    className="group relative w-full flex justify-center items-center py-3 px-4 border border-gray-700 rounded-lg text-sm font-medium text-gray-300 bg-transparent hover:bg-gray-900/50 hover:border-gray-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-gray-500 transition-all duration-200 disabled:opacity-50"
                   >
                     <svg className="w-5 h-5 mr-2 text-gray-500 group-hover:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />

@@ -1,50 +1,37 @@
 'use client';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-// Liste blanche des domaines d'email fiables et utilisés en France (sans spam)
+// --- CONFIGURATION DE SÉCURITÉ (ALIGNÉE AVEC LE BACKEND) ---
+
+// Fournisseurs français grand public et sécurisés
 const ALLOWED_EMAIL_DOMAINS = [
-  // Fournisseurs internationaux fiables
-  'gmail.com',
-  'yahoo.com',
-  'outlook.com',
-  'hotmail.com',
-  'icloud.com',
-  'protonmail.com',
-  'proton.me',
-
-  // Fournisseurs français grand public
-  'orange.fr',
-  'wanadoo.fr',
-  'sfr.fr',
-  'neuf.fr',
-  'bbox.fr',
-  'laposte.net',
-  'free.fr',
-  'numericable.fr',
-
-  // Fournisseurs français sécurisés / respectueux de la vie privée
-  'mailo.com',        // ex-netcourrier
-  'mail.fr',
-
-  // Aliases sécurisés
-  'pm.me',            // ProtonMail alias
-
-  // Adresses académiques françaises
-  'ac-paris.fr',
-  'ac-versailles.fr',
-  'ac-lyon.fr',
-  'ac-toulouse.fr',
-  'ac-aix-marseille.fr',
-  'ac-nice.fr',
-  'ac-lille.fr',
-  'ac-bordeaux.fr',
-  'ac-strasbourg.fr',
-  'ac-nantes.fr',
+  'orange.fr', 'wanadoo.fr', 'sfr.fr', 'neuf.fr', 'bbox.fr',
+  'laposte.net', 'free.fr', 'numericable.fr', 'mailo.com', 'mail.fr',
+  'pm.me', 'proton.me'
 ];
 
+// Fournisseurs internationaux de confiance
+const TRUSTED_PROVIDERS = [
+  'gmail', 'yahoo', 'outlook', 'hotmail', 'live', 'msn',
+  'icloud', 'protonmail'
+];
+
+// Extensions de domaines européens (TLD)
+const TRUSTED_TLDS = [
+  'fr', 'de', 'es', 'it', 'be', 'nl', 'ch', 'pt', 'uk', 'ie',
+  'pl', 'cz', 'se', 'no', 'fi', 'dk', 'at'
+];
+
+// Domaines jetables connus
+const BLOCKED_DOMAINS = [
+  'tempmail.com', 'mailinator.com', '10minutemail.com',
+  'yopmail.com', 'guerrillamail.com', 'trashmail.com'
+];
+
+// --- VALIDATION EMAIL AVANCÉE (IDENTIQUE AU BACKEND) ---
 function validateEmailDomain(email: string): { valid: boolean; error?: string } {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -52,15 +39,42 @@ function validateEmailDomain(email: string): { valid: boolean; error?: string } 
   }
 
   const domain = email.split('@')[1].toLowerCase();
-  
-  if (!ALLOWED_EMAIL_DOMAINS.includes(domain)) {
-    return { 
-      valid: false, 
-      error: `Le domaine ${domain} n'est pas autorisé` 
-    };
+  const base = domain.split('.')[0];
+  const tld = domain.split('.').pop();
+
+  // Bloquer les domaines jetables
+  if (BLOCKED_DOMAINS.includes(domain)) {
+    return { valid: false, error: 'Adresse email jetable non autorisée' };
   }
 
-  return { valid: true };
+  // Accepter domaines explicitement whitelistés
+  if (ALLOWED_EMAIL_DOMAINS.includes(domain)) {
+    return { valid: true };
+  }
+
+  // Accepter les grands fournisseurs connus (toutes extensions locales)
+  if (TRUSTED_PROVIDERS.some(p => domain.startsWith(p + '.') || base === p)) {
+    return { valid: true };
+  }
+
+  // Accepter les TLD européens
+  if (TRUSTED_TLDS.includes(tld || '')) {
+    return { valid: true };
+  }
+
+  return {
+    valid: false,
+    error: `Le domaine ${domain} n'est pas autorisé.`
+  };
+}
+
+// Sanitisation des entrées
+function sanitizeInput(input: string): string {
+  if (!input) return '';
+  return input
+    .trim()
+    .slice(0, 255) // Limiter la longueur
+    .replace(/[<>\"']/g, ''); // Supprimer caractères dangereux
 }
 
 export default function CheckoutPage() {
@@ -71,9 +85,10 @@ export default function CheckoutPage() {
   const [paymentPlan, setPaymentPlan] = useState<'1x' | '2x'>('1x');
 
   // Validation en temps réel de l'email
-  const handleEmailChange = (value: string) => {
+  const handleEmailChange = useCallback((value: string) => {
     setEmail(value);
-    
+    setError(''); // Effacer l'erreur générale en cas de nouvelle saisie
+
     if (value.includes('@')) {
       const validation = validateEmailDomain(value);
       if (!validation.valid) {
@@ -84,48 +99,62 @@ export default function CheckoutPage() {
     } else {
       setEmailError('');
     }
+  }, []);
+
+  // Validation avant envoi
+  const validateBeforeSubmit = (): boolean => {
+    // Vérifier que l'email n'est pas vide
+    if (!email.trim()) {
+      setError('Veuillez saisir votre email');
+      return false;
+    }
+
+    // Vérifier le format et domaine
+    const validation = validateEmailDomain(email);
+    if (!validation.valid) {
+      setEmailError(validation.error || 'Email invalide');
+      setError(validation.error || 'Email invalide');
+      return false;
+    }
+
+    return true;
   };
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setEmailError('');
 
-    if (!email) {
-      setError('Veuillez saisir votre email');
+    // Validation préalable
+    if (!validateBeforeSubmit()) {
       return;
     }
-
-    // Validation finale avant envoi
-    const validation = validateEmailDomain(email);
-    if (!validation.valid) {
-      setError(validation.error ?? '');
-      return;
-    }
-
-    // Normaliser l'email
-    const normalizedEmail = email.toLowerCase().trim();
 
     setLoading(true);
-    setError('');
 
     try {
+      // Sanitiser et normaliser l'email
+      const cleanEmail = sanitizeInput(email).toLowerCase().trim();
+
       // Vérifier si l'utilisateur existe déjà
       const checkResponse = await fetch('/api/auth/check-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizedEmail })
+        body: JSON.stringify({ email: cleanEmail })
       });
-      
+
       const checkData = await checkResponse.json();
 
       if (checkData.error) {
-        setError(checkData.error ?? '');
+        setError(checkData.error || 'Erreur de validation');
+        setEmailError(checkData.error || 'Erreur de validation');
         return;
       }
 
       if (checkData.exists) {
         setError('Un compte existe déjà avec cet email. Veuillez vous connecter.');
         setTimeout(() => {
-          window.location.href = `/login?email=${encodeURIComponent(normalizedEmail)}`;
+          window.location.href = `/login?email=${encodeURIComponent(cleanEmail)}`;
         }, 2000);
         return;
       }
@@ -134,8 +163,8 @@ export default function CheckoutPage() {
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: normalizedEmail, 
+        body: JSON.stringify({
+          email: cleanEmail,
           paymentPlan // '1x' ou '2x'
         })
       });
@@ -143,7 +172,7 @@ export default function CheckoutPage() {
       const { sessionId, error: stripeError } = await response.json();
 
       if (stripeError) {
-        setError(stripeError ?? '');
+        setError(stripeError || 'Erreur lors de la création de la session');
         return;
       }
 
@@ -157,12 +186,18 @@ export default function CheckoutPage() {
         setError(redirectError.message || 'Erreur lors de la redirection');
       }
     } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.');
       console.error('Checkout error:', err);
+      setError('Une erreur est survenue. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
   };
+
+  // Le formulaire est valide si :
+  // - email est rempli
+  // - pas d'erreur email
+  // - pas en cours de chargement
+  const isFormValid = email.trim() && !emailError && !loading;
 
   return (
     <div className="checkout-page-dark min-h-screen relative overflow-hidden bg-black">
@@ -215,6 +250,13 @@ export default function CheckoutPage() {
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-30"></div>
 
             <div className="relative bg-gray-950/90 backdrop-blur-xl py-8 px-6 rounded-2xl border border-gray-800 sm:px-10">
+              {/* Erreur générale */}
+              {error && (
+                <div className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                  <p className="text-sm text-red-400">{error}</p>
+                </div>
+              )}
+
               <form onSubmit={handleCheckout} className="space-y-6">
                 {/* Email field */}
                 <div>
@@ -233,9 +275,10 @@ export default function CheckoutPage() {
                       type="email"
                       autoComplete="email"
                       required
+                      disabled={loading}
                       value={email}
                       onChange={(e) => handleEmailChange(e.target.value)}
-                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 ${
+                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                         emailError ? 'border-red-500' : 'border-gray-800'
                       }`}
                       placeholder="votre@email.com"
@@ -255,8 +298,9 @@ export default function CheckoutPage() {
                     {/* Option 1x - Card style */}
                     <button
                       type="button"
+                      disabled={loading}
                       onClick={() => setPaymentPlan('1x')}
-                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed ${
                         paymentPlan === '1x'
                           ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
                           : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
@@ -274,8 +318,8 @@ export default function CheckoutPage() {
                           <p className="text-xs text-gray-500 mt-1">Accès immédiat complet</p>
                         </div>
                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                          paymentPlan === '1x' 
-                            ? 'border-blue-500 bg-blue-500' 
+                          paymentPlan === '1x'
+                            ? 'border-blue-500 bg-blue-500'
                             : 'border-gray-600'
                         }`}>
                           {paymentPlan === '1x' && (
@@ -290,8 +334,9 @@ export default function CheckoutPage() {
                     {/* Option 2x - Card style */}
                     <button
                       type="button"
+                      disabled={loading}
                       onClick={() => setPaymentPlan('2x')}
-                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed ${
                         paymentPlan === '2x'
                           ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
                           : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
@@ -308,8 +353,8 @@ export default function CheckoutPage() {
                           </p>
                         </div>
                         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                          paymentPlan === '2x' 
-                            ? 'border-purple-500 bg-purple-500' 
+                          paymentPlan === '2x'
+                            ? 'border-purple-500 bg-purple-500'
                             : 'border-gray-600'
                         }`}>
                           {paymentPlan === '2x' && (
@@ -326,27 +371,24 @@ export default function CheckoutPage() {
                   </p>
                 </div>
 
-                {/* Error message */}
-                {error && (
-                  <div className="text-red-500 text-sm text-center p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    {error}
-                  </div>
-                )}
-
                 {/* Checkout button */}
                 <div>
                   <button
                     type="submit"
-                    disabled={loading || !!emailError}
-                    className="relative group w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!isFormValid}
+                    className="relative group w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : null}
-                    {loading ? 'Vérification...' : `Payer ${paymentPlan === '1x' ? '89€' : '44,50€ aujourd\'hui'}`}
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Vérification...
+                      </>
+                    ) : (
+                      `Payer ${paymentPlan === '1x' ? '89€' : '44,50€ aujourd\'hui'}`
+                    )}
                   </button>
                 </div>
 
@@ -354,8 +396,8 @@ export default function CheckoutPage() {
                 <div className="text-center">
                   <p className="text-sm text-gray-400">
                     Vous avez déjà un compte ?{' '}
-                    <a 
-                      href="/login" 
+                    <a
+                      href="/login"
                       className="text-blue-400 hover:text-blue-300 transition-colors"
                     >
                       Se connecter
