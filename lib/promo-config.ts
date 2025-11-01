@@ -11,21 +11,21 @@ export interface PromoCode {
 
 export const PROMO_CODES: PromoCode[] = [
   {
-    id: "promo_1SEIE9GkQ8NxIRz4Qp5AchMX", // Code: ERPRMETHODE9113061393
+    id: "promo_1SOj7uGYlym3LEYwUY65iY9G", // Code: ERPRMETHODE9113061393
     name: "Réduction 30€",
     description: "30€ de réduction sur le paiement 1x",
     validFor: "1x",
     active: true,
   },
   {
-    id: "promo_1SGRqtGkQ8NxIRz4ViUccKoT", // Code: ERPRx2
+    id: "promo_1SOj7BGYlym3LEYwDX2ghPls", // Code: ERPRx2
     name: "Réduction 15€ (2x)",
     description: "15€ de réduction sur chaque paiement (paiement 2x)",
     validFor: "2x",
     active: true,
   },
   {
-    id: "promo_1SGSqPGkQ8NxIRz4hycc13P2", // Votre nouveau coupon 15%
+    id: "promo_1SOj5CGYlym3LEYwwE9745Yr", // Votre nouveau coupon 15%
     name: "Offre de lancement 15%",
     description: "15% de réduction - Offre de lancement",
     validFor: "both", // Valable pour 1x ET 2x
