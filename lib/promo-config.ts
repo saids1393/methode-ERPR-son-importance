@@ -11,14 +11,14 @@ export interface PromoCode {
 
 export const PROMO_CODES: PromoCode[] = [
   {
-    id: "promo_1SOj7uGYlym3LEYwUY65iY9G", // Code: ERPRMETHODE9113061393
+    id: "promo_1SOk35GYlym3LEYwTDHGsLsz", // Code: ERPRMETHODE9113061393
     name: "Réduction 30€",
     description: "30€ de réduction sur le paiement 1x",
     validFor: "1x",
     active: true,
   },
   {
-    id: "promo_1SOj7BGYlym3LEYwDX2ghPls", // Code: ERPRx2
+    id: "promo_1SOk4RGYlym3LEYwggrRoow1", // Code: ERPRx2
     name: "Réduction 15€ (2x)",
     description: "15€ de réduction sur chaque paiement (paiement 2x)",
     validFor: "2x",

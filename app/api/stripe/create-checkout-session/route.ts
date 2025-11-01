@@ -54,7 +54,7 @@ export async function POST(req: Request) {
                 name: "Méthode ERPR - 1er paiement (1/2)",
                 description: "Premier versement du paiement en 2 fois",
               },
-              unit_amount: 100, // 44,50€
+              unit_amount: 4450, // 44,50€
             },
             quantity: 1,
           },
@@ -119,7 +119,7 @@ export async function POST(req: Request) {
               name: "Méthode ERPR - Paiement 1x",
               description: "Cours complet d'arabe",
             },
-            unit_amount: 100, //89€
+            unit_amount: 8900, //89€
           },
           quantity: 1,
         },
