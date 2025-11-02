@@ -72,3 +72,4 @@ export function getValidPromoCodes(paymentPlan: "1x" | "2x"): PromoCode[] {
 export function getPromoCodeIds(paymentPlan: "1x" | "2x"): string[] {
   return getValidPromoCodes(paymentPlan).map((promo) => promo.id);
 }
+
