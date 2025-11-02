@@ -99,7 +99,7 @@ const IntroductionPage = () => {
 
           <p>
             Comme pour les autres positions, les <span className="text-purple-400 font-semibold">6 lettres spéciales</span> :
-            <span className="font-bold"> ا, د, ذ, ر, ز, و</span> ne s'attachent jamais avant elles, même en fin de mot.
+            <span className="font-bold"> ا, د, ذ, ر, ز, و</span> ne s'attachent jamais après elles, même en fin de mot.
             Elles conservent donc leur forme isolée.
           </p>
 
@@ -213,7 +213,7 @@ const AlphabetPage = ({ playLetterAudio, activeIndex, setActiveIndex }: {
       {/* Information sur les lettres non-attachantes */}
       <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-4 md:p-6 mb-6">
         <p className="text-base md:text-lg leading-relaxed text-white text-center">
-          <span className="font-semibold">📝 Note importante :</span> Les lettres <span className="font-bold">ا, د, ذ, ر, ز, و</span> ne s'attachent jamais avant elles et conservent leur forme isolée même en fin de mot.
+          <span className="font-semibold">📝 Note importante :</span> Les lettres <span className="font-bold">ا, د, ذ, ر, ز, و</span> ne s'attachent jamais après elles et conservent leur forme isolée même en fin de mot.
         </p>
       </div>
 

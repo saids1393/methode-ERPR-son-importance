@@ -135,12 +135,12 @@ const IntroductionPage = () => (
         <p>
           Jusqu'à présent, vous avez appris à lire les lettres avec des voyelles courtes
           et les lettres qui se prolongent. Maintenant, découvrez un concept crucial :
-          le <span className="text-yellow-400 font-semibold">Soukoun</span> (السُّكُون).
+          la <span className="text-yellow-400 font-semibold">Soukoun</span> (السُّكُون).
         </p>
 
         <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6">
           <p>
-            ✨ <span className="font-semibold">Qu'est-ce que le Soukoun ?</span>
+            ✨ <span className="font-semibold">Qu'est-ce que la Soukoun ?</span>
             <br />
             <br />
             Le Soukoun est <span className="text-orange-400 font-semibold">l'absence de voyelle</span> sur une consonne.
@@ -159,7 +159,7 @@ const IntroductionPage = () => (
         </div>
 
         <p>
-          💡 <span className="font-semibold">Comprendre le Soukoun :</span>
+          💡 <span className="font-semibold">Comprendre la Soukoun :</span>
           <br />
           Jusqu'à maintenant, chaque lettre que vous avez lue portait une voyelle. Le Soukoun
           est différent : il <span className="text-orange-400 font-semibold">stoppe complètement le son</span> de la lettre.
@@ -176,10 +176,10 @@ const IntroductionPage = () => (
 
         <div className="bg-purple-900/30 border border-purple-500/50 rounded-lg p-4 md:p-6">
           <p>
-            🎯 <span className="font-semibold text-amber-400">Important - Impact du Soukoun en Tajweed :</span>
+            🎯 <span className="font-semibold text-amber-400">Important - Impact du Soukoun en Tajwid :</span>
             <br />
             <br />
-            Quand une lettre porte un Soukoun, plusieurs comportements spéciaux peuvent se produire :
+            Quand une lettre porte une Soukoun, plusieurs comportements spéciaux peuvent se produire :
             <br />
             <br />
             • <span className="text-orange-400 font-semibold">Al-Qalqalah</span> (القَلْقَلَة) : Certaines lettres avec Soukoun
@@ -187,7 +187,7 @@ const IntroductionPage = () => (
             <br />
             • <span className="text-orange-400 font-semibold">Al-Hams</span> (الهمس) : Certaines lettres deviennent chuchotées
             <br />
-            • Et d'autres règles de Tajweed qui s'appliquent selon la lettre et son contexte
+            • Et d'autres règles de Tajwidd qui s'appliquent selon la lettre et son contexte
           </p>
         </div>
 
@@ -195,13 +195,13 @@ const IntroductionPage = () => (
           🎯 <span className="font-semibold">Objectif de cette leçon :</span>
           <br />
           Prenez le temps de bien comprendre cette introduction avant de passer aux leçons pratiques.
-          Le Soukoun est la base de nombreuses règles de Tajweed que vous apprendrez par la suite.
+          La Soukoun est la base de nombreuses règles de Tajwid que vous apprendrez par la suite.
         </p>
 
         <p>
           Dans la page suivante, vous allez pratiquer avec différentes combinaisons de
           lettres + voyelles + Soukoun. Écoutez attentivement chaque syllabe pour sentir
-          la différence entre un son prolongé et un son arrêté net par le Soukoun.
+          la différence entre un son prolongé et un son arrêté net par la Soukoun.
         </p>
       </div>
     </div>
@@ -261,12 +261,12 @@ const Page22 = () => {
       <div className="text-white p-4 md:p-6 text-center border-b-2">
         <div className="text-2xl md:text-3xl font-bold mb-2">
           {currentPage === 0
-            ? "Leçon 22 : Le Soukoun (l'absence de voyelle)"
+            ? "Leçon 22 : La Soukoun (l'absence de voyelle)"
             : "Leçon 22 : Pratique du Soukoun"}
         </div>
         {currentPage === 1 && (
           <div className="text-md md:text-lg text-amber-300">
-            Cliquez sur chaque syllabe pour écouter le son avec Soukoun.
+            Cliquez sur chaque case pour écouter le son avec la Soukoun.
           </div>
         )}
       </div>

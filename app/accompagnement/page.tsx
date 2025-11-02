@@ -185,7 +185,7 @@ export default function AccompagnementPage() {
                   et sessions de questions-réponses exclusives avec le formateur.
                 </p>
                 <a
-                  href="https://t.me/+your_telegram_group_link"
+                  href="https://t.me/+9QaRDegbynljNmY0"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center space-x-3"

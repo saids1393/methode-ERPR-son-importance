@@ -85,14 +85,14 @@ const IntroductionPage = () => (
     <div className="w-full bg-gray-800 rounded-lg p-6 md:p-8">
       <div className="text-white space-y-6 text-lg md:text-xl leading-relaxed">
         <p>
-          🎊 <span className="text-amber-400 font-semibold">Félicitations ! Vous avez terminé le cours complet du Tajweed !</span>
+          🎊 <span className="text-amber-400 font-semibold">Félicitations ! Vous avez terminé les bases de la lecture et de l'écriture !</span>
         </p>
 
         <p>
           Vous avez parcouru un chemin extraordinaire ! De la première voyelle à la combinaison
-          de toutes les règles avancées, vous maîtrisez maintenant les fondamentaux du
-          <span className="text-yellow-400 font-semibold"> Tajweed</span>. Cette dernière leçon vous présente
-          les <span className="text-cyan-400 font-semibold">mots coraniques les plus sacrés</span> et les plus courants.
+          de toutes les règles avancées, vous maîtrisez maintenant les fondamentaux de
+          <span className="text-yellow-400 font-semibold">la lecture et de l'écriture </span>. Cette dernière leçon vous présente
+          les <span className="text-cyan-400 font-semibold">versets du coran</span>
         </p>
 
         <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6">
@@ -100,17 +100,23 @@ const IntroductionPage = () => (
             ✨ <span className="font-semibold">Résumé de votre apprentissage :</span>
             <br />
             <br />
-            ✅ Les voyelles courtes (Fatha, Damma, Kasra)
+            ✅ Les prononciations des lettres
             <br />
-            ✅ Le Soukoun (absence de voyelle)
+            ✅ Les lettres attachées et nons attachées avec leurs 3 formes (début, milieu, fin)
             <br />
-            ✅ Les prolongations (Alif, Waw, Ya)
+            ✅ Les voyelles(Fatha, Damma, Kasra)
             <br />
-            ✅ Les Alif, Waw, Ya Saghirah
+            ✅ Les doubles voyelles (Fathatan, Dammatan, Kassratan)
+            <br />
+            ✅ La Soukoun (absence de voyelle)
+            <br />
+            ✅ Les prolongations (Alif, Waw, Ya) et les lettres douces (Waw et Ya)
+            <br />
+            ✅ Le Alif, Waw, Ya Saghirah
             <br />
             ✅ Les lettres solaires et lunaires
             <br />
-            ✅ La Chaddah (doublement de lettres)
+            ✅ La Shaddah (doublement de lettres)
             <br />
             ✅ Les combinaisons avancées de tous ces éléments
           </p>
@@ -141,40 +147,21 @@ const IntroductionPage = () => (
         <p>
           💡 <span className="font-semibold">Comment continuer votre progression :</span>
           <br />
-          1. Écoutez régulièrement des récitations coraniques de qualité
+          1. Écoutez régulièrement des récitations coraniques de qualité comme : Ayman Suwaid, Mahmoud Hussari et Houdayfi
           <br />
-          2. Pratiquez votre propre récitation avec patience et persévérance
+          2. Pratiquez en lisant le coran dans votre quotidien
           <br />
-          3. Consultez un maître de Tajweed pour affiner votre technique
+          3. Consultez une personne plus expérimentée pour corriger votre lecture
           <br />
-          4. Lisez le Coran quotidiennement en appliquant les règles apprises
-          <br />
-          5. Écoutez les grands récitants (Qurraa) pour inspirer votre récitation
+          4. Patientez jusqu'a que les bases se consolident dans votre esprit avant de passer au Tajwid
         </p>
 
-        <div className="bg-green-900/30 border border-green-500/50 rounded-lg p-4 md:p-6">
-          <p>
-            🏆 <span className="font-semibold">Message final :</span>
-            <br />
-            <br />
-            Vous avez maintenant les clés pour comprendre et réciter le Coran avec respect et beauté.
-            Le Tajweed n'est pas une destination, mais un <span className="text-amber-300">voyage continu d'amélioration</span>.
-            <br />
-            <br />
-            Que votre apprentissage soit une source de guidance et de bénédiction.
-            Continuez avec dévouement, car chaque lettre récitée avec intention a une grande valeur.
-            <br />
-            <br />
-            <span className="text-amber-300 font-semibold">Baraka Allahoufika wa Assalamu alaikum wa Rahmatoullahi wa Barakatuh</span>
-            <br />
-            <span className="text-gray-300 text-sm">(Que la bénédiction d'Allah soit avec vous et que la paix, la miséricorde et les bénédictions d'Allah soient sur vous)</span>
-          </p>
-        </div>
+       
       </div>
     </div>
 
     <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-base md:text-lg">
-      <div>Leçon 28 : Dernier exercice - Synthèse complète du Tajweed</div>
+      <div>Leçon 28 : Exercice d'écriture à rendre</div>
       <div className="mt-1">© 2025 Tous droits réservés</div>
     </footer>
   </div>
@@ -248,11 +235,11 @@ const ExercisePage = () => (
       </div>
     </div>
 
-    
-      <PageNavigation currentChapter={10} currentPage={28} className="mt-6 mb-4" />
 
-<footer className="border-t-1 text-white text-center p-4 md:p-6 mt-12 font-semibold text-sm md:text-base">
-      <div>Page 28 - Dernière leçon : Synthèse complète du Tajweed</div>
+    <PageNavigation currentChapter={10} currentPage={28} className="mt-6 mb-4" />
+
+    <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-12 font-semibold text-sm md:text-base">
+      <div>Page 28 - Exercice : reconnaissance des mots avec toutes les règles d'écriture</div>
       <div className="mt-1">© 2025 Tous droits réservés</div>
     </footer>
   </div>
@@ -268,8 +255,8 @@ const Page28 = () => {
       <div className="text-white p-4 md:p-6 text-center border-b-2">
         <div className="text-2xl md:text-3xl font-bold mb-2">
           {currentPage === 0
-            ? "Leçon 28 : Dernier exercice - Synthèse complète du Tajweed"
-            : "Leçon 28 : Exercice final"}
+            ? "Leçon 28 :  Exercice : reconnaissance des mots avec toutes les règles d'écriture"
+            : "Leçon 28 :  Exercice : reconnaissance des mots avec toutes les règles d'écriture"}
         </div>
         {currentPage === 1 && (
           <div className="text-md md:text-lg text-amber-300">
@@ -283,11 +270,10 @@ const Page28 = () => {
         <button
           onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
           disabled={currentPage === 0}
-          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
-            currentPage === 0
+          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === 0
               ? "border-gray-600 text-gray-600 cursor-not-allowed"
               : "border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110"
-          }`}
+            }`}
         >
           <ChevronLeft size={18} />
         </button>
@@ -299,11 +285,10 @@ const Page28 = () => {
         <button
           onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
           disabled={currentPage === totalPages - 1}
-          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${
-            currentPage === totalPages - 1
+          className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === totalPages - 1
               ? "border-gray-600 text-gray-600 cursor-not-allowed"
               : "border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110"
-          }`}
+            }`}
         >
           <ChevronRight size={18} />
         </button>

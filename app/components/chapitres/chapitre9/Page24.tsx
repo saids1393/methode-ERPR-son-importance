@@ -85,8 +85,8 @@ const IntroductionPage = () => (
         </p>
 
         <p>
-          Vous avez appris le Soukoun et comment il arrête le son d'une lettre. Maintenant,
-          découvrez un concept fondamental en Tajweed : les{" "}
+          Vous avez appris la Soukoun et comment il arrête le son d'une lettre. Maintenant,
+          découvrez un concept fondamental : les{" "}
           <span className="text-yellow-400 font-semibold">lettres solaires et lunaires</span> (حروف شمسية و قمرية).
         </p>
 
@@ -143,7 +143,7 @@ const IntroductionPage = () => (
         </div>
 
         <p>
-          🌟 <span className="font-semibold">Impact en Tajweed :</span>
+          🌟 <span className="font-semibold">Impact en Tajwid :</span>
           <br />
           Cette distinction est essentielle pour une récitation correcte du Coran.
           Écoutez bien la différence entre les deux catégories dans la page suivante !

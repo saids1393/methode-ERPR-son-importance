@@ -15,20 +15,15 @@ const Page30 = () => {
 
   return (
     <>
-      <div className="font-arabic min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 text-white">
+      <div className="font-arabic min-h-screen bg-black flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 text-white">
         {/* CARD */}
-        <div className="w-full max-w-md sm:max-w-lg md:max-w-2xl bg-gray-900 rounded-2xl shadow-2xl overflow-hidden transition-transform duration-300 hover:scale-[1.01]">
+        <div className="w-full max-w-md sm:max-w-lg md:max-w-2xl bg-black rounded-lg overflow-hidden transition-transform duration-300">
           {/* HEADER */}
-          <div
-            className="p-6 sm:p-8 text-center"
-            style={{
-              background: "linear-gradient(135deg, #a855f7, #3b82f6)",
-            }}
-          >
+          <div className="p-6 sm:p-8 text-center border-b border-gray-800">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
               Évaluation Finale
             </h1>
-            <p className="text-base sm:text-lg opacity-90">
+            <p className="text-base sm:text-lg text-gray-400">
               Félicitations pour avoir terminé le cours !
             </p>
           </div>
@@ -37,7 +32,7 @@ const Page30 = () => {
           <div className="p-6 sm:p-8 md:p-10 text-center">
             <div className="mb-8">
               <svg
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto text-green-400 mb-4"
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mx-auto text-white mb-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -53,7 +48,7 @@ const Page30 = () => {
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4">
                 Prêt pour l'évaluation ?
               </h2>
-              <p className="text-base sm:text-lg mb-6 leading-relaxed opacity-90">
+              <p className="text-base sm:text-lg mb-6 leading-relaxed text-gray-400">
                 Veuillez contacter le professeur via WhatsApp pour planifier votre évaluation finale.
               </p>
             </div>
@@ -61,7 +56,7 @@ const Page30 = () => {
             {/* BUTTON */}
             <button
               onClick={handleWhatsAppClick}
-              className="group relative inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold text-white bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-gray-900"
+              className="inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold text-black bg-white rounded-lg hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 focus:outline-none"
             >
               <svg
                 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3"
@@ -74,7 +69,7 @@ const Page30 = () => {
               Contacter via WhatsApp
             </button>
 
-            <p className="text-xs sm:text-sm mt-6 opacity-80">
+            <p className="text-xs sm:text-sm mt-6 text-gray-500">
               Le professeur vous répondra dans les plus brefs délais
             </p>
           </div>
@@ -85,7 +80,7 @@ const Page30 = () => {
       
       <PageNavigation currentChapter={11} currentPage={30} className="mt-6 mb-4" />
 
-<footer className="bg-gray-900 text-white text-center p-4 sm:p-6 mt-6 font-semibold text-xs sm:text-sm">
+      <footer className="bg-black text-white text-center p-4 sm:p-6 mt-6 font-semibold text-xs sm:text-sm border-t border-gray-800">
         <div>Page 30</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -94,7 +89,3 @@ const Page30 = () => {
 };
 
 export default Page30;
-
-
-
-

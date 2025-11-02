@@ -21,7 +21,7 @@ const chapter10Page26AudioMappings: { [key: string]: string } = {
   "النَّاسِ": "chap10_pg26_case15",
   "الشَّيْطَانُ": "chap10_pg26_case16",
   "الصَّالِحِينَ": "chap10_pg26_case17",
-  "مُصَدَّقِينَ": "chap10_pg26_case18",
+ "مُصَدِّقِينَ": "chap10_pg26_case18",
   "وَصَّىٰ": "chap10_pg26_case19",
   "نَذَّرْتُكُمْ": "chap10_pg26_case20",
   "قَدَّرْنَا": "chap10_pg26_case21",
@@ -36,7 +36,7 @@ const quranicWords: string[] = [
   "الْمُؤْمِنِينَ", "ضَرَّ", "تُبِّ",
   "النَّاسِ",
   "الشَّيْطَانُ",
-  "الصَّالِحِينَ", "مُصَدَّقِينَ", "وَصَّىٰ",
+  "الصَّالِحِينَ","مُصَدِّقِينَ", "وَصَّىٰ",
   "نَذَّرْتُكُمْ", "قَدَّرْنَا", "تَذَكَّرُوا"
 ];
 
@@ -60,10 +60,10 @@ const IntroductionPage = () => (
         </p>
 
         <p>
-          Félicitations ! Vous avez appris tous les éléments fondamentaux du Tajweed :
-          les voyelles, les prolongations, le Soukoun, les lettres solaires et lunaires,
+          Félicitations ! Vous avez appris tous les éléments fondamentaux de la lecture arabe :
+          les voyelles, doubles voyelles, les lettres qui ne s'attachent pas après elles, les prolongations, la Soukoun, les lettres solaires et lunaires,
           et la Chaddah. Maintenant, il est temps d'appliquer ces connaissances à des
-          <span className="text-cyan-400 font-semibold"> mots coraniques authentiques</span>.
+          <span className="text-cyan-400 font-semibold"> mots authentiques</span>.
         </p>
 
         <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6">
@@ -121,16 +121,15 @@ const IntroductionPage = () => (
         <p>
           🌟 <span className="font-semibold">Conseil final :</span>
           <br />
-          Vous avez parcouru un long chemin ! Ces mots coraniques sont la preuve que
-          tous ces éléments fonctionnent ensemble pour créer la beauté du Tajweed.
-          Continuez votre pratique, écoutez régulièrement, et vous verrez votre récitation
+          Vous avez parcouru un long chemin !
+          Continuez votre pratique, écoutez régulièrement, et vous verrez votre lecture
           s'améliorer considérablement. Excellente pratique ! 🎵
         </p>
       </div>
     </div>
 
     <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-base md:text-lg">
-      <div>Leçon 26 : Application complète - Mots coraniques</div>
+      <div>Leçon 26 : Exercice de reconnaissance des mots avec la shaddah</div>
       <div className="mt-1">© 2025 Tous droits réservés</div>
     </footer>
   </div>
@@ -198,7 +197,7 @@ const ExercisePage = () => (
       <PageNavigation currentChapter={10} currentPage={26} className="mt-6 mb-4" />
 
 <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-12 font-semibold text-sm md:text-base">
-      <div>Page 26 - Application complète du Tajweed</div>
+      <div>Page 26 - Exercice de reconnaissance</div>
       <div className="mt-1">© 2025 Tous droits réservés</div>
     </footer>
   </div>
@@ -214,12 +213,12 @@ const Page26 = () => {
       <div className="text-white p-4 md:p-6 text-center border-b-2">
         <div className="text-2xl md:text-3xl font-bold mb-2">
           {currentPage === 0
-            ? "Leçon 26 : Application complète - Mots coraniques"
+            ? "Leçon 26 : Exercice de reconnaissance des mots avec la shaddah"
             : "Leçon 26 : Exercice de reconnaissance"}
         </div>
         {currentPage === 1 && (
           <div className="text-md md:text-lg text-amber-300">
-            Cliquez sur chaque mot pour écouter et reconnaître les éléments du Tajweed.
+            Cliquez sur chaque mot pour écouter et reconnaître la shaddahet la soukoun
           </div>
         )}
       </div>

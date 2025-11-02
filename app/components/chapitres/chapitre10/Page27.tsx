@@ -115,13 +115,11 @@ const IntroductionPage = () => (
           2. Les <span className="text-yellow-400">lettres solaires</span> et <span className="text-blue-400">lunaires</span> continuent à s'appliquer
           <br />
           3. Les <span className="text-cyan-400">Alif saghirah, Waw saghirah, Ya saghirah</span> peuvent apparaître
-          <br />
-          4. C'est une combinaison qui montre votre progression en Tajweed
         </p>
 
         <p>
           Pratiquez avec attention et continuez votre progression. Les leçons suivantes
-          vous attendront avec d'autres concepts importants du Tajweed ! 🎵
+          vous attendront avec d'autres concepts importants ! 🎵
         </p>
       </div>
     </div>
@@ -219,7 +217,7 @@ const Page27 = () => {
         </div>
         {currentPage === 1 && (
           <div className="text-md md:text-lg text-amber-300">
-            Cliquez sur chaque mot pour écouter les combinaisons avancées du Tajweed.
+            Cliquez sur chaque mot pour écouter la shaddah et la soukoun.
           </div>
         )}
       </div>

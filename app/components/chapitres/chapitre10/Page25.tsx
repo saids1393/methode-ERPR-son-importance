@@ -128,7 +128,7 @@ const IntroductionPage = () => (
         </p>
 
         <p>
-          🎵 <span className="font-semibold">Importance en Tajweed :</span>
+          🎵 <span className="font-semibold">Importance en Tajwid :</span>
           <br />
           La Chaddah est très importante car :
           <br />

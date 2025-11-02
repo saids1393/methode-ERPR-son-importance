@@ -40,7 +40,7 @@ const IntroductionPage = () => (
         </p>
 
         <p>
-          Maintenant que vous maîtrisez toutes les bases du Tajweed, il est temps de mettre en pratique
+          Maintenant que vous maîtrisez toutes les bases de la lecture et de l'écriture il est temps de mettre en pratique
           ce que vous avez appris ! Cette leçon vous demande de <span className="text-yellow-400 font-semibold">rendre les mots coraniques </span>
           en écrivant leurs lettres <span className="text-cyan-400 font-semibold">de droite à gauche</span>, en appliquant
           le sens de chaque lettre que vous avez étudié au début.
@@ -71,7 +71,7 @@ const IntroductionPage = () => (
           <br />
           2. Analysez les lettres individuelles de droite à gauche
           <br />
-          3. Identifiez les éléments du Tajweed (voyelles, Chaddah, etc.)
+          3. Identifiez les éléments appris (voyelles, Chaddah, etc.)
           <br />
           4. Écrivez le mot dans un cahier ou sur papier en arabe
           <br />
