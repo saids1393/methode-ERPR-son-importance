@@ -50,6 +50,40 @@ export async function POST(req: Request) {
         }
         break;
 
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object as any;
+
+        if (paymentIntent.metadata?.paymentPlan === '2x' && paymentIntent.metadata?.paymentNumber === '2') {
+          const firstPaymentIntentId = paymentIntent.metadata.firstPaymentIntentId;
+          const email = paymentIntent.metadata.email;
+
+          console.log(`💳 2ème paiement 2x réussi pour ${email}`);
+          console.log(`   Payment Intent: ${paymentIntent.id}`);
+          console.log(`   Lié au 1er paiement: ${firstPaymentIntentId}`);
+
+          try {
+            const updated = await prisma.secondPayment.updateMany({
+              where: {
+                firstPaymentIntentId: firstPaymentIntentId,
+                status: { in: ['PENDING', 'PROCESSING'] }
+              },
+              data: {
+                status: 'COMPLETED',
+                secondPaymentIntentId: paymentIntent.id,
+              },
+            });
+
+            if (updated.count > 0) {
+              console.log(`✅ SecondPayment marqué comme COMPLETED`);
+            } else {
+              console.log(`⚠️ Aucune entrée SecondPayment trouvée pour ${firstPaymentIntentId}`);
+            }
+          } catch (dbErr: any) {
+            console.error('❌ Erreur mise à jour DB:', dbErr.message);
+          }
+        }
+        break;
+
       case 'charge.succeeded':
         console.log('✅ Paiement réussi:', event.data.object.id);
         break;

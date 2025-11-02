@@ -82,22 +82,30 @@ export async function POST(req: Request) {
       // ⚠️ UNIQUEMENT EN LOCAL POUR TESTER
       if (process.env.NODE_ENV === "development") {
         console.log("🧪 [DEV ONLY] Simulation du 2e paiement dans 2 minutes...");
-        
+
+        const sessionToProcess = session;
         setTimeout(async () => {
           console.log("⏳ [DEV] Lancement du 2ème paiement...");
           try {
+            const sessionData = await stripe.checkout.sessions.retrieve(sessionToProcess.id);
+            const firstPaymentIntentId = sessionData.payment_intent as string;
+
             await fetch(`${baseUrl}/api/stripe/charge-second-payment`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.CRON_SECRET}`
+              },
+              body: JSON.stringify({
                 customerId: customer.id,
-                email: email 
+                email: email,
+                firstPaymentIntentId: firstPaymentIntentId
               }),
             });
           } catch (err) {
             console.error("❌ Erreur simulation 2ème paiement:", err);
           }
-        }, 120000); // 2 minutes
+        }, 120000);
       } else {
         console.log("📌 [PROD] Le cron job Vercel s'en charge");
       }

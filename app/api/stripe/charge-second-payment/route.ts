@@ -119,6 +119,40 @@ export async function POST(req: Request) {
     console.log("💰 Montant:", paymentIntent.amount / 100, "€");
     console.log("📊 Statut:", paymentIntent.status);
 
+    if (recordId) {
+      try {
+        await prisma.secondPayment.update({
+          where: { id: recordId },
+          data: {
+            status: "COMPLETED",
+            secondPaymentIntentId: paymentIntent.id,
+            updatedAt: new Date(),
+          },
+        });
+        console.log("✅ SecondPayment mis à jour en COMPLETED");
+      } catch (dbErr) {
+        console.error("❌ Erreur mise à jour SecondPayment:", dbErr);
+      }
+    } else if (firstPaymentIntentId) {
+      try {
+        const updated = await prisma.secondPayment.updateMany({
+          where: {
+            firstPaymentIntentId: firstPaymentIntentId,
+            status: { in: ['PENDING', 'PROCESSING'] }
+          },
+          data: {
+            status: "COMPLETED",
+            secondPaymentIntentId: paymentIntent.id,
+          },
+        });
+        if (updated.count > 0) {
+          console.log("✅ SecondPayment mis à jour en COMPLETED (via firstPaymentIntentId)");
+        }
+      } catch (dbErr) {
+        console.error("❌ Erreur mise à jour SecondPayment:", dbErr);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       paymentIntentId: paymentIntent.id,
