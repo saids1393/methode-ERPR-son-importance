@@ -25,10 +25,10 @@ export const PROMO_CODES: PromoCode[] = [
     active: true,
   },
   {
-    id: "promo_1SOj5CGYlym3LEYwwE9745Yr", // Votre nouveau coupon 15%
+    id: "promo_1SOj5CGYlym3LEYwwE9745Yr", 
     name: "Offre de lancement 15%",
     description: "15% de réduction - Offre de lancement",
-    validFor: "both", // Valable pour 1x ET 2x
+    validFor: "both", 
     active: true,
   },
 
