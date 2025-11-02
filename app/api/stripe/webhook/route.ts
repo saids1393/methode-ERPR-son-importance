@@ -16,40 +16,42 @@ export async function POST(req: Request) {
 
     // Traiter les événements
     switch (event.type) {
-      case 'charge.succeeded':
-        console.log('✅ Paiement réussi:', event.data.object.id);
-        
-        // ✅ AJOUTER: Créer l'entrée SecondPayment si c'est un paiement 2x
-        const charge = event.data.object as any;
-        
-        if (charge.metadata?.paymentPlan === '2x' && charge.metadata?.paymentNumber === '1') {
-          console.log(`✅ 1er paiement 2x détecté pour ${charge.metadata.email}`);
+      case 'checkout.session.completed':
+        const session = event.data.object as any;
+        console.log('✅ Checkout session complété:', session.id);
 
-          const customerId = charge.customer as string;
-          const firstPaymentIntentId = charge.payment_intent as string;
-          const email = charge.metadata.email;
+        if (session.metadata?.paymentPlan === '2x' && session.metadata?.paymentNumber === '1') {
+          const customerId = session.customer as string;
+          const paymentIntentId = session.payment_intent as string;
+          const email = session.metadata.email;
+
+          console.log(`💳 1er paiement 2x détecté pour ${email}`);
+          console.log(`   Customer ID: ${customerId}`);
+          console.log(`   Payment Intent: ${paymentIntentId}`);
 
           try {
-            // ✅ CRÉER L'ENTRÉE dans SecondPayment
             const secondPayment = await prisma.secondPayment.create({
               data: {
                 customerId,
-                firstPaymentIntentId,
+                firstPaymentIntentId: paymentIntentId,
                 status: 'PENDING',
               },
             });
 
-            console.log(`✅ Entry créée dans SecondPayment: ${secondPayment.id}`);
-            console.log(`📅 Sera traité le: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}`);
+            console.log(`✅ SecondPayment créé: ${secondPayment.id}`);
+            console.log(`📅 2e paiement prévu le: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}`);
           } catch (dbErr: any) {
-            // ⚠️ Si l'entry existe déjà (UNIQUE constraint), c'est OK
             if (dbErr.code === 'P2002') {
-              console.log(`⚠️ Entry déjà existe pour ${firstPaymentIntentId}`);
+              console.log(`⚠️ Entry existe déjà pour ${paymentIntentId}`);
             } else {
               console.error('❌ Erreur DB:', dbErr.message);
             }
           }
         }
+        break;
+
+      case 'charge.succeeded':
+        console.log('✅ Paiement réussi:', event.data.object.id);
         break;
 
       case 'charge.failed':
