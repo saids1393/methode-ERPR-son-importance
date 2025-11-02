@@ -1,6 +1,7 @@
-// app/api/cron/process-second-payments/route.ts
+// app/api/cron/process-second-payments/route.ts (VERSION SÉCURISÉE - FINAL)
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
+import { prisma } from "@/lib/prisma"; // ✅ Import correct
 
 export async function GET(req: Request) {
   try {
@@ -13,16 +14,9 @@ export async function GET(req: Request) {
     console.log("🔄 Exécution du cron - Traitement des paiements 2x...");
 
     // 📅 Chercher les 1ers paiements réussis depuis 30 jours
-    const thirtyDaysInSeconds = 30 * 24 * 60 * 60; // 30 jours
+    const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
     const thirtyDaysAgo = Math.floor(Date.now() / 1000) - thirtyDaysInSeconds;
 
-    console.log(
-      `📅 Recherche des paiements depuis ${new Date(
-        thirtyDaysAgo * 1000
-      ).toLocaleString()}`
-    );
-
-    // Récupérer tous les PaymentIntents créés dans les dernières 30 jours
     const paymentIntents = await stripe.paymentIntents.list({
       limit: 100,
       created: {
@@ -33,7 +27,12 @@ export async function GET(req: Request) {
 
     console.log(`📊 ${paymentIntents.data.length} paiements à vérifier`);
 
-    const results = [];
+    const results: Array<{
+      email: string;
+      status: "success" | "failed" | "error";
+      amount?: number;
+      error?: string;
+    }> = [];
 
     for (const pi of paymentIntents.data) {
       // Vérifier si c'est un 1er paiement 2x réussi
@@ -43,30 +42,71 @@ export async function GET(req: Request) {
         pi.status === "succeeded"
       ) {
         const customerId = pi.customer as string;
-        const email = pi.metadata.email;
+        const email = (pi.metadata?.email as string) || "unknown";
+        const firstPaymentTime = pi.created || 0;
 
-        console.log(`💳 Traitement du 2e paiement pour ${email}`);
+        // ✅ VÉRIFIER QUE 30 JOURS SONT BIEN PASSÉS
+        const paymentAgeInSeconds = Math.floor(Date.now() / 1000) - firstPaymentTime;
+        const thirtyDaysInSeconds = 30 * 24 * 60 * 60;
 
-        // Vérifier si le 2ème paiement a déjà été effectué
-        const existingSecondPayments = await stripe.paymentIntents.list({
-          customer: customerId,
-          limit: 10,
-        });
-
-        const alreadyPaid = existingSecondPayments.data.some(
-          (p) =>
-            p.metadata?.paymentPlan === "2x" &&
-            p.metadata?.paymentNumber === "2" &&
-            p.status === "succeeded"
-        );
-
-        if (alreadyPaid) {
-          console.log(`✅ ${email} : 2ème paiement déjà effectué, skip`);
+        if (paymentAgeInSeconds < thirtyDaysInSeconds) {
+          console.log(
+            `⏳ ${email} : Pas encore 30 jours (${Math.floor(paymentAgeInSeconds / 86400)} jours), skip`
+          );
           continue;
         }
 
-        // Lancer le 2e paiement
+        console.log(`💳 Vérification du 2e paiement pour ${email}`);
+
         try {
+          // ✅ ÉTAPE 1: VÉRIFIER DANS LA DB (source de vérité)
+          const existingRecord = await prisma.secondPayment.findUnique({
+            where: { firstPaymentIntentId: pi.id },
+          });
+
+          if (existingRecord) {
+            console.log(
+              `✅ ${email} : Entrée DB trouvée (status: ${existingRecord.status})`
+            );
+
+            if (existingRecord.status === "COMPLETED") {
+              console.log(`✅ ${email} : 2ème paiement déjà complété, skip`);
+              continue;
+            }
+
+            if (existingRecord.status === "PROCESSING") {
+              console.log(
+                `⏳ ${email} : 2ème paiement en cours de traitement, skip (évite race condition)`
+              );
+              continue;
+            }
+
+            if (existingRecord.status === "FAILED" && existingRecord.retryCount >= 3) {
+              console.log(
+                `❌ ${email} : 2ème paiement échoué 3 fois déjà, skip`
+              );
+              continue;
+            }
+          }
+
+          // ✅ ÉTAPE 2: CRÉER UNE ENTRÉE "PROCESSING" DE MANIÈRE ATOMIQUE
+          const processingRecord = await prisma.secondPayment.upsert({
+            where: { firstPaymentIntentId: pi.id },
+            update: {
+              status: "PROCESSING",
+              updatedAt: new Date(),
+            },
+            create: {
+              customerId,
+              firstPaymentIntentId: pi.id,
+              status: "PROCESSING",
+              retryCount: (existingRecord?.retryCount || 0) + 1,
+            },
+          });
+
+          console.log(`📝 Entrée DB créée avec status="PROCESSING"`);
+
+          // ✅ ÉTAPE 3: LANCER LE 2E PAIEMENT
           const baseUrl =
             process.env.NODE_ENV === "production"
               ? process.env.NEXTAUTH_URL
@@ -76,8 +116,16 @@ export async function GET(req: Request) {
             `${baseUrl}/api/stripe/charge-second-payment`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ customerId, email }),
+              headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.CRON_SECRET}`, // ✅ AUTH!
+              },
+              body: JSON.stringify({ 
+                customerId, 
+                email, 
+                firstPaymentIntentId: pi.id,
+                recordId: processingRecord.id, // ✅ Passer l'ID du record
+              }),
             }
           );
 
@@ -85,13 +133,50 @@ export async function GET(req: Request) {
 
           if (result.success) {
             console.log(`✅ 2ème paiement réussi pour ${email} : ${result.amount}€`);
+
+            // ✅ ÉTAPE 4: MARQUER COMME COMPLETED
+            await prisma.secondPayment.update({
+              where: { id: processingRecord.id },
+              data: {
+                status: "COMPLETED",
+                secondPaymentIntentId: result.paymentIntentId,
+                updatedAt: new Date(),
+              },
+            });
+
             results.push({ email, status: "success", amount: result.amount });
           } else {
             console.error(`❌ Échec 2ème paiement pour ${email}:`, result.error);
+
+            // ✅ ÉTAPE 4: MARQUER COMME FAILED (avec retry)
+            await prisma.secondPayment.update({
+              where: { id: processingRecord.id },
+              data: {
+                status: "FAILED",
+                errorMessage: result.error,
+                updatedAt: new Date(),
+              },
+            });
+
             results.push({ email, status: "failed", error: result.error });
           }
         } catch (err: any) {
           console.error(`❌ Erreur lors du 2ème paiement pour ${email}:`, err.message);
+
+          // ✅ ÉTAPE 4: MARQUER COMME ERREUR
+          try {
+            await prisma.secondPayment.update({
+              where: { firstPaymentIntentId: pi.id },
+              data: {
+                status: "FAILED",
+                errorMessage: err.message,
+                updatedAt: new Date(),
+              },
+            });
+          } catch (dbErr) {
+            console.error("❌ Erreur lors de la mise à jour DB:", dbErr);
+          }
+
           results.push({ email, status: "error", error: err.message });
         }
       }
@@ -111,7 +196,6 @@ export async function GET(req: Request) {
   }
 }
 
-// Pour tests manuels en développement
 export async function POST(req: Request) {
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json(

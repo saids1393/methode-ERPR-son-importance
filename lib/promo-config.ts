@@ -31,14 +31,14 @@ export const PROMO_CODES: PromoCode[] = [
     validFor: "both", // Valable pour 1x ET 2x
     active: true,
   },
-  // 🔹 Ajoutez vos futurs coupons ici
-  // {
-  //   id: "promo_XXXXXXXXX",
-  //   name: "Black Friday",
-  //   description: "50% de réduction",
-  //   validFor: "both",
-  //   active: true,
-  // },
+
+  {
+    id: "promo_1SOyihGYlym3LEYwnsuXmLKu",
+    name: "test",
+    description: "100% de réduction",
+    validFor: "both",
+    active: true,
+  },
 ];
 
 /**

@@ -84,6 +84,30 @@ model Payment {
   @@index([status])
 }
 
+// ✨ NOUVEAU: PAIEMENTS 2X - SUIVI DES 2E PAIEMENTS
+model SecondPayment {
+  id                      String   @id @default(cuid())
+  
+  // Références Stripe
+  customerId              String   @db.VarChar(255)
+  firstPaymentIntentId    String   @unique @db.VarChar(255) // ✅ UNIQUE = une seule entrée par 1er paiement
+  secondPaymentIntentId   String?  @db.VarChar(255)
+  
+  // État du traitement
+  status                  SecondPaymentStatus @default(PENDING) // pending, processing, completed, failed
+  errorMessage            String?  @db.Text
+  retryCount              Int      @default(0)
+  
+  // Audit
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Indices pour les requêtes fréquentes
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+}
+
 // -------------------------
 // TABLE PIVOT POUR PAIEMENTS / NIVEAUX
 // -------------------------
@@ -331,7 +355,15 @@ enum PaymentStatus {
   CANCELLED
 }
 
-// ➕ Nouveaux ENUMS pour les rendus de devoirs
+// ✨ NOUVEAU: ENUM pour statuts des 2e paiements
+enum SecondPaymentStatus {
+  PENDING      // En attente de traitement
+  PROCESSING   // Actuellement en cours (évite les race conditions)
+  COMPLETED    // Paiement effectué avec succès
+  FAILED       // Paiement échoué (à retry)
+}
+
+// ➕ Enums existants pour les rendus de devoirs
 enum HomeworkSendType {
   TEXT
   AUDIO
