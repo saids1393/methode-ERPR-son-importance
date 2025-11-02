@@ -39,6 +39,13 @@ export const PROMO_CODES: PromoCode[] = [
     validFor: "both",
     active: true,
   },
+    {
+    id: "promo_1SOz46GYlym3LEYw7EucdoBb",
+    name: "testb",
+    description: "90% de réduction",
+    validFor: "both",
+    active: true,
+  },
 ];
 
 /**
