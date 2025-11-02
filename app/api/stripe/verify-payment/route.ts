@@ -34,6 +34,38 @@ export async function POST(req: Request) {
       );
     }
 
+    if (session.metadata?.paymentPlan === '2x' && session.metadata?.paymentNumber === '1') {
+      const customerId = session.customer as string;
+      const paymentIntentId = session.payment_intent as string;
+
+      console.log(`💳 1er paiement 2x détecté pour ${email} (verify-payment)`);
+      console.log(`   Customer ID: ${customerId}`);
+      console.log(`   Payment Intent: ${paymentIntentId}`);
+
+      try {
+        const existing = await prisma.secondPayment.findUnique({
+          where: { firstPaymentIntentId: paymentIntentId },
+        });
+
+        if (!existing) {
+          const secondPayment = await prisma.secondPayment.create({
+            data: {
+              customerId,
+              firstPaymentIntentId: paymentIntentId,
+              status: 'PENDING',
+            },
+          });
+
+          console.log(`✅ SecondPayment créé: ${secondPayment.id}`);
+          console.log(`📅 2e paiement prévu le: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}`);
+        } else {
+          console.log(`⚠️ SecondPayment existe déjà pour ${paymentIntentId}`);
+        }
+      } catch (dbErr: any) {
+        console.error('❌ Erreur création SecondPayment:', dbErr.message);
+      }
+    }
+
     // Vérifier si l'utilisateur existe déjà
     let user = await getUserByEmail(email);
     let isNewAccount = false;
