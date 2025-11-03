@@ -250,7 +250,7 @@ const Page3 = () => {
 
   const pageTitle = currentPage === 0
     ? "Leçon 3 : Lettres attachées au milieu d'un mot"
-    : "Leçon 3 : Tableau des lettres attachées en position médiane";
+    : "Leçon 3 : Tableau des lettres attachées au milieu d'un mot";
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">

@@ -256,7 +256,7 @@ const Page2 = () => {
 
   const pageTitle = currentPage === 0
     ? "Leçon 2 : Lettres attachées au début d'un mot"
-    : "Leçon 2 : Tableau des lettres en position initiale";
+    : "Leçon 2 : Tableau des lettres au début d'un mot";
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">

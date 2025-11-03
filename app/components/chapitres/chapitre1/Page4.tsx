@@ -264,7 +264,7 @@ const Page4 = () => {
 
   const pageTitle = currentPage === 0
     ? "Leçon 4 : Lettres attachées à la fin d'un mot"
-    : "Leçon 4 : Tableau des lettres en position finale";
+    : "Leçon 4 : Tableau des lettres à la fin d'un mot";
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
