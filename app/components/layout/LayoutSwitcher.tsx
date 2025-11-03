@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import DesktopLayout from "./DesktopLayout";
 import MobileLayout from "./MobileLayout";
 
+
+
+
 export default function LayoutSwitcher({ children }: { children: React.ReactNode }) {
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);

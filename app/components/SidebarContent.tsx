@@ -50,10 +50,20 @@ export default function SidebarContent() {
   } = useUserProgress();
 
   const { getVideoByChapter } = useChapterVideos();
-  const { isEnabled: autoProgressEnabled, currentPageInfo, validateIfTimeElapsed, getTimeOnCurrentPage } = useAutoProgress({
+  
+  // ✅ Extraire validateIfTimeElapsed et getTimeOnCurrentPage
+  const autoProgressHook = useAutoProgress({
     minTimeOnPage: 6000,
     enabled: true 
   });
+  
+  const { 
+    isEnabled: autoProgressEnabled, 
+    currentPageInfo, 
+    validateIfTimeElapsed, 
+    getTimeOnCurrentPage,
+    hasValidated  // ✅ AJOUTÉ: Récupérer hasValidated pour arrêter le setInterval
+  } = autoProgressHook;
 
   const currentOpenChapter = useMemo(() => {
     const chapter = chapters.find(ch =>
@@ -84,7 +94,14 @@ export default function SidebarContent() {
     
     if (!isProfessorMode && timeOnPage >= 6000) {
       e.preventDefault();
-      const validated = await validateIfTimeElapsed();
+      
+      // ✅ CORRIGÉ: Vérifier que validateIfTimeElapsed existe avant de l'appeler
+      if (validateIfTimeElapsed && typeof validateIfTimeElapsed === 'function') {
+        console.log('📞 [SIDEBAR] Appel validateIfTimeElapsed');
+        const validated = await validateIfTimeElapsed();
+        console.log('✅ [SIDEBAR] Validation résultat:', validated);
+      }
+      
       setTimeout(() => {
         router.push(href);
       }, 100);
@@ -109,17 +126,35 @@ export default function SidebarContent() {
     }
   }, [currentOpenChapter]);
 
+  // ✅ CORRIGÉ: setInterval qui s'arrête UNE FOIS que hasValidated = TRUE
   useEffect(() => {
     if (!isProfessorMode && autoProgressEnabled) {
       const checkInterval = setInterval(async () => {
         const timeOnPage = getTimeOnCurrentPage();
-        if (timeOnPage >= 6000 && currentPageInfo && !currentPageInfo.isCompleted) {
+        
+        console.log('⏱️ [SIDEBAR] Check interval:', {
+          timeOnPage,
+          hasValidated,
+          minTimeOnPage: 6000
+        });
+        
+        // ✅ IMPORTANT: Si déjà validé, arrêter le setInterval!
+        if (hasValidated) {
+          console.log('✅ [SIDEBAR] Déjà validé, arrêt du setInterval');
+          clearInterval(checkInterval);
+          return;
+        }
+        
+        // ✅ Valider seulement si temps suffisant et pas encore validé
+        if (validateIfTimeElapsed && typeof validateIfTimeElapsed === 'function' && timeOnPage >= 6000) {
+          console.log('📞 [SIDEBAR] Auto-validation via setInterval');
           await validateIfTimeElapsed();
         }
       }, 500);
+      
       return () => clearInterval(checkInterval);
     }
-  }, [isProfessorMode, autoProgressEnabled, currentPageInfo, getTimeOnCurrentPage, validateIfTimeElapsed]);
+  }, [isProfessorMode, autoProgressEnabled, getTimeOnCurrentPage, validateIfTimeElapsed, hasValidated]);
 
   useEffect(() => {
     if (isProfessorMode) return;

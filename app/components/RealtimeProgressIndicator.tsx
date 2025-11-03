@@ -35,10 +35,11 @@ export default function RealtimeProgressIndicator({
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {/* Indicateur de progression */}
         {!isValidated && timeOnPage > 1000 && (
           <motion.div
+            key="progress-indicator" // ✅ AJOUTÉ
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -87,6 +88,7 @@ export default function RealtimeProgressIndicator({
         {/* Checkmark de validation */}
         {showCheckmark && (
           <motion.div
+            key="checkmark-indicator" // ✅ AJOUTÉ
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}

@@ -44,3 +44,4 @@ export default function InactivityWarning({ onContinue }: InactivityWarningProps
     </div>
   );
 }
+
