@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import DesktopLayout from "./DesktopLayout";
 import MobileLayout from "./MobileLayout";
-
-
-
+import { useInactivityLogout } from '@/hooks/useInactivityLogout';
 
 export default function LayoutSwitcher({ children }: { children: React.ReactNode }) {
+   useInactivityLogout()
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false); // Track hydration
   const pathname = usePathname();
 
+
+  // Gérer le changement de taille d'écran (pas d'hydration mismatch)
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
     const handleResize = () => setIsMobile(mediaQuery.matches);
@@ -22,38 +24,51 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
     return () => mediaQuery.removeEventListener('change', handleResize);
   }, []);
 
+  // Logique de sidebar avec gestion correcte du localStorage et cookies
   useEffect(() => {
-    let hasStartedCourse = false;
-    let isProfessorAccess = false;
-    
-    // Vérification côté client uniquement
-    if (typeof window !== 'undefined') {
-      hasStartedCourse = localStorage.getItem('courseStarted') === 'true';
-      isProfessorAccess = document.cookie.includes('professor-course-token');
-      console.log('🔍 LAYOUT - Course started check:', hasStartedCourse, 'for path:', pathname);
-      console.log('👨‍🏫 LAYOUT - Professor access check:', isProfessorAccess);
-    }
-    
-    // LOGIQUE SÉPARÉE pour sidebar :
+    // Parser les cookies correctement
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+
+    const hasStartedCourse = localStorage.getItem('courseStarted') === 'true';
+    const isProfessorAccess = !!getCookie('professor-course-token');
+
+    console.log('🔍 LAYOUT - Course started check:', hasStartedCourse, 'for path:', pathname);
+    console.log('👨‍🏫 LAYOUT - Professor access check:', isProfessorAccess);
+
+    // Logique de la sidebar
     let shouldShowSidebar = false;
-    
+
     if (pathname.startsWith('/chapitres/')) {
       if (isProfessorAccess) {
-        // Professeur : toujours afficher la sidebar dans les chapitres
         shouldShowSidebar = true;
         console.log('📱 SIDEBAR PROFESSEUR activée');
       } else if (hasStartedCourse) {
-        // Élève : afficher seulement si le cours a été commencé
         shouldShowSidebar = true;
         console.log('📱 SIDEBAR ÉLÈVE activée');
       } else {
         console.log('📱 SIDEBAR DÉSACTIVÉE - cours non commencé par élève');
       }
     }
-    
+
     console.log('📱 DÉCISION FINALE - Show sidebar:', shouldShowSidebar);
     setShowSidebar(shouldShowSidebar);
+    setIsHydrated(true); // Marquer comme hydraté après le premier calcul
   }, [pathname]);
+
+  // Pendant l'hydration, ne pas afficher la sidebar pour éviter les mismatches
+  // (Ou afficher un fallback)
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen">
+        {children}
+      </div>
+    );
+  }
 
   // Si pas de sidebar nécessaire, afficher le contenu directement
   if (!showSidebar) {

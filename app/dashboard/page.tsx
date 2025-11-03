@@ -443,25 +443,13 @@ export default function DashboardPage() {
         <h3 className="text-lg font-semibold text-gray-900">Progression</h3>
         {/* ✨ NOUVEAU : Afficher la source des données */}
         {dataSource === 'REAL_DATA' && (
-          <p className="text-xs text-green-600 mt-1">✅ Données réelles du serveur</p>
+          <p className="text-xs text-green-600 mt-1">✅ Données réelles</p>
         )}
         {dataSource === 'FALLBACK' && (
           <p className="text-xs text-orange-600 mt-1">⚠️ Données en attente de mise à jour</p>
         )}
       </div>
       <div className="flex items-center space-x-4">
-        <div className="text-right">
-          <div className="text-sm text-gray-500">Ce mois</div>
-          <div className={`text-lg font-bold ${monthlyStats.trend === 'up' ? 'text-green-600' :
-            monthlyStats.trend === 'down' ? 'text-red-600' :
-              'text-gray-600'
-            }`}>
-            {monthlyStats.currentMonth}%
-            {monthlyStats.trend === 'up' && ' ↗️'}
-            {monthlyStats.trend === 'down' && ' ↘️'}
-            {monthlyStats.trend === 'stable' && ' →'}
-          </div>
-        </div>
         <select
           value={selectedPeriod}
           onChange={(e) => setSelectedPeriod(e.target.value as 'week' | 'month')}
@@ -525,22 +513,8 @@ export default function DashboardPage() {
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-blue-800 rounded"></div>
           <span>
-            {selectedPeriod === 'week' ? 'Progression quotidienne' : 'Progression hebdomadaire'}
+            {selectedPeriod === 'week' ? 'Progression en semaine' : 'Progression en mois'}
           </span>
-        </div>
-      </div>
-      <div className="text-right">
-        <div>
-          Moyenne: {Math.round(
-            (selectedPeriod === 'week' ? weekData : monthData)
-              .reduce((sum: any, d: { percentage: any; }) => sum + d.percentage, 0) /
-            ((selectedPeriod === 'week' ? weekData : monthData).length || 1)
-          )}%
-        </div>
-        <div className="text-xs">
-          {monthlyStats.trend === 'up' && `+${monthlyStats.difference}% vs mois dernier`}
-          {monthlyStats.trend === 'down' && `${monthlyStats.difference}% vs mois dernier`}
-          {monthlyStats.trend === 'stable' && 'Stable vs mois dernier'}
         </div>
       </div>
     </div>

@@ -5,40 +5,25 @@ import * as htmlToImage from "html-to-image";
 import PageNavigation from '@/app/components/PageNavigation';
 
 import VisuelEcriture from "@/app/components/ecritures/VisuelEcriture";
-import LettresAttacheesDebut from "@/app/components/ecritures/LettresAttacheesDebut";
-import LettresAttacheesMilieu from "@/app/components/ecritures/LettresAttacheesMilieu";
-import LettresAttacheesFin from "@/app/components/ecritures/LettresAttacheesFin";
-
-const emphaticLetters = ["خ", "ر", "ص", "ض", "ط", "ظ", "غ", "ق"];
-
-const allLetters = [
-  { letter: "ا" }, { letter: "ب" }, { letter: "ت" }, { letter: "ث" },
-  { letter: "ج" }, { letter: "ح" }, { letter: "خ" }, { letter: "د" },
-  { letter: "ذ" }, { letter: "ر" }, { letter: "ز" }, { letter: "س" },
-  { letter: "ش" }, { letter: "ص" }, { letter: "ض" }, { letter: "ط" },
-  { letter: "ظ" }, { letter: "ع" }, { letter: "غ" }, { letter: "ف" },
-  { letter: "ق" }, { letter: "ك" }, { letter: "ل" }, { letter: "م" },
-  { letter: "ن" }, { letter: "ه" }, { letter: "و" }, { letter: "ي" },
-];
 
 const IntroductionPage = () => {
   return (
     <div className="p-4 md:p-8 bg-gray-900 min-h-screen">
       <div className="w-full bg-gray-800 rounded-lg p-4 md:p-8">
         <div className="text-white space-y-4 md:space-y-6 text-lg md:text-xl leading-relaxed">
-          
+
           <p>
-            <span className="text-purple-400 font-semibold">Pourquoi l'écriture maintenant ? </span> 
+            <span className="text-purple-400 font-semibold">Pourquoi l'écriture maintenant ? </span>
             Tu te demandes peut-être pourquoi on aborde l'écriture seulement maintenant dans ton apprentissage.
           </p>
 
           <p>
-            Je ne voulais pas t'apprendre à écrire dès le début avec l'apprentissage de lecture des lettres 
+            Je ne voulais pas t'apprendre à écrire dès le début avec l'apprentissage de lecture des lettres
             car cela fait <span className="text-yellow-400">trop d'informations d'un coup</span>.
           </p>
 
           <p>
-            J'ai préféré d'abord te faire passer par la <span className="text-green-400">lecture des lettres </span> 
+            J'ai préféré d'abord te faire passer par la <span className="text-green-400">lecture des lettres </span>
             et l'<span className="text-green-400">assimilation visuelle</span> pour ensuite aborder l'écriture.
           </p>
 
@@ -54,8 +39,8 @@ const IntroductionPage = () => {
 
           <div className="bg-blue-900/30 border border-blue-500/50 rounded-lg p-4 md:p-6 my-4 md:my-6">
             <p>
-              💡 <span className="font-semibold">Ne t'inquiète pas ! </span> 
-              Savoir écrire est surtout important pour les dictées, mais cela n'est 
+              💡 <span className="font-semibold">Ne t'inquiète pas ! </span>
+              Savoir écrire est surtout important pour les dictées, mais cela n'est
               <span className="text-amber-300"> vraiment pas crucial à ce niveau</span>.
             </p>
           </div>
@@ -71,8 +56,8 @@ const IntroductionPage = () => {
           </p>
 
           <p>
-            Les dictées viendront <span className="text-purple-400">après le tajwid</span>, 
-            quand tu commenceras à apprendre le vocabulaire de la langue arabe avec des études 
+            Les dictées viendront <span className="text-purple-400">après le tajwid</span>,
+            quand tu commenceras à apprendre le vocabulaire de la langue arabe avec des études
             de texte sous forme de dialogues.
           </p>
 
@@ -84,14 +69,14 @@ const IntroductionPage = () => {
               Sur la deuxième page, tu trouveras un tableau complet avec <span className="text-yellow-300">toutes les 28 lettres de l'alphabet arabe</span>.
             </p>
             <p className="mt-2 text-white">
-              <span className="text-cyan-300">👉 Comment l'utiliser :</span> Tu dois <span className="text-yellow-300 font-semibold">copier ce tableau comme si tu dessinais</span>. 
-              Prends une feuille, un crayon, et reproduis chaque lettre dans le même ordre et la même disposition en respectant le sens des flèches. 
+              <span className="text-cyan-300">👉 Comment l'utiliser :</span> Tu dois <span className="text-yellow-300 font-semibold">copier ce tableau comme si tu dessinais</span>.
+              Prends une feuille, un crayon, et reproduis chaque lettre dans le même ordre et la même disposition en respectant le sens des flèches.
               C'est un exercice de motricité.
             </p>
           </div>
 
           <p>
-            Dans la page suivante, tu découvriras le modèle complet d'écriture avec toutes les formes des lettres 
+            Dans la page suivante, tu découvriras le modèle complet d'écriture avec toutes les formes des lettres
             et la grille pour pratiquer.
           </p>
         </div>
@@ -140,10 +125,10 @@ const WritingGuidePage = () => {
         <VisuelEcriture />
       </div>
 
-      
+
       <PageNavigation currentChapter={1} currentPage={5} className="mt-6 mb-4" />
 
-<footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-xs md:text-sm">
+      <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-xs md:text-sm">
         <div>Modèle d'écriture - Tableau complet à copier</div>
         <div className="mt-1">© 2025 Tous droits réservés</div>
       </footer>
@@ -160,9 +145,8 @@ const Cell = ({
 }) => (
   <div className="bg-white rounded-lg md:rounded-xl p-2 md:p-4 text-center min-h-[80px] md:min-h-[100px] flex flex-col justify-center items-center cursor-pointer relative">
     <div
-      className={`text-3xl md:text-5xl lg:text-6xl font-bold ${
-        emphatic ? "text-red-400/20" : "text-gray-400/20"
-      } transition-colors select-none`}
+      className={`text-3xl md:text-5xl lg:text-6xl font-bold ${emphatic ? "text-red-400/20" : "text-gray-400/20"
+        } transition-colors select-none`}
     >
       {letter}
     </div>
@@ -212,24 +196,23 @@ const Page5 = () => {
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
       <div className="w-full h-full overflow-hidden bg-gray-900">
-        
+
         {/* Header */}
         <div className="text-white p-4 md:p-6 text-center border-b-2">
           <div className="text-2xl md:text-3xl font-bold mb-2">
             {getPageTitle(currentPage)}
           </div>
         </div>
-        
+
         {/* Navigation Buttons */}
         <div className="flex justify-between items-center px-3 md:px-8 py-3 md:py-4">
           <button
             onClick={goToPreviousPage}
             disabled={currentPage === 0}
-            className={`w-8 h-8 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
-              currentPage === 0
+            className={`w-8 h-8 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === 0
                 ? 'border-gray-600 text-gray-600 cursor-not-allowed'
                 : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
-            }`}
+              }`}
           >
             <ChevronLeft size={16} className="md:w-6 md:h-6" />
           </button>
@@ -241,11 +224,10 @@ const Page5 = () => {
           <button
             onClick={goToNextPage}
             disabled={currentPage === totalPages - 1}
-            className={`w-8 h-8 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${
-              currentPage === totalPages - 1
+            className={`w-8 h-8 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all ${currentPage === totalPages - 1
                 ? 'border-gray-600 text-gray-600 cursor-not-allowed'
                 : 'border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white hover:scale-110'
-            }`}
+              }`}
           >
             <ChevronRight size={16} className="md:w-6 md:h-6" />
           </button>

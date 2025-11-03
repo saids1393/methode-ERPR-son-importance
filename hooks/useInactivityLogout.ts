@@ -3,37 +3,43 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
-// 30 minutes
-const INACTIVITY_TIMEOUT = 30 * 60 * 1000;
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
 export function useInactivityLogout() {
   const router = useRouter();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const logout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      router.push('/login?reason=inactivity');
-    } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
-    }
-  };
-
-  const resetTimer = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(logout, INACTIVITY_TIMEOUT);
-  };
-
   useEffect(() => {
-    const events = ['mousedown','mousemove','keypress','scroll','touchstart','click'];
-    const handleActivity = () => resetTimer();
+    const logout = async () => {
+      console.log('[INACTIVITY] Timeout déclenché - déconnexion utilisateur');
+      try {
+        const response = await fetch('/api/auth/logout', { method: 'POST' });
+        
+        if (response.ok) {
+          console.log('[INACTIVITY] Logout réussi');
+          router.push('/login?reason=inactivity');
+        }
+      } catch (error) {
+        console.error('[INACTIVITY] Erreur logout:', error);
+        router.push('/login?reason=inactivity');
+      }
+    };
 
-    events.forEach(e => document.addEventListener(e, handleActivity));
+    const resetTimer = () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(logout, INACTIVITY_TIMEOUT);
+    };
+
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    events.forEach(e => document.addEventListener(e, resetTimer));
+    
     resetTimer();
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      events.forEach(e => document.removeEventListener(e, handleActivity));
+      events.forEach(e => document.removeEventListener(e, resetTimer));
     };
-  }, []);
+  }, [router]);
+
+  return null;
 }
