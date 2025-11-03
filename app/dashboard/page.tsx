@@ -98,23 +98,24 @@ export default function DashboardPage() {
   // Calculer la progression
   const calculateProgress = () => {
     const totalPages = chapters
-      .filter(ch => ch.chapterNumber !== 0 && ch.chapterNumber !== 11)
-      .reduce((total, ch) => total + ch.pages.length, 0);
+      .filter(ch => ch.chapterNumber !== 11)
+      .reduce((total, ch) => total + ch.pages.filter(p => p.pageNumber !== 30).length, 0);
     const totalQuizzes = chapters
       .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 11)
       .length;
     const totalItems = totalPages + totalQuizzes;
-    // Page 0 est maintenant incluse dans le calcul, on exclut seulement la page 30 (évaluation finale)
+    // Page 0 incluse, page 30 exclue
     const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 30);
-    const completedItems = completedPagesFiltered.length + completedQuizzes.size;
+    const completedQuizzesFiltered = Array.from(completedQuizzes).filter(quizNum => quizNum !== 11);
+    const completedItems = completedPagesFiltered.length + completedQuizzesFiltered.length;
     return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
   };
 
   // Calculer les totaux
   const getTotals = () => {
     const totalPages = chapters
-      .filter(ch => ch.chapterNumber !== 0 && ch.chapterNumber !== 11)
-      .reduce((total, ch) => total + ch.pages.length, 0);
+      .filter(ch => ch.chapterNumber !== 11)
+      .reduce((total, ch) => total + ch.pages.filter(p => p.pageNumber !== 30).length, 0);
     const totalQuizzes = chapters
       .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 11)
       .length;
@@ -565,7 +566,7 @@ export default function DashboardPage() {
         }
 
         for (const chapter of chapters) {
-          if (chapter.chapterNumber === 0 || chapter.chapterNumber === 11) continue;
+          if (chapter.chapterNumber === 11) continue;
 
 
           for (const page of chapter.pages) {

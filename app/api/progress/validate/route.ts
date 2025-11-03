@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
     console.log('🎯 [API] VALIDATION AUTO - Données reçues:', { pageNumber, quizNumber, chapterNumber, userId: user.id });
 
     if (pageNumber !== undefined) {
-      // Exclure les pages spéciales
-      if (pageNumber === 0 || pageNumber === 30) {
-        return NextResponse.json({ success: false, message: 'Page exclue' });
+      // Exclure seulement la page 30 (page 0 est valide)
+      if (pageNumber === 30) {
+        return NextResponse.json({ success: false, message: 'Page 30 exclue' });
       }
 
       const currentUser = await prisma.user.findUnique({
@@ -46,13 +46,16 @@ export async function POST(request: NextRequest) {
         await logPageCompletion(user.id, pageNumber, chapterNumber);
         console.log(`📊 [TRACKING] Page ${pageNumber} enregistrée dans l'historique`);
 
-        return NextResponse.json({
+        const response = NextResponse.json({
           success: true,
           type: 'page',
           pageNumber,
           completedPages: updatedPages,
           message: `Page ${pageNumber} validée automatiquement`
         });
+
+        response.headers.set('X-Progress-Update', 'true');
+        return response;
       }
     }
 
@@ -82,13 +85,16 @@ export async function POST(request: NextRequest) {
         await logQuizCompletion(user.id, quizNumber);
         console.log(`📊 [TRACKING] Quiz ${quizNumber} enregistré dans l'historique`);
 
-        return NextResponse.json({
+        const response = NextResponse.json({
           success: true,
           type: 'quiz',
           quizNumber,
           completedQuizzes: updatedQuizzes,
           message: `Quiz ${quizNumber} validé automatiquement`
         });
+
+        response.headers.set('X-Progress-Update', 'true');
+        return response;
       }
     }
 

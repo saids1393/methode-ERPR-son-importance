@@ -83,9 +83,9 @@ export function useAutoProgress(options: UseAutoProgressOptions = {}) {
       return false;
     }
 
-    // Exclure certaines pages
+    // Exclure certaines pages (page 30 et chapitre 11)
     if (pageInfo.type === 'page') {
-      if (pageInfo.pageNumber === 0 || pageInfo.pageNumber === 30 || pageInfo.chapterNumber === 0 || pageInfo.chapterNumber === 11) {
+      if (pageInfo.pageNumber === 30 || pageInfo.chapterNumber === 11) {
         console.log('❌ [AUTO-PROGRESS] Page exclue');
         return false;
       }
@@ -109,6 +109,13 @@ export function useAutoProgress(options: UseAutoProgressOptions = {}) {
         } else {
           console.log('  ❌ Page pas complétée, appel API');
           await togglePageCompletion(pageInfo.pageNumber);
+
+          // 🔄 Dispatcher un événement custom pour notifier la sidebar immédiatement
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('progressUpdated', {
+              detail: { type: 'page', number: pageInfo.pageNumber }
+            }));
+          }
         }
       } else if (pageInfo.type === 'quiz') {
         console.log('  toggleQuizCompletion:', pageInfo.chapterNumber);
@@ -119,6 +126,13 @@ export function useAutoProgress(options: UseAutoProgressOptions = {}) {
         } else {
           console.log('  ❌ Quiz pas complété, appel API');
           await toggleQuizCompletion(pageInfo.chapterNumber);
+
+          // 🔄 Dispatcher un événement custom pour notifier la sidebar immédiatement
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('progressUpdated', {
+              detail: { type: 'quiz', number: pageInfo.chapterNumber }
+            }));
+          }
         }
       }
 

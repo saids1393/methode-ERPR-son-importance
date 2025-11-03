@@ -11,23 +11,23 @@ import { useAutoProgress } from "@/hooks/useAutoProgress";
 import { useRouter } from "next/navigation";
 
 const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<number>) => {
-  // Count total pages (excluding chapter 0, 11, and page 30)
+  // Count total pages (excluding only chapter 11 and page 30)
   const totalPages = chapters
-    .filter(ch => ch.chapterNumber !== 0 && ch.chapterNumber !== 11)
+    .filter(ch => ch.chapterNumber !== 11)
     .reduce((total, ch) => total + ch.pages.filter(p => p.pageNumber !== 30).length, 0);
 
-  // Count total quizzes (excluding chapter 0 and 11)
+  // Count total quizzes (excluding only chapter 11)
   const totalQuizzes = chapters
-    .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 0 && ch.chapterNumber !== 11)
+    .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 11)
     .length;
 
   const totalItems = totalPages + totalQuizzes;
 
   // Count only completed pages that are not page 30
   const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 30);
-  
-  // Count only completed quizzes that are not chapter 0 or 11
-  const completedQuizzesFiltered = Array.from(completedQuizzes).filter(quizNum => quizNum !== 0 && quizNum !== 11);
+
+  // Count only completed quizzes that are not chapter 11
+  const completedQuizzesFiltered = Array.from(completedQuizzes).filter(quizNum => quizNum !== 11);
 
   const completedItems = completedPagesFiltered.length + completedQuizzesFiltered.length;
   return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
@@ -302,7 +302,7 @@ export default function SidebarContent() {
                                 : 'hover:bg-gray-800 text-gray-200'
                             }`}
                           >
-                            {!isProfessorMode && chapter.chapterNumber !== 0 && chapter.chapterNumber !== 11 && page.pageNumber !== 30 && (
+                            {!isProfessorMode && chapter.chapterNumber !== 11 && page.pageNumber !== 30 && (
                               <button
                                 onClick={(e) => handleTogglePageCompletion(page.pageNumber, e)}
                                 className="flex-shrink-0"

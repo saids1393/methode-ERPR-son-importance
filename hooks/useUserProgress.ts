@@ -217,6 +217,39 @@ export function useUserProgress() {
     loadProgress();
   }, [loadProgress]);
 
+  // 🔄 Écouter les événements de mise à jour de progression en temps réel
+  useEffect(() => {
+    const handleProgressUpdate = (event: CustomEvent) => {
+      console.log('🔄 [PROGRESS HOOK] Événement progressUpdated reçu:', event.detail);
+
+      const { type, number } = event.detail;
+
+      if (type === 'page') {
+        setCompletedPages(prev => {
+          const newSet = new Set(prev);
+          newSet.add(number);
+          console.log('✅ [PROGRESS HOOK] Page ajoutée en temps réel:', number);
+          return newSet;
+        });
+      } else if (type === 'quiz') {
+        setCompletedQuizzes(prev => {
+          const newSet = new Set(prev);
+          newSet.add(number);
+          console.log('✅ [PROGRESS HOOK] Quiz ajouté en temps réel:', number);
+          return newSet;
+        });
+      }
+
+      forceUpdate();
+    };
+
+    window.addEventListener('progressUpdated', handleProgressUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('progressUpdated', handleProgressUpdate as EventListener);
+    };
+  }, [forceUpdate]);
+
   return {
     completedPages,
     completedQuizzes,

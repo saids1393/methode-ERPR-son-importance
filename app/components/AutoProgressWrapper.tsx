@@ -15,11 +15,9 @@ export default function AutoProgressWrapper({
 }: AutoProgressWrapperProps) {
   
   const [timeOnPage, setTimeOnPage] = useState(0);
-  const [showCheckmark, setShowCheckmark] = useState(false);
-  
+
   // ✅ Ref pour tracker le temps (pas de state!)
   const timeTrackerRef = useRef<NodeJS.Timeout | null>(null);
-  const hasShownCheckmarkRef = useRef(false);
   
   // ✅ UTILISE useAutoProgress
   const {
@@ -69,18 +67,16 @@ export default function AutoProgressWrapper({
     if (!hasValidated) {
       console.log('🔄 [WRAPPER] Page change detected, reset');
       setTimeOnPage(0);
-      hasShownCheckmarkRef.current = false;
-      setShowCheckmark(false);
-      
+
       // Redémarrer le timer
       if (timeTrackerRef.current) {
         clearInterval(timeTrackerRef.current);
       }
-      
+
       timeTrackerRef.current = setInterval(() => {
         const elapsed = getTimeOnCurrentPage();
         setTimeOnPage(elapsed);
-        
+
         if (elapsed >= minTimeOnPage) {
           console.log('⏸️ [WRAPPER] 6 sec atteintes, arrêt du timer');
           if (timeTrackerRef.current) {
@@ -89,7 +85,7 @@ export default function AutoProgressWrapper({
           }
         }
       }, 100);
-      
+
       return () => {
         if (timeTrackerRef.current) {
           clearInterval(timeTrackerRef.current);
@@ -97,23 +93,6 @@ export default function AutoProgressWrapper({
       };
     }
   }, [hasValidated, getTimeOnCurrentPage, minTimeOnPage]);
-
-  // ✅ Afficher le checkmark UNE SEULE FOIS quand hasValidated = TRUE
-  useEffect(() => {
-    if (hasValidated && !hasShownCheckmarkRef.current) {
-      console.log('✅ [WRAPPER] Affichage checkmark');
-      hasShownCheckmarkRef.current = true;
-      setShowCheckmark(true);
-      
-      // Masquer après 3 secondes
-      const timer = setTimeout(() => {
-        console.log('⏱️ [WRAPPER] Masquage checkmark');
-        setShowCheckmark(false);
-      }, 3000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [hasValidated]);
 
   // Ne pas afficher le wrapper si pas de page validable
   if (!currentPageInfo) {
@@ -128,7 +107,7 @@ export default function AutoProgressWrapper({
       <RealtimeProgressIndicator
         timeOnPage={timeOnPage}
         isValidated={hasValidated}
-        showCheckmark={showCheckmark}
+        showCheckmark={hasValidated}
         canValidate={timeOnPage >= minTimeOnPage && !hasValidated}
         minTime={minTimeOnPage}
       />

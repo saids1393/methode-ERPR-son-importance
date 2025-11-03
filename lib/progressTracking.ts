@@ -90,20 +90,22 @@ async function updateDailySnapshot(userId: string) {
 
     // Filtrer les données réelles (pas la page 30 qui est l'évaluation finale)
     const validPages = user.completedPages.filter(p => p !== 30);
+    const validQuizzes = user.completedQuizzes.filter(q => q !== 11);
 
     // Calculer la progression réelle
-    // Page 0 est maintenant incluse, donc 30 pages au total (0 à 29)
+    // Page 0 incluse, page 30 exclue, chapitre 11 exclu
+    // Total: 30 pages (0-29) et 10 quiz (0-10, excluant 11)
     const totalPages = 30;
-    const totalQuizzes = 11;
+    const totalQuizzes = 10;
     const totalItems = totalPages + totalQuizzes;
-    const completedItems = validPages.length + user.completedQuizzes.length;
+    const completedItems = validPages.length + validQuizzes.length;
     const progressPercentage = totalItems > 0
       ? Math.round((completedItems / totalItems) * 100)
       : 0;
 
     console.log(`📊 [SNAPSHOT] Stats calculées:`, {
       validPages: validPages.length,
-      completedQuizzes: user.completedQuizzes.length,
+      validQuizzes: validQuizzes.length,
       progressPercentage,
       date: today.toISOString()
     });
@@ -120,12 +122,12 @@ async function updateDailySnapshot(userId: string) {
         userId,
         snapshotDate: today,
         pagesCompletedCount: validPages.length,
-        quizzesCompletedCount: user.completedQuizzes.length,
+        quizzesCompletedCount: validQuizzes.length,
         progressPercentage,
       },
       update: {
         pagesCompletedCount: validPages.length,
-        quizzesCompletedCount: user.completedQuizzes.length,
+        quizzesCompletedCount: validQuizzes.length,
         progressPercentage,
       },
     });
