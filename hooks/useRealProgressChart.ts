@@ -43,37 +43,25 @@ export const useRealProgressChart = () => {
   useEffect(() => {
     const fetchProgressData = async () => {
       try {
-        console.log('📡 Récupération des données de progression...');
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const now = new Date();
 
         const response = await fetch('/api/progress/history', {
           method: 'GET',
           cache: 'no-store',
           headers: {
             'Content-Type': 'application/json',
+            'X-Timezone': timeZone,
+            'X-Client-Date': now.toISOString(),
           },
         });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`❌ Erreur API: ${response.status}`, errorText);
-          throw new Error(`API error ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`API error ${response.status}`);
 
         const result = await response.json();
 
-        console.log('✅ Données reçues:', {
-          source: result.source,
-          weekDataLength: result.weekData?.length || 0,
-          monthDataLength: result.monthData?.length || 0,
-          monthlyStats: result.monthlyStats,
-        });
-
-        // Valider les données
-        if (!Array.isArray(result.weekData)) {
-          throw new Error('Invalid weekData format');
-        }
-        if (!Array.isArray(result.monthData)) {
-          throw new Error('Invalid monthData format');
+        if (!Array.isArray(result.weekData) || !Array.isArray(result.monthData)) {
+          throw new Error('Invalid data format');
         }
 
         setData({
@@ -91,7 +79,6 @@ export const useRealProgressChart = () => {
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('❌ Erreur chargement données:', errorMessage);
 
         setData((prev) => ({
           ...prev,
@@ -103,8 +90,6 @@ export const useRealProgressChart = () => {
     };
 
     fetchProgressData();
-
-    // Rafraîchir toutes les 5 minutes
     const interval = setInterval(fetchProgressData, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
