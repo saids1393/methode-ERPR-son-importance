@@ -101,16 +101,11 @@ export default function AutoProgressWrapper({
   }
 
   return (
-    <div className="relative">
-      {children}
-      
-      <RealtimeProgressIndicator
-        timeOnPage={timeOnPage}
-        isValidated={hasValidated}
-        showCheckmark={hasValidated}
-        canValidate={timeOnPage >= minTimeOnPage && !hasValidated}
-        minTime={minTimeOnPage}
-      />
-    </div>
+<div className="relative">
+  {children}
+
+  <RealtimeProgressIndicator isValidated={hasValidated} />
+</div>
+
   );
 }

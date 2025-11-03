@@ -5,6 +5,7 @@ import { CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface RealtimeProgressIndicatorProps {
+  /** Affiche le message quand la validation passe à true */
   isValidated: boolean;
 }
 
@@ -14,20 +15,21 @@ export default function RealtimeProgressIndicator({
   const [showValidationMessage, setShowValidationMessage] = useState(false);
   const previousIsValidatedRef = useRef(false);
 
-  // 🧩 Affiche le message de validation une seule fois
+  // 🧩 Affiche le message de validation une seule fois à chaque passage false -> true
   useEffect(() => {
     if (isValidated && !previousIsValidatedRef.current) {
       previousIsValidatedRef.current = true;
       setShowValidationMessage(true);
 
-      // ⏱️ On réduit légèrement le timer pour compenser l'animation (≈3.5 s visibles)
+      // ⏱️ Le message reste environ 4 secondes visibles (animations incluses)
       const timer = setTimeout(() => {
         setShowValidationMessage(false);
-      }, 2500); // le message sera visible ~4s avec animations
+      }, 2500); // 2.5 s visibles + 1 s animations = ~4 s totales
 
       return () => clearTimeout(timer);
     }
 
+    // Réinitialise si la validation repasse à false
     if (!isValidated) {
       previousIsValidatedRef.current = false;
     }
@@ -40,7 +42,7 @@ export default function RealtimeProgressIndicator({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }} // animation plus courte
+          transition={{ duration: 0.3 }}
           className="bg-green-900/95 backdrop-blur-sm border border-green-500/30 rounded-xl p-4 shadow-2xl"
         >
           <div className="flex items-center gap-3">
