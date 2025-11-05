@@ -293,8 +293,8 @@ export default function DevoirsPage() {
         setTextContent(prev => ({ ...prev, [homeworkId]: '' }));
         setFiles(prev => ({ ...prev, [homeworkId]: [] }));
 
-        // Lancer le cooldown de test: 2 minutes = 120 secondes
-      const cooldownDuration = 1800;
+        // Lancer le cooldown de 5 secondes
+      const cooldownDuration = 3;
         setCooldowns(prev => ({ ...prev, [homeworkId]: cooldownDuration }));
         saveCooldownToStorage(homeworkId, cooldownDuration);
       } else {
@@ -503,28 +503,15 @@ export default function DevoirsPage() {
                           </div>
                         </div>
 
-                        {/* Message de confirmation après soumission avec cooldown */}
+                        {/* Message de confirmation après soumission */}
                         {showCooldownMessage && (
                           <div className="bg-green-50 border border-green-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
                             <div className="flex items-start space-x-2 sm:space-x-3">
                               <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-semibold text-green-900 mb-2 text-sm sm:text-base">
-                                  Devoir bien reçu par le professeur !
+                                <h4 className="font-semibold text-green-900 text-sm sm:text-base">
+                                  Votre devoir a été bien envoyé !
                                 </h4>
-                                <p className="text-green-800 text-xs sm:text-sm mb-2">
-                                  Vous avez normalement reçu une copie dans votre boîte mail. Le professeur vous répondra au plus vite.
-                                </p>
-                                <div className="flex items-start space-x-2 text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-2 sm:px-3 py-2 mt-3">
-                                  <Clock className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                                  <p className="text-xs flex-1">
-                                    {cooldowns[homework.id] > 0
-                                      ? `Vous pourrez renvoyer dans ${Math.floor(cooldowns[homework.id] / 60)
-                                        .toString()
-                                        .padStart(2, '0')} : ${(cooldowns[homework.id] % 60).toString().padStart(2, '0')}`
-                                      : 'Vous pouvez renvoyer votre devoir maintenant.'}
-                                  </p>
-                                </div>
                               </div>
                             </div>
                           </div>
