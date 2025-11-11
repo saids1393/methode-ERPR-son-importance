@@ -28,14 +28,22 @@ model User {
   updatedAt         DateTime         @updatedAt
   gender            Gender?
   welcomeEmailSent  Boolean          @default(false)
+
+  // Système d'essai gratuit
+  accountType       AccountType      @default(FREE_TRIAL)
+  trialStartDate    DateTime?
+  trialEndDate      DateTime?
+  trialExpired      Boolean          @default(false)
+  conversionDate    DateTime?
+
   homeworkSends     HomeworkSend[]
   payments          Payment[]
   quizAttempts      QuizAttempt[]
   videoWatches      VideoWatch[]
   whatsappMessages  WhatsAppMessage[]
   levelPurchases    LevelPurchase[]
-  progressLogs      UserProgressLog[]        // ✨ NOUVEAU
-  dailySnapshots    DailyProgressSnapshot[]  // ✨ NOUVEAU
+  progressLogs      UserProgressLog[]
+  dailySnapshots    DailyProgressSnapshot[]
 }
 
 // -------------------------
@@ -345,6 +353,12 @@ model DailyProgressSnapshot {
 enum Gender {
   HOMME
   FEMME
+}
+
+enum AccountType {
+  FREE_TRIAL      // Essai gratuit 14 jours
+  PAID_FULL       // Payant complet (accès à vie)
+  PAID_LEGACY     // Ancien système (pour compatibilité)
 }
 
 enum PaymentStatus {
