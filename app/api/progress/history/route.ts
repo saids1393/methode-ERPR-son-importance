@@ -1,4 +1,4 @@
-// app/api/progress/history/route.ts - VERSION CORRIGÉE
+// app/api/progress/history/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 import {
@@ -11,7 +11,7 @@ interface DayProgress {
   day: string;
   completed: number;
   total: number;
-  percentage: number; // ✅ Maintenant c'est la PROGRESSION DU JOUR (delta)
+  percentage: number; // Progression depuis le début de la semaine (redémarre à 0 chaque lundi)
 }
 
 export async function GET(request: NextRequest) {
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const monthSnapshots = await getMonthlyProgressData(user.id);
     const monthlyComparison = await getMonthlyComparison(user.id);
 
-    // ✅ NOUVEAU : Calculer les DELTAS (progression par jour)
+    // Calculer la progression hebdomadaire (redémarre à 0 chaque semaine)
     const weekData = formatWeekDataWithDelta(weekSnapshots, timeZone);
     const monthData = formatMonthDataWithDelta(monthSnapshots, timeZone);
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('❌ [API /progress/history] Erreur:', error);
+    console.error('[API /progress/history] Erreur:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -48,14 +48,32 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// ✅ NOUVELLE FONCTION : Calcule les DELTAS pour la semaine
+// Calcule la progression hebdomadaire (redémarre à 0 chaque lundi)
 function formatWeekDataWithDelta(snapshots: any[], timeZone: string): DayProgress[] {
   const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
   const today = getDateInTimeZone(new Date(), timeZone);
   today.setHours(0, 0, 0, 0);
 
+  // Trouver le début de la semaine (lundi)
+  const dayOfWeek = today.getDay();
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() + diffToMonday);
+  weekStart.setHours(0, 0, 0, 0);
+
+  // Trouver le snapshot du dimanche précédent (fin de la semaine précédente)
+  const sundayBeforeWeek = new Date(weekStart);
+  sundayBeforeWeek.setDate(weekStart.getDate() - 1);
+
+  const baseSnapshot = snapshots.find((s) => {
+    const snapDate = getDateInTimeZone(new Date(s.snapshotDate), timeZone);
+    snapDate.setHours(0, 0, 0, 0);
+    return snapDate.getTime() === sundayBeforeWeek.getTime();
+  }) || getLastValidSnapshot(snapshots, sundayBeforeWeek, timeZone);
+
+  const basePercentage = baseSnapshot?.progressPercentage || 0;
+
   const weekData: DayProgress[] = [];
-  let previousPercentage = 0; // Tracker la progression du jour précédent
 
   for (let i = 6; i >= 0; i--) {
     const date = new Date(today);
@@ -73,27 +91,24 @@ function formatWeekDataWithDelta(snapshots: any[], timeZone: string): DayProgres
     const dataToUse = snapshot || getLastValidSnapshot(snapshots, date, timeZone);
     const currentPercentage = dataToUse?.progressPercentage || 0;
 
-    // ✅ DELTA = Progression du jour (aujourd'hui) - (hier)
-    const dailyDelta = Math.max(0, currentPercentage - previousPercentage);
+    // Progression depuis le début de la semaine (redémarre à 0 chaque lundi)
+    const weeklyProgress = Math.max(0, currentPercentage - basePercentage);
 
-    // ✅ Le completed/total reflète le delta aussi
-    const dailyCompletedPages = Math.round((dailyDelta / 100) * 30);
+    // Le completed/total reflète la progression hebdomadaire
+    const dailyCompletedPages = Math.round((weeklyProgress / 100) * 30);
 
     weekData.push({
       day: dayName,
       completed: dailyCompletedPages,
       total: 30,
-      percentage: dailyDelta, // ✅ C'est le DELTA maintenant, pas le cumulé
+      percentage: weeklyProgress,
     });
-
-    // Tracker pour le jour suivant
-    previousPercentage = currentPercentage;
   }
 
   return weekData;
 }
 
-// ✅ NOUVELLE FONCTION : Calcule les DELTAS pour le mois
+// Calcule la progression mensuelle par semaine (chaque semaine redémarre à 0)
 function formatMonthDataWithDelta(snapshots: any[], timeZone: string): DayProgress[] {
   const today = getDateInTimeZone(new Date(), timeZone);
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -101,8 +116,6 @@ function formatMonthDataWithDelta(snapshots: any[], timeZone: string): DayProgre
 
   const monthData: DayProgress[] = [];
   const weeksInMonth = Math.ceil(daysInMonth / 7);
-  
-  let previousPercentage = 0; // Tracker la progression de la semaine précédente
 
   for (let week = 0; week < weeksInMonth; week++) {
     const weekStart = new Date(firstDayOfMonth);
@@ -112,29 +125,38 @@ function formatMonthDataWithDelta(snapshots: any[], timeZone: string): DayProgre
 
     const weekLabel = `S${week + 1}`;
 
+    // Trouver le snapshot du dimanche précédent (fin de la semaine précédente)
+    const sundayBeforeWeek = new Date(weekStart);
+    sundayBeforeWeek.setDate(weekStart.getDate() - 1);
+
+    const baseSnapshot = snapshots.find((s) => {
+      const snapDate = getDateInTimeZone(new Date(s.snapshotDate), timeZone);
+      snapDate.setHours(0, 0, 0, 0);
+      return snapDate.getTime() === sundayBeforeWeek.getTime();
+    }) || getLastValidSnapshot(snapshots, sundayBeforeWeek, timeZone);
+
+    const basePercentage = baseSnapshot?.progressPercentage || 0;
+
     const weekSnapshots = snapshots.filter((s) => {
       const snapDate = getDateInTimeZone(new Date(s.snapshotDate), timeZone);
       return snapDate >= weekStart && snapDate <= weekEnd;
     });
 
-    const lastSnapshot = weekSnapshots[weekSnapshots.length - 1];
+    const lastSnapshot = weekSnapshots[weekSnapshots.length - 1] ||
+                        getLastValidSnapshot(snapshots, weekEnd, timeZone);
     const currentPercentage = lastSnapshot?.progressPercentage || 0;
 
-    // ✅ DELTA = Progression de cette semaine - (semaine précédente)
-    const weeklyDelta = Math.max(0, currentPercentage - previousPercentage);
+    // Progression depuis le début de cette semaine (redémarre à 0 chaque semaine)
+    const weeklyProgress = Math.max(0, currentPercentage - basePercentage);
 
-    // ✅ Le completed/total reflète le delta aussi
-    const weeklyCompletedPages = Math.round((weeklyDelta / 100) * 30);
+    const weeklyCompletedPages = Math.round((weeklyProgress / 100) * 30);
 
     monthData.push({
       day: weekLabel,
       completed: weeklyCompletedPages,
       total: 30,
-      percentage: weeklyDelta, // ✅ C'est le DELTA maintenant
+      percentage: weeklyProgress,
     });
-
-    // Tracker pour la semaine suivante
-    previousPercentage = currentPercentage;
   }
 
   return monthData;

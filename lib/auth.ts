@@ -6,7 +6,6 @@ import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { sendPasswordResetEmail } from './email';
 
-// ⭐ CACHE EN MÉMOIRE - TRÈS IMPORTANT !
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
