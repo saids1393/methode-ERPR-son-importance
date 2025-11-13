@@ -708,3 +708,408 @@ const html = `
     return false;
   }
 }
+
+// À AJOUTER DANS lib/email.ts (avant createWelcomeEmailTemplate)
+
+// ----------------------------
+// Template Free Trial Day 3
+// ----------------------------
+const createFreeTrialDay3Template = (username?: string) => `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jour 3 - Votre essai gratuit</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f3f4f6;
+    }
+    
+    .wrapper {
+      width: 100%;
+      background: #f3f4f6;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      padding: 48px 32px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .body {
+      padding: 40px 32px;
+    }
+    
+    .greeting {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 24px;
+    }
+    
+    .description {
+      font-size: 15px;
+      color: #4b5563;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+    
+    .progress-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+    
+    .progress-title {
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 12px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #fbbf24;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      width: 30%;
+      background: #f59e0b;
+    }
+    
+    .cta-section {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      text-decoration: none;
+      padding: 14px 40px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    
+    .footer {
+      background: #f9fafb;
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    
+    @media (max-width: 600px) {
+      .header {
+        padding: 32px 24px;
+      }
+      
+      .body {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>📊 Jour 3</h1>
+        <p>Continuez votre progression</p>
+      </div>
+      
+      <!-- Body -->
+      <div class="body">
+        <div class="greeting">
+          ${username ? `Bien joué, ${username} ! 🎯` : 'Bien joué ! 🎯'}
+        </div>
+        
+        <p class="description">
+          Vous êtes maintenant à mi-chemin de votre essai gratuit de 7 jours. Continuez à explorer la Méthode ERPR et découvrez comment elle peut transformer votre apprentissage.
+        </p>
+        
+        <!-- Progress Box -->
+        <div class="progress-box">
+          <div class="progress-title">Votre progression : 3/7 jours</div>
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <p style="margin-top: 12px; font-size: 13px; color: #92400e;">4 jours restants pour explorer</p>
+        </div>
+        
+        <p class="description">
+          <strong>💡 Astuce :</strong> Pour tirer le meilleur parti de votre essai, essayez de compléter au moins un chapitre et un quiz. Vous verrez rapidement vos progrès.
+        </p>
+        
+        <!-- CTA -->
+        <div class="cta-section">
+          <a href="${BASE_URL}/dashboard" class="cta-button">🚀 Continuer mon apprentissage</a>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="footer">
+        <p>© 2025 Méthode ERPR. Tous droits réservés.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
+// ----------------------------
+// Send Free Trial Day 3 Email
+// ----------------------------
+export async function sendFreeTrialDay3Email(email: string, username?: string): Promise<boolean> {
+  try {
+    const html = createFreeTrialDay3Template(username);
+    await transporter.sendMail({
+      from: SENDER_INFO,
+      to: email,
+      subject: `📊 Jour 3 - Vous êtes à mi-chemin !`,
+      html: juice(html),
+      text: `Jour 3 de votre essai gratuit. Continuez : ${BASE_URL}/dashboard`,
+    });
+    return true;
+  } catch (err) {
+    console.error("Erreur sendFreeTrialDay3Email:", err);
+    return false;
+  }
+}
+
+
+// Send Free Trial Day 6 Email
+const createFreeTrialDay6Template = (username?: string) => `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jour 3 - Votre essai gratuit</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f3f4f6;
+    }
+    
+    .wrapper {
+      width: 100%;
+      background: #f3f4f6;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      padding: 48px 32px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .body {
+      padding: 40px 32px;
+    }
+    
+    .greeting {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 24px;
+    }
+    
+    .description {
+      font-size: 15px;
+      color: #4b5563;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+    
+    .progress-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+    
+    .progress-title {
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 12px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #fbbf24;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      width: 30%;
+      background: #f59e0b;
+    }
+    
+    .cta-section {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      text-decoration: none;
+      padding: 14px 40px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    
+    .footer {
+      background: #f9fafb;
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    
+    @media (max-width: 600px) {
+      .header {
+        padding: 32px 24px;
+      }
+      
+      .body {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>📊 Jour 3</h1>
+        <p>Continuez votre progression</p>
+      </div>
+      
+      <!-- Body -->
+      <div class="body">
+        <div class="greeting">
+          ${username ? `Bien joué, ${username} ! 🎯` : 'Bien joué ! 🎯'}
+        </div>
+        
+        <p class="description">
+          Vous êtes maintenant à mi-chemin de votre essai gratuit de 7 jours. Continuez à explorer la Méthode ERPR et découvrez comment elle peut transformer votre apprentissage.
+        </p>
+        
+        <!-- Progress Box -->
+        <div class="progress-box">
+          <div class="progress-title">Votre progression : 3/7 jours</div>
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <p style="margin-top: 12px; font-size: 13px; color: #92400e;">4 jours restants pour explorer</p>
+        </div>
+        
+        <p class="description">
+          <strong>💡 Astuce :</strong> Pour tirer le meilleur parti de votre essai, essayez de compléter au moins un chapitre et un quiz. Vous verrez rapidement vos progrès.
+        </p>
+        
+        <!-- CTA -->
+        <div class="cta-section">
+          <a href="${BASE_URL}/dashboard" class="cta-button">🚀 Continuer mon apprentissage</a>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="footer">
+        <p>© 2025 Méthode ERPR. Tous droits réservés.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+`;
+export async function sendFreeTrialDay6Email(email: string, username?: string): Promise<boolean> {
+  try {
+    const html = createFreeTrialDay6Template(username);
+    await transporter.sendMail({
+      from: SENDER_INFO,
+      to: email,
+      subject: `⏰ Jour 6 - Dernière ligne droite !`,
+      html: juice(html),
+      text: `Jour 6 de votre essai gratuit. Terminez vos défis : ${BASE_URL}/dashboard`,
+    });
+    return true;
+  } catch (err) {
+    console.error("Erreur sendFreeTrialDay6Email:", err);
+    return false;
+  }
+}

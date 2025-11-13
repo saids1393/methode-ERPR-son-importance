@@ -106,10 +106,53 @@ export async function POST(req: Request) {
     // Rechercher l'utilisateur par email (case-insensitive)
     const user = await prisma.user.findUnique({
       where: { email: cleanEmail },
-      select: { id: true },
+      select: {
+        id: true,
+        accountType: true,
+        isActive: true,
+      },
     });
 
-    secureLog('CHECK_USER_SUCCESS', { 
+    // Si l'utilisateur existe ET est FREE_TRIAL, permettre la mise à niveau
+    if (user && user.accountType === 'FREE_TRIAL') {
+      secureLog('CHECK_USER_FREE_TRIAL_UPGRADE', {
+        email: cleanEmail,
+        userId: user.id
+      });
+
+      return NextResponse.json(
+        {
+          exists: false,
+          canUpgrade: true,
+          message: 'Mise à niveau disponible'
+        },
+        {
+          status: 200,
+          headers: getSecurityHeaders()
+        }
+      );
+    }
+
+    // Si l'utilisateur existe et est PAID_FULL, bloquer
+    if (user && user.accountType === 'PAID_FULL') {
+      secureLog('CHECK_USER_ALREADY_PAID', {
+        email: cleanEmail,
+        userId: user.id
+      });
+
+      return NextResponse.json(
+        {
+          exists: true,
+          message: 'Cet email est déjà utilisé'
+        },
+        {
+          status: 200,
+          headers: getSecurityHeaders()
+        }
+      );
+    }
+
+    secureLog('CHECK_USER_SUCCESS', {
       email: cleanEmail,
       exists: !!user
     });

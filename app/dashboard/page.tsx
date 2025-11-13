@@ -46,6 +46,7 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
+  accountType?: 'FREE_TRIAL' | 'PAID_FULL';
 }
 
 interface HomeworkSend {
@@ -251,6 +252,7 @@ export default function DashboardPage() {
       <DashboardSidebar
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
+        user={user!}
       />
 
       {/* Mobile Menu Overlay */}

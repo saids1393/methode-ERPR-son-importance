@@ -152,6 +152,7 @@ export async function createUser(userData: {
   email: string;
   stripeCustomerId?: string;
   stripeSessionId?: string;
+  accountType?: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_LEGACY';
 }): Promise<UserWithStripe> {
   try {
     if (!isValidEmail(userData.email)) {
@@ -170,6 +171,7 @@ export async function createUser(userData: {
         isActive: true,
         stripeCustomerId: userData.stripeCustomerId || `default_${Date.now()}`,
         stripeSessionId: userData.stripeSessionId || `default_session_${Date.now()}`,
+        accountType: userData.accountType || 'PAID_FULL',
       },
       select: {
         id: true,

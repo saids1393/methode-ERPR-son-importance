@@ -9,6 +9,8 @@ import { useUserProgress } from "@/hooks/useUserProgress";
 import { useChapterVideos } from "@/hooks/useChapterVideos";
 import { useAutoProgress } from "@/hooks/useAutoProgress";
 import { useRouter } from "next/navigation";
+import FreeTrialRestrictionModal from "./FreeTrialRestrictionModal";
+
 
 const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<number>) => {
   // Count total pages (excluding only chapter 11 and page 30)
@@ -33,10 +35,14 @@ const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<nu
   return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 };
 
+
 export default function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState<Record<number, boolean>>({});
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+  const [restrictedChapterName, setRestrictedChapterName] = useState('');
+  const [isFreeTrial, setIsFreeTrial] = useState(false);
 
   const {
     completedPages,
@@ -89,12 +95,36 @@ export default function SidebarContent() {
     return pagesCompleted && quizCompleted;
   }, [completedPages, completedQuizzes]);
 
+  useEffect(() => {
+    const checkTrialStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/check-trial-access');
+        if (response.ok) {
+          const data = await response.json();
+          setIsFreeTrial(data.isFreeTrial && data.hasAccess);
+        }
+      } catch (error) {
+        console.error('Error checking trial status:', error);
+      }
+    };
+    checkTrialStatus();
+  }, []);
+
+  const handleChapterClick = (chapterNumber: number, chapterTitle: string) => {
+    if (isFreeTrial && chapterNumber > 1) {
+      setRestrictedChapterName(`Chapitre ${chapterNumber} - ${chapterTitle}`);
+      setShowRestrictionModal(true);
+    } else {
+      setOpen(prev => ({ ...prev, [chapterNumber]: !prev[chapterNumber] }));
+    }
+  };
+
   const handleNavigation = useCallback(async (href: string, e: React.MouseEvent) => {
     const timeOnPage = getTimeOnCurrentPage();
-    
+
     if (!isProfessorMode && timeOnPage >= 6000) {
       e.preventDefault();
-      
+
       // ✅ CORRIGÉ: Vérifier que validateIfTimeElapsed existe avant de l'appeler
       if (validateIfTimeElapsed && typeof validateIfTimeElapsed === 'function') {
         console.log('📞 [SIDEBAR] Appel validateIfTimeElapsed');
@@ -231,10 +261,11 @@ export default function SidebarContent() {
         <ul className="space-y-1 px-3">
           {chapters.map((chapter) => {
             const chapterComplete = isChapterCompleted(chapter);
+            const isLocked = isFreeTrial && chapter.chapterNumber > 1;
             return (
               <li key={chapter.chapterNumber} className="rounded-lg">
                 <button
-                  onClick={() => setOpen(prev => ({ ...prev, [chapter.chapterNumber]: !prev[chapter.chapterNumber] }))}
+                  onClick={() => handleChapterClick(chapter.chapterNumber, chapter.title)}
                   className={`w-full text-left px-3 py-3 flex justify-between items-center rounded-lg transition-colors ${
                     open[chapter.chapterNumber]
                       ? 'bg-gray-800 text-gray-100'
@@ -242,17 +273,15 @@ export default function SidebarContent() {
                   } ${chapterComplete && !isProfessorMode ? '!text-blue-400' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="font-bold">
+                    <span className={`font-bold ${isLocked ? 'blur-xs' : ''}`}>
                       {chapter.chapterNumber === 0 ? 'Phase préparatoire' : `${chapter.chapterNumber}.`} {chapter.title}
                     </span>
                   </div>
-                  {open[chapter.chapterNumber] ? (
+                  {!isLocked && (open[chapter.chapterNumber] ? (
                     <ChevronDown className={`${chapterComplete && !isProfessorMode ? 'text-blue-400' : 'text-gray-400'}`} size={18} />
                   ) : (
                     <ChevronRight className={`${chapterComplete && !isProfessorMode ? 'text-blue-400' : 'text-gray-400'}`} size={18} />
-                 
-
-                  )}
+                  ))}
                 </button>
 
                 {open[chapter.chapterNumber] && (
@@ -368,6 +397,12 @@ export default function SidebarContent() {
           <span>Quiz complétés: {completedQuizzes.size}</span>
         </div>
       )}
+
+      <FreeTrialRestrictionModal
+        isOpen={showRestrictionModal}
+        onClose={() => setShowRestrictionModal(false)}
+        contentName={restrictedChapterName}
+      />
     </div>
   );
 }

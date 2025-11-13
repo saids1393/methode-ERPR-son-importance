@@ -30,6 +30,7 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
+  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
 }
 
 interface Submission {
@@ -372,6 +373,7 @@ export default function DevoirsPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <DashboardSidebar
+        user={user!}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />

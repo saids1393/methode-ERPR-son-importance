@@ -69,6 +69,7 @@ export async function POST(req: Request) {
     // Vérifier si l'utilisateur existe déjà
     let user = await getUserByEmail(email);
     let isNewAccount = false;
+    let wasFreeTrial = false;
 
     if (!user) {
       // Créer un nouvel utilisateur
@@ -76,19 +77,51 @@ export async function POST(req: Request) {
         email: email,
         stripeCustomerId: session.customer as string,
         stripeSessionId: sessionId,
+        accountType: 'PAID_FULL',
       });
       isNewAccount = true;
     } else if (!user.isActive) {
       // Activer l'utilisateur existant
       await prisma.user.update({
         where: { id: user.id },
-        data: { 
+        data: {
           isActive: true,
           stripeCustomerId: session.customer as string,
           stripeSessionId: sessionId,
+          accountType: 'PAID_FULL',
         }
       });
       user.isActive = true;
+    } else {
+      // Utilisateur existant et actif - Mettre à niveau si FREE_TRIAL
+      const existingUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          accountType: true,
+          username: true,
+          password: true,
+        },
+      });
+
+      if (existingUser?.accountType === 'FREE_TRIAL') {
+        wasFreeTrial = true;
+        console.log(`🔄 Mise à niveau FREE_TRIAL → PAID_FULL pour ${email}`);
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            accountType: 'PAID_FULL',
+            stripeCustomerId: session.customer as string,
+            stripeSessionId: sessionId,
+            trialEndDate: null,
+            trialExpired: false,
+            conversionDate: new Date(),
+          }
+        });
+
+        // Mettre à jour les données utilisateur avec les nouvelles infos
+        user.username = existingUser.username;
+        console.log(`✅ Compte mis à niveau avec succès`);
+      }
     }
 
     // Générer un token JWT
@@ -112,6 +145,7 @@ export async function POST(req: Request) {
     }
 
     // Créer la réponse et y attacher le cookie
+    // Si l'utilisateur vient d'un FREE_TRIAL, il a déjà un profil complet
     const response = NextResponse.json({
       success: true,
       user: {
@@ -119,7 +153,7 @@ export async function POST(req: Request) {
         email: user.email,
         isActive: user.isActive,
       },
-      needsProfileCompletion: !user.username || !user.password
+      needsProfileCompletion: wasFreeTrial ? false : (!user.username || !user.password)
     });
 
     response.cookies.set({

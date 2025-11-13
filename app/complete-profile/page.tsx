@@ -11,6 +11,7 @@ export default function CompleteProfilePage() {
   const [gender, setGender] = useState<'HOMME' | 'FEMME' | ''>('');
   const [loading, setLoading] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [userAccountType, setUserAccountType] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
@@ -21,9 +22,10 @@ export default function CompleteProfilePage() {
         const response = await fetch('/api/auth/me');
         if (response.ok) {
           const userData = await response.json();
-          setUserEmail(userData.email);
+          setUserEmail(userData.user?.email || userData.email);
+          setUserAccountType(userData.user?.accountType || '');
 
-          if (userData.username && userData.hasPassword) {
+          if (userData.user?.username || userData.username) {
             router.push('/dashboard');
           }
         } else {
@@ -40,7 +42,7 @@ export default function CompleteProfilePage() {
   const handleCompleteProfile = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username || !password || !confirmPassword || !gender) {
+    if (!username || !gender || !password || !confirmPassword) {
       toast.error('Veuillez remplir tous les champs');
       return;
     }
@@ -66,7 +68,11 @@ export default function CompleteProfilePage() {
       const response = await fetch('/api/auth/complete-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, gender })
+        body: JSON.stringify({
+          username,
+          password,
+          gender
+        })
       });
 
       const data = await response.json();
@@ -117,10 +123,12 @@ export default function CompleteProfilePage() {
             <BookOpen className="h-8 w-8 text-white" />
           </div>
           <h2 className="mt-4 text-center text-3xl font-bold text-white">
-            Félicitations !
+            {userAccountType === 'FREE_TRIAL' ? 'Bienvenue !' : 'Félicitations !'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Votre paiement a été confirmé. Complétez votre profil pour accéder au cours.
+            {userAccountType === 'FREE_TRIAL'
+              ? 'Complétez votre profil pour commencer votre essai gratuit.'
+              : 'Votre paiement a été confirmé. Complétez votre profil pour accéder au cours.'}
           </p>
           <p className="mt-1 text-center text-xs text-gray-500">
             Connecté avec : {userEmail}

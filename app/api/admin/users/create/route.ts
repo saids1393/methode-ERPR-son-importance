@@ -84,10 +84,12 @@ export async function POST(request: NextRequest) {
     if (isPaid) {
       userData.stripeCustomerId = `manual_${Date.now()}`;
       userData.stripeSessionId = `manual_session_${Date.now()}`;
+      userData.accountType = 'PAID_FULL';
     } else {
       // Si gratuit, pas de données de paiement
       userData.stripeCustomerId = null;
       userData.stripeSessionId = null;
+      userData.accountType = 'PAID_FULL';
     }
 
     const user = await prisma.user.create({

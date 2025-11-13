@@ -38,7 +38,6 @@ async function verifyJWTToken(token: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
 
   // Crée la réponse et ajoute les headers de sécurité
   const response = NextResponse.next();
@@ -48,7 +47,7 @@ export async function middleware(request: NextRequest) {
   });
 
   // Pages publiques
-  const publicPaths = ['/', '/checkout', '/merci', '/login', '/complete-profile', '/professor/auth', '/testEcriture'];
+  const publicPaths = ['/', '/checkout', '/merci', '/login', '/signup-free', '/complete-profile', '/professor/auth', '/testEcriture'];
   if (publicPaths.includes(pathname)) {
     return response;
   }
@@ -113,6 +112,33 @@ export async function middleware(request: NextRequest) {
         Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
         return redirectResponse;
       }
+
+      // Vérifier la restriction FREE_TRIAL pour les chapitres 2-11
+      const chapitreMatch = pathname.match(/^\/chapitres\/(\d+)(?:\/|$)/);
+      if (chapitreMatch && userPayload?.userId) {
+        const chapitreNumber = parseInt(chapitreMatch[1], 10);
+        if (chapitreNumber >= 2 && chapitreNumber <= 11) {
+          try {
+            const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
+            const checkResponse = await fetch(apiUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId: userPayload.userId })
+            });
+
+            const data = await checkResponse.json();
+            
+            if (data.accountType === 'FREE_TRIAL') {
+              const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+              Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+              return redirectResponse;
+            }
+          } catch (error) {
+            console.error('Error checking account type:', error);
+          }
+        }
+      }
+
       return response;
     }
   }
@@ -135,6 +161,46 @@ export async function middleware(request: NextRequest) {
       Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
       return redirectResponse;
     }
+    return response;
+  }
+
+  // Pages restreintes pour FREE_TRIAL: accompagnement, devoirs, conseil, niveaux
+  const restrictedPaths = ['/accompagnement', '/conseil', '/niveaux'];
+  if (restrictedPaths.includes(pathname)) {
+    const userToken = request.cookies.get('auth-token')?.value;
+    if (!userToken) {
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+      return redirectResponse;
+    }
+    const userPayload = await verifyJWTToken(userToken);
+    if (!userPayload || !userPayload.userId) {
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      redirectResponse.cookies.delete('auth-token');
+      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+      return redirectResponse;
+    }
+
+    // ✅ Appeler l'API au lieu d'utiliser Prisma directement
+    try {
+      const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
+      const checkResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userPayload.userId })
+      });
+
+      const data = await checkResponse.json();
+      
+      if (data.accountType === 'FREE_TRIAL') {
+        const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+        Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+        return redirectResponse;
+      }
+    } catch (error) {
+      console.error('Error checking account type:', error);
+    }
+
     return response;
   }
 

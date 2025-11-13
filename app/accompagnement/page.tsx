@@ -20,6 +20,7 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
+  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
 }
 
 interface HomeworkSend {
@@ -105,6 +106,7 @@ export default function AccompagnementPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       <DashboardSidebar
+        user={user!}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />

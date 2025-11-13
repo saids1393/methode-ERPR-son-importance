@@ -19,6 +19,7 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
+  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
 }
 
 export default function NiveauxPage() {
@@ -97,6 +98,7 @@ export default function NiveauxPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardSidebar
+        user={user!}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />

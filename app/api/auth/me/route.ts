@@ -13,13 +13,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // ⭐ OPTIMISÉ : Fetch seulement gender et password
+    // ⭐ OPTIMISÉ : Fetch seulement gender, password et accountType
     // Au lieu de refetcher tout l'user
     const userExtra = await prisma.user.findUnique({
       where: { id: user.id },
       select: {
         gender: true,
         password: true,
+        accountType: true,
       },
     });
 
@@ -29,7 +30,8 @@ export async function GET(request: NextRequest) {
       username: user.username,
       gender: userExtra?.gender || null,
       isActive: user.isActive,
-      hasPassword: userExtra?.password !== null
+      hasPassword: userExtra?.password !== null,
+      accountType: userExtra?.accountType || 'PAID_FULL'
     });
   } catch (error) {
     console.error('Auth me error:', error);

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -83,6 +83,19 @@ export default function CheckoutPage() {
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [paymentPlan, setPaymentPlan] = useState<'1x' | '2x'>('1x');
+  const [isEmailLocked, setIsEmailLocked] = useState(false);
+
+  // Pré-remplir l'email depuis l'URL si présent
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const emailParam = params.get('email');
+      if (emailParam) {
+        setEmail(emailParam);
+        setIsEmailLocked(true);
+      }
+    }
+  }, []);
 
   // Validation en temps réel de l'email
   const handleEmailChange = useCallback((value: string) => {
@@ -275,7 +288,7 @@ export default function CheckoutPage() {
                       type="email"
                       autoComplete="email"
                       required
-                      disabled={loading}
+                      disabled={loading || isEmailLocked}
                       value={email}
                       onChange={(e) => handleEmailChange(e.target.value)}
                       className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
@@ -283,6 +296,13 @@ export default function CheckoutPage() {
                       }`}
                       placeholder="votre@email.com"
                     />
+                    {isEmailLocked && (
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <svg className="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
                   {emailError && (
                     <p className="mt-2 text-sm text-red-500">{emailError}</p>

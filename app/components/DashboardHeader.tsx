@@ -15,6 +15,7 @@ import {
     Eye,
     EyeOff
 } from 'lucide-react';
+import FreeTrialRestrictionModal from './FreeTrialRestrictionModal';
 
 interface User {
     id: string;
@@ -22,6 +23,7 @@ interface User {
     username: string | null;
     gender: 'HOMME' | 'FEMME' | null;
     isActive: boolean;
+    accountType?: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
 }
 
 interface HomeworkSend {
@@ -70,7 +72,14 @@ export default function DashboardHeader({
     const [contactSuccess, setContactSuccess] = useState(false);
     const [showNotificationModal, setShowNotificationModal] = useState(false);
     const [editError, setEditError] = useState('');
+    const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+    const [restrictedContent, setRestrictedContent] = useState('');
     const router = useRouter();
+
+    const handleRestrictedClick = (contentName: string) => {
+        setRestrictedContent(contentName);
+        setShowRestrictionModal(true);
+    };
 
     const getSentHomeworkCount = () => {
         return homeworkSends.length;
@@ -236,19 +245,33 @@ export default function DashboardHeader({
                         </Link>
 
                         <Link
-                            href="/accompagnement"
-                            className={`${pathname === "/accompagnement" ? "text-gray-900 font-medium border-b-2 border-blue-800" : "text-gray-500 hover:text-gray-900"}`}
+                            href={user.accountType === 'FREE_TRIAL' ? "#" : "/accompagnement"}
+                            className={`${user.accountType === 'FREE_TRIAL'
+                                    ? "text-gray-400 opacity-60 cursor-not-allowed"
+                                    : pathname === "/accompagnement"
+                                        ? "text-gray-900 font-medium border-b-2 border-blue-800"
+                                        : "text-gray-500 hover:text-gray-900"
+                                }`}
+                            onClick={(e) => {
+                                if (user.accountType === 'FREE_TRIAL') {
+                                    e.preventDefault();
+                                    handleRestrictedClick('Accompagnement');
+                                }
+                            }}
                         >
                             Accompagnement
                         </Link>
 
-                         <Link
+                        <Link
                             href="/devoirs"
-                            className={`${pathname === "/devoirs" ? "text-gray-900 font-medium border-b-2 border-blue-800" : "text-gray-500 hover:text-gray-900"}`}
+                            className={`${pathname === "/devoirs"
+                                    ? "text-gray-900 font-medium border-b-2 border-blue-800"
+                                    : "text-gray-500 hover:text-gray-900"
+                                }`}
+
                         >
                             Devoirs
                         </Link>
-
                     </nav>
 
 
@@ -297,60 +320,60 @@ export default function DashboardHeader({
                                 <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
                             </button>
 
-{/* Dropdown Menu */}
-{showProfileMenu && (
-  <div
-    className="
+                            {/* Dropdown Menu */}
+                            {showProfileMenu && (
+                                <div
+                                    className="
       absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 
       rounded-xl shadow-lg overflow-hidden z-50
       will-change-transform will-change-opacity
       md:transition-none
     "
-    style={{
-      transform: 'translateZ(0)', // accélération matérielle
-    }}
-  >
-    <div className="p-4 border-b border-gray-100">
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center">
-          <span className="text-white font-medium">
-            {user.username
-              ? user.username.charAt(0).toUpperCase()
-              : user.email.charAt(0).toUpperCase()}
-          </span>
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-gray-900 font-semibold truncate">
-            {user.username ||
-              (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
-          </p>
-          <p className="text-gray-500 text-sm truncate">{user.email}</p>
-        </div>
-      </div>
-    </div>
+                                    style={{
+                                        transform: 'translateZ(0)', // accélération matérielle
+                                    }}
+                                >
+                                    <div className="p-4 border-b border-gray-100">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center">
+                                                <span className="text-white font-medium">
+                                                    {user.username
+                                                        ? user.username.charAt(0).toUpperCase()
+                                                        : user.email.charAt(0).toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-gray-900 font-semibold truncate">
+                                                    {user.username ||
+                                                        (user.gender === 'FEMME' ? 'Utilisatrice' : 'Utilisateur')}
+                                                </p>
+                                                <p className="text-gray-500 text-sm truncate">{user.email}</p>
+                                            </div>
+                                        </div>
+                                    </div>
 
-    <div className="p-2">
-      <button
-        onClick={() => {
-          setShowEditProfile(true);
-          setShowProfileMenu(false);
-        }}
-        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
-      >
-        <Edit3 className="h-4 w-4 text-gray-400" />
-        <span className="text-gray-700">Modifier le profil</span>
-      </button>
+                                    <div className="p-2">
+                                        <button
+                                            onClick={() => {
+                                                setShowEditProfile(true);
+                                                setShowProfileMenu(false);
+                                            }}
+                                            className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                                        >
+                                            <Edit3 className="h-4 w-4 text-gray-400" />
+                                            <span className="text-gray-700">Modifier le profil</span>
+                                        </button>
 
-      <button
-        onClick={handleLogout}
-        className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
-      >
-        <LogOut className="h-4 w-4 text-gray-400" />
-        <span className="text-gray-700">Se déconnecter</span>
-      </button>
-    </div>
-  </div>
-)}
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-gray-50 rounded-lg transition-colors"
+                                        >
+                                            <LogOut className="h-4 w-4 text-gray-400" />
+                                            <span className="text-gray-700">Se déconnecter</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                         </div>
                         {/* Modal Notifications */}
@@ -570,25 +593,25 @@ export default function DashboardHeader({
                                 </button>
                             </div>
 
-                       {/* Section Suppression de compte */}
-<div className="pt-6 border-t border-gray-200">
-  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-    <h4 className="text-sm font-semibold text-red-900 mb-2">
-      Supprimer mon compte
-    </h4>
-    <p className="text-sm text-red-800">
-      Pour supprimer votre compte, contactez le support :
-    </p>
-    <div className="mt-2 text-sm text-red-700">
-      <p>
-        📧 <a href="mailto:arabeimportance@gmail.com" className="font-semibold hover:underline">
-          arabeimportance@gmail.com
-        </a>
-      </p>
-      <p>💬 Ou utilisez le formulaire de contact ci-dessus.</p>
-    </div>
-  </div>
-</div>
+                            {/* Section Suppression de compte */}
+                            <div className="pt-6 border-t border-gray-200">
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <h4 className="text-sm font-semibold text-red-900 mb-2">
+                                        Supprimer mon compte
+                                    </h4>
+                                    <p className="text-sm text-red-800">
+                                        Pour supprimer votre compte, contactez le support :
+                                    </p>
+                                    <div className="mt-2 text-sm text-red-700">
+                                        <p>
+                                            📧 <a href="mailto:arabeimportance@gmail.com" className="font-semibold hover:underline">
+                                                arabeimportance@gmail.com
+                                            </a>
+                                        </p>
+                                        <p>💬 Ou utilisez le formulaire de contact ci-dessus.</p>
+                                    </div>
+                                </div>
+                            </div>
 
                         </form>
                     </div>
@@ -660,6 +683,12 @@ export default function DashboardHeader({
                     </div>
                 </div>
             )}
+
+            <FreeTrialRestrictionModal
+                isOpen={showRestrictionModal}
+                onClose={() => setShowRestrictionModal(false)}
+                contentName={restrictedContent}
+            />
         </>
     );
 }
