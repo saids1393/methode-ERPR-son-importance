@@ -10,34 +10,44 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Calcul des dates pour récupérer les utilisateurs
+    // 🧪 MODE TEST : Chercher les utilisateurs d'AUJOURD'HUI
     const now = new Date();
     
-    // Récupérer la date d'il y a 6 jours (minuit à 23:59)
-    const sixDaysAgo = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
-    const sixDaysAgoStart = new Date(sixDaysAgo);
-    sixDaysAgoStart.setHours(0, 0, 0, 0);
+    const today = new Date(now);
     
-    const sixDaysAgoEnd = new Date(sixDaysAgo);
-    sixDaysAgoEnd.setHours(23, 59, 59, 999);
+    const dayStart = new Date(today);
+    dayStart.setHours(0, 0, 0, 0);
+    
+    const dayEnd = new Date(today);
+    dayEnd.setHours(23, 59, 59, 999);
 
-    // Trouver les utilisateurs en essai gratuit depuis 6 jours
+    console.log(`
+      🔍 CRON JOUR 6 - MODE TEST
+      Heure actuelle: ${now.toISOString()}
+      Recherche: users avec trialStartDate entre ${dayStart.toISOString()} et ${dayEnd.toISOString()}
+    `);
+
+    // Trouver les utilisateurs en essai gratuit depuis AUJOURD'HUI
     const users = await prisma.user.findMany({
       where: {
         accountType: 'FREE_TRIAL',
         trialExpired: false,
-        trialDay6EmailSent: false,
+        // ⚠️ ATTENTION: On n'utilise PAS trialDay6EmailSent pour le TEST
+        // pour pouvoir renvoyer l'email plusieurs fois
         trialStartDate: {
-          gte: sixDaysAgoStart,
-          lte: sixDaysAgoEnd,
+          gte: dayStart,
+          lte: dayEnd,
         },
       },
       select: {
         id: true,
         email: true,
         username: true,
+        trialStartDate: true,
       },
     });
+
+    console.log(`📊 ${users.length} utilisateur(s) trouvé(s)`);
 
     let emailsSent = 0;
     let emailsFailed = 0;
@@ -45,34 +55,33 @@ export async function GET(request: NextRequest) {
     // Envoyer les emails
     for (const user of users) {
       try {
+        const startDate = user.trialStartDate ? user.trialStartDate.toISOString() : 'N/A';
+        console.log(`📨 Envoi email jour 6 à ${user.email} (commencé: ${startDate})`);
+        
         const success = await sendFreeTrialDay6Email(user.email, user.username || undefined);
         
         if (success) {
-          // Mettre à jour le flag dans la base de données
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { trialDay6EmailSent: true },
-          });
+          // On met à jour SEULEMENT après le vrai déploiement
           emailsSent++;
-          console.log(`✅ Email jour 6 envoyé à ${user.email}`);
+          console.log(`✅ Email jour 6 envoyé avec succès à ${user.email}`);
         } else {
           emailsFailed++;
           console.error(`❌ Échec envoi email jour 6 à ${user.email}`);
         }
       } catch (error) {
         emailsFailed++;
-        console.error(`❌ Erreur envoi email jour 6 à ${user.email}:`, error);
+        console.error(`❌ Erreur lors de l'envoi à ${user.email}:`, error);
       }
     }
 
     console.log(`
       ========================================
-      CRON: Send Trial Day 6 Emails
+      ✅ CRON: Send Trial Day 6 Emails (TEST)
       ========================================
       Utilisateurs trouvés: ${users.length}
       Emails envoyés: ${emailsSent}
       Emails échoués: ${emailsFailed}
-      Heure d'exécution: ${now.toISOString()}
+      Exécution: ${now.toISOString()}
       ========================================
     `);
 
@@ -83,9 +92,10 @@ export async function GET(request: NextRequest) {
       emailsSent,
       emailsFailed,
       executedAt: now.toISOString(),
+      mode: 'TEST - cherche utilisateurs d\'aujourd\'hui',
     });
   } catch (error) {
-    console.error('Erreur cron send-trial-day6-emails:', error);
+    console.error('❌ Erreur cron send-trial-day6-emails:', error);
     return NextResponse.json(
       { 
         error: 'Erreur lors de l\'envoi des emails jour 6',
