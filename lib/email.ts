@@ -836,6 +836,27 @@ const createFreeTrialDay3Template = (username?: string) => `
       color: #9ca3af;
     }
     
+    .social-links {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    
+    .social-link {
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1f2937;
+      transition: color 0.2s;
+      padding: 0 8px;
+    }
+    
+    .social-link:hover {
+      color: #f59e0b;
+    }
+    
     @media (max-width: 600px) {
       .header {
         padding: 32px 24px;
@@ -868,7 +889,7 @@ const createFreeTrialDay3Template = (username?: string) => `
         
         <!-- Progress Box -->
         <div class="progress-box">
-          <div class="progress-title">Votre progression : 3/7 jours</div>
+          <div class="progress-title">Vos jours : 3/7 jours</div>
           <div class="progress-bar">
             <div class="progress-fill"></div>
           </div>
@@ -876,7 +897,7 @@ const createFreeTrialDay3Template = (username?: string) => `
         </div>
         
         <p class="description">
-          <strong>💡 Astuce :</strong> Pour tirer le meilleur parti de votre essai, essayez de compléter au moins un chapitre et un quiz. Vous verrez rapidement vos progrès.
+          <strong>💡 Astuce :</strong> Pour tirer le meilleur parti de votre essai, essayez de compléter au moins le chapitre 1 et le quiz. Vous verrez rapidement vos progrès.
         </p>
         
         <!-- CTA -->
@@ -888,6 +909,13 @@ const createFreeTrialDay3Template = (username?: string) => `
       <!-- Footer -->
       <div class="footer">
         <p>© 2025 Méthode ERPR. Tous droits réservés.</p>
+        
+        <!-- Social Links -->
+        <div class="social-links">
+          <a href="https://t.me/ArabeImportance" class="social-link">Telegram</a>
+          <a href="https://www.instagram.com/arabeimportance/" class="social-link">Instagram</a>
+          <a href="https://www.tiktok.com/@arabeimportance?_r=1&_t=ZN-91MgOs7KLRe" class="social-link">TikTok</a>
+        </div>
       </div>
     </div>
   </div>
@@ -923,7 +951,7 @@ const createFreeTrialDay6Template = (username?: string) => `
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jour 3 - Votre essai gratuit</title>
+  <title>Jour 6 - Votre essai gratuit</title>
   <style>
     * {
       margin: 0;
@@ -954,7 +982,7 @@ const createFreeTrialDay6Template = (username?: string) => `
     }
     
     .header {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
       padding: 48px 32px;
       text-align: center;
@@ -985,8 +1013,8 @@ const createFreeTrialDay6Template = (username?: string) => `
     }
     
     .progress-box {
-      background: #fef3c7;
-      border-left: 4px solid #f59e0b;
+      background: #fee2e2;
+      border-left: 4px solid #ef4444;
       padding: 20px;
       border-radius: 8px;
       margin-bottom: 32px;
@@ -994,22 +1022,22 @@ const createFreeTrialDay6Template = (username?: string) => `
     
     .progress-title {
       font-weight: 700;
-      color: #92400e;
+      color: #7f1d1d;
       margin-bottom: 12px;
     }
     
     .progress-bar {
       width: 100%;
       height: 8px;
-      background: #fbbf24;
+      background: #fca5a5;
       border-radius: 4px;
       overflow: hidden;
     }
     
     .progress-fill {
       height: 100%;
-      width: 30%;
-      background: #f59e0b;
+      width: 85%;
+      background: #ef4444;
     }
     
     .cta-section {
@@ -1021,14 +1049,14 @@ const createFreeTrialDay6Template = (username?: string) => `
     
     .cta-button {
       display: inline-block;
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
       text-decoration: none;
       padding: 14px 40px;
       border-radius: 8px;
       font-weight: 600;
       font-size: 15px;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
     
     .footer {
@@ -1037,6 +1065,27 @@ const createFreeTrialDay6Template = (username?: string) => `
       text-align: center;
       font-size: 12px;
       color: #9ca3af;
+    }
+    
+    .social-links {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    
+    .social-link {
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1f2937;
+      transition: color 0.2s;
+      padding: 0 8px;
+    }
+    
+    .social-link:hover {
+      color: #ef4444;
     }
     
     @media (max-width: 600px) {
@@ -1055,42 +1104,49 @@ const createFreeTrialDay6Template = (username?: string) => `
     <div class="container">
       <!-- Header -->
       <div class="header">
-        <h1>📊 Jour 3</h1>
-        <p>Continuez votre progression</p>
+        <h1>⏰ Jour 6</h1>
+        <p>Dernière ligne droite</p>
       </div>
       
       <!-- Body -->
       <div class="body">
         <div class="greeting">
-          ${username ? `Bien joué, ${username} ! 🎯` : 'Bien joué ! 🎯'}
+          ${username ? `Presque là, ${username} ! 🎉` : 'Presque là ! 🎉'}
         </div>
         
         <p class="description">
-          Vous êtes maintenant à mi-chemin de votre essai gratuit de 7 jours. Continuez à explorer la Méthode ERPR et découvrez comment elle peut transformer votre apprentissage.
+          Vous êtes pratiquement à la fin de votre essai gratuit de 7 jours. C'est le moment décisif pour constater tous vos progrès avec la Méthode ERPR.
         </p>
         
         <!-- Progress Box -->
         <div class="progress-box">
-          <div class="progress-title">Votre progression : 3/7 jours</div>
+          <div class="progress-title">Vos jours : 6/7 jours</div>
           <div class="progress-bar">
             <div class="progress-fill"></div>
           </div>
-          <p style="margin-top: 12px; font-size: 13px; color: #92400e;">4 jours restants pour explorer</p>
+          <p style="margin-top: 12px; font-size: 13px; color: #7f1d1d;">1 jour restant avant l'expiration</p>
         </div>
         
         <p class="description">
-          <strong>💡 Astuce :</strong> Pour tirer le meilleur parti de votre essai, essayez de compléter au moins un chapitre et un quiz. Vous verrez rapidement vos progrès.
+          <strong>🎯 Dernier jour :</strong> Complétez le chapitre 1, testez les audios interactifs avant votre décision finale. En espérant que vous apprécierez votre expérience avec la Méthode ERPR.
         </p>
         
         <!-- CTA -->
         <div class="cta-section">
-          <a href="${BASE_URL}/dashboard" class="cta-button">🚀 Continuer mon apprentissage</a>
+          <a href="${BASE_URL}/dashboard" class="cta-button">🚀 Terminer le test</a>
         </div>
       </div>
       
       <!-- Footer -->
       <div class="footer">
         <p>© 2025 Méthode ERPR. Tous droits réservés.</p>
+        
+        <!-- Social Links -->
+        <div class="social-links">
+          <a href="https://t.me/ArabeImportance" class="social-link">Telegram</a>
+          <a href="https://www.instagram.com/arabeimportance/" class="social-link">Instagram</a>
+          <a href="https://www.tiktok.com/@arabeimportance?_r=1&_t=ZN-91MgOs7KLRe" class="social-link">TikTok</a>
+        </div>
       </div>
     </div>
   </div>

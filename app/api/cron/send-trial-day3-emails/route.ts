@@ -12,29 +12,30 @@ export async function GET(request: NextRequest) {
 
     const now = new Date();
     
-    // 🧪 MODE TEST : Chercher les utilisateurs d'AUJOURD'HUI
-    // À la place de "il y a 3 jours", on cherche "aujourd'hui"
-    const today = new Date(now);
+    // Calculer les timestamps pour "aujourd'hui - 3 jours"
+    // Si on est le 14 novembre, on cherche les utilisateurs du 11 novembre
+    const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+    const targetDate = new Date(now.getTime() - threeDaysInMs);
     
-    const dayStart = new Date(today);
+    // Début et fin de la journée cible
+    const dayStart = new Date(targetDate);
     dayStart.setHours(0, 0, 0, 0);
     
-    const dayEnd = new Date(today);
+    const dayEnd = new Date(targetDate);
     dayEnd.setHours(23, 59, 59, 999);
 
     console.log(`
-      🔍 CRON JOUR 3 - MODE TEST
+      🔍 CRON JOUR 3 - PRODUCTION
       Heure actuelle: ${now.toISOString()}
       Recherche: users avec trialStartDate entre ${dayStart.toISOString()} et ${dayEnd.toISOString()}
     `);
 
-    // Trouver tous les utilisateurs qui ont commencé leur essai AUJOURD'HUI
+    // Trouver tous les utilisateurs qui ont commencé leur essai il y a 3 jours
     const users = await prisma.user.findMany({
       where: {
         accountType: 'FREE_TRIAL',
         trialExpired: false,
-        // ⚠️ ATTENTION: On n'utilise PAS trialDay3EmailSent pour le TEST
-        // pour pouvoir renvoyer l'email plusieurs fois
+        trialDay3EmailSent: false,
         trialStartDate: {
           gte: dayStart,
           lte: dayEnd,
@@ -62,7 +63,11 @@ export async function GET(request: NextRequest) {
         const success = await sendFreeTrialDay3Email(user.email, user.username || undefined);
         
         if (success) {
-          // On met à jour SEULEMENT après le vrai déploiement
+          // Mettre à jour le flag pour éviter de renvoyer
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { trialDay3EmailSent: true },
+          });
           emailsSent++;
           console.log(`✅ Email jour 3 envoyé avec succès à ${user.email}`);
         } else {
@@ -77,7 +82,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`
       ========================================
-      ✅ CRON: Send Trial Day 3 Emails (TEST)
+      ✅ CRON: Send Trial Day 3 Emails
       ========================================
       Utilisateurs trouvés: ${users.length}
       Emails envoyés: ${emailsSent}
@@ -93,7 +98,6 @@ export async function GET(request: NextRequest) {
       emailsSent,
       emailsFailed,
       executedAt: now.toISOString(),
-      mode: 'TEST - cherche utilisateurs d\'aujourd\'hui',
     });
   } catch (error) {
     console.error('❌ Erreur cron send-trial-day3-emails:', error);
