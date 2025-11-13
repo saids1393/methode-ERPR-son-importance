@@ -65,7 +65,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Logger les résultats
     console.log(`
       ========================================
       CRON: Send Trial Day 6 Emails
