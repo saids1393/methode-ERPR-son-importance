@@ -113,29 +113,35 @@ export async function middleware(request: NextRequest) {
         return redirectResponse;
       }
 
-      // Vérifier la restriction FREE_TRIAL pour les chapitres 2-11
+      // Vérifier la restriction FREE_TRIAL pour tous les chapitres si expiré
       const chapitreMatch = pathname.match(/^\/chapitres\/(\d+)(?:\/|$)/);
       if (chapitreMatch && userPayload?.userId) {
         const chapitreNumber = parseInt(chapitreMatch[1], 10);
-        if (chapitreNumber >= 2 && chapitreNumber <= 11) {
-          try {
-            const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
-            const checkResponse = await fetch(apiUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId: userPayload.userId })
-            });
+        try {
+          const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
+          const checkResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userPayload.userId })
+          });
 
-            const data = await checkResponse.json();
-            
-            if (data.accountType === 'FREE_TRIAL') {
-              const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-              Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-              return redirectResponse;
-            }
-          } catch (error) {
-            console.error('Error checking account type:', error);
+          const data = await checkResponse.json();
+
+          // Bloquer TOUS les chapitres si FREE_TRIAL expiré
+          if (data.accountType === 'FREE_TRIAL' && data.trialExpired === true) {
+            const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+            Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+            return redirectResponse;
           }
+
+          // Bloquer chapitres 2-11 si FREE_TRIAL actif (non expiré)
+          if (chapitreNumber >= 2 && chapitreNumber <= 11 && data.accountType === 'FREE_TRIAL') {
+            const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+            Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+            return redirectResponse;
+          }
+        } catch (error) {
+          console.error('Error checking account type:', error);
         }
       }
 
@@ -164,9 +170,9 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Pages restreintes pour FREE_TRIAL: accompagnement, devoirs, conseil, niveaux
-  const restrictedPaths = ['/accompagnement', '/conseil'];
-  if (restrictedPaths.includes(pathname)) {
+  // Pages restreintes pour FREE_TRIAL EXPIRÉ: devoirs, niveaux
+  const restrictedPathsForExpiredTrial = ['/devoirs', '/niveaux'];
+  if (restrictedPathsForExpiredTrial.includes(pathname)) {
     const userToken = request.cookies.get('auth-token')?.value;
     if (!userToken) {
       const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
@@ -181,7 +187,6 @@ export async function middleware(request: NextRequest) {
       return redirectResponse;
     }
 
-    // ✅ Appeler l'API au lieu d'utiliser Prisma directement
     try {
       const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
       const checkResponse = await fetch(apiUrl, {
@@ -191,7 +196,48 @@ export async function middleware(request: NextRequest) {
       });
 
       const data = await checkResponse.json();
-      
+
+      // Bloquer UNIQUEMENT si FREE_TRIAL ET expiré
+      if (data.accountType === 'FREE_TRIAL' && data.trialExpired === true) {
+        const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+        Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+        return redirectResponse;
+      }
+    } catch (error) {
+      console.error('Error checking account type:', error);
+    }
+
+    return response;
+  }
+
+  // Pages restreintes pour FREE_TRIAL non expiré: accompagnement, conseil
+  const restrictedPathsForActiveTrial = ['/accompagnement', '/conseil'];
+  if (restrictedPathsForActiveTrial.includes(pathname)) {
+    const userToken = request.cookies.get('auth-token')?.value;
+    if (!userToken) {
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+      return redirectResponse;
+    }
+    const userPayload = await verifyJWTToken(userToken);
+    if (!userPayload || !userPayload.userId) {
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      redirectResponse.cookies.delete('auth-token');
+      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+      return redirectResponse;
+    }
+
+    try {
+      const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
+      const checkResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userPayload.userId })
+      });
+
+      const data = await checkResponse.json();
+
+      // Bloquer si FREE_TRIAL (peu importe expiré ou non)
       if (data.accountType === 'FREE_TRIAL') {
         const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
         Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
