@@ -1,3 +1,4 @@
+// app/api/auth/signup-free/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
@@ -199,7 +200,8 @@ export async function POST(request: NextRequest) {
 
     // ========== CRÉER L'UTILISATEUR ==========
     const now = new Date();
-    const trialEndDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+   const trialEndDate = new Date(now.getTime() + 10 * 60 * 1000);
+
 
     const user = await prisma.user.create({
       data: {
