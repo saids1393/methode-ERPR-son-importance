@@ -529,7 +529,7 @@ export default function DashboardPage() {
         Reprendre où vous vous êtes arrêté
       </h3>
       <span className="text-blue-800 text-sm font-medium mt-2 sm:mt-0">
-        {progressPercentage}% complété
+        {progressPercentage}% progression globale
       </span>
     </div>
 

@@ -238,7 +238,7 @@ export default function DashboardHeader({
                         </Link>
 
                         <Link
-                            href="/chapitres/0/introduction"
+                            href="/chapitres/0/video"
                             className={`${pathname.startsWith("/chapitres") ? "text-gray-900 font-medium border-b-2 border-blue-800" : "text-gray-500 hover:text-gray-900"}`}
                         >
                             Cours

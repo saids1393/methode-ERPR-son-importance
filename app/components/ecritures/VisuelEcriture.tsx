@@ -1,5 +1,5 @@
 import Image from "next/image";
-import visuelEcriture from "@/public/img/visuelEcriture.jpg";
+import visuelEcriture from "@/public/img/EcritureBase.jpeg";
 
 export default function VisuelEcriture() {
   return (

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const ALLOWED_EMAIL_DOMAINS = [
@@ -63,12 +63,53 @@ function sanitizeInput(input: string): string {
     .replace(/[<>"']/g, '');
 }
 
+// ==================== DEVICE FINGERPRINT CLIENT ====================
+async function generateClientDeviceFingerprint(): Promise<string> {
+  const data = {
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    platform: navigator.platform,
+    hardwareConcurrency: navigator.hardwareConcurrency,
+    deviceMemory: (navigator as any).deviceMemory,
+    maxTouchPoints: navigator.maxTouchPoints,
+    screen: {
+      width: window.screen.width,
+      height: window.screen.height,
+      colorDepth: window.screen.colorDepth,
+      pixelDepth: window.screen.pixelDepth,
+    },
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timestamp: Date.now(),
+  };
+
+  const fingerprint = JSON.stringify(data);
+  
+  // Utiliser SubtleCrypto pour le hash
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(fingerprint);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  return hashHex;
+}
+
 export default function SignupFreePage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [deviceFingerprint, setDeviceFingerprint] = useState<string | null>(null);
+
+  // ========== INITIALISER LE DEVICE FINGERPRINT ==========
+  useEffect(() => {
+    generateClientDeviceFingerprint().then(fp => {
+      setDeviceFingerprint(fp);
+      // Stocker localement pour éviter de le régénérer
+      localStorage.setItem('device-fp', fp);
+    });
+  }, []);
 
   const handleEmailChange = useCallback((value: string) => {
     setEmail(value);
@@ -111,6 +152,11 @@ export default function SignupFreePage() {
       return;
     }
 
+    if (!deviceFingerprint) {
+      setError('Erreur de sécurité. Veuillez rafraîchir la page.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -120,7 +166,8 @@ export default function SignupFreePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: cleanEmail
+          email: cleanEmail,
+          deviceFingerprint: deviceFingerprint
         })
       });
 
@@ -140,7 +187,7 @@ export default function SignupFreePage() {
     }
   };
 
-  const isFormValid = email.trim() && !emailError && !loading;
+  const isFormValid = email.trim() && !emailError && !loading && deviceFingerprint !== null;
 
   return (
     <div className="signup-page-dark min-h-screen relative overflow-hidden bg-black">
@@ -215,7 +262,7 @@ export default function SignupFreePage() {
                       type="email"
                       autoComplete="email"
                       required
-                      disabled={loading}
+                      disabled={loading || deviceFingerprint === null}
                       value={email}
                       onChange={(e) => handleEmailChange(e.target.value)}
                       className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
@@ -228,7 +275,6 @@ export default function SignupFreePage() {
                     <p className="mt-2 text-sm text-red-500">{emailError}</p>
                   )}
                 </div>
-
 
                 <div>
                   <button

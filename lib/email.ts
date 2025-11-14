@@ -41,6 +41,336 @@ const getWelcomeGreeting = (username?: string, context: 'welcome' | 'reset' | 'c
 // ----------------------------
 // --- Templates HTML
 // ----------------------------
+
+// Template pour FREE_TRIAL
+const createFreeTrialWelcomeTemplate = (username?: string) => `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenue à votre essai gratuit - Méthode ERPR</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f3f4f6;
+    }
+
+    .wrapper {
+      width: 100%;
+      background: #f3f4f6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+
+    .header {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 48px 32px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.95;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .body {
+      padding: 40px 32px;
+    }
+
+    .greeting {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 24px;
+    }
+
+    .description {
+      font-size: 15px;
+      color: #4b5563;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+
+    .trial-badge {
+      background: #d1fae5;
+      border-left: 4px solid #10b981;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+
+    .trial-badge-title {
+      font-weight: 700;
+      color: #065f46;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .trial-badge-text {
+      font-size: 14px;
+      color: #047857;
+    }
+
+    .features {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .feature {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .feature:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .feature-icon {
+      flex-shrink: 0;
+      font-size: 20px;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .feature-content {
+      flex: 1;
+    }
+
+    .feature-title {
+      font-weight: 600;
+      color: #111827;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .important-note {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+
+    .important-note-title {
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .important-note-text {
+      font-size: 13px;
+      color: #78350f;
+      line-height: 1.6;
+    }
+
+    .cta-section {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      text-decoration: none;
+      padding: 14px 40px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .footer {
+      background: #f9fafb;
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .footer a {
+      color: #10b981;
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 32px 24px;
+      }
+
+      .header h1 {
+        font-size: 26px;
+      }
+
+      .body {
+        padding: 24px;
+      }
+
+      .greeting {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>Bienvenue dans votre essai gratuit</h1>
+        <p>JOUR 1 sur 7</p>
+      </div>
+
+      <!-- Body -->
+      <div class="body">
+        <div class="greeting">
+          ${username ? `Bienvenue, ${username} !` : 'Bienvenue !'} 👋
+        </div>
+
+        <p class="description">
+          Félicitations ! Vous venez de commencer votre premier jour d'essai gratuit avec la Méthode ERPR.
+          Découvrez toutes les fonctionnalités qui vous permettront de progresser rapidement.
+        </p>
+
+        <!-- Trial Badge -->
+        <div class="trial-badge">
+          <div class="trial-badge-title">🎯 Votre essai gratuit de 7 jours commence maintenant</div>
+          <div class="trial-badge-text">Profitez de toutes les fonctionnalités du Chapitre 1 pour tester la méthode</div>
+        </div>
+
+        <!-- Features -->
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">📚</div>
+            <div class="feature-content">
+              <div class="feature-title">Chapitre 1 complet</div>
+              <div class="feature-desc">Accès à toutes les pages du premier chapitre</div>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">🎧</div>
+            <div class="feature-content">
+              <div class="feature-title">Audios dynamiques</div>
+              <div class="feature-desc">Écoutez la prononciation correcte de chaque lettre et mot</div>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">📊</div>
+            <div class="feature-content">
+              <div class="feature-title">Tableau de bord automatisé</div>
+              <div class="feature-desc">Progression en pourcentage et graphiques en temps réel</div>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">✅</div>
+            <div class="feature-content">
+              <div class="feature-title">Leçons complétées</div>
+              <div class="feature-desc">Suivez votre avancement page par page</div>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-content">
+              <div class="feature-title">Quiz interactifs</div>
+              <div class="feature-desc">Testez vos connaissances à la fin du chapitre</div>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="feature-icon">⏱️</div>
+            <div class="feature-content">
+              <div class="feature-title">Chronomètre intégré</div>
+              <div class="feature-desc">Calcule automatiquement le temps passé sur votre cours</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Important Note -->
+        <div class="important-note">
+          <div class="important-note-title">📖 Notice d'utilisation</div>
+          <div class="important-note-text">
+            N'oubliez pas de lire attentivement la notice d'utilisation qui a été mise à votre disposition
+            via le tableau de bord. Elle vous guidera pas à pas dans votre apprentissage.
+          </div>
+        </div>
+
+        <p class="description">
+          <strong>💬 Besoin d'aide ?</strong><br>
+          Un contact support est à votre disposition via le tableau de bord pour toute question ou en cas de problème technique.
+        </p>
+
+        <!-- CTA -->
+        <div class="cta-section">
+          <a href="${BASE_URL}/dashboard" class="cta-button">🚀 C'est parti !</a>
+          <p style="margin-top: 16px; font-size: 13px; color: #6b7280;">À bientôt dans votre espace d'apprentissage</p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>© 2025 Méthode ERPR. Tous droits réservés.</p>
+        <p style="margin-top: 8px;">
+          <a href="${BASE_URL}/notice">Consulter la notice</a> •
+          <a href="${BASE_URL}/contact">Contacter le support</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
+// Template pour PAID_FULL
 const createWelcomeEmailTemplate = (username?: string) => `
 <!DOCTYPE html>
 <html lang="fr">
@@ -364,6 +694,26 @@ const createEmailChangeTemplate = (newEmail: string, confirmationUrl: string) =>
 // ----------------------------
 // --- Email Functions
 // ----------------------------
+
+// Email de bienvenue pour FREE_TRIAL
+export async function sendFreeTrialWelcomeEmail(email: string, username?: string): Promise<boolean> {
+  try {
+    const html = createFreeTrialWelcomeTemplate(username);
+    await transporter.sendMail({
+      from: SENDER_INFO,
+      to: email,
+      subject: `🎯 Bienvenue dans votre essai gratuit - Jour 1/7`,
+      html: juice(html),
+      text: `Bienvenue dans votre essai gratuit ! Découvrez toutes les fonctionnalités : ${BASE_URL}/dashboard`,
+    });
+    return true;
+  } catch (err) {
+    console.error("Erreur sendFreeTrialWelcomeEmail:", err);
+    return false;
+  }
+}
+
+// Email de bienvenue pour PAID_FULL
 export async function sendWelcomeEmail(email: string, username?: string): Promise<boolean> {
   try {
     const html = createWelcomeEmailTemplate(username);

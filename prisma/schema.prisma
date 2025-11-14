@@ -35,8 +35,10 @@ model User {
   trialEndDate      DateTime?
   trialExpired      Boolean          @default(false)
   conversionDate    DateTime?
-  trialDay3EmailSent Boolean         @default(false)  // ✅ SEUL AJOUT
-  trialDay6EmailSent Boolean         @default(false)  // ✅ SEUL AJOUT
+  trialDay3EmailSent Boolean         @default(false) 
+  trialDay6EmailSent Boolean         @default(false)
+  deviceFingerprint String?          @db.VarChar(255)
+  
 
   homeworkSends     HomeworkSend[]
   payments          Payment[]
@@ -46,6 +48,9 @@ model User {
   levelPurchases    LevelPurchase[]
   progressLogs      UserProgressLog[]
   dailySnapshots    DailyProgressSnapshot[]
+
+  @@index([deviceFingerprint])
+  @@index([email, accountType, createdAt])
 }
 
 // -------------------------

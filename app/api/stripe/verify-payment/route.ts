@@ -131,7 +131,22 @@ export async function POST(req: Request) {
     });
 
     // ======= ANTI-DOUBLON EMAIL =======
+    // Email de bienvenue SEULEMENT pour les nouveaux comptes PAID_FULL
     if (isNewAccount) {
+      const claim = await prisma.user.updateMany({
+        where: { id: user.id, welcomeEmailSent: false, accountType: 'PAID_FULL' },
+        data: { welcomeEmailSent: true },
+      });
+
+      if (claim.count === 1) {
+        await sendWelcomeEmail(user.email, user.username || undefined).catch(error => {
+          console.error('❌ Erreur envoi email de bienvenue (payment):', error);
+        });
+      }
+    }
+
+    // ======= EMAIL DE BIENVENUE POUR CONVERSION FREE_TRIAL -> PAID_FULL =======
+    if (wasFreeTrial) {
       const claim = await prisma.user.updateMany({
         where: { id: user.id, welcomeEmailSent: false },
         data: { welcomeEmailSent: true },
@@ -139,7 +154,7 @@ export async function POST(req: Request) {
 
       if (claim.count === 1) {
         await sendWelcomeEmail(user.email, user.username || undefined).catch(error => {
-          console.error('❌ Erreur envoi email de bienvenue (payment):', error);
+          console.error('❌ Erreur envoi email de bienvenue (conversion):', error);
         });
       }
     }

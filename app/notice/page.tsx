@@ -19,7 +19,8 @@ import {
   Zap,
   Award,
   Bell,
-  Menu
+  Menu,
+  Heart
 } from 'lucide-react';
 import DashboardHeader from '@/app/components/DashboardHeader';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
@@ -167,8 +168,12 @@ export default function NoticePage() {
     content: [
       'Vous pouvez demander un accompagnement personnalisé en me contactant via WhatsApp.',
       'Selon la complexité de votre difficulté, vous aurez la possibilité d\'un suivi :',
-      '• Par messages vocaux à horaires fixes pour plus de fluidité',
-      '• Ou même par appel direct'
+      '• Par messages vocaux',
+      '💙 Vous n\'êtes pas seuls ! Au niveau administrateur, je surveille votre progression en temps réel.',
+      '• Vérification que vos devoirs vous sont bien envoyés',
+      '• Suivi de votre progression global',
+      '• Ajustement du rythme si cela avance trop vite',
+      '• À chaque rendu de devoir, un Google Drive personnalisé est créé pour un suivi optimal des points à améliorer'
     ],
     bgColor: 'bg-indigo-50',
     borderColor: 'border-indigo-200',
@@ -198,11 +203,11 @@ export default function NoticePage() {
     icon: <Award className="h-6 w-6 text-teal-600" />,
     content: [
       'À la fin de chaque devoir, vous trouverez les instructions pour le rendu de vos devoirs.',
-      'Le rendu de devoirs se fait via l’onglet accessible sur votre tableau de bord (Dashboard).',
+      'Le rendu de devoirs se fait via l\'onglet accessible sur votre tableau de bord (Dashboard).',
       'Vous pouvez accéder à cette section ici : https://methode-erpr-v1.vercel.app/devoirs',
       'Vous avez la possibilité de rendre votre devoir sous différents formats : PDF, DOCS, ou tout autre fichier.',
       'Vous pouvez également rendre votre devoir en audio 🎧 ou le rédiger directement en texte via le champ intégré.',
-      'Chaque rendu est automatiquement associé au devoir correspondant et stocké dans votre espace personnel.'
+      'Chaque rendu est corrigé puis conservé dans un drive sécurisé auquel vous aurez accès pour assurer un suivi optimal.'
     ],
     bgColor: 'bg-teal-50',
     borderColor: 'border-teal-200',
@@ -281,14 +286,7 @@ export default function NoticePage() {
                 <div className="space-y-3">
                   {item.content.map((text, index) => (
                     <div key={index} className="flex items-start space-x-3">
-                      {text.startsWith('•') ? (
-                        <>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                          <p className="text-gray-700 text-sm leading-relaxed">
-                            {text.substring(2)}
-                          </p>
-                        </>
-                      ) : text.includes('⚠️') ? (
+                      {text.includes('⚠️') ? (
                         <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 w-full">
                           <div className="flex items-start space-x-2">
                             <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
@@ -297,11 +295,20 @@ export default function NoticePage() {
                             </p>
                           </div>
                         </div>
+                      ) : text.includes('💙') ? (
+                        <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 w-full">
+                          <div className="flex items-start space-x-2">
+                            <Heart className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-blue-800 text-sm font-medium">
+                              {text.replace('💙', '').trim()}
+                            </p>
+                          </div>
+                        </div>
                       ) : (
                         <>
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2.5 flex-shrink-0"></div>
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2.5 flex-shrink-0"></div>
                           <p className="text-gray-700 text-sm leading-relaxed">
-                            {text}
+                            {text.startsWith('•') ? text.substring(2) : text}
                           </p>
                         </>
                       )}
@@ -315,7 +322,7 @@ export default function NoticePage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <Headphones className="h-5 w-5 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-700">530+ audios disponibles</span>
+                        <span className="text-sm font-medium text-blue-700">+530 audios disponibles</span>
                       </div>
                       <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
                         Illimité

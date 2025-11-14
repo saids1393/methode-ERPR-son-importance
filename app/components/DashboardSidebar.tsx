@@ -214,27 +214,15 @@ export default function DashboardSidebar({
 
                         {/* Niveaux */}
                         <Link
-                            href={user.accountType === 'FREE_TRIAL' ? "#" : "/niveaux"}
-                            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${user.accountType === 'FREE_TRIAL'
-                                ? "text-gray-400 cursor-not-allowed opacity-60"
-                                : pathname === "/niveaux"
-                                    ? "text-blue-800 bg-blue-100 font-medium"
-                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                            href="/niveaux"
+                            className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${pathname === "/niveaux"
+                                ? "text-blue-800 bg-blue-100 font-medium"
+                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                                 }`}
-                            onClick={(e) => {
-                                if (user.accountType === 'FREE_TRIAL') {
-                                    e.preventDefault();
-                                    handleRestrictedClick('Niveaux');
-                                } else {
-                                    setMobileMenuOpen(false);
-                                }
-                            }}
+                            onClick={() => setMobileMenuOpen(false)}
                         >
                             <BarChart className="h-5 w-5" />
                             <span>Niveaux</span>
-                            {user.accountType === 'FREE_TRIAL' && (
-                                <Lock className="h-4 w-4 ml-auto text-gray-400" />
-                            )}
                         </Link>
                     </nav>
                 </div>

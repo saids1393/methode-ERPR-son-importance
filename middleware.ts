@@ -165,7 +165,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Pages restreintes pour FREE_TRIAL: accompagnement, devoirs, conseil, niveaux
-  const restrictedPaths = ['/accompagnement', '/conseil', '/niveaux'];
+  const restrictedPaths = ['/accompagnement', '/conseil'];
   if (restrictedPaths.includes(pathname)) {
     const userToken = request.cookies.get('auth-token')?.value;
     if (!userToken) {

@@ -129,19 +129,27 @@ export async function POST(req: Request) {
     }
 
     // ======= ANTIDUPLICATION ATOMIQUE =======
-    // On "réserve" l'envoi en mettant welcomeEmailSent = true SEULEMENT si c'était false.
-    const claim = await prisma.user.updateMany({
-      where: { id: updatedUser.id, welcomeEmailSent: false },
-      data: { welcomeEmailSent: true }
+    // Email de bienvenue SEULEMENT pour les utilisateurs PAID_FULL
+    const userWithAccountType = await prisma.user.findUnique({
+      where: { id: updatedUser.id },
+      select: { accountType: true }
     });
 
-    if (claim.count === 1) {
-      // On est le premier à avoir revendiqué => on peut envoyer
-      await sendWelcomeEmail(updatedUser.email, updatedUser.username || undefined).catch(err =>
-        console.error('❌ Erreur envoi email de bienvenue (complete-profile):', err)
-      );
+    if (userWithAccountType?.accountType === 'PAID_FULL') {
+      // On "réserve" l'envoi en mettant welcomeEmailSent = true SEULEMENT si c'était false.
+      const claim = await prisma.user.updateMany({
+        where: { id: updatedUser.id, welcomeEmailSent: false },
+        data: { welcomeEmailSent: true }
+      });
+
+      if (claim.count === 1) {
+        // On est le premier à avoir revendiqué => on peut envoyer
+        await sendWelcomeEmail(updatedUser.email, updatedUser.username || undefined).catch(err =>
+          console.error('❌ Erreur envoi email de bienvenue (complete-profile):', err)
+        );
+      }
+      // Si claim.count === 0 => quelqu'un l'a déjà fait ailleurs (aucun envoi)
     }
-    // Si claim.count === 0 => quelqu'un l'a déjà fait ailleurs (aucun envoi)
 
     secureLog('COMPLETE_PROFILE_SUCCESS', { ip: clientIP, userId: user.id });
 
