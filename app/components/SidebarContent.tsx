@@ -11,6 +11,16 @@ import { useAutoProgress } from "@/hooks/useAutoProgress";
 import { useRouter } from "next/navigation";
 import FreeTrialRestrictionModal from "./FreeTrialRestrictionModal";
 
+interface User {
+  id: string;
+  email: string;
+  username: string | null;
+  gender: 'HOMME' | 'FEMME' | null;
+  isActive: boolean;
+  accountType?: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
+  trialExpired?: boolean;
+}
+
 
 const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<number>) => {
   // Count total pages (excluding only chapter 11 and page 30)
@@ -40,7 +50,7 @@ export default function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState<Record<number, boolean>>({});
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Fonction pour récupérer l'utilisateur avec les restrictions actuelles
