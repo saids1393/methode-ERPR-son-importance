@@ -149,6 +149,8 @@ export async function POST(req: Request) {
         );
       }
       // Si claim.count === 0 => quelqu'un l'a déjà fait ailleurs (aucun envoi)
+
+
     }
 
     secureLog('COMPLETE_PROFILE_SUCCESS', { ip: clientIP, userId: user.id });

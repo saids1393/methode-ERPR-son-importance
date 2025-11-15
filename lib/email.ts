@@ -1519,3 +1519,36 @@ export async function sendFreeTrialDay6Email(email: string, username?: string): 
     return false;
   }
 }
+
+
+// ----------------------------
+// Admin notification for FREE_TRIAL signup
+// ----------------------------
+export async function sendAdminFreeTrialNotification(user: { email: string; createdAt: Date; }): Promise<boolean> {
+  try {
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.SMTP_FROM || process.env.SMTP_USER;
+    if (!adminEmail) return false;
+    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Nouveau essai gratuit</title></head><body style="font-family:Arial,sans-serif;line-height:1.5;color:#111;background:#f9fafb;padding:24px;">
+      <h2 style="margin:0 0 12px 0;">Nouvelle inscription au 7 jours d'essai</h2>
+      <table style="border-collapse:collapse;width:100%;max-width:520px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <tbody>
+          <tr style="background:#10b981;color:#fff;"><td colspan="2" style="padding:12px 16px;font-weight:600;">Détails inscription</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:600;border-bottom:1px solid #f1f5f9;">Email</td><td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;">${user.email}</td></tr>
+          <tr><td style="padding:8px 12px;font-weight:600;">Date inscription</td><td style="padding:8px 12px;">${user.createdAt.toLocaleString('fr-FR')}</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:16px;font-size:12px;color:#64748b;">Email automatique de suivi des essais gratuits.</p>
+    </body></html>`;
+    await transporter.sendMail({
+      from: SENDER_INFO,
+      to: adminEmail,
+      subject: `Nouvelle inscription au 7 jours gratuit`,
+      html: juice(html),
+      text: `Nouveau FREE_TRIAL\nEmail: ${user.email}\nDate: ${user.createdAt.toISOString()}`,
+    });
+    return true;
+  } catch (e) {
+    console.error('Erreur sendAdminFreeTrialNotification:', e);
+    return false;
+  }
+}

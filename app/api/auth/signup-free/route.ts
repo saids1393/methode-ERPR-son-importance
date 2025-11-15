@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '@/lib/auth';
-import { sendFreeTrialWelcomeEmail } from '@/lib/email';
+import { sendFreeTrialWelcomeEmail, sendAdminFreeTrialNotification } from '@/lib/email';
 import { createHash } from 'crypto';
 
 // ==================== VALIDATION D'EMAIL ====================
@@ -227,6 +227,11 @@ export async function POST(request: NextRequest) {
     await sendFreeTrialWelcomeEmail(user.email, user.username || undefined).catch(error => {
       console.error('❌ Erreur envoi email de bienvenue FREE_TRIAL:', error);
     });
+    // ========== NOTIFICATION ADMIN ==========
+    sendAdminFreeTrialNotification({
+      email: user.email,
+      createdAt: user.createdAt,
+    }).catch(err => console.error('❌ Erreur notification admin FREE_TRIAL:', err));
 
     const response = NextResponse.json(
       {
