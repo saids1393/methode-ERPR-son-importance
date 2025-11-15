@@ -39,6 +39,8 @@ async function verifyJWTToken(token: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  console.log('📍 [MIDDLEWARE] Request to:', pathname);
+
   const response = NextResponse.next();
   const securityHeaders = getSecurityHeaders();
   Object.entries(securityHeaders).forEach(([key, value]) => {
@@ -47,19 +49,23 @@ export async function middleware(request: NextRequest) {
 
   const publicPaths = ['/', '/checkout', '/merci', '/login', '/signup-free', '/complete-profile', '/professor/auth', '/testEcriture'];
   if (publicPaths.includes(pathname)) {
+    console.log('✅ [MIDDLEWARE] Public path, allowing');
     return response;
   }
 
   if (pathname.startsWith('/api/stripe') || pathname.startsWith('/api/auth')) {
+    console.log('✅ [MIDDLEWARE] Public API, allowing');
     return response;
   }
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/chapitres')) {
+    console.log('🔒 [MIDDLEWARE] Protected route detected');
     const professorCourseToken = request.cookies.get('professor-course-token')?.value;
     const userToken = request.cookies.get('auth-token')?.value;
     const professorToken = request.cookies.get('professor-token')?.value;
 
     if (professorCourseToken && pathname.startsWith('/chapitres')) {
+      console.log('👨‍🏫 [MIDDLEWARE] Professor token detected');
       const professorPayload = await verifyJWTToken(professorCourseToken);
       if (!professorPayload || professorPayload.role !== 'professor' || !professorPayload.isProfessorMode) {
         const redirectResponse = NextResponse.redirect(new URL('/professor/auth', request.url));
@@ -73,6 +79,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathname.startsWith('/dashboard')) {
+      console.log('📊 [MIDDLEWARE] Dashboard route');
       if (!userToken) {
         if (professorToken) return NextResponse.redirect(new URL('/professor', request.url));
         const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
@@ -91,6 +98,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathname.startsWith('/chapitres')) {
+      console.log('📚 [MIDDLEWARE] Chapitres route');
       if (!userToken) {
         if (professorToken) return NextResponse.redirect(new URL('/professor', request.url));
         const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
@@ -107,13 +115,21 @@ export async function middleware(request: NextRequest) {
       }
 
       const chapitreMatch = pathname.match(/^\/chapitres\/(\d+)(?:\/|$)/);
+      console.log('🔍 [CHAPITRES] Pathname:', pathname);
+      console.log('🔍 [CHAPITRES] Match result:', chapitreMatch);
+      
       if (chapitreMatch && userPayload?.userId) {
         const chapitreNumber = parseInt(chapitreMatch[1], 10);
+        console.log('🔍 [CHAPITRES] Chapitre number:', chapitreNumber);
+        console.log('🔍 [CHAPITRES] User ID:', userPayload.userId);
         
-        // Bloquer chapitres 2-11 pendant les 7 jours du trial, et 0-11 après expiration
-        if (chapitreNumber >= 2 && chapitreNumber <= 11) {
+     if (chapitreNumber >= 0 && chapitreNumber <= 11) {
+          console.log('✅ [CHAPITRES] Chapitre 2-11 detected, calling API...');
           try {
             const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
+            console.log('🔍 [CHAPITRES] API URL:', apiUrl);
+            console.log('🔍 [CHAPITRES] Auth token exists:', !!userToken);
+            
             const checkResponse = await fetch(apiUrl, {
               method: 'POST',
               headers: { 
@@ -123,49 +139,23 @@ export async function middleware(request: NextRequest) {
               body: JSON.stringify({ userId: userPayload.userId })
             });
 
+            console.log('🔍 [CHAPITRES] API Response Status:', checkResponse.status);
             const data = await checkResponse.json();
+            console.log('🔍 [CHAPITRES] API Response Data:', JSON.stringify(data));
             
-            // Bloquer chapitres 2-11 PENDANT le trial (pas expiré)
-            if (data.accountType === 'FREE_TRIAL' && !data.trialExpired) {
+            if (data.accountType === 'FREE_TRIAL' || data.trialExpired) {
+              console.log('🚫 [CHAPITRES] BLOCKING - accountType:', data.accountType, 'trialExpired:', data.trialExpired);
               const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
               Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
               return redirectResponse;
-            }
-            
-            // Bloquer chapitres 2-11 APRES expiration si pas PAID_FULL
-            if (data.accountType === 'FREE_TRIAL' && data.trialExpired && data.accountType !== 'PAID_FULL') {
-              const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-              Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-              return redirectResponse;
+            } else {
+              console.log('✅ [CHAPITRES] ALLOWED - User is PAID_FULL');
             }
           } catch (error) {
-            console.error('Error checking account type:', error);
+            console.error('❌ [CHAPITRES] Error checking account type:', error);
           }
-        }
-
-        // Bloquer chapitres 0-1 SEULEMENT après expiration
-        if ((chapitreNumber === 0 || chapitreNumber === 1) && userPayload?.userId) {
-          try {
-            const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
-            const checkResponse = await fetch(apiUrl, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${userToken}`
-              },
-              body: JSON.stringify({ userId: userPayload.userId })
-            });
-
-            const data = await checkResponse.json();
-            
-            if (data.accountType === 'FREE_TRIAL' && data.trialExpired && data.accountType !== 'PAID_FULL') {
-              const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-              Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-              return redirectResponse;
-            }
-          } catch (error) {
-            console.error('Error checking account type:', error);
-          }
+        } else {
+          console.log('✅ [CHAPITRES] Chapitre 0-1 or 12+, no restriction');
         }
       }
 
@@ -193,21 +183,15 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Vérifier les restrictions pour FREE_TRIAL
-  const needsAccountCheck = pathname.match(/^\/chapitres\/(\d+)(?:\/|$)/) ||
-                            pathname === '/accompagnement' ||
-                            pathname === '/conseil' ||
-                            pathname === '/niveaux' ||
-                            pathname === '/devoirs';
-  
-  if (needsAccountCheck) {
+  const restrictedPaths = ['/accompagnement', '/conseil'];
+  if (restrictedPaths.includes(pathname)) {
+    console.log('🔒 [RESTRICTED] Checking FREE_TRIAL restriction for:', pathname);
     const userToken = request.cookies.get('auth-token')?.value;
     if (!userToken) {
       const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
       Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
       return redirectResponse;
     }
-    
     const userPayload = await verifyJWTToken(userToken);
     if (!userPayload || !userPayload.userId) {
       const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
@@ -220,6 +204,51 @@ export async function middleware(request: NextRequest) {
       const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
       const checkResponse = await fetch(apiUrl, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userPayload.userId })
+      });
+
+      const data = await checkResponse.json();
+      console.log('🔍 [RESTRICTED] API Response:', data);
+      
+      if (data.accountType === 'FREE_TRIAL') {
+        console.log('🚫 [RESTRICTED] BLOCKING - FREE_TRIAL');
+        const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+        Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+        return redirectResponse;
+      }
+    } catch (error) {
+      console.error('Error checking account type:', error);
+    }
+
+    return response;
+  }
+
+  // ✅ NOUVELLE RESTRICTION : APRÈS expiration FREE_TRIAL (trialExpired = true)
+  const postTrialRestrictedMatch = pathname.match(/^\/chapitres\/(0|1|2|3|4|5|6|7|8|9|10|11)(?:\/|$)/) || 
+                                   pathname === '/devoirs' || 
+                                   pathname === '/niveaux';
+  if (postTrialRestrictedMatch) {
+    console.log('🔒 [POST-TRIAL] Checking expired trial restriction for:', pathname);
+    const userToken = request.cookies.get('auth-token')?.value;
+    if (!userToken) {
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+      return redirectResponse;
+    }
+    const userPayload = await verifyJWTToken(userToken);
+    if (!userPayload || !userPayload.userId) {
+      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
+      redirectResponse.cookies.delete('auth-token');
+      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+      return redirectResponse;
+    }
+
+    try {
+      const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
+      console.log('🔍 [POST-TRIAL] Calling API for user:', userPayload.userId);
+      const checkResponse = await fetch(apiUrl, {
+        method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${userToken}`
@@ -228,64 +257,18 @@ export async function middleware(request: NextRequest) {
       });
 
       const data = await checkResponse.json();
+      console.log('🔍 [POST-TRIAL] API Response:', JSON.stringify(data));
       
-      console.log('🔍 MIDDLEWARE - Chemin:', pathname);
-      console.log('🔍 MIDDLEWARE - Type de compte:', data.accountType);
-      console.log('🔍 MIDDLEWARE - Trial expiré:', data.trialExpired);
-      
-      // Si compte payant complet, tout est accessible
-      if (data.accountType === 'PAID_FULL') {
-        console.log('✅ MIDDLEWARE - PAID_FULL: Accès autorisé pour', pathname);
-        return response;
+      if (data.trialExpired && data.accountType !== 'PAID_FULL') {
+        console.log('🚫 [POST-TRIAL] BLOCKING - Trial expired and not paid');
+        const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
+        Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
+        return redirectResponse;
+      } else {
+        console.log('✅ [POST-TRIAL] ALLOWED - User paid or trial active');
       }
-      
-      // Si FREE_TRIAL
-      if (data.accountType === 'FREE_TRIAL') {
-        console.log('🔶 MIDDLEWARE - FREE_TRIAL détecté');
-        // Si trial expiré: bloquer tout sauf dashboard et notice
-        if (data.trialExpired) {
-          console.log('❌ MIDDLEWARE - Trial expiré, redirection vers dashboard');
-          const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-          Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-          return redirectResponse;
-        }
-        
-        // Si trial actif: autoriser chapitres 0 et 1, devoirs, niveaux
-        // Bloquer chapitres 2-11, accompagnement, conseil
-        const chapterMatch = pathname.match(/^\/chapitres\/(\d+)(?:\/|$)/);
-        if (chapterMatch) {
-          const chapterNum = parseInt(chapterMatch[1], 10);
-          if (chapterNum > 1) {
-            console.log('❌ MIDDLEWARE - Chapitre', chapterNum, 'bloqué pendant trial actif');
-            // Chapitres 2-11 bloqués pendant trial actif
-            const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-            Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-            return redirectResponse;
-          }
-        }
-        
-        // Bloquer accompagnement et conseil pendant trial actif
-        if (pathname === '/accompagnement' || pathname === '/conseil') {
-          console.log('❌ MIDDLEWARE - Accompagnement/Conseil bloqué pendant trial actif');
-          const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-          Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-          return redirectResponse;
-        }
-        
-        console.log('✅ MIDDLEWARE - FREE_TRIAL: Accès autorisé pour', pathname);
-        // Devoirs et niveaux sont accessibles pendant trial actif
-        return response;
-      }
-      
-      // Si aucun type de compte reconnu ou autre erreur
-      console.log('❌ MIDDLEWARE - Type de compte non reconnu:', data.accountType);
-      console.log('🔄 MIDDLEWARE - Autorisation par défaut pour:', pathname);
-      return response;
     } catch (error) {
-      console.error('❌ MIDDLEWARE - Erreur lors de la vérification du compte:', error);
-      console.log('🔄 MIDDLEWARE - Autorisation par défaut (erreur API) pour:', pathname);
-      // En cas d'erreur API, autoriser l'accès par défaut
-      // L'utilisateur sera géré au niveau de la page
+      console.error('❌ [POST-TRIAL] Error checking account type:', error);
     }
 
     return response;

@@ -2,30 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUserFromRequest } from '@/lib/auth';
 import { checkFreeTrialAccess } from '@/lib/free-trial-access';
 
+// API DEPRECATED - Utilisez /api/auth/get-user à la place
+// Cette API était problématique car elle mettait à jour trialExpired automatiquement
 export async function GET(request: NextRequest) {
-  try {
-    const user = await getAuthUserFromRequest(request);
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Non autorisé' },
-        { status: 401 }
-      );
-    }
-
-    const accessInfo = await checkFreeTrialAccess(user.id);
-
-    return NextResponse.json({
-      hasAccess: accessInfo.hasAccess,
-      isFreeTrial: accessInfo.isFreeTrial,
-      daysLeft: accessInfo.daysLeft,
-      reason: accessInfo.reason
-    });
-  } catch (error) {
-    console.error('Check trial access error:', error);
-    return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    { error: 'API deprecated. Use /api/auth/get-user instead' },
+    { status: 410 } // Gone
+  );
 }

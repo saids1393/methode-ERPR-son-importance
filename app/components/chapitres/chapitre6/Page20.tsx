@@ -99,11 +99,36 @@ const words = [
   "غَوْ", "غَيْ",
 ];
 
-const playLetterAudio = (word: string) => {
+// === 📖 Fonction audio globale avec contrôle ===
+let globalCurrentAudio: HTMLAudioElement | null = null;
+
+const playLetterAudio = (word: string, setActiveWord: (word: string) => void) => {
+  // ✅ Arrêter l'audio précédent s'il existe
+  if (globalCurrentAudio) {
+    globalCurrentAudio.pause();
+    globalCurrentAudio.currentTime = 0;
+  }
+  
+  // ✅ Mettre à jour l'état visuel
+  setActiveWord(word);
+  
   const audioFileName = chapter6Page20AudioMappings[word];
   if (audioFileName) {
     const audio = new Audio(`/audio/chapitre6/${audioFileName}.mp3`);
-    audio.play().catch((err) => console.error("Erreur audio:", err));
+    
+    // ✅ Gérer la fin de l'audio
+    audio.addEventListener('ended', () => {
+      globalCurrentAudio = null;
+      // Garder le mot actif pour le clignotant
+    });
+    
+    // ✅ Mettre à jour la référence et jouer
+    globalCurrentAudio = audio;
+    audio.play().catch((err) => {
+      console.error("Erreur audio:", err);
+      globalCurrentAudio = null;
+      // Garder le mot actif pour le clignotant
+    });
   }
 };
 
@@ -189,9 +214,15 @@ const IntroductionPage = () => (
 );
 
 // === 🧱 Diphthong Card ===
-const DiphthongCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
+const DiphthongCard = ({ word, onClick, isActive }: { 
+  word: string; 
+  onClick?: () => void; 
+  isActive?: boolean;
+}) => (
   <div
-    className="bg-gray-800 border border-zinc-500 rounded-xl p-3 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[120px] flex items-center justify-center cursor-pointer"
+    className={`bg-gray-800 border border-zinc-500 rounded-xl p-3 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[120px] flex items-center justify-center cursor-pointer ${
+      isActive ? 'pulse-active' : ''
+    }`}
     onClick={onClick}
   >
     <div
@@ -206,12 +237,20 @@ const DiphthongCard = ({ word, onClick }: { word: string; onClick?: () => void }
 );
 
 // === 📖 Exercise Page ===
-const ExercisePage = () => (
+const ExercisePage = ({ playLetterAudio, activeWord }: { 
+  playLetterAudio: (word: string, index: number) => void;
+  activeWord: string;
+}) => (
   <div className="p-4 md:p-8 bg-gray-900" dir="rtl">
     <div className="max-w-6xl mx-auto">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
         {words.map((word, index) => (
-          <DiphthongCard key={index} word={word} onClick={() => playLetterAudio(word)} />
+          <DiphthongCard 
+            key={index} 
+            word={word} 
+            onClick={() => playLetterAudio(word, index)} 
+            isActive={activeWord === word}
+          />
         ))}
       </div>
     </div>
@@ -229,7 +268,12 @@ const ExercisePage = () => (
 // === 📖 Main Component ===
 const Page20 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeWord, setActiveWord] = useState("بَوْ"); // Premier mot actif par défaut
   const totalPages = 2;
+
+  const handlePlayAudio = (word: string, index: number = 0) => {
+    playLetterAudio(word, setActiveWord);
+  };
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
@@ -277,7 +321,7 @@ const Page20 = () => {
         </button>
       </div>
 
-      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage />}
+      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage playLetterAudio={handlePlayAudio} activeWord={activeWord} />}
     </div>
   );
 };

@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
     if (recentFreeTrialAccounts.length > 0) {
       return NextResponse.json(
         { 
-          error: 'Vous avez déjà bénéficié d’un essai gratuit. Veuillez passer à un compte payant pour continuer.'
+          error: "Vous avez déjà bénéficié d'un essai gratuit. Veuillez passer à un compte payant pour continuer."
         },
         { status: 400 }
       );
@@ -200,8 +200,7 @@ export async function POST(request: NextRequest) {
 
     // ========== CRÉER L'UTILISATEUR ==========
     const now = new Date();
-   const trialEndDate = new Date(now.getTime() + 10 * 60 * 1000);
-
+    const trialEndDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 jours
 
     const user = await prisma.user.create({
       data: {

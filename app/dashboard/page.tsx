@@ -67,7 +67,13 @@ export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');
   const [homeworkSends, setHomeworkSends] = useState<HomeworkSend[]>([]);
   const [homeworkLoading, setHomeworkLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  // Fix hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {
     completedPages,
@@ -229,12 +235,187 @@ export default function DashboardPage() {
     refreshTime();
   }, [refreshTime]);
 
-  if (loading) {
+  if (!mounted || loading || progressLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mx-auto mb-6"></div>
-          <p className="text-gray-600 text-lg font-medium">Chargement de votre espace...</p>
+      <div className="min-h-screen bg-gray-50">
+        {/* Sidebar Skeleton */}
+        <div className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-30 lg:translate-x-0 -translate-x-full lg:block hidden">
+          <div className="p-6">
+            {/* Logo skeleton */}
+            <div className="flex items-center space-x-1 mb-8">
+              <div className="w-10 h-10 rounded-lg bg-gray-200 animate-pulse"></div>
+              <div className="h-6 w-32 bg-gray-200 animate-pulse rounded"></div>
+            </div>
+
+            {/* Search skeleton */}
+            <div className="relative mb-8">
+              <div className="h-10 bg-gray-100 rounded-lg animate-pulse"></div>
+            </div>
+
+            {/* Menu items skeleton */}
+            {[1, 2, 3, 4, 5].map((item) => (
+              <div key={item} className="flex items-center space-x-3 px-3 py-2 rounded-lg mb-2">
+                <div className="w-5 h-5 bg-gray-200 animate-pulse rounded"></div>
+                <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="lg:ml-64">
+          {/* Header Skeleton */}
+          <header className="bg-white border-b border-gray-200">
+            <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="lg:hidden w-6 h-6 bg-gray-200 animate-pulse rounded"></div>
+                <div className="h-8 w-48 bg-gray-200 animate-pulse rounded"></div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="w-8 h-8 bg-gray-200 animate-pulse rounded-full"></div>
+                <div className="w-8 h-8 bg-gray-200 animate-pulse rounded-full"></div>
+                <div className="w-8 h-8 bg-gray-200 animate-pulse rounded-full"></div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Dashboard Content */}
+          <main className="p-4 lg:p-8">
+            {/* Welcome Section Skeleton */}
+            <div className="mb-8">
+              <div className="h-8 w-64 bg-gray-200 animate-pulse rounded mb-2"></div>
+              <div className="h-5 w-96 bg-gray-200 animate-pulse rounded"></div>
+            </div>
+
+            {/* Stats Cards Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+              {[1, 2, 3, 4].map((card) => (
+                <div key={card} className="bg-white rounded-xl p-6 border border-gray-200">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gray-200 animate-pulse rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="h-4 w-24 bg-gray-200 animate-pulse rounded mb-2"></div>
+                      <div className="h-8 w-16 bg-gray-200 animate-pulse rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Main Content Grid Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+              {/* Progress Section Skeleton */}
+              <div className="lg:col-span-2">
+                {/* Progress Chart Skeleton */}
+                <div className="bg-white rounded-xl p-6 border border-gray-200 mb-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <div className="h-6 w-32 bg-gray-200 animate-pulse rounded mb-2"></div>
+                      <div className="h-4 w-48 bg-gray-200 animate-pulse rounded"></div>
+                    </div>
+                    <div className="h-8 w-32 bg-gray-200 animate-pulse rounded"></div>
+                  </div>
+
+                  {/* Chart Skeleton */}
+                  <div className="relative h-64">
+                    <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs pr-4">
+                      {[1, 2, 3, 4, 5].map((item) => (
+                        <div key={item} className="w-6 h-3 bg-gray-200 animate-pulse rounded"></div>
+                      ))}
+                    </div>
+                    <div className="ml-8 h-full flex items-end justify-between space-x-2">
+                      {[
+                        { height: '140px' },
+                        { height: '80px' },
+                        { height: '160px' },
+                        { height: '100px' },
+                        { height: '120px' },
+                        { height: '180px' },
+                        { height: '60px' }
+                      ].map((bar, index) => (
+                        <div key={index} className="flex flex-col items-center space-y-2">
+                          <div 
+                            className="w-8 bg-gray-200 animate-pulse rounded-t-lg"
+                            style={{ height: bar.height }}
+                          ></div>
+                          <div className="w-8 h-3 bg-gray-200 animate-pulse rounded"></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex justify-between items-center">
+                    <div className="h-4 w-48 bg-gray-200 animate-pulse rounded"></div>
+                  </div>
+                </div>
+
+                {/* Resume Section Skeleton */}
+                <div className="bg-white rounded-xl p-6 border border-gray-200">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="h-6 w-64 bg-gray-200 animate-pulse rounded"></div>
+                    <div className="h-4 w-24 bg-gray-200 animate-pulse rounded"></div>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <div className="w-12 h-12 bg-gray-300 animate-pulse rounded-xl"></div>
+                        <div className="flex-1">
+                          <div className="h-5 w-48 bg-gray-300 animate-pulse rounded mb-2"></div>
+                          <div className="h-4 w-32 bg-gray-300 animate-pulse rounded"></div>
+                        </div>
+                      </div>
+                      <div className="h-12 w-28 bg-gray-300 animate-pulse rounded-lg"></div>
+                    </div>
+
+                    <div className="mt-6">
+                      <div className="flex justify-between mb-2">
+                        <div className="h-3 w-32 bg-gray-300 animate-pulse rounded"></div>
+                        <div className="h-3 w-8 bg-gray-300 animate-pulse rounded"></div>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 rounded-full">
+                        <div className="h-2 bg-gray-300 animate-pulse rounded-full w-1/3"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Sidebar Skeleton */}
+              <div className="space-y-6">
+                {/* Homework Section Skeleton */}
+                <div className="bg-white rounded-xl p-6 border border-gray-200">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="h-6 w-32 bg-gray-200 animate-pulse rounded"></div>
+                    <div className="h-4 w-16 bg-gray-200 animate-pulse rounded"></div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4, 5].map((homework) => (
+                      <div key={homework} className="flex items-center justify-between py-2 px-2 rounded-lg">
+                        <div className="flex items-center space-x-3 flex-1">
+                          <div className="w-2 h-2 bg-gray-200 animate-pulse rounded-full"></div>
+                          <div className="flex-1">
+                            <div className="h-4 w-32 bg-gray-200 animate-pulse rounded mb-1"></div>
+                            <div className="h-3 w-48 bg-gray-200 animate-pulse rounded"></div>
+                          </div>
+                        </div>
+                        <div className="w-6 h-6 bg-gray-200 animate-pulse rounded-full"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Loading indicator */}
+            <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 border border-gray-200">
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-blue-600"></div>
+                <span className="text-sm text-gray-600">Chargement de votre dashboard...</span>
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -252,7 +433,6 @@ export default function DashboardPage() {
       <DashboardSidebar
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-        user={user!}
       />
 
       {/* Mobile Menu Overlay */}

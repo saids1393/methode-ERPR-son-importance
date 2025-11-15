@@ -77,45 +77,45 @@ export default function FreeTrialRestrictionModal({
           </div>
 
           <h3 className="text-2xl font-bold text-white text-center mb-3">
-            Contenu verrouillé
+            Accès premium requis
           </h3>
 
           <p className="text-gray-300 text-center mb-2">
-            L'accès à {contentName} est réservé aux membres premium.
-          </p>
-
-          <p className="text-sm text-gray-400 text-center mb-6">
-            Votre essai gratuit vous donne accès uniquement au chapitre 1.
+            L'accès "{contentName}" est réservé aux membres premium.
           </p>
 
           <div className="bg-gray-800/50 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-300 text-center mb-3">
-              Débloquez tous les chapitres avec l'accès complet :
+              Débloquez tout avec l’accès premium :
             </p>
+
             <ul className="space-y-2 text-sm text-gray-400">
               <li className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Accès à vie à tous les chapitres</span>
+                <span>Déblocage de tous les chapitres</span>
               </li>
+
               <li className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Vidéos et audios explicatifs</span>
+                <span>Suivi & accompagnement A → Z + suivi de vos progressions</span>
               </li>
+
               <li className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Quiz et exercices interactifs</span>
+                <span>Corrections de tous vos devoirs (dès le chapitre 2)</span>
               </li>
+
               <li className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Support et accompagnement</span>
+                <span>Paiement possible en 2x + code promo <b>ERPR15</b></span>
               </li>
             </ul>
           </div>
@@ -125,13 +125,14 @@ export default function FreeTrialRestrictionModal({
               onClick={handleUpgrade}
               className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
             >
-              Passer à l'accès complet
+              Accédez à l'offre premium
             </button>
+
             <button
               onClick={onClose}
               className="w-full py-3 px-6 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-lg transition-colors"
             >
-              Continuer avec le chapitre 1
+              Retour
             </button>
           </div>
         </div>

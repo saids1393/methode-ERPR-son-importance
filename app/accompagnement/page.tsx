@@ -47,12 +47,27 @@ export default function AccompagnementPage() {
       if (response.ok) {
         const userData = await response.json();
         setUser(userData);
+        
+        // 🔍 Vérifier si l'utilisateur a accès
+        if (userData.accountType === 'FREE_TRIAL' && userData.trialExpired) {
+          // Si trial expiré, rediriger vers dashboard
+          router.push('/dashboard');
+          return;
+        }
+        
+        // Si pas de compte payant et trial actif, bloquer
+        if (userData.accountType === 'FREE_TRIAL' && !userData.trialExpired) {
+          router.push('/dashboard');
+          return;
+        }
+        
       } else {
-        router.push('/checkout');
+        // Si pas authentifié, rediriger vers login
+        router.push('/login');
       }
     } catch (error) {
       console.error('Erreur auth:', error);
-      router.push('/checkout');
+      router.push('/login');
     } finally {
       setLoading(false);
     }

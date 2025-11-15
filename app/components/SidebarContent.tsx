@@ -40,9 +40,59 @@ export default function SidebarContent() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState<Record<number, boolean>>({});
-  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
-  const [restrictedChapterName, setRestrictedChapterName] = useState('');
-  const [isFreeTrial, setIsFreeTrial] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fonction pour récupérer l'utilisateur avec les restrictions actuelles
+  const fetchUser = async () => {
+    try {
+      const res = await fetch('/api/auth/get-user', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        }
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          setUser(data.user);
+          console.log('✅ User fetched in SidebarContent:', {
+            email: data.user.email,
+            accountType: data.user.accountType,
+            trialExpired: data.user.trialExpired,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération de l\'utilisateur:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fonction pour vérifier si un chapitre est verrouillé
+  const isChapterLocked = (chapterNumber) => {
+    if (!user) return false;
+    
+    // Si compte payant complet, rien n'est verrouillé
+    if (user.accountType === 'PAID_FULL') return false;
+    
+    // Si FREE_TRIAL
+    if (user.accountType === 'FREE_TRIAL') {
+      // Si trial expiré: tout verrouillé sauf chapitres 0 et notice (mais on est pas sur notice ici)
+      if (user.trialExpired) {
+        return true; // Tous les chapitres verrouillés après expiration
+      }
+      
+      // Si trial actif: chapitres 2-11 verrouillés, 0-1 accessibles
+      return chapterNumber > 1;
+    }
+    
+    return false;
+  };
 
   const {
     completedPages,
@@ -95,23 +145,44 @@ export default function SidebarContent() {
     return pagesCompleted && quizCompleted;
   }, [completedPages, completedQuizzes]);
 
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
+  const [restrictedChapterName, setRestrictedChapterName] = useState('');
+
   useEffect(() => {
-    const checkTrialStatus = async () => {
-      try {
-        const response = await fetch('/api/auth/check-trial-access');
-        if (response.ok) {
-          const data = await response.json();
-          setIsFreeTrial(data.isFreeTrial && data.hasAccess);
-        }
-      } catch (error) {
-        console.error('Error checking trial status:', error);
-      }
-    };
-    checkTrialStatus();
+    fetchUser();
   }, []);
 
+  // Mettre à jour à chaque focus (tab switch, reconnexion)
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('🔄 SidebarContent focus - Rafraîchissement utilisateur');
+      fetchUser();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('🔄 SidebarContent tab visible - Rafraîchissement utilisateur');
+        fetchUser();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Mettre à jour aussi quand le pathname change (navigation)
+  useEffect(() => {
+    console.log('🔄 SidebarContent pathname changed - Rafraîchissement utilisateur');
+    fetchUser();
+  }, [pathname]);
+
   const handleChapterClick = (chapterNumber: number, chapterTitle: string) => {
-    if (isFreeTrial && chapterNumber > 1) {
+    if (isChapterLocked(chapterNumber)) {
       setRestrictedChapterName(`Chapitre ${chapterNumber} - ${chapterTitle}`);
       setShowRestrictionModal(true);
     } else {
@@ -261,7 +332,7 @@ export default function SidebarContent() {
         <ul className="space-y-1 px-3">
           {chapters.map((chapter) => {
             const chapterComplete = isChapterCompleted(chapter);
-            const isLocked = isFreeTrial && chapter.chapterNumber > 1;
+            const isLocked = isChapterLocked(chapter.chapterNumber);
             return (
               <li key={chapter.chapterNumber} className="rounded-lg">
                 <button
@@ -273,7 +344,7 @@ export default function SidebarContent() {
                   } ${chapterComplete && !isProfessorMode ? '!text-blue-400' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`font-bold ${isLocked ? 'blur-xs' : ''}`}>
+                    <span className={`font-bold ${isLocked ? 'blur-sm opacity-75' : ''}`}>
                       {chapter.chapterNumber === 0 ? 'Phase préparatoire' : `${chapter.chapterNumber}.`} {chapter.title}
                     </span>
                   </div>

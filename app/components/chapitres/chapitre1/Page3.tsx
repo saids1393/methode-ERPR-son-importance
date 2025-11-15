@@ -224,14 +224,33 @@ const AlphabetPage = ({ playLetterAudio, activeIndex, setActiveIndex }: {
 const Page3 = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
+  // ✅ Référence audio globale pour contrôler la lecture
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const totalPages = 2;
 
   const playLetterAudio = (letter: string) => {
+    // ✅ Arrêter l'audio précédent s'il existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    
     const audioFileName = chapter1Page3AudioMappings[letter];
     if (audioFileName) {
       const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
+      
+      // ✅ Gérer la fin de l'audio
+      audio.addEventListener('ended', () => {
+        setCurrentAudio(null);
+        setActiveIndex(0);
+      });
+      
+      // ✅ Mettre à jour la référence et jouer
+      setCurrentAudio(audio);
       audio.play().catch(error => {
         console.error('Erreur lors de la lecture audio:', error);
+        setCurrentAudio(null);
+        setActiveIndex(0);
       });
     }
   };

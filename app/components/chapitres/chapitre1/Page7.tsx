@@ -94,7 +94,11 @@ const IntroductionPage = () => {
   );
 };
 
-const ExercisePage = ({ playLetterAudio }: { playLetterAudio: (letter: string) => void }) => {
+const ExercisePage = ({ playLetterAudio, activeIndex, setActiveIndex }: { 
+  playLetterAudio: (letter: string, index: number) => void;
+  activeIndex: number;
+  setActiveIndex: (index: number) => void;
+}) => {
   const hurufMuqattaah = [
     // Row 1
     'الٓمٓ',
@@ -128,8 +132,10 @@ const ExercisePage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
           return (
             <div
               key={index}
-              className="bg-gray-900 border border-zinc-500 rounded-xl p-4 text-center min-h-[120px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer"
-              onClick={() => playLetterAudio(letters)}
+              className={`bg-gray-900 border border-zinc-500 rounded-xl p-4 text-center min-h-[120px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer ${
+                activeIndex === index ? 'pulse-active' : ''
+              }`}
+              onClick={() => playLetterAudio(letters, index)}
             >
               <div className={`text-4xl md:text-5xl font-bold transition-colors ${colorClass}`}>
                 {letters}
@@ -161,14 +167,37 @@ const ExercisePage = ({ playLetterAudio }: { playLetterAudio: (letter: string) =
 
 const Page7 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0); // Première lettre active par défaut
+  // ✅ Référence audio globale pour contrôler la lecture
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const totalPages = 2;
 
-  const playLetterAudio = (letter: string) => {
+  const playLetterAudio = (letter: string, index: number = 0) => {
+    // ✅ Arrêter l'audio précédent s'il existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    
+    // ✅ Mettre à jour l'état visuel
+    setActiveIndex(index);
+    
     const audioFileName = chapterPage7AudioMappings[letter];
     if (audioFileName) {
       const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
+      
+      // ✅ Gérer la fin de l'audio
+      audio.addEventListener('ended', () => {
+        setCurrentAudio(null);
+        // Garder la lettre active pour le clignotant
+      });
+      
+      // ✅ Mettre à jour la référence et jouer
+      setCurrentAudio(audio);
       audio.play().catch(error => {
         console.error('Erreur lors de la lecture audio:', error);
+        setCurrentAudio(null);
+        // Garder la lettre active pour le clignotant
       });
     }
   };
@@ -239,7 +268,7 @@ const Page7 = () => {
 
         {/* Content */}
         {currentPage === 0 && <IntroductionPage />}
-        {currentPage === 1 && <ExercisePage playLetterAudio={playLetterAudio} />}
+        {currentPage === 1 && <ExercisePage playLetterAudio={playLetterAudio} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />}
       </div>
     </div>
   );

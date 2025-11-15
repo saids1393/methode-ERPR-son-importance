@@ -16,12 +16,14 @@ export async function GET(request: NextRequest) {
 
     const now = new Date();
 
+    // Trouver les trials qui ont EXACTEMENT 7 jours ou plus
+    // et qui ne sont pas encore expirés
     const expiredTrials = await prisma.user.updateMany({
       where: {
         accountType: 'FREE_TRIAL',
         trialExpired: false,
         trialEndDate: {
-          lt: now
+          lte: now // Seulement si trialEndDate <= maintenant
         }
       },
       data: {
@@ -29,15 +31,16 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    console.log(`Expired ${expiredTrials.count} free trials`);
+    console.log(`✅ CRON: Expiré ${expiredTrials.count} essais gratuits de 7+ jours`);
 
     return NextResponse.json({
       success: true,
       expired: expiredTrials.count,
-      timestamp: now.toISOString()
+      timestamp: now.toISOString(),
+      message: `${expiredTrials.count} trials expirés après 7+ jours`
     });
   } catch (error) {
-    console.error('Expire free trials cron error:', error);
+    console.error('❌ CRON: Erreur expire-free-trials:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

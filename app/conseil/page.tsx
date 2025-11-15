@@ -51,12 +51,27 @@ export default function ConseilsPage() {
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
+          
+          // 🔍 Vérifier si l'utilisateur a accès
+          if (userData.accountType === 'FREE_TRIAL' && userData.trialExpired) {
+            // Si trial expiré, rediriger vers dashboard
+            window.location.replace('/dashboard');
+            return;
+          }
+          
+          // Si pas de compte payant et trial actif, bloquer
+          if (userData.accountType === 'FREE_TRIAL' && !userData.trialExpired) {
+            window.location.replace('/dashboard');
+            return;
+          }
+          
         } else {
-          window.location.replace('/checkout');
+          // Si pas authentifié, rediriger vers login
+          window.location.replace('/login');
         }
       } catch (error) {
         console.error('Auth check error:', error);
-        window.location.replace('/checkout');
+        window.location.replace('/login');
       } finally {
         setLoading(false);
       }

@@ -43,13 +43,7 @@ const words = [
   "زَمَنٌ",
 ];
 
-const playWordAudio = (word: string) => {
-  const audioFileName = chapter5Page17AudioMappings[word];
-  if (audioFileName) {
-    const audio = new Audio(`/audio/chapitre5/${audioFileName}.mp3`);
-    audio.play().catch((err) => console.error("Erreur audio:", err));
-  }
-};
+
 
 // === 📘 Introduction ===
 const IntroductionPage = () => (
@@ -141,9 +135,11 @@ const IntroductionPage = () => (
 );
 
 // === 🧱 Carte de mot ===
-const WordCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
+const WordCard = ({ word, onClick, isActive }: { word: string; onClick?: () => void; isActive?: boolean }) => (
   <div
-    className="bg-gray-800 border border-zinc-500 rounded-xl p-4 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[100px] flex items-center justify-center cursor-pointer"
+    className={`bg-gray-800 border border-zinc-500 rounded-xl p-4 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[100px] flex items-center justify-center cursor-pointer ${
+      isActive ? 'pulse-active' : ''
+    }`}
     onClick={onClick}
   >
     <div
@@ -157,12 +153,20 @@ const WordCard = ({ word, onClick }: { word: string; onClick?: () => void }) => 
   </div>
 );
 
-const ExercisePage = () => (
+const ExercisePage = ({ playWordAudio, activeWord }: { 
+  playWordAudio: (word: string, index: number) => void;
+  activeWord: string;
+}) => (
   <div className="p-4 md:p-8 bg-gray-900">
     <div className="max-w-6xl mx-auto">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
         {words.map((word, idx) => (
-          <WordCard key={idx} word={word} onClick={() => playWordAudio(word)} />
+          <WordCard 
+            key={idx} 
+            word={word} 
+            onClick={() => playWordAudio(word, idx)} 
+            isActive={activeWord === word}
+          />
         ))}
       </div>
     </div>
@@ -180,7 +184,40 @@ const ExercisePage = () => (
 // === 📖 Composant principal ===
 const Page17 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeWord, setActiveWord] = useState("وَرَقٌ"); // Premier mot actif par défaut
+  // ✅ Référence audio globale pour contrôler la lecture
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const totalPages = 2;
+
+  const playWordAudio = (word: string, index: number = 0) => {
+    // ✅ Arrêter l'audio précédent s'il existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    
+    // ✅ Mettre à jour l'état visuel
+    setActiveWord(word);
+    
+    const audioFileName = chapter5Page17AudioMappings[word];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre5/${audioFileName}.mp3`);
+      
+      // ✅ Gérer la fin de l'audio
+      audio.addEventListener('ended', () => {
+        setCurrentAudio(null);
+        // Garder le mot actif pour le clignotant
+      });
+      
+      // ✅ Mettre à jour la référence et jouer
+      setCurrentAudio(audio);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+        setCurrentAudio(null);
+        // Garder le mot actif pour le clignotant
+      });
+    }
+  };
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
@@ -228,7 +265,7 @@ const Page17 = () => {
         </button>
       </div>
 
-      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage />}
+      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage playWordAudio={playWordAudio} activeWord={activeWord} />}
     </div>
   );
 };

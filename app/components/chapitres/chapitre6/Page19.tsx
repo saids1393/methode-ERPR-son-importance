@@ -46,16 +46,7 @@ const letterData = [
   { letter: "غُ", specialSign: "ۥ", keyForAudio: "غُـو", signType: "waw", position: "bottom", letterStyle: "relative top-[1px] right-[-10px]" },
 ];
 
-// 🎧 Lecture audio (basée sur la clé de Page 18)
-const playLetterAudio = (audioKey: string) => {
-  const audioFileName = chapter6Page19AudioMappings[audioKey];
-  if (audioFileName) {
-    const audio = new Audio(`/audio/chapitre6/${audioFileName}.mp3`);
-    audio.play().catch((err) => console.error("Erreur audio:", err));
-  } else {
-    console.warn("Aucun fichier audio trouvé pour", audioKey);
-  }
-};
+
 
 // === 🧱 Composant visuel de lettre ===
 const SpecialLetterCard = ({
@@ -65,6 +56,7 @@ const SpecialLetterCard = ({
   position,
   letterStyle,
   onClick,
+  isActive,
 }: {
   letter: string;
   specialSign: string;
@@ -72,6 +64,7 @@ const SpecialLetterCard = ({
   position: string;
   letterStyle?: string;
   onClick?: () => void;
+  isActive?: boolean;
 }) => {
   const getSignColor = (type: string) => {
     switch (type) {
@@ -97,7 +90,9 @@ const SpecialLetterCard = ({
 
   return (
     <div
-      className="bg-gray-800 border border-zinc-500 rounded-xl p-4 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[110px] flex items-center justify-center relative cursor-pointer"
+      className={`bg-gray-800 border border-zinc-500 rounded-xl p-4 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[110px] flex items-center justify-center relative cursor-pointer ${
+        isActive ? 'pulse-active' : ''
+      }`}
       onClick={onClick}
     >
       <div className="relative">
@@ -113,7 +108,10 @@ const SpecialLetterCard = ({
 };
 
 // === 📖 Page d’exercices ===
-const ExercisePage = () => (
+const ExercisePage = ({ playLetterAudio, activeAudio }: { 
+  playLetterAudio: (audioKey: string, index: number) => void;
+  activeAudio: string;
+}) => (
   <div className="p-4 md:p-8 bg-gray-900" dir="rtl">
     <div className="max-w-6xl mx-auto">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
@@ -125,7 +123,8 @@ const ExercisePage = () => (
             signType={item.signType}
             position={item.position}
             letterStyle={item.letterStyle}
-            onClick={() => playLetterAudio(item.keyForAudio)}
+            onClick={() => playLetterAudio(item.keyForAudio, index)}
+            isActive={activeAudio === item.keyForAudio}
           />
         ))}
       </div>
@@ -174,7 +173,42 @@ const IntroductionPage = () => (
 // === 📖 Composant principal ===
 const Page19 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeAudio, setActiveAudio] = useState("بَـا"); // Premier audio actif par défaut
+  // ✅ Référence audio globale pour contrôler la lecture
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const totalPages = 2;
+
+  const playLetterAudio = (audioKey: string, index: number = 0) => {
+    // ✅ Arrêter l'audio précédent s'il existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    
+    // ✅ Mettre à jour l'état visuel
+    setActiveAudio(audioKey);
+    
+    const audioFileName = chapter6Page19AudioMappings[audioKey];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre6/${audioFileName}.mp3`);
+      
+      // ✅ Gérer la fin de l'audio
+      audio.addEventListener('ended', () => {
+        setCurrentAudio(null);
+        // Garder l'audio actif pour le clignotant
+      });
+      
+      // ✅ Mettre à jour la référence et jouer
+      setCurrentAudio(audio);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+        setCurrentAudio(null);
+        // Garder l'audio actif pour le clignotant
+      });
+    } else {
+      console.warn("Aucun fichier audio trouvé pour", audioKey);
+    }
+  };
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
       <div className="text-white p-4 md:p-6 text-center border-b-2">
@@ -221,7 +255,7 @@ const Page19 = () => {
         </button>
       </div>
 
-      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage />}
+      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage playLetterAudio={playLetterAudio} activeAudio={activeAudio} />}
     </div>
   );
 };

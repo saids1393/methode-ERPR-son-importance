@@ -23,14 +23,6 @@ const disconnectedLetters = [
   { letter: "و", example: "خَوْفٌ", meaning: "peur" },
 ];
 
-const playLetterAudio = (word: string) => {
-  const audioFileName = chapter4Page16AudioMappings[word];
-  if (audioFileName) {
-    const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
-    audio.play().catch((err) => console.error("Erreur audio:", err));
-  }
-};
-
 // === 📘 Introduction ===
 const IntroductionPage = () => (
   <div className="p-4 md:p-8 bg-gray-900">
@@ -114,11 +106,13 @@ const DisconnectedLetterCard = ({
   example,
   meaning,
   onClick,
+  isActive,
 }: {
   letter: string;
   example: string;
   meaning: string;
-  onClick?: (word: string) => void;
+  onClick?: (word: string, index: number) => void;
+  isActive?: boolean;
 }) => (
   <div className="bg-gray-800 border border-zinc-500 rounded-xl p-6 text-center hover:bg-gray-700 transition-all duration-300 group">
     <div className="text-5xl md:text-6xl font-bold text-red-400 mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -126,8 +120,10 @@ const DisconnectedLetterCard = ({
     </div>
     <div className="w-full h-px bg-zinc-600 mb-4"></div>
     <div
-      className="text-3xl md:text-4xl font-bold text-white mb-3 leading-relaxed cursor-pointer hover:text-blue-300 transition-colors"
-      onClick={() => onClick?.(example)}
+      className={`text-3xl md:text-4xl font-bold text-white mb-3 leading-relaxed cursor-pointer hover:text-blue-300 transition-colors ${
+        isActive ? 'pulse-active' : ''
+      }`}
+      onClick={() => onClick?.(example, disconnectedLetters.findIndex(item => item.example === example))}
     >
       {example}
     </div>
@@ -138,7 +134,10 @@ const DisconnectedLetterCard = ({
   </div>
 );
 
-const ExamplesPage = () => (
+const ExamplesPage = ({ playLetterAudio, activeExample }: { 
+  playLetterAudio: (word: string, index: number) => void;
+  activeExample: string;
+}) => (
   <div className="p-4 md:p-8 bg-gray-900">
     <div className="max-w-5xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -149,6 +148,7 @@ const ExamplesPage = () => (
             example={item.example}
             meaning={item.meaning}
             onClick={playLetterAudio}
+            isActive={activeExample === item.example}
           />
         ))}
       </div>
@@ -180,7 +180,40 @@ const ExamplesPage = () => (
 // === 📖 Composant principal ===
 const Page16 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeExample, setActiveExample] = useState("قَالَ"); // Premier mot actif par défaut
+  // ✅ Référence audio globale pour contrôler la lecture
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const totalPages = 2;
+
+  const playLetterAudio = (word: string, index: number = 0) => {
+    // ✅ Arrêter l'audio précédent s'il existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    
+    // ✅ Mettre à jour l'état visuel
+    setActiveExample(word);
+    
+    const audioFileName = chapter4Page16AudioMappings[word];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
+      
+      // ✅ Gérer la fin de l'audio
+      audio.addEventListener('ended', () => {
+        setCurrentAudio(null);
+        // Garder le mot actif pour le clignotant
+      });
+      
+      // ✅ Mettre à jour la référence et jouer
+      setCurrentAudio(audio);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+        setCurrentAudio(null);
+        // Garder le mot actif pour le clignotant
+      });
+    }
+  };
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
@@ -228,7 +261,7 @@ const Page16 = () => {
         </button>
       </div>
 
-      {currentPage === 0 ? <IntroductionPage /> : <ExamplesPage />}
+      {currentPage === 0 ? <IntroductionPage /> : <ExamplesPage playLetterAudio={playLetterAudio} activeExample={activeExample} />}
     </div>
   );
 };

@@ -272,15 +272,14 @@ const AlphabetPage = () => (
           vowels={group.vowels}
           emphatic={emphaticLetters.includes(group.letter)}
           nonConnecting={nonConnectingLetters.includes(group.letter)}
-          onClick={playLetterAudio}
+          onClick={(v) => playLetterAudio(v)}  // ✅ Correction ici
         />
       ))}
     </div>
 
-    
-      <PageNavigation currentChapter={2} currentPage={9} className="mt-6 mb-4" />
+    <PageNavigation currentChapter={2} currentPage={9} className="mt-6 mb-4" />
 
-<footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-sm md:text-base">
+    <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-sm md:text-base">
       <div>Page 9</div>
       <div className="mt-1">© 2025 Tous droits réservés</div>
     </footer>

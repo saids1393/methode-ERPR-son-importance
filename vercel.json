@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/expire-free-trials",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 0 * * *"
     },
      {
       "path": "/api/cron/send-trial-day3-emails",

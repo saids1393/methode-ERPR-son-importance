@@ -136,14 +136,6 @@ const letterGroups = [
 
 const vowelNames = ["Fatha (a)", "Damma (ou)", "Kasra (i)"];
 
-const playLetterAudio = (vowelLetter: string) => {
-  const audioFileName = chapter2Page8AudioMappings[vowelLetter];
-  if (audioFileName) {
-    const audio = new Audio(`/audio/chapitre2/${audioFileName}.mp3`);
-    audio.play().catch((err) => console.error("Erreur audio:", err));
-  }
-};
-
 // === 📘 Introduction ===
 const IntroductionPage = () => (
   <div className="p-4 md:p-8 bg-gray-900">
@@ -217,48 +209,61 @@ const LetterGroup = ({
   vowels,
   emphatic,
   onClick,
+  activeVowel,
 }: {
   letter: string;
   vowels: string[];
   emphatic?: boolean;
-  onClick?: (v: string) => void;
+  onClick?: (v: string, globalIndex: number) => void;
+  activeVowel?: string;
 }) => (
   <div className="bg-gray-800 border border-zinc-500 rounded-xl p-4" dir="rtl">
     <div className="text-center font-bold text-5xl md:text-5xl lg:text-5xl xl:text-6xl text-white mb-4">
       {letter}
     </div>
     <div className="grid grid-cols-3 gap-3">
-      {vowels.map((v, i) => (
-        <div
-          key={i}
-          className="border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
-          onClick={() => onClick?.(v)}
-        >
+      {vowels.map((v, i) => {
+        // Calculer l'index global pour cette voyelle
+        const groupIndex = letterGroups.findIndex(g => g.letter === letter);
+        const globalIndex = groupIndex * 3 + i;
+        
+        return (
           <div
-            className={`text-5xl md:text-5xl lg:text-5xl xl:text-6xl font-bold transition-colors leading-tight ${
-              emphatic ? "text-red-400" : "text-white"
+            key={i}
+            className={`border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1 ${
+              activeVowel === v ? 'pulse-active' : ''
             }`}
+            onClick={() => onClick?.(v, globalIndex)}
           >
-            {v}
+            <div
+              className={`text-5xl md:text-5xl lg:text-5xl xl:text-6xl font-bold transition-colors leading-tight ${
+                emphatic ? "text-red-400" : "text-white"
+              }`}
+            >
+              {v}
+            </div>
+            <div
+              className={`text-xs font-semibold px-2 py-1 mt-2 rounded ${
+                i === 0
+                  ? "text-orange-400 bg-orange-900/30"
+                  : i === 1
+                  ? "text-blue-400 bg-blue-900/30"
+                  : "text-green-400 bg-green-900/30"
+              }`}
+            >
+              {vowelNames[i]}
+            </div>
           </div>
-          <div
-            className={`text-xs font-semibold px-2 py-1 mt-2 rounded ${
-              i === 0
-                ? "text-orange-400 bg-orange-900/30"
-                : i === 1
-                ? "text-blue-400 bg-blue-900/30"
-                : "text-green-400 bg-green-900/30"
-            }`}
-          >
-            {vowelNames[i]}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   </div>
 );
 
-const AlphabetPage = () => (
+const AlphabetPage = ({ playLetterAudio, activeVowel }: { 
+  playLetterAudio: (vowel: string, globalIndex: number) => void;
+  activeVowel: string;
+}) => (
   <div className="p-4 md:p-8 bg-gray-900">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" dir="rtl">
       {letterGroups.map((group, idx) => (
@@ -268,6 +273,7 @@ const AlphabetPage = () => (
           vowels={group.vowels}
           emphatic={emphaticLetters.includes(group.letter)}
           onClick={playLetterAudio}
+          activeVowel={activeVowel}
         />
       ))}
     </div>
@@ -285,7 +291,40 @@ const AlphabetPage = () => (
 // === 📖 Composant principal ===
 const Page8 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeVowel, setActiveVowel] = useState("أَ"); // Première lettre active par défaut
+  // ✅ Référence audio globale pour contrôler la lecture
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const totalPages = 2;
+
+  const playLetterAudio = (vowelLetter: string, globalIndex: number = 0) => {
+    // ✅ Arrêter l'audio précédent s'il existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    
+    // ✅ Mettre à jour l'état visuel
+    setActiveVowel(vowelLetter);
+    
+    const audioFileName = chapter2Page8AudioMappings[vowelLetter];
+    if (audioFileName) {
+      const audio = new Audio(`/audio/chapitre2/${audioFileName}.mp3`);
+      
+      // ✅ Gérer la fin de l'audio
+      audio.addEventListener('ended', () => {
+        setCurrentAudio(null);
+        // Garder la voyelle active pour le clignotant
+      });
+      
+      // ✅ Mettre à jour la référence et jouer
+      setCurrentAudio(audio);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+        setCurrentAudio(null);
+        // Garder la voyelle active pour le clignotant
+      });
+    }
+  };
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
@@ -333,7 +372,7 @@ const Page8 = () => {
         </button>
       </div>
 
-      {currentPage === 0 ? <IntroductionPage /> : <AlphabetPage />}
+      {currentPage === 0 ? <IntroductionPage /> : <AlphabetPage playLetterAudio={playLetterAudio} activeVowel={activeVowel} />}
     </div>
   );
 };

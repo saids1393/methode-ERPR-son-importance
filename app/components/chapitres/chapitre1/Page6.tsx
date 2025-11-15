@@ -56,12 +56,15 @@ const chapterPage6AudioMappings: { [key: string]: string } = {
   'يئس': 'chap1_pg6_case53',
 };
 
-const Cell = ({ word, onClick }: {
+const Cell = ({ word, onClick, isActive }: {
   word: string;
   onClick?: () => void;
+  isActive?: boolean;
 }) => (
   <div
-    className="border border-zinc-500 rounded-xl p-3 md:p-4 text-center min-h-[110px] md:min-h-[120px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
+    className={`border border-zinc-500 rounded-xl p-3 md:p-4 text-center min-h-[110px] md:min-h-[120px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1 ${
+      isActive ? 'pulse-active' : ''
+    }`}
     onClick={onClick}
   >
     <div className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
@@ -132,7 +135,11 @@ const IntroductionPage = () => {
 };
 
 
-const ExercisePage = ({ playWordAudio }: { playWordAudio: (word: string) => void }) => {
+const ExercisePage = ({ playWordAudio, activeIndex, setActiveIndex }: { 
+  playWordAudio: (word: string, index: number) => void;
+  activeIndex: number;
+  setActiveIndex: (index: number) => void;
+}) => {
   const words = [
     'في', 'من', 'ق', 'قد', 'ل', 'هو',
     'ما', 'لم', 'كل', 'ثم', 'هل',
@@ -151,8 +158,10 @@ const ExercisePage = ({ playWordAudio }: { playWordAudio: (word: string) => void
         {words.map((word, index) => (
           <div
             key={index}
-            className="border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1"
-            onClick={() => playWordAudio(word)}
+            className={`border border-zinc-500 rounded-xl p-2 md:p-3 lg:p-4 text-center min-h-[90px] md:min-h-[100px] lg:min-h-[110px] flex flex-col justify-center items-center hover:bg-zinc-700 transition-all duration-300 hover:scale-105 cursor-pointer mx-1 ${
+              activeIndex === index ? 'pulse-active' : ''
+            }`}
+            onClick={() => playWordAudio(word, index)}
           >
             <div className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight">
               {word}
@@ -182,14 +191,37 @@ const ExercisePage = ({ playWordAudio }: { playWordAudio: (word: string) => void
 
 const Page6 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0); // Premier mot actif par défaut
+  // ✅ Référence audio globale pour contrôler la lecture
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const totalPages = 2;
 
-  const playWordAudio = (word: string) => {
+  const playWordAudio = (word: string, index: number = 0) => {
+    // ✅ Arrêter l'audio précédent s'il existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    
+    // ✅ Mettre à jour l'état visuel
+    setActiveIndex(index);
+    
     const audioFileName = chapterPage6AudioMappings[word];
     if (audioFileName) {
       const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
+      
+      // ✅ Gérer la fin de l'audio
+      audio.addEventListener('ended', () => {
+        setCurrentAudio(null);
+        // Garder le mot actif pour le clignotant
+      });
+      
+      // ✅ Mettre à jour la référence et jouer
+      setCurrentAudio(audio);
       audio.play().catch(error => {
         console.error('Erreur lors de la lecture audio:', error);
+        setCurrentAudio(null);
+        // Garder le mot actif pour le clignotant
       });
     }
   };
@@ -258,7 +290,7 @@ const Page6 = () => {
 
         {/* Content */}
         {currentPage === 0 && <IntroductionPage />}
-        {currentPage === 1 && <ExercisePage playWordAudio={playWordAudio} />}
+        {currentPage === 1 && <ExercisePage playWordAudio={playWordAudio} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />}
       </div>
     </div>
   );

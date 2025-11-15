@@ -128,13 +128,35 @@ const auxiliaryLetters = ['ء', 'ة'];
 const Page0 = () => {
   const [openPopup, setOpenPopup] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  // ✅ Référence audio globale pour contrôler la lecture
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
 
   const playLetterAudio = (letter: string, index: number) => {
     setActiveIndex(index);
+    
+    // ✅ Arrêter l'audio précédent s'il existe
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    
     const audioFileName = chapter0Page0AudioMappings[letter];
     if (audioFileName) {
       const audio = new Audio(`/audio/chapitre0_1/${audioFileName}.mp3`);
-      audio.play();
+      
+      // ✅ Gérer la fin de l'audio
+      audio.addEventListener('ended', () => {
+        setCurrentAudio(null);
+        setActiveIndex(0);
+      });
+      
+      // ✅ Mettre à jour la référence et jouer
+      setCurrentAudio(audio);
+      audio.play().catch(error => {
+        console.error('Erreur lors de la lecture audio:', error);
+        setCurrentAudio(null);
+        setActiveIndex(0);
+      });
     }
   };
 

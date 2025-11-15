@@ -73,13 +73,40 @@ const words: WordItem[] = [
   { word: "شُهُورٌ" },
 ];
 
-const playLetterAudio = (word: string) => {
+// === 📖 Fonction audio globale avec contrôle ===
+let globalCurrentAudio: HTMLAudioElement | null = null;
+
+const playLetterAudio = (word: string, setActiveWord: (word: string) => void) => {
+  // ✅ Arrêter l'audio précédent s'il existe
+  if (globalCurrentAudio) {
+    globalCurrentAudio.pause();
+    globalCurrentAudio.currentTime = 0;
+  }
+  
+  // ✅ Mettre à jour l'état visuel
+  setActiveWord(word);
+  
   const audioFileName = chapter7Page21AudioMappings[word];
   if (audioFileName) {
     const audio = new Audio(`/audio/chapitre7/${audioFileName}.mp3`);
-    audio.play().catch((err) => console.error("Erreur audio:", err));
+    
+    // ✅ Gérer la fin de l'audio
+    audio.addEventListener('ended', () => {
+      globalCurrentAudio = null;
+      // Garder le mot actif pour le clignotant
+    });
+    
+    // ✅ Mettre à jour la référence et jouer
+    globalCurrentAudio = audio;
+    audio.play().catch((err) => {
+      console.error("Erreur audio:", err);
+      globalCurrentAudio = null;
+      // Garder le mot actif pour le clignotant
+    });
   }
 };
+
+
 
 // === 📘 Introduction Page ===
 const IntroductionPage = () => (
@@ -157,9 +184,15 @@ const IntroductionPage = () => (
 );
 
 // === 🧱 Various Word Card ===
-const VariousWordCard = ({ word, onClick }: { word: string; onClick?: () => void }) => (
+const VariousWordCard = ({ word, onClick, isActive }: { 
+  word: string; 
+  onClick?: () => void; 
+  isActive?: boolean;
+}) => (
   <div
-    className="bg-gray-800 border border-gray-500 rounded-xl p-3 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[120px] flex items-center justify-center cursor-pointer relative"
+    className={`bg-gray-800 border border-gray-500 rounded-xl p-3 text-center hover:bg-gray-700 transition-all duration-300 group min-h-[120px] flex items-center justify-center cursor-pointer relative ${
+      isActive ? 'pulse-active' : ''
+    }`}
     onClick={onClick}
   >
     <div
@@ -173,7 +206,10 @@ const VariousWordCard = ({ word, onClick }: { word: string; onClick?: () => void
 );
 
 // === 📖 Exercise Page ===
-const ExercisePage = () => (
+const ExercisePage = ({ playLetterAudio, activeWord }: { 
+  playLetterAudio: (word: string, index: number) => void;
+  activeWord: string;
+}) => (
   <div className="p-4 md:p-8 bg-gray-900" dir="rtl">
     <div className="max-w-6xl mx-auto">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
@@ -181,7 +217,8 @@ const ExercisePage = () => (
           <VariousWordCard
             key={index}
             word={wordItem.word}
-            onClick={() => playLetterAudio(wordItem.word)}
+            onClick={() => playLetterAudio(wordItem.word, index)}
+            isActive={activeWord === wordItem.word}
           />
         ))}
       </div>

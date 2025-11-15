@@ -62,14 +62,11 @@ export async function checkFreeTrialAccess(userId: string) {
   const trialEnd = new Date(user.trialEndDate);
 
   if (now > trialEnd) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { trialExpired: true }
-    });
-
+    // ⚠️ NE JAMAIS mettre à jour trialExpired ici !
+    // Seul le cron job doit le faire après exactement 7 jours
     return {
       hasAccess: false,
-      reason: 'Trial expired',
+      reason: 'Trial period ended, waiting for cron job',
       isFreeTrial: true,
       daysLeft: 0
     };

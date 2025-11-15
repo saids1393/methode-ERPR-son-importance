@@ -52,7 +52,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
       className="w-9 h-8 object-contain "
     />
   </div>
-  <h1 className="md:text-xl sm:text-md font-bold text-white-900" style={{ fontFamily: "'Spectral', serif" }}>
+  <h1 className="md:text-xl sm:text-md font-bold text-white" style={{ fontFamily: "'Spectral', serif" }}>
     Méthode ERPR
   </h1>
 </div>

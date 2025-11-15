@@ -100,7 +100,7 @@ export const chapters: Chapter[] = [
         status: 'completed'
       },
       {
-        title: "Exercice : écriture des lettres seules et attachées",
+        title: "Exercice : écriture des lettres",
         href: "/chapitres/1/5",
         pageNumber: 5,
         status: 'completed'
