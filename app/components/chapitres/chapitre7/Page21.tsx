@@ -76,7 +76,7 @@ const words: WordItem[] = [
 // === 📖 Fonction audio globale avec contrôle ===
 let globalCurrentAudio: HTMLAudioElement | null = null;
 
-const playLetterAudio = (word: string, setActiveWord: (word: string) => void) => {
+const playWordAudio = (word: string, setActiveWord: (word: string) => void) => {
   // ✅ Arrêter l'audio précédent s'il existe
   if (globalCurrentAudio) {
     globalCurrentAudio.pause();
@@ -237,7 +237,13 @@ const ExercisePage = ({ playLetterAudio, activeWord }: {
 // === 📖 Main Component ===
 const Page21 = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [activeWord, setActiveWord] = useState<string>("");
   const totalPages = 2;
+
+  const playLetterAudio = (word: string, index: number) => {
+    setActiveWord(word);
+    playWordAudio(word, setActiveWord);
+  };
 
   return (
     <div className="font-arabic min-h-screen bg-gray-900">
@@ -285,7 +291,7 @@ const Page21 = () => {
         </button>
       </div>
 
-      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage />}
+      {currentPage === 0 ? <IntroductionPage /> : <ExercisePage playLetterAudio={playLetterAudio} activeWord={activeWord} />}
     </div>
   );
 };
