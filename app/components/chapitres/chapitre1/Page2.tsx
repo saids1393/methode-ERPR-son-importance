@@ -132,7 +132,7 @@ const IntroductionPage = () => {
 
 
 const AlphabetPage = ({ playLetterAudio, activeIndex, setActiveIndex }: {
-  playLetterAudio: (letter: string) => void;
+  playLetterAudio: (letter: string, index?: number) => void;
   activeIndex: number;
   setActiveIndex: (index: number) => void;
 }) => {
