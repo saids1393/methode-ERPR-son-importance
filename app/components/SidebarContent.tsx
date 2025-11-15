@@ -74,7 +74,7 @@ export default function SidebarContent() {
   };
 
   // Fonction pour vérifier si un chapitre est verrouillé
-  const isChapterLocked = (chapterNumber) => {
+  const isChapterLocked = (chapterNumber: number) => {
     if (!user) return false;
     
     // Si compte payant complet, rien n'est verrouillé
