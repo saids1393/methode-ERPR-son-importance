@@ -42,6 +42,25 @@ export default function DashboardSidebar({
     const [loading, setLoading] = useState(true);
     const [showRestrictionModal, setShowRestrictionModal] = useState(false);
     const [restrictedContent, setRestrictedContent] = useState('');
+    // Recherche en dur (peu d'infos)
+    const [query, setQuery] = useState('');
+    const [showResults, setShowResults] = useState(false);
+    const searchItems = [
+        { label: 'Tableau de bord', href: '/dashboard', keywords: ['dashboard', 'tableau'] },
+        { label: 'Cours', href: '/chapitres/0/video', keywords: ['cours', 'chapitre', 'leçon', 'lecon'] },
+        { label: 'Accompagnement', href: '/accompagnement', keywords: ['accompagnement', 'support'] },
+        { label: 'Devoirs', href: '/devoirs', keywords: ['devoir', 'devoirs', 'homework'] },
+        { label: 'Notice', href: '/notice', keywords: ['notice', 'aide', 'help'] },
+        { label: 'Conseil', href: '/conseil', keywords: ['conseil', 'astuce', 'tips'] },
+        { label: 'Niveaux', href: '/niveaux', keywords: ['niveaux', 'niveau', 'progression'] },
+    ];
+    const norm = (s: string) => s.toLowerCase();
+    const results = query.trim()
+        ? searchItems.filter(i =>
+            norm(i.label).includes(norm(query)) ||
+            i.keywords.some(k => norm(k).includes(norm(query)) || norm(query).includes(norm(k)))
+          )
+        : [];
 
     // Fonction pour récupérer l'utilisateur avec les restrictions actuelles
     const fetchUser = async () => {
@@ -249,9 +268,27 @@ export default function DashboardSidebar({
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                         <input
                             type="text"
-                            placeholder="Search"
+                            value={query}
+                            onChange={(e) => { setQuery(e.target.value); setShowResults(true); }}
+                            onFocus={() => setShowResults(true)}
+                            onBlur={() => setTimeout(() => setShowResults(false), 150)}
+                            placeholder="Rechercher..."
                             className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
+                        {showResults && results.length > 0 && (
+                          <div className="absolute z-20 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                            {results.map((r) => (
+                              <Link
+                                key={r.href}
+                                href={r.href}
+                                className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                onClick={() => { setMobileMenuOpen(false); setShowResults(false); setQuery(''); }}
+                              >
+                                {r.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
                     </div>
 
                     {/* Navigation */}

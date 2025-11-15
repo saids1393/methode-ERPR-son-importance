@@ -230,7 +230,7 @@ export default function SignupFreePage() {
           </h3>
 
           <p className="mt-3 text-center text-sm text-gray-400 max-w-sm">
-            Accès gratuit au chapitre 1 pendant 7 jours. Aucune carte bancaire requise.
+            Accès gratuit au chapitre 1 pendant 7 jours. Aucune carte bancaire requise et sans engement.
           </p>
         </div>
 
@@ -325,13 +325,20 @@ export default function SignupFreePage() {
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p>Chapitre 1 complet (8 leçons)</p>
+                  <p>Phase préparatoire avant la méthode</p>
                 </div>
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p>Accès au dashboard et page notices</p>
+                  <p>Chapitre 1 complet (8 leçons) + vidéo explicative</p>
+                </div>
+                
+                <div className="flex items-start space-x-2">
+                  <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p>Accès au dashboard, page notice et page devoirs</p>
                 </div>
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -343,7 +350,7 @@ export default function SignupFreePage() {
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p>Aucune carte bancaire requise</p>
+                  <p>Aucune carte bancaire requise et sans engagement</p>
                 </div>
               </div>
 
@@ -360,7 +367,7 @@ export default function SignupFreePage() {
                     href="/checkout"
                     className="text-green-400 hover:text-green-300 transition-colors"
                   >
-                    Voir nos offres
+                   Clique moi
                   </a>
                 </p>
               </div>
