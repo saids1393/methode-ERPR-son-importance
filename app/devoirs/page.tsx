@@ -373,7 +373,6 @@ export default function DevoirsPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <DashboardSidebar
-        user={user!}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />

@@ -98,7 +98,6 @@ export default function NiveauxPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardSidebar
-        user={user!}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />

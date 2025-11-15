@@ -220,7 +220,6 @@ export default function NoticePage() {
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
       <DashboardSidebar
-        user={user!}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
