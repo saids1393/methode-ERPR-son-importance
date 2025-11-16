@@ -226,11 +226,11 @@ export default function SignupFreePage() {
           </h2>
 
           <h3 className="mt-2 text-center text-xl font-bold text-green-400">
-            Essai gratuit de 7 jours
+        7 jours gratuits, puis tu décides !
           </h3>
 
           <p className="mt-3 text-center text-sm text-gray-400 max-w-sm">
-            Accès gratuit au chapitre 1 pendant 7 jours. Aucune carte bancaire requise et sans engagement.
+            Rien n’est demandé après 7 jours : tu as simplement à tester la méthode gratuitement et à décider ensuite.
           </p>
         </div>
 
@@ -307,6 +307,17 @@ export default function SignupFreePage() {
                   </p>
                 </div>
               </form>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                  En savoir plus sur la méthode ?{' '}
+                  <a
+                    href="https://arabeimportance.fr"
+                    className="text-green-400 hover:text-green-300 transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    arabeimportance.fr
+                  </a>
+                </p>
 
               <div className="mt-6">
                 <div className="relative">
@@ -324,48 +335,39 @@ export default function SignupFreePage() {
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p>Phase préparatoire avant la méthode</p>
+                  <p>Chapitre 1 sur les lettres de l’alphabet seules et attachées (8 leçons) + vidéo explicative</p>
+                </div>
+                 <div className="flex items-start space-x-2">
+                  <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p>Bonus : Phase préparatoire avant la méthode</p>
                 </div>
 
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p>Chapitre 1 complet (8 leçons) + vidéo explicative</p>
+                  <p>Accès au tableau de bord, à la page notice et à la page des devoirs</p>
                 </div>
 
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p>Accès au tableau de bord, page notice et page devoirs</p>
+                  <p>7 jours d'accès</p>
                 </div>
 
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p>7 jours d'accès gratuit</p>
-                </div>
-
-                <div className="flex items-start space-x-2">
-                  <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <p>Aucune carte bancaire requise et sans engagement</p>
+                  <p>Aucun spam. Tu restes libre à 100 %</p>
                 </div>
               </div>
-
-
-              <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
-                <p className="text-xs text-yellow-400 text-center">
-                  Après 7 jours, l’accès sera bloqué. Passez à la version complète pour débloquer tous les chapitres.
-                </p>
-              </div>
-
               <div className="mt-6 text-center">
                 <p className="text-xs text-gray-500">
-                  Vous voulez un accès complet immédiat ?{' '}
+                 Accès complet si tu le veux : {' '}
                   <a
                     href="/checkout"
                     className="text-green-400 hover:text-green-300 transition-colors"
@@ -374,17 +376,7 @@ export default function SignupFreePage() {
                   </a>
                 </p>
 
-                <p className="text-xs text-gray-500 mt-2">
-                  En savoir plus sur la méthode ?{' '}
-                  <a
-                    href="https://arabeimportance.fr"
-                    className="text-green-400 hover:text-green-300 transition-colors"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    arabeimportance.fr
-                  </a>
-                </p>
+
               </div>
 
             </div>
