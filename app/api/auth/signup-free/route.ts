@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erreur envoi email de bienvenue FREE_TRIAL:', error);
     });
     // ========== NOTIFICATION ADMIN ==========
-    sendAdminFreeTrialNotification({
+    await sendAdminFreeTrialNotification({
       email: user.email,
       createdAt: user.createdAt,
     }).catch(err => console.error('❌ Erreur notification admin FREE_TRIAL:', err));

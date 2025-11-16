@@ -83,14 +83,14 @@ async function generateClientDeviceFingerprint(): Promise<string> {
   };
 
   const fingerprint = JSON.stringify(data);
-  
+
   // Utiliser SubtleCrypto pour le hash
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(fingerprint);
   const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  
+
   return hashHex;
 }
 
@@ -226,11 +226,11 @@ export default function SignupFreePage() {
           </h2>
 
           <h3 className="mt-2 text-center text-xl font-bold text-green-400">
-            Essai gratuit 7 jours
+            Essai gratuit de 7 jours
           </h3>
 
           <p className="mt-3 text-center text-sm text-gray-400 max-w-sm">
-            Accès gratuit au chapitre 1 pendant 7 jours. Aucune carte bancaire requise et sans engement.
+            Accès gratuit au chapitre 1 pendant 7 jours. Aucune carte bancaire requise et sans engagement.
           </p>
         </div>
 
@@ -265,9 +265,8 @@ export default function SignupFreePage() {
                       disabled={loading || deviceFingerprint === null}
                       value={email}
                       onChange={(e) => handleEmailChange(e.target.value)}
-                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        emailError ? 'border-red-500' : 'border-gray-800'
-                      }`}
+                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${emailError ? 'border-red-500' : 'border-gray-800'
+                        }`}
                       placeholder="votre@email.com"
                     />
                   </div>
@@ -327,25 +326,28 @@ export default function SignupFreePage() {
                   </svg>
                   <p>Phase préparatoire avant la méthode</p>
                 </div>
+
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <p>Chapitre 1 complet (8 leçons) + vidéo explicative</p>
                 </div>
-                
+
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p>Accès au dashboard, page notice et page devoirs</p>
+                  <p>Accès au tableau de bord, page notice et page devoirs</p>
                 </div>
+
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <p>7 jours d'accès gratuit</p>
                 </div>
+
                 <div className="flex items-start space-x-2">
                   <svg className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -354,9 +356,10 @@ export default function SignupFreePage() {
                 </div>
               </div>
 
+
               <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
                 <p className="text-xs text-yellow-400 text-center">
-                  Après 7 jours, l'accès sera bloqué. Passez au complet pour débloquer tous les chapitres.
+                  Après 7 jours, l’accès sera bloqué. Passez à la version complète pour débloquer tous les chapitres.
                 </p>
               </div>
 
@@ -367,10 +370,23 @@ export default function SignupFreePage() {
                     href="/checkout"
                     className="text-green-400 hover:text-green-300 transition-colors"
                   >
-                   Clique moi
+                    Cliquez ici
+                  </a>
+                </p>
+
+                <p className="text-xs text-gray-500 mt-2">
+                  En savoir plus sur la méthode ?{' '}
+                  <a
+                    href="https://arabeimportance.fr"
+                    className="text-green-400 hover:text-green-300 transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    arabeimportance.fr
                   </a>
                 </p>
               </div>
+
             </div>
           </div>
         </div>
