@@ -1,4 +1,5 @@
 'use client';
+// @ts-nocheck
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -25,6 +26,8 @@ interface User {
     isActive: boolean;
     accountType?: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
     trialExpired?: boolean;
+    hasLecture?: boolean;
+    hasTajwid?: boolean;
 }
 
 interface DashboardSidebarProps {
@@ -314,6 +317,19 @@ export default function DashboardSidebar({
                                 } else {
                                     console.log('🎯 ===== CLIC BOUTON COURS =====');
                                     localStorage.setItem('courseStarted', 'true');
+                                    
+                                    // Déterminer l'URL directement depuis les données utilisateur
+                                    let startUrl = '/chapitres/1/1';
+                                    
+                                    if (user.hasLecture) {
+                                        startUrl = '/chapitres/1/1';
+                                    } else if (user.hasTajwid) {
+                                        startUrl = '/chapitres-tajwid/1/1';
+                                    }
+                                    
+                                    console.log('📍 URL déterminée:', startUrl);
+                                    
+                                    // Démarrer le timer
                                     fetch('/api/auth/time/start', {
                                         method: 'POST',
                                         headers: { 'Content-Type': 'application/json' },
@@ -321,11 +337,11 @@ export default function DashboardSidebar({
                                         console.log('🚀 RÉPONSE START TIMER:', response.status);
                                         if (response.ok) {
                                             console.log('✅ CHRONO DÉMARRÉ EN DB');
-                                            window.location.href = '/chapitres/0/video';
+                                            window.location.href = startUrl;
                                         }
                                     }).catch(error => {
                                         console.error('❌ ERREUR START TIMER:', error);
-                                        window.location.href = '/chapitres/0/video';
+                                        window.location.href = startUrl;
                                     });
                                 }
                                 setMobileMenuOpen(false);

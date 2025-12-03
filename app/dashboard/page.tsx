@@ -35,6 +35,8 @@ import {
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
 import { useSimpleTimer } from '@/hooks/useSimpleTimer';
+import { useUserModule } from '@/hooks/useUserModule';
+import { getChaptersByModule, hasAccessToChapter, getModuleTotals } from '@/lib/module-access';
 import useRealProgressChart from '@/hooks/useRealProgressChart';
 import Logo from '@/app/components/Logo';
 import DashboardHeader from '@/app/components/DashboardHeader';
@@ -69,6 +71,7 @@ export default function DashboardPage() {
   const [homeworkLoading, setHomeworkLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { module: userModule } = useUserModule();
 
   // Fix hydration issues
   useEffect(() => {
@@ -715,15 +718,20 @@ export default function DashboardPage() {
 
     {(() => {
       const getNextPageToComplete = () => {
+        // Utiliser uniquement les chapitres accessibles selon le module de l'utilisateur
+        const accessibleChapters = getChaptersByModule(userModule);
         const completedPagesArray = Array.from(completedPages).filter(p => p !== 30);
+        
+        // Générer le prefix d'URL basé sur le module
+        const urlPrefix = userModule === 'TAJWID' ? '/chapitres-tajwid' : '/chapitres';
 
-        if (completedPagesArray.length === 0) {
-          return { chapterNumber: 1, pageNumber: 1, isFirstPage: true };
+        if (completedPagesArray.length === 0 && accessibleChapters.length > 0) {
+          const firstChapter = accessibleChapters[0];
+          return { chapterNumber: firstChapter.chapterNumber, pageNumber: 1, isFirstPage: true };
         }
 
-        for (const chapter of chapters) {
+        for (const chapter of accessibleChapters) {
           if (chapter.chapterNumber === 11) continue;
-
 
           for (const page of chapter.pages) {
             if (!completedPages.has(page.pageNumber)) {
@@ -732,7 +740,7 @@ export default function DashboardPage() {
                 pageNumber: page.pageNumber,
                 pageTitle: page.title,
                 chapterTitle: chapter.title,
-                href: page.href,
+                href: `${urlPrefix}/${chapter.chapterNumber}/${page.pageNumber}`,
                 isFirstPage: false
               };
             }
@@ -744,19 +752,21 @@ export default function DashboardPage() {
               pageNumber: null,
               pageTitle: 'Quiz du chapitre',
               chapterTitle: chapter.title,
-              href: `/chapitres/${chapter.chapterNumber}/quiz`,
+              href: `${urlPrefix}/${chapter.chapterNumber}/quiz`,
               isQuiz: true,
               isFirstPage: false
             };
           }
         }
 
+        // Si tous les chapitres accessibles sont complets
+        const lastAccessibleChapter = accessibleChapters[accessibleChapters.length - 1];
         return {
-          chapterNumber: 11,
+          chapterNumber: lastAccessibleChapter?.chapterNumber || 11,
           pageNumber: 30,
           pageTitle: 'Évaluation finale',
           chapterTitle: 'Évaluation finale',
-          href: '/chapitres/11/30',
+          href: `${urlPrefix}/11/30`,
           isCompleted: true,
           isFirstPage: false
         };

@@ -24,6 +24,20 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Récupérer les modules achetés
+    const purchases = await prisma.levelPurchase.findMany({
+      where: { userId: user.id },
+      include: {
+        level: {
+          select: { module: true }
+        }
+      }
+    });
+
+    const modules = purchases.map(p => p.level.module);
+    const hasLecture = modules.includes('LECTURE');
+    const hasTajwid = modules.includes('TAJWID');
+
     return NextResponse.json({
       id: user.id,
       email: user.email,
@@ -31,7 +45,10 @@ export async function GET(request: NextRequest) {
       gender: userExtra?.gender || null,
       isActive: user.isActive,
       hasPassword: userExtra?.password !== null,
-      accountType: userExtra?.accountType || 'PAID_FULL'
+      accountType: userExtra?.accountType || 'PAID_FULL',
+      modules,
+      hasLecture,
+      hasTajwid
     });
   } catch (error) {
     console.error('Auth me error:', error);

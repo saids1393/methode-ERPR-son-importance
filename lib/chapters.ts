@@ -8,6 +8,7 @@ export type Page = {
   status?: 'completed' | 'pending';
 };
 
+
 export type QuizQuestion = {
   question: string;
   choices: string[];
@@ -20,6 +21,7 @@ export type Chapter = {
   pages: Page[];
   introduction?: string;
   quiz?: QuizQuestion[];
+  module?: 'LECTURE' | 'TAJWID';
 };
 
 export const chapters: Chapter[] = [

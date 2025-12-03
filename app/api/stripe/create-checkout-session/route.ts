@@ -4,7 +4,7 @@ import { stripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
   try {
-    const { email, paymentPlan } = await req.json();
+    const { email, paymentPlan, module } = await req.json();
 
     if (!email) {
       console.log("❌ Aucun email fourni");
@@ -16,12 +16,15 @@ export async function POST(req: Request) {
         ? process.env.NEXTAUTH_URL
         : "http://localhost:6725";
 
+    const normalizedModule = (module || 'LECTURE').toString().toUpperCase();
+
     console.log("🔵 CREATE CHECKOUT SESSION");
     console.log("📧 Email:", email);
     console.log("💳 Payment Plan:", paymentPlan);
+    console.log("📦 Module:", normalizedModule);
 
-    // 🚀 PAIEMENT EN 2X - Version corrigée
-    if (paymentPlan === "2x") {
+    // 🚀 PAIEMENT EN 2X - Version corrigée (uniquement pour module LECTURE)
+    if (paymentPlan === "2x" && normalizedModule !== 'TAJWID') {
       // Créer ou récupérer le client Stripe
       let customer;
       const existingCustomers = await stripe.customers.list({
@@ -34,7 +37,7 @@ export async function POST(req: Request) {
       } else {
         customer = await stripe.customers.create({
           email: email,
-          metadata: { paymentPlan: "2x" },
+          metadata: { paymentPlan: "2x", module: normalizedModule },
         });
       }
 
@@ -68,12 +71,13 @@ export async function POST(req: Request) {
           email, 
           paymentPlan: "2x", 
           paymentNumber: "1",
-          customerId: customer.id 
+          customerId: customer.id,
+          module: normalizedModule,
         },
         // Sauvegarder la carte pour le 2ème paiement
         payment_intent_data: {
           setup_future_usage: "off_session",
-          metadata: { paymentPlan: "2x", paymentNumber: "1" },
+          metadata: { paymentPlan: "2x", paymentNumber: "1", module: normalizedModule },
         },
       });
 
@@ -113,8 +117,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ sessionId: session.id });
     }
 
-    // 🚀 PAIEMENT UNIQUE 1x
+    // 🚀 PAIEMENT UNIQUE 1x (LECTURE ou TAJWID)
     console.log("🎟️ Codes promo configurés pour paiement 1x");
+
+    // Déterminer le produit et le montant
+    let productName = "Méthode ERPR - Paiement 1x";
+    let productDescription = normalizedModule === 'TAJWID' ? "Module Tajwid" : "Cours complet d'arabe";
+    let unitAmount = 8900; // 89€ par défaut
+
+    if (normalizedModule === 'TAJWID') {
+      try {
+        // Charger le prix du niveau Tajwid depuis la DB si disponible
+        const { prisma } = await import('@/lib/prisma');
+        const tajwidLevel = await prisma.level.findFirst({ where: { module: 'TAJWID' as any } });
+        if (tajwidLevel?.price) {
+          unitAmount = tajwidLevel.price * 100; // convertir en centimes
+        } else {
+          unitAmount = 2900; // fallback 29€ si non défini
+        }
+        productName = 'Module Tajwid';
+      } catch (e) {
+        unitAmount = 2900;
+        productName = 'Module Tajwid';
+      }
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -124,10 +150,10 @@ export async function POST(req: Request) {
           price_data: {
             currency: "eur",
             product_data: {
-              name: "Méthode ERPR - Paiement 1x",
-              description: "Cours complet d'arabe",
+              name: productName,
+              description: productDescription,
             },
-            unit_amount: 8900, //89€
+            unit_amount: unitAmount,
           },
           quantity: 1,
         },
@@ -136,8 +162,8 @@ export async function POST(req: Request) {
       // 🔹 Permet aux clients de saisir un code promo
       allow_promotion_codes: true,
       success_url: `${baseUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/checkout`,
-      metadata: { email, paymentPlan: "1x" },
+      cancel_url: `${baseUrl}/checkout?module=${normalizedModule.toLowerCase()}`,
+      metadata: { email, paymentPlan: "1x", module: normalizedModule },
     });
 
     console.log("✅ Session 1x créée:", session.id);

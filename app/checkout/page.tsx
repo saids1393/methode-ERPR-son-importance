@@ -1,6 +1,8 @@
 'use client';
-import { useState, useCallback, useEffect } from 'react';
+import { Suspense, useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
+import { BookOpen, CheckCircle, AlertCircle, Zap, ArrowRight } from 'lucide-react';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -78,12 +80,20 @@ function sanitizeInput(input: string): string {
 }
 
 export default function CheckoutPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [paymentPlan, setPaymentPlan] = useState<'1x' | '2x'>('1x');
   const [isEmailLocked, setIsEmailLocked] = useState(false);
+  const [selectedModule, setSelectedModule] = useState<'LECTURE' | 'TAJWID' | null>(null);
+
+  // Récupérer le module depuis l'URL ou utiliser la sélection
+  const module = selectedModule || searchParams.get('module')?.toUpperCase() || null;
+  
+  // Si pas de module sélectionné et pas d'URL param, afficher écran de sélection
+  const showModuleSelection = !module;
 
   // Pré-remplir l'email depuis l'URL si présent
   useEffect(() => {
@@ -178,7 +188,8 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: cleanEmail,
-          paymentPlan // '1x' ou '2x'
+          paymentPlan, // '1x' ou '2x'
+          module: module || 'LECTURE'
         })
       });
 
@@ -211,6 +222,138 @@ export default function CheckoutPage() {
   // - pas d'erreur email
   // - pas en cours de chargement
   const isFormValid = email.trim() && !emailError && !loading;
+
+  // ===== ÉCRAN DE SÉLECTION DU MODULE =====
+  if (showModuleSelection) {
+    return (
+      <div className="checkout-page-dark min-h-screen relative overflow-hidden bg-black">
+        <style jsx>{`
+          .checkout-page-dark {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+          }
+        `}</style>
+
+        {/* Light effects on sides */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 -left-40 w-96 h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
+          <div className="absolute top-0 -right-40 w-96 h-full bg-gradient-to-l from-transparent via-purple-500/10 to-transparent blur-3xl"></div>
+          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-white/5 to-transparent rounded-full blur-3xl"></div>
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.05'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`
+          }}
+        ></div>
+
+        <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full max-w-4xl">
+            {/* Logo avec image */}
+            <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
+              <img
+                src="/img/logo_ecrit_blanc-point.png"
+                alt="Logo Méthode ERPR"
+                className="w-14 h-13 object-contain"
+              />
+            </div>
+
+            {/* Titre principal */}
+            <h2 className="mt-4 text-center text-3xl font-bold text-white">
+              Méthode ERPR
+            </h2>
+
+            {/* Sous-titre centré */}
+            <h3 className="mt-2 text-center text-xl font-bold text-white">
+              Choisissez votre module
+            </h3>
+
+            {/* Sélection des modules */}
+            <div className="mt-12 w-full max-w-2xl px-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Option LECTURE */}
+                <button
+                  onClick={() => setSelectedModule('LECTURE')}
+                  className="group relative p-8 rounded-2xl border-2 border-blue-500/30 bg-gray-950/90 hover:border-blue-500/60 hover:bg-gray-900 transition-all duration-300"
+                >
+                  <div className="absolute inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-300"></div>
+                  <div className="relative space-y-4">
+                    <div className="flex items-center justify-center h-16 bg-blue-500/20 rounded-lg">
+                      <BookOpen className="h-8 w-8 text-blue-400" />
+                    </div>
+                    <h4 className="text-xl font-bold text-white">LECTURE</h4>
+                    <p className="text-sm text-gray-400">
+                      Cours complet de lecture et d'écriture en arabe
+                    </p>
+                    <div className="pt-4 border-t border-gray-800">
+                      <p className="text-2xl font-bold text-white">89€</p>
+                      <p className="text-xs text-gray-500 mt-1">Accès illimité à vie</p>
+                    </div>
+                    <div className="flex items-center justify-center pt-2 text-blue-400 group-hover:translate-x-1 transition-transform">
+                      <span className="text-sm font-medium">Continuer</span>
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </div>
+                  </div>
+                </button>
+
+                {/* Option TAJWID */}
+                <button
+                  onClick={() => setSelectedModule('TAJWID')}
+                  className="group relative p-8 rounded-2xl border-2 border-purple-500/30 bg-gray-950/90 hover:border-purple-500/60 hover:bg-gray-900 transition-all duration-300"
+                >
+                  <div className="absolute inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-300"></div>
+                  <div className="relative space-y-4">
+                    <div className="flex items-center justify-center h-16 bg-purple-500/20 rounded-lg">
+                      <BookOpen className="h-8 w-8 text-purple-400" />
+                    </div>
+                    <h4 className="text-xl font-bold text-white">TAJWID</h4>
+                    <p className="text-sm text-gray-400">
+                      Module d'apprentissage des règles du Tajwid
+                    </p>
+                    <div className="pt-4 border-t border-gray-800">
+                      <p className="text-2xl font-bold text-white">89€</p>
+                      <p className="text-xs text-gray-500 mt-1">Accès illimité à vie</p>
+                    </div>
+                    <div className="flex items-center justify-center pt-2 text-purple-400 group-hover:translate-x-1 transition-transform">
+                      <span className="text-sm font-medium">Continuer</span>
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {/* Lien pour revenir */}
+              <div className="text-center mt-12">
+                <p className="text-sm text-gray-400">
+                  Vous avez besoin d'aide ?{' '}
+                  <a
+                    href="/"
+                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    Revenir à l'accueil
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== FORMULAIRE DE CHECKOUT (pour LECTURE et TAJWID) =====
+
+
+  // Déterminer le label et la description selon le module
+  const moduleLabel = module === 'TAJWID' ? 'TAJWID' : 'LECTURE';
+  const moduleDescription = module === 'TAJWID' 
+    ? 'Module d\'apprentissage des règles du Tajwid'
+    : 'Cours complet de lecture et d\'écriture en arabe';
+
+  // Déterminer si on peut afficher le paiement 2x (uniquement pour LECTURE)
+  const canUse2x = module === 'LECTURE';
 
   return (
     <div className="checkout-page-dark min-h-screen relative overflow-hidden bg-black">
@@ -253,8 +396,8 @@ export default function CheckoutPage() {
           </h2>
 
           {/* Sous-titre centré */}
-          <h3 className="mt-2 text-center text-xl font-bold text-white-900">
-            Créer un compte
+          <h3 className="mt-2 text-center text-xl font-bold text-white">
+            {moduleLabel}
           </h3>
         </div>
 
@@ -309,7 +452,7 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                {/* Payment plan selector */}
+                {/* Payment plan selector - Afficher 2x uniquement pour LECTURE */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-3">
                     Choisissez votre mode de paiement
@@ -351,44 +494,48 @@ export default function CheckoutPage() {
                       </div>
                     </button>
 
-                    {/* Option 2x - Card style */}
-                    <button
-                      type="button"
-                      disabled={loading}
-                      onClick={() => setPaymentPlan('2x')}
-                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed ${
-                        paymentPlan === '2x'
-                          ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
-                          : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold text-white">2 × 44,50€</span>
-                          </div>
-                          <p className="text-sm text-gray-400 mt-1">Paiement en 2 fois</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            44,50€ aujourd'hui + 44,50€ dans 30 jours
-                          </p>
-                        </div>
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                    {/* Option 2x - Card style - Uniquement pour LECTURE */}
+                    {canUse2x && (
+                      <button
+                        type="button"
+                        disabled={loading}
+                        onClick={() => setPaymentPlan('2x')}
+                        className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed ${
                           paymentPlan === '2x'
-                            ? 'border-purple-500 bg-purple-500'
-                            : 'border-gray-600'
-                        }`}>
-                          {paymentPlan === '2x' && (
-                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
+                            ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
+                            : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl font-bold text-white">2 × 44,50€</span>
+                            </div>
+                            <p className="text-sm text-gray-400 mt-1">Paiement en 2 fois</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              44,50€ aujourd'hui + 44,50€ dans 30 jours
+                            </p>
+                          </div>
+                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                            paymentPlan === '2x'
+                              ? 'border-purple-500 bg-purple-500'
+                              : 'border-gray-600'
+                          }`}>
+                            {paymentPlan === '2x' && (
+                              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                    )}
                   </div>
-                  <p className="mt-3 text-xs text-center text-gray-500">
-                    💳 Aucun frais supplémentaire pour le paiement en 2 fois
-                  </p>
+                  {canUse2x && (
+                    <p className="mt-3 text-xs text-center text-gray-500">
+                      💳 Aucun frais supplémentaire pour le paiement en 2 fois
+                    </p>
+                  )}
                 </div>
 
                 {/* Checkout button */}
@@ -412,9 +559,16 @@ export default function CheckoutPage() {
                   </button>
                 </div>
 
-                {/* Login link */}
+                {/* Retour au sélecteur */}
                 <div className="text-center">
-                  <p className="text-sm text-gray-400">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedModule(null)}
+                    className="text-sm text-gray-400 hover:text-gray-300 transition-colors"
+                  >
+                    ← Changer de module
+                  </button>
+                  <p className="text-sm text-gray-400 mt-2">
                     Vous avez déjà un compte ?{' '}
                     <a
                       href="/login"
@@ -453,7 +607,7 @@ export default function CheckoutPage() {
               {/* Features list */}
               <div className="mt-6 text-center text-xs text-gray-400 space-y-1">
                 <p>✓ Accès immédiat après paiement</p>
-                <p>✓ Méthode d'apprentissage de lecture et d'écriture</p>
+                <p>✓ {moduleDescription}</p>
                 <p>✓ Support inclus</p>
               </div>
             </div>

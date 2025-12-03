@@ -36,10 +36,28 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Récupérer les modules achetés
+    const purchases = await prisma.levelPurchase.findMany({
+      where: { userId: user.id },
+      include: {
+        level: {
+          select: { module: true }
+        }
+      }
+    });
+
+    const modules = purchases.map(p => p.level.module);
+    const hasLecture = modules.includes('LECTURE');
+    const hasTajwid = modules.includes('TAJWID');
+
     return NextResponse.json(
       {
         success: true,
-        user: completeUser,
+        user: {
+          ...completeUser,
+          hasLecture,
+          hasTajwid
+        },
       },
       { status: 200 }
     );

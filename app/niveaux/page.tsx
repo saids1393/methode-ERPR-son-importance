@@ -9,6 +9,8 @@ import {
   Sparkles,
   Clock,
   Lock,
+  ShoppingCart,
+  CheckCircle,
 } from 'lucide-react';
 import DashboardHeader from '@/app/components/DashboardHeader';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
@@ -22,10 +24,25 @@ interface User {
   accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
 }
 
+interface Niveau {
+  id: number;
+  title: string;
+  icon: React.ReactNode;
+  description: string;
+  badge: string;
+  comingSoon?: boolean;
+  color: string;
+  price?: number;
+  isAvailable?: boolean;
+  isPurchased?: boolean;
+  module?: string;
+}
+
 export default function NiveauxPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [tajwidPurchased, setTajwidPurchased] = useState(false);
   const router = useRouter();
 
   const fetchUserData = async () => {
@@ -34,6 +51,7 @@ export default function NiveauxPage() {
       if (res.ok) {
         const data = await res.json();
         setUser(data);
+        checkTajwidAccess();
       } else {
         router.push('/checkout');
       }
@@ -43,6 +61,22 @@ export default function NiveauxPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const checkTajwidAccess = async () => {
+    try {
+      const res = await fetch('/api/user/check-level-access?module=TAJWID');
+      if (res.ok) {
+        const data = await res.json();
+        setTajwidPurchased(data.hasAccess);
+      }
+    } catch (error) {
+      console.error('Error checking Tajwid access:', error);
+    }
+  };
+
+  const handleBuyTajwid = () => {
+    router.push('/checkout?level=tajwid');
   };
 
   useEffect(() => {
@@ -158,18 +192,61 @@ export default function NiveauxPage() {
                     {niveau.description}
                   </p>
 
-                  <div className="mt-auto flex items-center justify-between w-full">
-                    <span
-                      className={`text-sm font-medium bg-${niveau.color}-50 text-${niveau.color}-700 px-3 py-1 rounded-full flex items-center space-x-1`}
-                    >
-                      <Clock className="h-4 w-4" />
-                      <span>{niveau.badge}</span>
-                    </span>
+                  <div className="mt-auto flex flex-col w-full space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`text-sm font-medium bg-${niveau.color}-50 text-${niveau.color}-700 px-3 py-1 rounded-full flex items-center space-x-1`}
+                      >
+                        {niveau.isAvailable && !niveau.comingSoon ? (
+                          <>
+                            <span>{niveau.badge}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="h-4 w-4" />
+                            <span>{niveau.badge}</span>
+                          </>
+                        )}
+                      </span>
 
-                    {niveau.comingSoon && (
-                      <div className="bg-gray-100 p-2 rounded-full">
-                        <Lock className="h-5 w-5 text-gray-500" />
-                      </div>
+                      {niveau.comingSoon && (
+                        <div className="bg-gray-100 p-2 rounded-full">
+                          <Lock className="h-5 w-5 text-gray-500" />
+                        </div>
+                      )}
+
+                      {niveau.isAvailable && !niveau.comingSoon && (
+                        <div className={`p-2 rounded-full ${niveau.isPurchased ? 'bg-green-100' : 'bg-indigo-100'}`}>
+                          {niveau.isPurchased ? (
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                          ) : (
+                            <ShoppingCart className="h-5 w-5 text-indigo-600" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {niveau.isAvailable && !niveau.comingSoon && !niveau.isPurchased && (
+                      <button
+                        onClick={handleBuyTajwid}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                      >
+                        <ShoppingCart className="h-5 w-5" />
+                        <span>Accéder au Tajwid</span>
+                      </button>
+                    )}
+
+                    {niveau.isAvailable && !niveau.comingSoon && niveau.isPurchased && (
+                      <button
+                        onClick={() => {
+                          // Navigue vers le dashboard ou les chapitres Tajwid
+                          router.push('/dashboard');
+                        }}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                      >
+                        <CheckCircle className="h-5 w-5" />
+                        <span>Accéder au module</span>
+                      </button>
                     )}
                   </div>
                 </div>

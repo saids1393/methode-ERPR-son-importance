@@ -41,6 +41,7 @@ model User {
   
 
   homeworkSends     HomeworkSend[]
+  tajwidHomeworkSends TajwidHomeworkSend[] @relation("TajwidHomeworkSendUser")
   payments          Payment[]
   quizAttempts      QuizAttempt[]
   videoWatches      VideoWatch[]
@@ -60,6 +61,7 @@ model Level {
   id        Int       @id @default(autoincrement())
   title     String
   price     Int       @default(89)
+  module    CourseModule @default(LECTURE)
   isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
@@ -211,6 +213,47 @@ model HomeworkSend {
   @@unique([userId, homeworkId])
   @@index([userId])
   @@index([homeworkId])
+  @@index([status])
+}
+
+// -------------------------
+// DEVOIRS TAJWID
+// -------------------------
+model TajwidHomework {
+  id        String   @id @default(cuid())
+  chapterId Int
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  tajwidHomeworkSends TajwidHomeworkSend[]
+  @@index([chapterId])
+  @@index([isActive])
+}
+
+model TajwidHomeworkSend {
+  id              String     @id @default(cuid())
+  userId          String
+  tajwidHomeworkId String
+  sentAt          DateTime   @default(now())
+  emailSent       Boolean    @default(false)
+
+  // Gestion des rendus
+  type            HomeworkSendType @default(TEXT)
+  textContent     String?     // rendu écrit
+  audioUrl        String?     // rendu audio (fichier uploadé)
+  fileUrls        String?     // URLs des fichiers (JSON stringifié)
+  status          HomeworkStatus @default(PENDING)
+  feedback        String?     // commentaire du prof
+  correctedAt     DateTime?   // date de correction
+
+  user            User              @relation("TajwidHomeworkSendUser", fields: [userId], references: [id], onDelete: Restrict)
+  tajwidHomework  TajwidHomework    @relation(fields: [tajwidHomeworkId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, tajwidHomeworkId])
+  @@index([userId])
+  @@index([tajwidHomeworkId])
   @@index([status])
 }
 
@@ -383,6 +426,13 @@ enum SecondPaymentStatus {
   COMPLETED    // Paiement effectué avec succès
   FAILED       // Paiement échoué (à retry)
 }
+
+// Module de cours (Lecture vs Tajwid)
+enum CourseModule {
+  LECTURE
+  TAJWID
+}
+
 
 // ➕ Enums existants pour les rendus de devoirs
 enum HomeworkSendType {

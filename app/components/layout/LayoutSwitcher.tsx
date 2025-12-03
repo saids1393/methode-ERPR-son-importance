@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import DesktopLayout from "./DesktopLayout";
+import DesktopLayoutTajwid from "./DesktopLayoutTajwid";
 import MobileLayout from "./MobileLayout";
+import MobileLayoutTajwid from "./MobileLayoutTajwid";
 import { useInactivityLogout } from '@/hooks/useInactivityLogout';
 
 export default function LayoutSwitcher({ children }: { children: React.ReactNode }) {
    useInactivityLogout()
   const [isMobile, setIsMobile] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [sidebarType, setSidebarType] = useState<'default' | 'tajwid'>('default');
   const [isHydrated, setIsHydrated] = useState(false); // Track hydration
   const pathname = usePathname();
 
@@ -42,8 +45,21 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
 
     // Logique de la sidebar
     let shouldShowSidebar = false;
+    let type: 'default' | 'tajwid' = 'default';
 
-    if (pathname.startsWith('/chapitres/')) {
+    if (pathname.startsWith('/chapitres-tajwid/')) {
+      if (isProfessorAccess) {
+        shouldShowSidebar = true;
+        type = 'tajwid';
+        console.log('📱 SIDEBAR TAJWID PROFESSEUR activée');
+      } else if (hasStartedCourse) {
+        shouldShowSidebar = true;
+        type = 'tajwid';
+        console.log('📱 SIDEBAR TAJWID ÉLÈVE activée');
+      } else {
+        console.log('📱 SIDEBAR TAJWID DÉSACTIVÉE - cours non commencé par élève');
+      }
+    } else if (pathname.startsWith('/chapitres/')) {
       if (isProfessorAccess) {
         shouldShowSidebar = true;
         console.log('📱 SIDEBAR PROFESSEUR activée');
@@ -55,8 +71,9 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
       }
     }
 
-    console.log('📱 DÉCISION FINALE - Show sidebar:', shouldShowSidebar);
+    console.log('📱 DÉCISION FINALE - Show sidebar:', shouldShowSidebar, 'Type:', type);
     setShowSidebar(shouldShowSidebar);
+    setSidebarType(type);
     setIsHydrated(true); // Marquer comme hydraté après le premier calcul
   }, [pathname]);
 
@@ -79,7 +96,15 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
     );
   }
 
-  // Utiliser le layout avec sidebar
+  // Utiliser le layout avec sidebar approprié
+  if (sidebarType === 'tajwid') {
+    return isMobile ? (
+      <MobileLayoutTajwid>{children}</MobileLayoutTajwid>
+    ) : (
+      <DesktopLayoutTajwid>{children}</DesktopLayoutTajwid>
+    );
+  }
+
   return isMobile ? (
     <MobileLayout>{children}</MobileLayout>
   ) : (

@@ -34,7 +34,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (session.metadata?.paymentPlan === '2x' && session.metadata?.paymentNumber === '1') {
+    const module = (session.metadata?.module || 'LECTURE').toUpperCase();
+
+    if (session.metadata?.paymentPlan === '2x' && session.metadata?.paymentNumber === '1' && module !== 'TAJWID') {
       const customerId = session.customer as string;
       const paymentIntentId = session.payment_intent as string;
 
@@ -72,12 +74,12 @@ export async function POST(req: Request) {
     let wasFreeTrial = false;
 
     if (!user) {
-      // Créer un nouvel utilisateur
+      // Créer un nouvel utilisateur (ne pas forcer PAID_FULL si achat TAJWID)
       user = await createUser({
         email: email,
         stripeCustomerId: session.customer as string,
         stripeSessionId: sessionId,
-        accountType: 'PAID_FULL',
+        accountType: module === 'TAJWID' ? 'PAID_LEGACY' : 'PAID_FULL',
       });
       isNewAccount = true;
     } else if (!user.isActive) {
@@ -88,12 +90,12 @@ export async function POST(req: Request) {
           isActive: true,
           stripeCustomerId: session.customer as string,
           stripeSessionId: sessionId,
-          accountType: 'PAID_FULL',
+          ...(module !== 'TAJWID' ? { accountType: 'PAID_FULL' } : {}),
         }
       });
       user.isActive = true;
-    } else {
-      // Utilisateur existant et actif - Mettre à niveau si FREE_TRIAL
+    } else if (module !== 'TAJWID') {
+      // Utilisateur existant et actif - Mettre à niveau si FREE_TRIAL (uniquement module Lecture)
       const existingUser = await prisma.user.findUnique({
         where: { id: user.id },
         select: {
@@ -124,6 +126,33 @@ export async function POST(req: Request) {
       }
     }
 
+    // Lier l'achat au Level correspondant (TAJWID ou LECTURE)
+    try {
+      let level = await prisma.level.findFirst({
+        where: { module: module as any },
+      });
+
+      if (!level) {
+        // Créer automatiquement si manquant
+        level = await prisma.level.create({
+          data: {
+            title: module === 'TAJWID' ? 'Module Tajwid' : 'Méthode Lecture',
+            price: module === 'TAJWID' ? 29 : 89,
+            module: module as any,
+          },
+        });
+      }
+
+      // Créer l'achat si pas déjà présent
+      await prisma.levelPurchase.upsert({
+        where: { userId_levelId: { userId: user.id, levelId: level.id } },
+        create: { userId: user.id, levelId: level.id },
+        update: {},
+      });
+    } catch (e) {
+      console.error('❌ Erreur LevelPurchase:', e);
+    }
+
     // Générer un token JWT
     const token = await generateToken({
       userId: user.id,
@@ -132,7 +161,7 @@ export async function POST(req: Request) {
 
     // ======= ANTI-DOUBLON EMAIL =======
     // Email de bienvenue SEULEMENT pour les nouveaux comptes PAID_FULL
-    if (isNewAccount) {
+    if (isNewAccount && module !== 'TAJWID') {
       const claim = await prisma.user.updateMany({
         where: { id: user.id, welcomeEmailSent: false, accountType: 'PAID_FULL' },
         data: { welcomeEmailSent: true },
@@ -168,7 +197,8 @@ export async function POST(req: Request) {
         email: user.email,
         isActive: user.isActive,
       },
-      needsProfileCompletion: wasFreeTrial ? false : (!user.username || !user.password)
+      needsProfileCompletion: wasFreeTrial ? false : (!user.username || !user.password),
+      redirectTo: module === 'TAJWID' ? '/niveaux' : '/dashboard'
     });
 
     response.cookies.set({
