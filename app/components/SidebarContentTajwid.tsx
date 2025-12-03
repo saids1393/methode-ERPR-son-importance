@@ -310,7 +310,7 @@ export default function SidebarContentTajwid() {
           <BookOpen className="text-blue-400" size={20} />
           <span>Sommaire du Cours Tajwid</span>
         </h1>
-        <div className="mt-3">
+        <div className="mt-3 space-y-1">
           <Link
             href={isProfessorMode ? "/professor" : "/dashboard"}
             onClick={handleDashboardReturn}
@@ -318,6 +318,13 @@ export default function SidebarContentTajwid() {
           >
             <Home size={16} className="text-blue-400" />
             <span>Retour au tableau de bord</span>
+          </Link>
+          <Link
+            href="/devoirs-tajwid"
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-gray-200 hover:bg-gray-800"
+          >
+            <BookOpen size={16} className="text-green-400" />
+            <span>Mes devoirs Tajwid</span>
           </Link>
         </div>
 
