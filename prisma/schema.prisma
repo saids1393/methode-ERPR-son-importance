@@ -221,12 +221,12 @@ model HomeworkSend {
 // -------------------------
 model TajwidHomework {
   id        String   @id @default(cuid())
-  chapterId Int
+  chapterId Int      @unique
   title     String
-  content   String
+  content   String   @db.Text
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   tajwidHomeworkSends TajwidHomeworkSend[]
   @@index([chapterId])
   @@index([isActive])
