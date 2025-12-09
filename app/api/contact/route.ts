@@ -63,7 +63,7 @@ export async function POST(request: Request) {
           <p>En attendant, vous pouvez continuer votre apprentissage sur votre espace personnel.</p>
           
           <div style="margin-top: 30px; text-align: center;">
-            <a href="${process.env.NEXTAUTH_URL || 'https://methode-erpr-v1.vercel.app'}/dashboard" 
+            <a href="${process.env.NEXTAUTH_URL || 'https://methode-erpr-by-arabeimportance.vercel.app'}/dashboard" 
                style="display: inline-block; padding: 10px 20px; background-color: #4299e1; color: white; text-decoration: none; border-radius: 4px;">
               Accéder à mon espace
             </a>

@@ -204,7 +204,7 @@ export default function NoticePage() {
     content: [
       'À la fin de chaque devoir, vous trouverez les instructions pour le rendu de vos devoirs.',
       'Le rendu de devoirs se fait via l\'onglet accessible sur votre tableau de bord (Dashboard).',
-      'Vous pouvez accéder à cette section ici : https://methode-erpr-v1.vercel.app/devoirs',
+      'Vous pouvez accéder à cette section ici : https://methode-erpr-by-arabeimportance.vercel.app/devoirs',
       'Vous avez la possibilité de rendre votre devoir sous différents formats : PDF, DOCS, ou tout autre fichier.',
       'Vous pouvez également rendre votre devoir en audio 🎧 ou le rédiger directement en texte via le champ intégré.',
       'Chaque rendu est corrigé puis conservé dans un drive sécurisé auquel vous aurez accès pour assurer un suivi optimal.'

@@ -27,11 +27,25 @@ function getSecurityHeaders() {
   };
 }
 
+// À ajouter dans middleware.ts pour remplacer verifyJWTToken()
+
 async function verifyJWTToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
+    
+    // 🔍 LOGS DE DEBUG
+    console.log('================================');
+    console.log('🔍 [JWT VERIFY] Payload décodé:');
+    console.log('   userId:', payload.userId);
+    console.log('   email:', payload.email);
+    console.log('   username:', payload.username);
+    console.log('   Toutes les clés:', Object.keys(payload));
+    console.log('   Payload complet:', JSON.stringify(payload));
+    console.log('================================');
+    
     return payload;
   } catch (error) {
+    console.error('❌ [JWT VERIFY] Erreur lors de la vérification:', error);
     return null;
   }
 }

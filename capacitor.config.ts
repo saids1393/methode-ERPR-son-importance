@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Méthode ERPR',         // Nom de ton application
   webDir: 'www',                   // Dossier local vide pour la synchronisation Capacitor
   server: {
-    url: 'https://methode-erpr-v1.vercel.app', // Ton app Next.js en ligne
+    url: 'https://methode-erpr-by-arabeimportance.vercel.app', // Ton app Next.js en ligne
     cleartext: true                // Laisse "true" pour éviter les blocages HTTP (utile en dev)
   },
   plugins: {

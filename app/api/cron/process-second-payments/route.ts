@@ -1,4 +1,4 @@
-// app/api/cron/process-second-payments/route.ts (VERSION SÉCURISÉE - FINAL)
+// app/api/cron/process-second-payments/route.ts (VERSION AVEC LOGS DE DEBUG)
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma"; // ✅ Import correct
@@ -7,10 +7,21 @@ export async function GET(req: Request) {
   try {
     // Vérifier l'authentification (secret token)
     const authHeader = req.headers.get("authorization");
+    const cronSecret = process.env.CRON_SECRET;
+    
+    console.log("🔐 === DEBUG AUTH CRON ===");
+    console.log("   Header reçu:", authHeader ? authHeader.substring(0, 20) + "..." : "NULL");
+    console.log("   Secret attendu:", cronSecret ? cronSecret.substring(0, 20) + "..." : "NULL");
+    console.log("   NODE_ENV:", process.env.NODE_ENV);
+    console.log("   Match:", authHeader === `Bearer ${cronSecret}`);
+    console.log("🔐 === FIN DEBUG AUTH ===");
+    
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      console.error("❌ AUTH ÉCHOUÉE - Unauthorized");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    console.log("✅ AUTH CRON réussie !");
     console.log("🔄 Exécution du cron - Traitement des paiements 2x...");
 
     // 📅 Calculer la date limite (30 jours en arrière)
@@ -63,13 +74,18 @@ export async function GET(req: Request) {
             ? process.env.NEXTAUTH_URL
             : "http://localhost:3000";
 
+        console.log(`📤 Envoi requête à: ${baseUrl}/api/stripe/charge-second-payment`);
+        
+        const bearerToken = `Bearer ${process.env.CRON_SECRET}`;
+        console.log(`🔑 Bearer token envoyé: ${bearerToken.substring(0, 20)}...`);
+
         const response = await fetch(
           `${baseUrl}/api/stripe/charge-second-payment`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${process.env.CRON_SECRET}`,
+              "Authorization": bearerToken,
             },
             body: JSON.stringify({
               customerId: payment.customerId,
@@ -80,7 +96,10 @@ export async function GET(req: Request) {
           }
         );
 
+        console.log(`📥 Réponse status: ${response.status}`);
+        
         const result = await response.json();
+        console.log(`📥 Réponse body:`, result);
 
         if (result.success) {
           console.log(`✅ 2ème paiement réussi : ${result.amount}€`);
