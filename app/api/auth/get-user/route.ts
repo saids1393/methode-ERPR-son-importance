@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Récupérer les infos complètes incluant trialExpired
+    // Récupérer les infos complètes incluant trialExpired et progression Tajwid
     const completeUser = await prisma.user.findUnique({
       where: { id: user.id },
       select: {
@@ -26,6 +26,8 @@ export async function GET(req: NextRequest) {
         isActive: true,
         accountType: true,
         trialExpired: true,
+        completedPagesTajwid: true,
+        completedQuizzesTajwid: true,
       },
     });
 

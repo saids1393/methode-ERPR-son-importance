@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { chapters } from '@/lib/chapters';
+import { chaptersTajwid } from '@/lib/chapters-tajwid';
 import { useSimpleTimer } from '@/hooks/useSimpleTimer';
 import { useUserModule } from '@/hooks/useUserModule';
 import { getChaptersByModule, hasAccessToChapter, getModuleTotals } from '@/lib/module-access';
@@ -61,6 +62,16 @@ interface HomeworkSend {
   };
 }
 
+interface TajwidHomeworkSend {
+  id: string;
+  sentAt: string;
+  tajwidHomework: {
+    id: string;
+    chapterId: number;
+    title: string;
+  };
+}
+
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -68,6 +79,7 @@ export default function DashboardPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');
   const [homeworkSends, setHomeworkSends] = useState<HomeworkSend[]>([]);
+  const [tajwidHomeworkSends, setTajwidHomeworkSends] = useState<TajwidHomeworkSend[]>([]);
   const [homeworkLoading, setHomeworkLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
@@ -79,10 +91,13 @@ export default function DashboardPage() {
   }, []);
 
   const {
-    completedPages,
-    completedQuizzes,
+    completedPages: lectureCompletedPages,
+    completedQuizzes: lectureCompletedQuizzes,
     isLoading: progressLoading,
   } = useUserProgress();
+
+  const [completedPages, setCompletedPages] = useState<Set<number>>(new Set());
+  const [completedQuizzes, setCompletedQuizzes] = useState<Set<number>>(new Set());
 
   const getSentHomeworkCount = () => {
     return homeworkSends.length;
@@ -148,13 +163,17 @@ export default function DashboardPage() {
     const statuses: Array<{
       chapterId: number;
       title: string;
-      status: 'sent' | 'pending';
+      status: 'sent' | 'pending' | 'failed';
       sentAt?: string;
     }> = [];
 
+    // Utiliser les chapitres selon le module
+    const moduleChapters = userModule === 'TAJWID' ? chaptersTajwid : chapters;
+    const moduleSends = userModule === 'TAJWID' ? tajwidHomeworkSends : homeworkSends;
+
     // Parcourir tous les chapitres (1-10)
     for (let chapterId = 1; chapterId <= 10; chapterId++) {
-      const chapter = chapters.find(ch => ch.chapterNumber === chapterId);
+      const chapter = moduleChapters.find(ch => ch.chapterNumber === chapterId);
       if (!chapter) {
         // Si le chapitre n'existe pas dans les données, créer un placeholder
         statuses.push({
@@ -172,20 +191,25 @@ export default function DashboardPage() {
       const isChapterFullyCompleted = chapterCompleted && chapterQuizCompleted;
 
       // Chercher si le devoir a été envoyé
-      const sentHomework = homeworkSends.find(send => send.homework.chapterId === chapterId);
+      const sentHomework = userModule === 'TAJWID'
+        ? (moduleSends as TajwidHomeworkSend[]).find(send => send.tajwidHomework.chapterId === chapterId)
+        : (moduleSends as HomeworkSend[]).find(send => send.homework.chapterId === chapterId);
 
       if (sentHomework) {
         statuses.push({
           chapterId,
-          title: sentHomework.homework.title,
+          title: userModule === 'TAJWID'
+            ? (sentHomework as TajwidHomeworkSend).tajwidHomework.title
+            : (sentHomework as HomeworkSend).homework.title,
           status: 'sent',
           sentAt: sentHomework.sentAt
         });
       } else {
+        // Si le chapitre est complété mais pas de devoir envoyé, c'est une erreur
         statuses.push({
           chapterId,
           title: `Devoir du chapitre ${chapterId}`,
-          status: isChapterFullyCompleted ? 'sent' : 'pending'
+          status: isChapterFullyCompleted ? 'failed' : 'pending'
         });
       }
     }
@@ -195,10 +219,18 @@ export default function DashboardPage() {
 
   const fetchHomeworkSends = async () => {
     try {
-      const response = await fetch('/api/homework/user-sends');
-      if (response.ok) {
-        const data = await response.json();
-        setHomeworkSends(data.sends || []);
+      // Récupérer les devoirs Lecture
+      const lectureResponse = await fetch('/api/homework/user-sends');
+      if (lectureResponse.ok) {
+        const lectureData = await lectureResponse.json();
+        setHomeworkSends(lectureData.sends || []);
+      }
+
+      // Récupérer les devoirs Tajwid
+      const tajwidResponse = await fetch('/api/homework/tajwid/user-sends');
+      if (tajwidResponse.ok) {
+        const tajwidData = await tajwidResponse.json();
+        setTajwidHomeworkSends(tajwidData.sends || []);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des devoirs:', error);
@@ -210,6 +242,37 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchHomeworkSends();
   }, []);
+
+  // Récupérer les données de progression selon le module
+  useEffect(() => {
+    const fetchModuleProgress = async () => {
+      if (userModule === 'TAJWID') {
+        try {
+          // Pour Tajwid, récupérer les données de progression Tajwid
+          const userResponse = await fetch('/api/auth/get-user');
+          if (userResponse.ok) {
+            const response = await userResponse.json();
+            const userData = response.user;
+            setCompletedPages(new Set(userData.completedPagesTajwid || []));
+            setCompletedQuizzes(new Set(userData.completedQuizzesTajwid || []));
+          }
+        } catch (error) {
+          console.error('Erreur lors du chargement de la progression Tajwid:', error);
+          // En cas d'erreur, utiliser des données vides
+          setCompletedPages(new Set());
+          setCompletedQuizzes(new Set());
+        }
+      } else {
+        // Utiliser les données Lecture
+        setCompletedPages(lectureCompletedPages);
+        setCompletedQuizzes(lectureCompletedQuizzes);
+      }
+    };
+
+    if (userModule) {
+      fetchModuleProgress();
+    }
+  }, [userModule, lectureCompletedPages, lectureCompletedQuizzes]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -898,10 +961,10 @@ export default function DashboardPage() {
               <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Devoirs <span className="text-gray-400">(10)</span>
+                    Devoirs {userModule === 'TAJWID' ? 'Tajwid' : ''} <span className="text-gray-400">(10)</span>
                   </h3>
                   <Link
-                    href="/devoirs"
+                    href={userModule === 'TAJWID' ? '/devoirs-tajwid' : '/devoirs'}
                     className="text-blue-800 text-sm font-medium hover:underline cursor-pointer"
                   >
                    Voir plus
@@ -920,8 +983,13 @@ export default function DashboardPage() {
                       homeworkStatuses.map((homework, index) => (
                         <div key={homework.chapterId} className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-gray-50 transition-colors">
                           <div className="flex items-center space-x-3 min-w-0 flex-1">
-                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${homework.status === 'sent' ? 'bg-blue-800' : 'bg-gray-300'
-                              }`}></div>
+                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                              homework.status === 'sent'
+                                ? 'bg-green-500'
+                                : homework.status === 'failed'
+                                ? 'bg-red-500'
+                                : 'bg-orange-400'
+                            }`}></div>
                             <div className="min-w-0 flex-1">
                               <p className="font-medium text-gray-900 text-sm sm:text-base truncate">
                                 {homework.title}
@@ -929,26 +997,36 @@ export default function DashboardPage() {
                               <div className="text-slate-400 text-xs mt-1">
                                 {homework.status === 'pending' ? (
                                   <span className="text-orange-500">
-                                    Terminez le chapitre pour recevoir le devoir
+                                    En attente - Terminez le chapitre pour recevoir le devoir
                                   </span>
-                                ) : homework.sentAt ? (
+                                ) : homework.status === 'sent' && homework.sentAt ? (
                                   <span className="text-green-600">
-                                    Le devoir a été envoyé le {new Date(homework.sentAt).toLocaleDateString('fr-FR')}
+                                    Envoyé le {new Date(homework.sentAt).toLocaleDateString('fr-FR')}
+                                  </span>
+                                ) : homework.status === 'failed' ? (
+                                  <span className="text-red-600">
+                                    Échec - Chapitre complété mais devoir non envoyé
                                   </span>
                                 ) : (
-                                  <span className="text-red-600">
-                                    Chapitre et quiz complétés, mais devoir inexistant.
+                                  <span className="text-gray-500">
+                                    Statut inconnu
                                   </span>
                                 )}
                               </div>
                             </div>
                           </div>
-                          <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center flex-shrink-0 ml-2 ${homework.status === 'sent'
-                            ? 'bg-blue-800'
-                            : 'border-2 border-gray-300'
-                            }`}>
+                          <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center flex-shrink-0 ml-2 ${
+                            homework.status === 'sent'
+                              ? 'bg-green-500'
+                              : homework.status === 'failed'
+                              ? 'bg-red-500'
+                              : 'border-2 border-orange-400'
+                          }`}>
                             {homework.status === 'sent' && (
                               <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>
+                            )}
+                            {homework.status === 'failed' && (
+                              <X className="w-3 h-3 text-white" />
                             )}
                           </div>
                         </div>
