@@ -50,7 +50,7 @@ interface TajwidHomework {
   submission: Submission | null;
 }
 
-interface HomeworkSend {
+interface TajwidHomeworkSendData {
   id: string;
   sentAt: string;
   tajwidHomework: {
@@ -84,7 +84,7 @@ export default function DevoirsTajwidPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [homeworks, setHomeworks] = useState<TajwidHomework[]>([]);
-  const [homeworkSends, setHomeworkSends] = useState<HomeworkSend[]>([]);
+  const [homeworkSends, setHomeworkSends] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<string | null>(null);
@@ -179,7 +179,11 @@ export default function DevoirsTajwidPage() {
       const response = await fetch('/api/homework/tajwid/user-sends');
       if (response.ok) {
         const data = await response.json();
-        setHomeworkSends(data.sends || []);
+        const mappedSends = (data.sends || []).map((send: TajwidHomeworkSendData) => ({
+          ...send,
+          homework: send.tajwidHomework
+        }));
+        setHomeworkSends(mappedSends);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des envois:', error);
@@ -591,6 +595,43 @@ export default function DevoirsTajwidPage() {
 
                         {hasSubmission && (
                           <div className="bg-green-50 border border-green-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                            <div className="flex items-start space-x-2 sm:space-x-3 mb-3">
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-green-900 text-sm sm:text-base mb-2">
+                                  ✅ Votre réponse
+                                </h4>
+                                {homework.submission?.type === 'TEXT' && homework.submission.textContent && (
+                                  <div className="bg-white rounded-lg p-3 sm:p-4 text-gray-800 text-xs sm:text-sm whitespace-pre-wrap break-words">
+                                    {homework.submission.textContent}
+                                  </div>
+                                )}
+                                {homework.submission?.type === 'FILE' && homework.submission.files && (
+                                  <div className="space-y-2">
+                                    {homework.submission.files.map((file, idx) => {
+                                      const ext = file.name.split('.').pop()?.toLowerCase();
+                                      return renderFilePreview(file, ext, idx);
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {homework.submission?.feedback && (
+                              <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-green-200">
+                                <div className="flex items-start space-x-2 sm:space-x-3">
+                                  <Award className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-gray-900 text-sm sm:text-base mb-2">
+                                      💬 Retour du professeur
+                                    </h4>
+                                    <div className="bg-white rounded-lg p-3 sm:p-4 text-gray-800 text-xs sm:text-sm whitespace-pre-wrap break-words">
+                                      {homework.submission.feedback}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 

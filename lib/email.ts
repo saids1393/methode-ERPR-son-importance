@@ -1059,6 +1059,125 @@ const html = `
   }
 }
 
+export async function sendTajwidHomeworkSubmissionEmail(
+  params: HomeworkSubmissionEmailParams
+): Promise<boolean> {
+  try {
+    const attachments =
+      params.submissionType === "AUDIO" && params.fileUrls?.length
+        ? params.fileUrls.map((f) => ({
+            filename: f.name,
+            path: f.path,
+          }))
+        : [];
+
+const html = `
+  <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <h2 style="color: #16a085;">✅ Devoir Tajwid soumis avec succès !</h2>
+    <p>Bonjour <strong>${params.userName}</strong>,</p>
+    <p>Votre devoir Tajwid pour le chapitre <strong>${params.chapterId}</strong> a été soumis avec succès.</p>
+
+    <div style="margin-top: 15px; padding: 15px; background-color: #d5f4e6; border-left: 4px solid #16a085; border-radius: 6px;">
+      <p><strong>Titre :</strong> ${params.homeworkTitle}</p>
+      <p><strong>Type :</strong> ${
+        params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"
+      }</p>
+    </div>
+
+    ${
+      params.submissionType === "TEXT"
+        ? `<div style="margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 6px; border: 1px solid #ddd;">
+             <p>${params.content}</p>
+           </div>`
+        : `<p style="margin-top: 15px;">📎 Vos fichiers sont joints à cet email. Assurez-vous de les conserver pour référence.</p>`
+    }
+
+    <p style="margin-top: 20px;">Merci pour votre travail et continuez comme ça ! 💪</p>
+
+    <p style="margin-top: 20px; font-size: 12px; color: #777;">
+      Ceci est un message automatique, merci de ne pas répondre.
+    </p>
+  </div>
+`;
+
+    await transporter.sendMail({
+      from: SENDER_INFO,
+      to: params.userEmail,
+      subject: `🚀 Devoir Tajwid envoyé - ${params.homeworkTitle}`,
+      html: juice(html),
+      attachments,
+    });
+
+    console.log(`✅ Email étudiant Tajwid envoyé avec fichiers joints`);
+    return true;
+  } catch (err) {
+    console.error("❌ Erreur sendTajwidHomeworkSubmissionEmail:", err);
+    return false;
+  }
+}
+
+export async function sendTeacherTajwidHomeworkNotification(
+  params: TeacherNotificationParams
+): Promise<boolean> {
+  try {
+    const attachments =
+      params.submissionType === "AUDIO" && params.fileUrls?.length
+        ? params.fileUrls.map((f) => ({
+            filename: f.name,
+            path: f.path,
+          }))
+        : [];
+
+const html = `
+  <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <h2 style="color: #16a085;">📬 Nouveau devoir Tajwid soumis</h2>
+    <p>Bonjour,</p>
+    <p>Un étudiant vient de soumettre un devoir Tajwid. Voici les détails :</p>
+
+    <div style="margin-top: 15px; padding: 15px; background-color: #d5f4e6; border-left: 4px solid #16a085; border-radius: 6px;">
+      <ul style="list-style: none; padding: 0;">
+        <li><strong>Nom :</strong> ${params.userName}</li>
+        <li><strong>Email :</strong> ${params.userEmail}</li>
+        <li><strong>Chapitre :</strong> ${params.chapterId}</li>
+        <li><strong>Titre :</strong> ${params.homeworkTitle}</li>
+        <li><strong>Type :</strong> ${
+          params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"
+        }</li>
+      </ul>
+    </div>
+
+    ${
+      params.submissionType === "TEXT"
+        ? `<div style="margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 6px; border: 1px solid #ddd;">
+             <p>${params.content}</p>
+           </div>`
+        : `<p style="margin-top: 15px;">📎 Les fichiers sont joints à cet email.</p>`
+    }
+
+    <p style="margin-top: 20px;">Merci de vérifier et de noter le devoir Tajwid dès que possible.</p>
+
+    <p style="margin-top: 20px; font-size: 12px; color: #777;">
+      Ceci est un message automatique, merci de ne pas répondre.
+    </p>
+  </div>
+`;
+
+    await transporter.sendMail({
+      from: SENDER_INFO,
+      to: params.teacherEmail,
+      subject: `📬 Nouveau devoir Tajwid - ${params.userName} (${params.homeworkTitle})`,
+      html: juice(html),
+      attachments,
+    });
+
+    console.log(`✅ Email professeur Tajwid envoyé avec fichiers joints`);
+    return true;
+  } catch (err) {
+    console.error("❌ Erreur sendTeacherTajwidHomeworkNotification:", err);
+    return false;
+  }
+}
+
 // À AJOUTER DANS lib/email.ts (avant createWelcomeEmailTemplate)
 
 // ----------------------------
