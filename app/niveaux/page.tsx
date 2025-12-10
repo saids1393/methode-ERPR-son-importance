@@ -102,9 +102,11 @@ export default function NiveauxPage() {
       title: 'Niveau Tajwid',
       icon: <BookOpen className="h-10 w-10 text-indigo-600" />,
       description:
-        "Un espace d’apprentissage du Tajwid sous forme d’articles clairs et audio-guidés. Disponible avant le mois béni du Ramadan إن شاء الله.",
+        "Un espace d'apprentissage du Tajwid sous forme d'articles clairs et audio-guidés. Disponible avant le mois béni du Ramadan إن شاء الله.",
       badge: 'Sortie avant Ramadan 2026',
       comingSoon: true,
+      isAvailable: false,
+      isPurchased: false,
       color: 'indigo',
     },
     {
@@ -115,6 +117,8 @@ export default function NiveauxPage() {
         "Introduction à la langue arabe : conjugaison, vocabulaire, étude de texte. Parfait pour bien démarrer et consolider les bases.",
       badge: 'Disponible courant 2026',
       comingSoon: true,
+      isAvailable: false,
+      isPurchased: false,
       color: 'emerald',
     },
     {
@@ -125,6 +129,8 @@ export default function NiveauxPage() {
         "Un parcours complet : étude de texte, vocabulaire, conjugaison et grammaire. Structuré pour progresser pas à pas vers la maîtrise.",
       badge: 'Disponible courant 2026',
       comingSoon: true,
+      isAvailable: false,
+      isPurchased: false,
       color: 'rose',
     },
   ];

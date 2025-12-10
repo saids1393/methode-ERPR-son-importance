@@ -21,6 +21,8 @@ model User {
   stripeSessionId   String?
   completedPages    Int[]            @default([])
   completedQuizzes  Int[]            @default([])
+  completedPagesTajwid    Int[]      @default([])
+  completedQuizzesTajwid  Int[]      @default([])
   studyTimeSeconds  Int              @default(0)
   resetToken        String?
   resetTokenExpires DateTime?
