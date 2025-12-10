@@ -78,22 +78,31 @@ export async function POST(request: NextRequest) {
           );
 
           if (allPagesCompleted) {
-            console.log(`🎉 [API TAJWID] Chapitre ${quizNumber} terminé! Envoi du devoir...`);
+            console.log(`🎉 [API TAJWID] Chapitre ${quizNumber} terminé! Toutes les pages complétées:`, allPagesOfChapter);
+            console.log(`📋 [API TAJWID] Pages complétées par l'utilisateur:`, completedPages);
+            console.log(`🚀 [API TAJWID] Tentative d'envoi du devoir...`);
 
             try {
               const homeworkSent = await checkAndSendTajwidHomework(user.id, quizNumber);
 
               if (homeworkSent) {
-                console.log(`📧 [API TAJWID] Devoir Tajwid du chapitre ${quizNumber} envoyé avec succès!`);
+                console.log(`✅ [API TAJWID] Devoir Tajwid du chapitre ${quizNumber} envoyé avec succès!`);
               } else {
-                console.log(`⚠️ [API TAJWID] Devoir Tajwid du chapitre ${quizNumber} non envoyé (déjà envoyé ou inexistant)`);
+                console.log(`⚠️ [API TAJWID] Devoir Tajwid du chapitre ${quizNumber} non envoyé.`);
+                console.log(`   Raisons possibles:`);
+                console.log(`   - Le devoir n'existe pas dans la base de données (table TajwidHomework vide)`);
+                console.log(`   - Le devoir a déjà été envoyé à cet utilisateur`);
+                console.log(`   - L'utilisateur n'est pas actif`);
               }
             } catch (homeworkError) {
               console.error(`❌ [API TAJWID] Erreur envoi devoir chapitre ${quizNumber}:`, homeworkError);
             }
           } else {
             const missingPages = allPagesOfChapter.filter(p => !completedPages.includes(p));
-            console.log(`⏳ [API TAJWID] Chapitre ${quizNumber} pas encore terminé. Pages manquantes:`, missingPages);
+            console.log(`⏳ [API TAJWID] Chapitre ${quizNumber} pas encore terminé.`);
+            console.log(`   Pages requises:`, allPagesOfChapter);
+            console.log(`   Pages complétées:`, completedPages.filter(p => allPagesOfChapter.includes(p)));
+            console.log(`   Pages manquantes:`, missingPages);
           }
         }
 
