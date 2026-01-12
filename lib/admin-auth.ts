@@ -13,7 +13,9 @@ export async function isAdminUser(request: NextRequest): Promise<boolean> {
     if (!token) return false;
 
     const decoded = await verifyToken(token);
-    return ADMIN_EMAILS.includes(decoded.email);
+    if (!decoded || !decoded.email) return false;
+    
+    return ADMIN_EMAILS.includes(decoded.email as string);
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;

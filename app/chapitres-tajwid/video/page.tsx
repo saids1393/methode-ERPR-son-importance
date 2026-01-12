@@ -32,9 +32,9 @@ export default function VideoPage({ params }: VideoPageProps) {
     return notFound();
   }
 
-  // 🔁 Si le chapitre n'a pas de vidéo → affichage du contenu placeholder
+  // 🔁 Si le chapitre n'a pas de pages → affichage du contenu placeholder
   // Pour Tajwid, nous affichons un placeholder au lieu de rediriger
-  if (!chapter.videoId && !chapter.pages) {
+  if (!chapter.pages || chapter.pages.length === 0) {
     return (
       <div className="min-h-screen bg-gray-900 text-white">
         <div className="p-8 flex items-center justify-center">
@@ -66,22 +66,13 @@ export default function VideoPage({ params }: VideoPageProps) {
 
       {/* Lecteur vidéo ou placeholder */}
       <div className="w-full">
-        {chapter.videoId ? (
-          <CloudflareVideoPlayer
-            videoId={chapter.videoId}
-            title={chapter.title}
-            thumbnailUrl={chapter.thumbnail}
-            className="w-full"
-          />
-        ) : (
-          <div className="w-full bg-gradient-to-br from-gray-800 to-gray-900 p-8 md:p-16 flex items-center justify-center min-h-96">
-            <div className="text-center">
-              <div className="text-6xl mb-4">📺</div>
-              <p className="text-gray-300 text-xl">Vidéo à venir</p>
-              <p className="text-gray-500 text-sm mt-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-            </div>
+        <div className="w-full bg-gradient-to-br from-gray-800 to-gray-900 p-8 md:p-16 flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <div className="text-6xl mb-4">📺</div>
+            <p className="text-gray-300 text-xl">Vidéo à venir</p>
+            <p className="text-gray-500 text-sm mt-2">Les vidéos pour les chapitres Tajwid seront bientôt disponibles.</p>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Navigation */}

@@ -43,27 +43,36 @@ export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Se
     }
 
     // Vérifier ou créer l'utilisateur
-    let user = await getUserByEmail(email);
+    const existingUser = await getUserByEmail(email);
+    let userId: string;
+    let userEmail: string;
+    let username: string | null = null;
     let isNewAccount = false;
 
-    if (!user) {
-      user = await createUser({
+    if (!existingUser) {
+      const newUser = await createUser({
         email,
         stripeCustomerId: session.customer as string,
         stripeSessionId: session.id,
       });
-      console.log(`🆕 Nouvel utilisateur créé: ${user.id}`);
+      userId = newUser.id;
+      userEmail = newUser.email;
+      username = newUser.username;
+      console.log(`🆕 Nouvel utilisateur créé: ${userId}`);
       isNewAccount = true;
     } else {
       await prisma.user.update({
-        where: { id: user.id },
+        where: { id: existingUser.id },
         data: {
           isActive: true,
           stripeCustomerId: session.customer as string,
           stripeSessionId: session.id,
         },
       });
-      console.log(`🔓 Utilisateur activé: ${user.id}`);
+      userId = existingUser.id;
+      userEmail = existingUser.email;
+      username = existingUser.username;
+      console.log(`🔓 Utilisateur activé: ${userId}`);
     }
 
     // Enregistrer le paiement dans Prisma
@@ -73,14 +82,14 @@ export async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Se
         stripePaymentIntentId: session.payment_intent as string,
         amount: session.amount_total || 0,
         currency: session.currency || 'eur',
-        userId: user.id,
+        userId: userId,
       },
     });
 
     // Envoyer uniquement le mail de bienvenue si nouvel utilisateur
     if (isNewAccount) {
       try {
-        await sendWelcomeEmail(user.email, user.username || undefined);
+        await sendWelcomeEmail(userEmail, username || undefined);
         console.log('📧 Email de bienvenue envoyé à:', email);
       } catch (emailError) {
         console.error('❌ Erreur lors de l\'envoi de l\'email de bienvenue:', emailError);

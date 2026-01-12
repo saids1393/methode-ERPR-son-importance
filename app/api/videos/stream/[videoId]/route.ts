@@ -76,9 +76,13 @@ async function checkUserIsActive(request: NextRequest): Promise<{ isValid: boole
     // Vérifier le token
     const decoded = await verifyToken(token);
 
+    if (!decoded || !decoded.userId) {
+      return { isValid: false, error: 'Token invalide' };
+    }
+
     // Récupérer l'utilisateur
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: decoded.userId as string },
       select: {
         id: true,
         email: true,

@@ -1,6 +1,6 @@
 import React from 'react';
 import UniversalNavigation from './UniversalNavigation';
-import { ModuleType } from '@/lib/chapters';
+import { ModuleType } from '@/lib/progressTracking';
 
 interface PageNavigationProps {
   currentChapter: number;

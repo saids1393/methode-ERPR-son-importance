@@ -2,7 +2,8 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getNextContent, ContentType, ModuleType } from '@/lib/chapters';
+import { getNextContent, ContentType } from '@/lib/chapters';
+import { ModuleType } from '@/lib/progressTracking';
 
 interface UseNavigationNextProps {
   currentChapter: number;

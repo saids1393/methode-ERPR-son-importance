@@ -3,7 +3,8 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useNavigationNext } from '@/hooks/useNavigationNext';
-import { ContentType, ModuleType } from '@/lib/chapters';
+import { ContentType } from '@/lib/chapters';
+import { ModuleType } from '@/lib/progressTracking';
 
 interface NextButtonProps {
   currentChapter: number;

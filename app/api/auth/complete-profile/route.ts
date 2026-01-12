@@ -141,13 +141,13 @@ export async function POST(req: Request) {
     }
 
     // ======= ANTIDUPLICATION ATOMIQUE =======
-    // Email de bienvenue SEULEMENT pour les utilisateurs PAID_FULL
+    // Email de bienvenue SEULEMENT pour les utilisateurs avec un compte ACTIVE
     const userWithAccountType = await prisma.user.findUnique({
       where: { id: updatedUser.id },
       select: { accountType: true }
     });
 
-    if (userWithAccountType?.accountType === 'PAID_FULL') {
+    if (userWithAccountType?.accountType === 'ACTIVE') {
       // On "réserve" l'envoi en mettant welcomeEmailSent = true SEULEMENT si c'était false.
       const claim = await prisma.user.updateMany({
         where: { id: updatedUser.id, welcomeEmailSent: false },

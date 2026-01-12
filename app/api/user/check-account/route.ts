@@ -33,9 +33,8 @@ export async function POST(request: NextRequest) {
       where: { id: userId },
       select: {
         accountType: true,
-        trialStartDate: true,
-        trialEndDate: true,
-        trialExpired: true
+        subscriptionStartDate: true,
+        subscriptionEndDate: true,
       }
     });
 
@@ -43,13 +42,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Utiliser trialExpired directement de la base de données
-    // Le cron job est responsable de mettre à jour ce champ
+    // Vérifier si l'abonnement est expiré
+    const isExpired = user.subscriptionEndDate 
+      ? new Date(user.subscriptionEndDate) < new Date() 
+      : user.accountType === 'INACTIVE' || user.accountType === 'EXPIRED';
+
     return NextResponse.json({
       accountType: user.accountType,
-      trialExpired: user.trialExpired,
-      freeTrialStartDate: user.trialStartDate,
-      freeTrialEndDate: user.trialEndDate
+      subscriptionExpired: isExpired,
+      subscriptionStartDate: user.subscriptionStartDate,
+      subscriptionEndDate: user.subscriptionEndDate
     });
 
   } catch (error) {

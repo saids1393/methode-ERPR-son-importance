@@ -122,7 +122,16 @@ export async function POST(req: Request) {
           { username: { equals: cleanIdentifier, mode: 'insensitive' } },
         ],
       },
-      select: { id: true, email: true, username: true, password: true, isActive: true },
+      select: { 
+        id: true, 
+        email: true, 
+        username: true, 
+        password: true, 
+        isActive: true,
+        accountType: true,
+        subscriptionPlan: true,
+        subscriptionEndDate: true,
+      },
     });
 
     if (!user || !user.isActive || !user.password) {

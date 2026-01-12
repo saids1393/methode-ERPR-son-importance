@@ -213,3 +213,99 @@ export async function getUserByEmail(email: string) {
     where: { email },
   });
 }
+
+/**
+ * Crée une demande de réinitialisation de mot de passe
+ */
+export async function createPasswordResetRequest(email: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Par sécurité, on retourne toujours un succès même si l'utilisateur n'existe pas
+    if (!user) {
+      return {
+        success: true,
+        message: 'Si cette adresse email est associée à un compte, vous recevrez un email de réinitialisation.',
+      };
+    }
+
+    // Générer un token unique
+    const resetToken = crypto.randomUUID() + '-' + crypto.randomUUID();
+    const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 heure
+
+    // Mettre à jour l'utilisateur avec le token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken,
+        resetTokenExpires,
+      },
+    });
+
+    // Envoyer l'email de réinitialisation
+    const { sendPasswordResetEmail } = await import('./email');
+    const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    await sendPasswordResetEmail(email, resetUrl, user.username || undefined);
+
+    return {
+      success: true,
+      message: 'Si cette adresse email est associée à un compte, vous recevrez un email de réinitialisation.',
+    };
+  } catch (error) {
+    console.error('Erreur createPasswordResetRequest:', error);
+    return {
+      success: false,
+      message: 'Une erreur est survenue. Veuillez réessayer.',
+    };
+  }
+}
+
+/**
+ * Réinitialise le mot de passe avec un token
+ */
+export async function resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+  try {
+    // Trouver l'utilisateur avec ce token
+    const user = await prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpires: {
+          gt: new Date(),
+        },
+      },
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        message: 'Le lien de réinitialisation est invalide ou a expiré.',
+      };
+    }
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await hashPassword(newPassword);
+
+    // Mettre à jour l'utilisateur
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpires: null,
+      },
+    });
+
+    return {
+      success: true,
+      message: 'Votre mot de passe a été réinitialisé avec succès.',
+    };
+  } catch (error) {
+    console.error('Erreur resetPassword:', error);
+    return {
+      success: false,
+      message: 'Une erreur est survenue. Veuillez réessayer.',
+    };
+  }
+}
