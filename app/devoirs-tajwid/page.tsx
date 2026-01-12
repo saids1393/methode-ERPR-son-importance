@@ -26,7 +26,8 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
-  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
+  accountType: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+  subscriptionPlan?: 'SOLO' | 'COACHING' | null;
 }
 
 interface Submission {
@@ -50,10 +51,20 @@ interface TajwidHomework {
   submission: Submission | null;
 }
 
-interface HomeworkSend {
+interface TajwidHomeworkSendData {
   id: string;
   sentAt: string;
   tajwidHomework: {
+    id: string;
+    chapterId: number;
+    title: string;
+  };
+}
+
+interface HomeworkSend {
+  id: string;
+  sentAt: string;
+  homework: {
     id: string;
     chapterId: number;
     title: string;
@@ -85,6 +96,7 @@ export default function DevoirsTajwidPage() {
   const [user, setUser] = useState<User | null>(null);
   const [homeworks, setHomeworks] = useState<TajwidHomework[]>([]);
   const [homeworkSends, setHomeworkSends] = useState<HomeworkSend[]>([]);
+  const [tajwidHomeworkSends, setTajwidHomeworkSends] = useState<TajwidHomeworkSendData[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<string | null>(null);
@@ -95,6 +107,18 @@ export default function DevoirsTajwidPage() {
   const [files, setFiles] = useState<{ [key: string]: File[] }>({});
   const [justSubmitted, setJustSubmitted] = useState<{ [key: string]: boolean }>({});
   const [cooldowns, setCooldowns] = useState<{ [key: string]: number }>({});
+
+  // Redirection vers devoirs si le module sélectionné est LECTURE
+  const [moduleChecked, setModuleChecked] = useState(false);
+  
+  useEffect(() => {
+    const savedModule = localStorage.getItem('selectedDashboardModule');
+    if (savedModule !== 'TAJWID') {
+      router.replace('/devoirs');
+    } else {
+      setModuleChecked(true);
+    }
+  }, [router]);
 
   useEffect(() => {
     const loadCooldownsFromStorage = () => {
@@ -176,10 +200,17 @@ export default function DevoirsTajwidPage() {
 
   const fetchHomeworkSends = async () => {
     try {
+      // Tajwid
       const response = await fetch('/api/homework/tajwid/user-sends');
       if (response.ok) {
         const data = await response.json();
-        setHomeworkSends(data.sends || []);
+        setTajwidHomeworkSends(data.sends || []);
+      }
+      // Lecture (pour le header)
+      const lectureResponse = await fetch('/api/homework/user-sends');
+      if (lectureResponse.ok) {
+        const lectureData = await lectureResponse.json();
+        setHomeworkSends(lectureData.sends || []);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des envois:', error);
@@ -335,6 +366,18 @@ export default function DevoirsTajwidPage() {
     });
   };
 
+  // Ne pas afficher tant que le module n'est pas vérifié
+  if (!moduleChecked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-green-600 mx-auto mb-4" />
+          <p className="text-gray-600 text-lg">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 flex items-center justify-center">
@@ -366,6 +409,7 @@ export default function DevoirsTajwidPage() {
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
           homeworkSends={homeworkSends}
+          tajwidHomeworkSends={tajwidHomeworkSends}
         />
         <main className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
@@ -591,6 +635,43 @@ export default function DevoirsTajwidPage() {
 
                         {hasSubmission && (
                           <div className="bg-green-50 border border-green-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4">
+                            <div className="flex items-start space-x-2 sm:space-x-3 mb-3">
+                              <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold text-green-900 text-sm sm:text-base mb-2">
+                                  ✅ Votre réponse
+                                </h4>
+                                {homework.submission?.type === 'TEXT' && homework.submission.textContent && (
+                                  <div className="bg-white rounded-lg p-3 sm:p-4 text-gray-800 text-xs sm:text-sm whitespace-pre-wrap break-words">
+                                    {homework.submission.textContent}
+                                  </div>
+                                )}
+                                {homework.submission?.type === 'FILE' && homework.submission.files && (
+                                  <div className="space-y-2">
+                                    {homework.submission.files.map((file, idx) => {
+                                      const ext = file.name.split('.').pop()?.toLowerCase();
+                                      return renderFilePreview(file, ext, idx);
+                                    })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {homework.submission?.feedback && (
+                              <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-green-200">
+                                <div className="flex items-start space-x-2 sm:space-x-3">
+                                  <Award className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-gray-900 text-sm sm:text-base mb-2">
+                                      💬 Retour du professeur
+                                    </h4>
+                                    <div className="bg-white rounded-lg p-3 sm:p-4 text-gray-800 text-xs sm:text-sm whitespace-pre-wrap break-words">
+                                      {homework.submission.feedback}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 

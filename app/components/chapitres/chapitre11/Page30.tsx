@@ -78,7 +78,7 @@ const Page30 = () => {
 
       {/* FOOTER */}
       
-      <PageNavigation currentChapter={11} currentPage={30} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={11} currentPage={30} module="LECTURE" className="mt-6 mb-4" />
 
       <footer className="bg-black text-white text-center p-4 sm:p-6 mt-6 font-semibold text-xs sm:text-sm border-t border-gray-800">
         <div>Page 30</div>

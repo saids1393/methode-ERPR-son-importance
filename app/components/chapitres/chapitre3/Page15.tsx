@@ -242,7 +242,7 @@ const AlphabetPage = () => (
     </div>
 
     
-      <PageNavigation currentChapter={3} currentPage={15} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={3} currentPage={15} module="LECTURE" className="mt-6 mb-4" />
 
 <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-sm md:text-base">
       <div>Page 15</div>

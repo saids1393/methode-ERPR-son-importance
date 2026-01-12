@@ -216,7 +216,7 @@ const AlphabetPage = ({ playLetterAudio, activeIndex, setActiveIndex }: {
       </div>
 
       
-      <PageNavigation currentChapter={1} currentPage={2} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={1} currentPage={2} module="LECTURE" className="mt-6 mb-4" />
 
 <footer className="border-t-1 text-white text-center p-4 md:p-6 flex-shrink-0 font-semibold text-sm md:text-base">
         <div>Leçon 2</div>

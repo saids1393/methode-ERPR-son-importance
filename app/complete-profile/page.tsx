@@ -11,7 +11,7 @@ export default function CompleteProfilePage() {
   const [gender, setGender] = useState<'HOMME' | 'FEMME' | ''>('');
   const [loading, setLoading] = useState(false);
   const [userEmail, setUserEmail] = useState('');
-  const [userAccountType, setUserAccountType] = useState('');
+  const [subscriptionPlan, setSubscriptionPlan] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
@@ -23,17 +23,17 @@ export default function CompleteProfilePage() {
         if (response.ok) {
           const userData = await response.json();
           setUserEmail(userData.user?.email || userData.email);
-          setUserAccountType(userData.user?.accountType || '');
+          setSubscriptionPlan(userData.user?.subscriptionPlan || userData.subscriptionPlan || null);
 
           if (userData.user?.username || userData.username) {
             router.push('/dashboard');
           }
         } else {
-          router.push('/checkout');
+          router.push('/pricing');
         }
       } catch (error) {
         console.error('Error checking user:', error);
-        router.push('/checkout');
+        router.push('/pricing');
       }
     };
     checkUser();
@@ -93,6 +93,22 @@ export default function CompleteProfilePage() {
     }
   };
 
+  // Déterminer le message de bienvenue selon le plan
+  const getWelcomeMessage = () => {
+    if (subscriptionPlan === 'COACHING') {
+      return {
+        title: 'Félicitations !',
+        subtitle: 'Votre abonnement Coaching est activé. Complétez votre profil pour accéder au cours et au coaching personnalisé.'
+      };
+    }
+    return {
+      title: 'Félicitations !',
+      subtitle: 'Votre abonnement est activé. Complétez votre profil pour accéder au cours.'
+    };
+  };
+
+  const welcomeMessage = getWelcomeMessage();
+
   return (
     <div className="complete-profile-page-dark min-h-screen relative overflow-hidden bg-black">
       <style jsx>{`
@@ -123,12 +139,10 @@ export default function CompleteProfilePage() {
             <BookOpen className="h-8 w-8 text-white" />
           </div>
           <h2 className="mt-4 text-center text-3xl font-bold text-white">
-            {userAccountType === 'FREE_TRIAL' ? 'Bienvenue !' : 'Félicitations !'}
+            {welcomeMessage.title}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-400">
-            {userAccountType === 'FREE_TRIAL'
-              ? 'Complétez votre profil pour commencer votre essai gratuit.'
-              : 'Votre paiement a été confirmé. Complétez votre profil pour accéder au cours.'}
+            {welcomeMessage.subtitle}
           </p>
           <p className="mt-1 text-center text-xs text-gray-500">
             Connecté avec : {userEmail}

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generateToken, verifyPassword } from '@/lib/auth';
+import { generateAuthToken, comparePassword } from '@/lib/auth';
 import { rateLimit, getClientIP, sanitizeInput, secureLog, getSecurityHeaders } from '@/lib/security';
 
 // --- CONFIGURATION DE SÉCURITÉ ET DE VALIDATION ---
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const isValidPassword = await verifyPassword(cleanPassword, user.password);
+    const isValidPassword = await comparePassword(cleanPassword, user.password);
     if (!isValidPassword) {
       secureLog('LOGIN_INVALID_PASSWORD', { ip: clientIP, userId: user.id });
       return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
@@ -149,10 +149,12 @@ export async function POST(req: Request) {
 
     secureLog('LOGIN_SUCCESS', { ip: clientIP, userId: user.id });
 
-    const token = await generateToken({
-      userId: user.id,
+    const token = await generateAuthToken({
+      id: user.id,
       email: user.email,
-      username: user.username,
+      accountType: user.accountType,
+      subscriptionPlan: user.subscriptionPlan,
+      subscriptionEndDate: user.subscriptionEndDate,
     });
 
     const response = NextResponse.json(

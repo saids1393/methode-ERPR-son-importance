@@ -90,9 +90,8 @@ export const useRealProgressChart = () => {
     };
 
     fetchProgressData();
-    const interval = setInterval(fetchProgressData, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
+    // Pas de setInterval - le rafraîchissement automatique n'est pas nécessaire
+    // L'utilisateur peut rafraîchir la page si besoin
   }, []);
 
   return data;

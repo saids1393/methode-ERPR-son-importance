@@ -45,7 +45,8 @@ export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
       items: [
         { name: 'Utilisateurs', href: '/admin/users', icon: Users },
         { name: 'Ajouter Utilisateur', href: '/admin/users/create', icon: UserPlus },
-        { name: 'Vidéos', href: '/admin/videos', icon: Settings },
+        { name: 'Vidéos Lecture', href: '/admin/videos', icon: Settings },
+        { name: 'Vidéos Tajwid', href: '/admin/videos-tajwid', icon: Settings },
         { name: 'Devoirs Lecture', href: '/admin/homework', icon: FileText },
         { name: 'Devoirs Tajwid', href: '/admin/homework/tajwid', icon: FileText },
         { name: 'Tests Techniques', href: '/admin/tests', icon: Activity },

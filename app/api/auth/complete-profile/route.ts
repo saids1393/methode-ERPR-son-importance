@@ -1,6 +1,6 @@
 // app/api/auth/complete-profile/route.ts
 import { NextResponse } from 'next/server';
-import { getAuthUserFromRequest, updateUserProfile } from '@/lib/auth';
+import { getAuthUserFromRequest } from '@/lib/auth';
 import { sendWelcomeEmail } from '@/lib/email';
 import { rateLimit, getClientIP, sanitizeInput, validateUsername, validatePassword, secureLog, getSecurityHeaders } from '@/lib/security';
 import { prisma } from '@/lib/prisma';
@@ -107,10 +107,22 @@ export async function POST(req: Request) {
 
     const updateData: any = {};
     if (cleanUsername) updateData.username = cleanUsername;
-    if (password) updateData.password = password;
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
+    }
     if (gender) updateData.gender = gender;
 
-    const updatedUser = await updateUserProfile(user.id, updateData);
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        isActive: true,
+      },
+    });
 
     // Stripe fallback "dummy" si absent
     const userWithStripe = await prisma.user.findUnique({

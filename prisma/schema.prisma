@@ -1,3 +1,4 @@
+// 
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,7 +7,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 
 // -------------------------
 // UTILISATEURS
@@ -21,6 +21,8 @@ model User {
   stripeSessionId   String?
   completedPages    Int[]            @default([])
   completedQuizzes  Int[]            @default([])
+  completedPagesTajwid    Int[]      @default([])
+  completedQuizzesTajwid  Int[]      @default([])
   studyTimeSeconds  Int              @default(0)
   resetToken        String?
   resetTokenExpires DateTime?
@@ -29,14 +31,13 @@ model User {
   gender            Gender?
   welcomeEmailSent  Boolean          @default(false)
 
-  // Système d'essai gratuit
-  accountType       AccountType      @default(PAID_FULL)
-  trialStartDate    DateTime?
-  trialEndDate      DateTime?
-  trialExpired      Boolean          @default(false)
-  conversionDate    DateTime?
-  trialDay3EmailSent Boolean         @default(false) 
-  trialDay6EmailSent Boolean         @default(false)
+  // Système d'abonnement mensuel
+  accountType             AccountType      @default(INACTIVE)
+  subscriptionPlan        SubscriptionPlan? // SOLO (10€) ou COACHING (30€)
+  subscriptionStartDate   DateTime?
+  subscriptionEndDate     DateTime?        // Date de fin d'abonnement
+  stripeSubscriptionId    String?          // ID de l'abonnement Stripe
+  
   deviceFingerprint String?          @db.VarChar(255)
   
 
@@ -52,6 +53,7 @@ model User {
 
   @@index([deviceFingerprint])
   @@index([email, accountType, createdAt])
+  @@index([stripeSubscriptionId])
 }
 
 // -------------------------
@@ -175,6 +177,23 @@ model ChapterVideo {
 }
 
 // -------------------------
+// VIDÉOS CHAPITRES TAJWID
+// -------------------------
+model TajwidChapterVideo {
+  id                String   @id @default(cuid())
+  chapterNumber     Int      @unique  // Numéro du chapitre Tajwid (1-10)
+  title             String
+  cloudflareVideoId String   @unique
+  thumbnailUrl      String?
+  duration          Int?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  @@index([chapterNumber])
+  @@index([isActive])
+}
+
+// -------------------------
 // DEVOIRS
 // -------------------------
 model Homework {
@@ -226,7 +245,7 @@ model TajwidHomework {
   content   String   @db.Text
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
   tajwidHomeworkSends TajwidHomeworkSend[]
   @@index([chapterId])
   @@index([isActive])
@@ -377,6 +396,9 @@ model DailyProgressSnapshot {
   id                  String   @id @default(cuid())
   userId              String
   
+  // Module (LECTURE ou TAJWID)
+  module              String   @default("LECTURE")
+  
   // Stats du jour
   pagesCompletedCount Int      @default(0)
   quizzesCompletedCount Int    @default(0)
@@ -391,10 +413,11 @@ model DailyProgressSnapshot {
   
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  @@unique([userId, snapshotDate])
+  @@unique([userId, snapshotDate, module])
   @@index([userId])
   @@index([snapshotDate])
   @@index([userId, snapshotDate])
+  @@index([module])
 }
 
 // -------------------------
@@ -406,9 +429,15 @@ enum Gender {
 }
 
 enum AccountType {
-  FREE_TRIAL      // Essai gratuit 14 jours
-  PAID_FULL       // Payant complet (accès à vie)
-  PAID_LEGACY     // Ancien système (pour compatibilité)
+  INACTIVE      // Compte créé mais pas d'abonnement actif
+  ACTIVE        // Abonnement actif (SOLO ou COACHING)
+  CANCELLED     // Abonnement annulé (accès jusqu'à fin de période)
+  EXPIRED       // Abonnement expiré
+}
+
+enum SubscriptionPlan {
+  SOLO            // 10€/mois - Accès aux cours
+  COACHING        // 30€/mois - Accès aux cours + coaching
 }
 
 enum PaymentStatus {
@@ -446,3 +475,4 @@ enum HomeworkStatus {
   REVIEWED
   CORRECTED
 }
+

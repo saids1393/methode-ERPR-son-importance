@@ -161,7 +161,7 @@ const IntroductionPage = () => (
       </p>
     </div>
     
-      <PageNavigation currentChapter={6} currentPage={19} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={6} currentPage={19} module="LECTURE" className="mt-6 mb-4" />
 
 <footer className="border-t text-white text-center p-4 md:p-6 mt-8 font-semibold text-base md:text-lg">
       <div>Leçon 19 : Les symboles Alif saghirah - Ya saghirah - Waw saghirah</div>

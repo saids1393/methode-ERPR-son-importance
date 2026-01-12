@@ -1,7 +1,6 @@
 // app/api/auth/check-user/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sanitizeInput, secureLog, getSecurityHeaders } from '@/lib/security';
 
 // --- CONFIGURATION DE SÉCURITÉ (ALIGNÉE AVEC LE BACKEND) ---
 
@@ -68,113 +67,49 @@ function validateEmailDomain(email: string): { valid: boolean; error?: string } 
 }
 
 // --- ROUTE POST /api/auth/check-user ---
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();
 
-    // Vérifier que l'email est fourni
     if (!email) {
-      secureLog('CHECK_USER_MISSING_EMAIL', {});
-      return NextResponse.json(
-        { error: 'Email requis' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email requis' }, { status: 400 });
     }
 
-    // Sanitiser et normaliser l'email
-    const cleanEmail = sanitizeInput(email).toLowerCase().trim();
-
-    // Vérifier que l'email n'est pas vide après sanitisation
-    if (!cleanEmail) {
-      secureLog('CHECK_USER_INVALID_EMAIL', { email: email });
-      return NextResponse.json(
-        { error: 'Email invalide' },
-        { status: 400 }
-      );
-    }
-
-    // Valider le domaine email (même logique que le backend login)
-    const emailValidation = validateEmailDomain(cleanEmail);
-    if (!emailValidation.valid) {
-      secureLog('CHECK_USER_INVALID_EMAIL_DOMAIN', { email: cleanEmail });
-      return NextResponse.json(
-        { error: emailValidation.error },
-        { status: 400 }
-      );
-    }
-
-    // Rechercher l'utilisateur par email (case-insensitive)
     const user = await prisma.user.findUnique({
-      where: { email: cleanEmail },
+      where: { email },
       select: {
         id: true,
+        email: true,
+        username: true,
         accountType: true,
+        subscriptionPlan: true,
+        subscriptionEndDate: true,
         isActive: true,
-      },
-    });
-
-    // Si l'utilisateur existe ET est FREE_TRIAL, permettre la mise à niveau
-    if (user && user.accountType === 'FREE_TRIAL') {
-      secureLog('CHECK_USER_FREE_TRIAL_UPGRADE', {
-        email: cleanEmail,
-        userId: user.id
-      });
-
-      return NextResponse.json(
-        {
-          exists: false,
-          canUpgrade: true,
-          message: 'Mise à niveau disponible'
-        },
-        {
-          status: 200,
-          headers: getSecurityHeaders()
-        }
-      );
-    }
-
-    // Si l'utilisateur existe et est PAID_FULL, bloquer
-    if (user && user.accountType === 'PAID_FULL') {
-      secureLog('CHECK_USER_ALREADY_PAID', {
-        email: cleanEmail,
-        userId: user.id
-      });
-
-      return NextResponse.json(
-        {
-          exists: true,
-          message: 'Cet email est déjà utilisé'
-        },
-        {
-          status: 200,
-          headers: getSecurityHeaders()
-        }
-      );
-    }
-
-    secureLog('CHECK_USER_SUCCESS', {
-      email: cleanEmail,
-      exists: !!user
-    });
-
-    // Retourner uniquement si l'utilisateur existe
-    return NextResponse.json(
-      {
-        exists: !!user,
-        message: user ? 'Cet email est déjà utilisé' : 'Email disponible'
-      },
-      {
-        status: 200,
-        headers: getSecurityHeaders()
       }
-    );
+    });
 
-  } catch (error) {
-    console.error('Check user error:', error);
-    secureLog('CHECK_USER_ERROR', { error: error instanceof Error ? error.message : 'Unknown error' });
-    return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
-      { status: 500 }
-    );
+    if (!user) {
+      return NextResponse.json({ 
+        exists: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    // Vérifier si l'abonnement est actif
+    const hasActiveSubscription = 
+      (user.accountType === 'ACTIVE') ||
+      (user.accountType === 'CANCELLED' && user.subscriptionEndDate && new Date(user.subscriptionEndDate) > new Date());
+
+    return NextResponse.json({
+      exists: true,
+      hasActiveSubscription,
+      accountType: user.accountType,
+      subscriptionPlan: user.subscriptionPlan,
+      needsPassword: !user.username, // Si pas de username, c'est un nouveau compte Stripe
+    });
+
+  } catch (error: any) {
+    console.error('Erreur check-user:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

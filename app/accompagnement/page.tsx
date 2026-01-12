@@ -10,6 +10,10 @@ import {
   Loader2,
   Bell,
   Headphones,
+  HelpCircle,
+  BookOpen,
+  Clock,
+  UserCheck,
 } from 'lucide-react';
 import DashboardHeader from '@/app/components/DashboardHeader';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
@@ -20,7 +24,8 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
-  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
+  accountType?: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+  subscriptionPlan?: 'SOLO' | 'COACHING' | null;
 }
 
 interface HomeworkSend {
@@ -33,10 +38,21 @@ interface HomeworkSend {
   };
 }
 
+interface TajwidHomeworkSend {
+  id: string;
+  sentAt: string;
+  tajwidHomework: {
+    id: string;
+    chapterId: number;
+    title: string;
+  };
+}
+
 export default function AccompagnementPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [homeworkSends, setHomeworkSends] = useState<HomeworkSend[]>([]);
+  const [tajwidHomeworkSends, setTajwidHomeworkSends] = useState<TajwidHomeworkSend[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -48,18 +64,14 @@ export default function AccompagnementPage() {
         const userData = await response.json();
         setUser(userData);
         
-        // 🔍 Vérifier si l'utilisateur a accès
-        if (userData.accountType === 'FREE_TRIAL' && userData.trialExpired) {
-          // Si trial expiré, rediriger vers dashboard
-          router.push('/dashboard');
+        // 🔍 Vérifier si l'utilisateur a un abonnement actif
+        if (userData.accountType === 'INACTIVE' || userData.accountType === 'EXPIRED') {
+          // Si pas d'abonnement actif, rediriger vers pricing
+          router.push('/pricing');
           return;
         }
         
-        // Si pas de compte payant et trial actif, bloquer
-        if (userData.accountType === 'FREE_TRIAL' && !userData.trialExpired) {
-          router.push('/dashboard');
-          return;
-        }
+        // Note: La vérification du plan COACHING se fait dans le middleware (retourne 404)
         
       } else {
         // Si pas authentifié, rediriger vers login
@@ -76,10 +88,17 @@ export default function AccompagnementPage() {
   // 🔔 Charger les notifications (devoirs envoyés)
   const fetchHomeworkSends = async () => {
     try {
+      // Lecture
       const response = await fetch('/api/homework/user-sends');
       if (response.ok) {
         const data = await response.json();
         setHomeworkSends(data.sends || []);
+      }
+      // Tajwid
+      const tajwidResponse = await fetch('/api/homework/tajwid/user-sends');
+      if (tajwidResponse.ok) {
+        const tajwidData = await tajwidResponse.json();
+        setTajwidHomeworkSends(tajwidData.sends || []);
       }
     } catch (error) {
       console.error('Erreur de récupération des notifications :', error);
@@ -138,6 +157,7 @@ export default function AccompagnementPage() {
         <DashboardHeader
           user={user}
           homeworkSends={homeworkSends}
+          tajwidHomeworkSends={tajwidHomeworkSends}
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
         />
@@ -157,58 +177,136 @@ export default function AccompagnementPage() {
           </div>
 
           {/* Cartes d'accompagnement */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Carte WhatsApp */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-green-50 w-24 h-24 rounded-bl-[80px]" />
-              <div className="relative z-10">
-                <div className="bg-green-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                  <MessageCircle className="h-8 w-8 text-green-600" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {/* Assistance en cas de difficulté */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="bg-red-100 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <HelpCircle className="h-6 w-6 text-red-600" />
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  Accompagnement individuel via WhatsApp
-                </h3>
-                <p className="text-gray-600 mb-8 leading-relaxed">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Assistance en cas de difficulté
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Vous êtes bloqué sur une leçon ? Vous ne comprenez pas un concept ? 
+                    Contactez-nous immédiatement et recevez une explication personnalisée 
+                    adaptée à votre niveau et votre rythme d'apprentissage.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Soutien ponctuel sur une page précise */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="bg-purple-100 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <BookOpen className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Soutien ponctuel sur une page précise
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Besoin d'aide sur une page ou un exercice en particulier ? 
+                    Envoyez-nous le numéro de la page ou une capture d'écran, 
+                    et nous vous fournirons une aide ciblée et détaillée.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Suivi d'engagement */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="bg-amber-100 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Clock className="h-6 w-6 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Suivi d'engagement personnalisé
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Nous suivons votre progression : temps passé sur les cours, 
+                    pages où vous bloquez, quiz non complétés. Ce suivi nous permet 
+                    de vous accompagner au mieux et d'identifier vos points de blocage.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Relance et aide personnalisée */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <div className="bg-teal-100 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <UserCheck className="h-6 w-6 text-teal-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Relance et aide personnalisée
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Si nous remarquons une inactivité ou un blocage prolongé, 
+                    nous vous contactons proactivement pour vous remotiver, 
+                    comprendre vos difficultés et vous proposer des solutions adaptées.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section Nous contacter */}
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Nous contacter
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* WhatsApp */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="bg-green-100 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    WhatsApp
+                  </h3>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
                   Des problèmes, des questions, besoin de conseils ? Contactez-nous
-                  directement sur WhatsApp. Nous répondons rapidement, par écrit
-                  ou message vocal.
+                  directement sur WhatsApp. Nous répondons rapidement.
                 </p>
                 <a
                   href="https://wa.me/201022767532"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center space-x-3"
+                  className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2.5 rounded-lg transition-colors"
                 >
-                  <MessageCircle className="h-6 w-6" />
-                  <span>Contacter sur WhatsApp</span>
-                  <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <MessageCircle className="h-5 w-5" />
+                  Contacter sur WhatsApp
                 </a>
               </div>
-            </div>
 
-            {/* Carte Telegram */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow duration-300 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-blue-50 w-24 h-24 rounded-bl-[80px]" />
-              <div className="relative z-10">
-                <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                  <Send className="h-8 w-8 text-blue-600" />
+              {/* Telegram */}
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Send className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Groupe Telegram Privé
+                  </h3>
                 </div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-4">
-                  Groupe Telegram Privé
-                </h3>
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                  Rejoignez notre groupe privé Telegram pour des échanges, quiz,
-                  et sessions de questions-réponses exclusives avec le formateur.
+                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                  Rejoignez notre groupe privé Telegram pour des échanges.
                 </p>
                 <a
                   href="https://t.me/+9QaRDegbynljNmY0"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center space-x-3"
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg transition-colors"
                 >
-                  <Send className="h-6 w-6" />
-                  <span>Rejoindre le groupe Telegram</span>
-                  <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <Send className="h-5 w-5" />
+                  Rejoindre le groupe
                 </a>
               </div>
             </div>

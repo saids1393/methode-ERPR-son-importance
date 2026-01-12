@@ -42,7 +42,6 @@ const getWelcomeGreeting = (username?: string, context: 'welcome' | 'reset' | 'c
 // --- Templates HTML
 // ----------------------------
 
-// Template pour FREE_TRIAL
 const createFreeTrialWelcomeTemplate = (username?: string) => `
 <!DOCTYPE html>
 <html lang="fr">
@@ -691,27 +690,6 @@ const createEmailChangeTemplate = (newEmail: string, confirmationUrl: string) =>
 </html>
 `;
 
-// ----------------------------
-// --- Email Functions
-// ----------------------------
-
-// Email de bienvenue pour FREE_TRIAL
-export async function sendFreeTrialWelcomeEmail(email: string, username?: string): Promise<boolean> {
-  try {
-    const html = createFreeTrialWelcomeTemplate(username);
-    await transporter.sendMail({
-      from: SENDER_INFO,
-      to: email,
-      subject: `🎯 Bienvenue dans votre essai gratuit - Jour 1/7`,
-      html: juice(html),
-      text: `Bienvenue dans votre essai gratuit ! Découvrez toutes les fonctionnalités : ${BASE_URL}/dashboard`,
-    });
-    return true;
-  } catch (err) {
-    console.error("Erreur sendFreeTrialWelcomeEmail:", err);
-    return false;
-  }
-}
 
 // Email de bienvenue pour PAID_FULL
 export async function sendWelcomeEmail(email: string, username?: string): Promise<boolean> {
@@ -1059,496 +1037,188 @@ const html = `
   }
 }
 
-// À AJOUTER DANS lib/email.ts (avant createWelcomeEmailTemplate)
+export async function sendTajwidHomeworkSubmissionEmail(
+  params: HomeworkSubmissionEmailParams
+): Promise<boolean> {
+  try {
+    const attachments =
+      params.submissionType === "AUDIO" && params.fileUrls?.length
+        ? params.fileUrls.map((f) => ({
+            filename: f.name,
+            path: f.path,
+          }))
+        : [];
 
-// ----------------------------
-// Template Free Trial Day 3
-// ----------------------------
-const createFreeTrialDay3Template = (username?: string) => `
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jour 3 - Votre essai gratuit</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
-      color: #1f2937;
-      background: #f3f4f6;
-    }
-    
-    .wrapper {
-      width: 100%;
-      background: #f3f4f6;
-      padding: 40px 20px;
-    }
-    
-    .container {
-      max-width: 580px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-    }
-    
-    .header {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      color: white;
-      padding: 48px 32px;
-      text-align: center;
-    }
-    
-    .header h1 {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    
-    .body {
-      padding: 40px 32px;
-    }
-    
-    .greeting {
-      font-size: 18px;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 24px;
-    }
-    
-    .description {
-      font-size: 15px;
-      color: #4b5563;
-      margin-bottom: 32px;
-      line-height: 1.7;
-    }
-    
-    .progress-box {
-      background: #fef3c7;
-      border-left: 4px solid #f59e0b;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 32px;
-    }
-    
-    .progress-title {
-      font-weight: 700;
-      color: #92400e;
-      margin-bottom: 12px;
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #fbbf24;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      width: 30%;
-      background: #f59e0b;
-    }
-    
-    .cta-section {
-      text-align: center;
-      margin-top: 40px;
-      padding-top: 24px;
-      border-top: 1px solid #f0f0f0;
-    }
-    
-    .cta-button {
-      display: inline-block;
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      color: white;
-      text-decoration: none;
-      padding: 14px 40px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 15px;
-      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-    }
-    
-    .footer {
-      background: #f9fafb;
-      padding: 24px 32px;
-      text-align: center;
-      font-size: 12px;
-      color: #9ca3af;
-    }
-    
-    .social-links {
-      margin-top: 16px;
-      display: flex;
-      justify-content: center;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-    
-    .social-link {
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      color: #1f2937;
-      transition: color 0.2s;
-      padding: 0 8px;
-    }
-    
-    .social-link:hover {
-      color: #f59e0b;
-    }
-    
-    @media (max-width: 600px) {
-      .header {
-        padding: 32px 24px;
-      }
-      
-      .body {
-        padding: 24px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="wrapper">
-    <div class="container">
-      <!-- Header -->
-      <div class="header">
-        <h1>📊 Jour 3</h1>
-        <p>Continuez votre progression</p>
-      </div>
-      
-      <!-- Body -->
-      <div class="body">
-        <div class="greeting">
-          ${username ? `Bien joué, ${username} ! 🎯` : 'Bien joué ! 🎯'}
-        </div>
-        
-        <p class="description">
-          Vous êtes maintenant à mi-chemin de votre essai gratuit de 7 jours. Continuez à explorer la Méthode ERPR et découvrez comment elle peut transformer votre apprentissage.
-        </p>
-        
-        <!-- Progress Box -->
-        <div class="progress-box">
-          <div class="progress-title">Vos jours : 3/7 jours</div>
-          <div class="progress-bar">
-            <div class="progress-fill"></div>
-          </div>
-          <p style="margin-top: 12px; font-size: 13px; color: #92400e;">4 jours restants pour explorer</p>
-        </div>
-        
-        <p class="description">
-          <strong>💡 Astuce :</strong> Pour tirer le meilleur parti de votre essai, essayez de compléter au moins le chapitre 1 et le quiz. Vous verrez rapidement vos progrès.
-        </p>
-        
-        <!-- CTA -->
-        <div class="cta-section">
-          <a href="${BASE_URL}/dashboard" class="cta-button">🚀 Continuer mon apprentissage</a>
-        </div>
-      </div>
-      
-      <!-- Footer -->
-      <div class="footer">
-        <p>© 2025 Méthode ERPR. Tous droits réservés.</p>
-        
-        <!-- Social Links -->
-        <div class="social-links">
-          <a href="https://t.me/ArabeImportance" class="social-link">Telegram</a>
-          <a href="https://www.instagram.com/arabeimportance/" class="social-link">Instagram</a>
-          <a href="https://www.tiktok.com/@arabeimportance?_r=1&_t=ZN-91MgOs7KLRe" class="social-link">TikTok</a>
-        </div>
-      </div>
+const html = `
+  <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <h2 style="color: #16a085;">✅ Devoir Tajwid soumis avec succès !</h2>
+    <p>Bonjour <strong>${params.userName}</strong>,</p>
+    <p>Votre devoir Tajwid pour le chapitre <strong>${params.chapterId}</strong> a été soumis avec succès.</p>
+
+    <div style="margin-top: 15px; padding: 15px; background-color: #d5f4e6; border-left: 4px solid #16a085; border-radius: 6px;">
+      <p><strong>Titre :</strong> ${params.homeworkTitle}</p>
+      <p><strong>Type :</strong> ${
+        params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"
+      }</p>
     </div>
+
+    ${
+      params.submissionType === "TEXT"
+        ? `<div style="margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 6px; border: 1px solid #ddd;">
+             <p>${params.content}</p>
+           </div>`
+        : `<p style="margin-top: 15px;">📎 Vos fichiers sont joints à cet email. Assurez-vous de les conserver pour référence.</p>`
+    }
+
+    <p style="margin-top: 20px;">Merci pour votre travail et continuez comme ça ! 💪</p>
+
+    <p style="margin-top: 20px; font-size: 12px; color: #777;">
+      Ceci est un message automatique, merci de ne pas répondre.
+    </p>
   </div>
-</body>
-</html>
 `;
 
-// ----------------------------
-// Send Free Trial Day 3 Email
-// ----------------------------
-export async function sendFreeTrialDay3Email(email: string, username?: string): Promise<boolean> {
-  try {
-    const html = createFreeTrialDay3Template(username);
     await transporter.sendMail({
       from: SENDER_INFO,
-      to: email,
-      subject: `📊 Jour 3 - Vous êtes à mi-chemin !`,
+      to: params.userEmail,
+      subject: `🚀 Devoir Tajwid envoyé - ${params.homeworkTitle}`,
       html: juice(html),
-      text: `Jour 3 de votre essai gratuit. Continuez : ${BASE_URL}/dashboard`,
+      attachments,
+    });
+
+    console.log(`✅ Email étudiant Tajwid envoyé avec fichiers joints`);
+    return true;
+  } catch (err) {
+    console.error("❌ Erreur sendTajwidHomeworkSubmissionEmail:", err);
+    return false;
+  }
+}
+
+export async function sendTeacherTajwidHomeworkNotification(
+  params: TeacherNotificationParams
+): Promise<boolean> {
+  try {
+    const attachments =
+      params.submissionType === "AUDIO" && params.fileUrls?.length
+        ? params.fileUrls.map((f) => ({
+            filename: f.name,
+            path: f.path,
+          }))
+        : [];
+
+const html = `
+  <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+    <h2 style="color: #16a085;">📬 Nouveau devoir Tajwid soumis</h2>
+    <p>Bonjour,</p>
+    <p>Un étudiant vient de soumettre un devoir Tajwid. Voici les détails :</p>
+
+    <div style="margin-top: 15px; padding: 15px; background-color: #d5f4e6; border-left: 4px solid #16a085; border-radius: 6px;">
+      <ul style="list-style: none; padding: 0;">
+        <li><strong>Nom :</strong> ${params.userName}</li>
+        <li><strong>Email :</strong> ${params.userEmail}</li>
+        <li><strong>Chapitre :</strong> ${params.chapterId}</li>
+        <li><strong>Titre :</strong> ${params.homeworkTitle}</li>
+        <li><strong>Type :</strong> ${
+          params.submissionType === "TEXT" ? "Texte" : "Fichiers joints"
+        }</li>
+      </ul>
+    </div>
+
+    ${
+      params.submissionType === "TEXT"
+        ? `<div style="margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 6px; border: 1px solid #ddd;">
+             <p>${params.content}</p>
+           </div>`
+        : `<p style="margin-top: 15px;">📎 Les fichiers sont joints à cet email.</p>`
+    }
+
+    <p style="margin-top: 20px;">Merci de vérifier et de noter le devoir Tajwid dès que possible.</p>
+
+    <p style="margin-top: 20px; font-size: 12px; color: #777;">
+      Ceci est un message automatique, merci de ne pas répondre.
+    </p>
+  </div>
+`;
+
+    await transporter.sendMail({
+      from: SENDER_INFO,
+      to: params.teacherEmail,
+      subject: `📬 Nouveau devoir Tajwid - ${params.userName} (${params.homeworkTitle})`,
+      html: juice(html),
+      attachments,
+    });
+
+    console.log(`✅ Email professeur Tajwid envoyé avec fichiers joints`);
+    return true;
+  } catch (err) {
+    console.error("❌ Erreur sendTeacherTajwidHomeworkNotification:", err);
+    return false;
+  }
+}
+
+
+export async function sendSubscriptionWelcomeEmail(email: string, plan: 'SOLO' | 'COACHING') {
+  const planName = plan === 'SOLO' ? 'Solo (10€/mois)' : 'Coaching (30€/mois)';
+  
+  const html = `
+    <h1>Bienvenue dans votre abonnement ${planName} !</h1>
+    <p>Votre abonnement est maintenant actif.</p>
+    <p>Vous avez accès à tous les cours de lecture et Tajwid.</p>
+    ${plan === 'COACHING' ? '<p>Vous bénéficiez également du coaching personnalisé.</p>' : ''}
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">Accéder à mon espace</a>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `Bienvenue - Abonnement ${planName} activé`,
+    html,
+  });
+}
+
+export async function sendSubscriptionCancelledEmail(email: string, endDate: Date) {
+  const formattedDate = endDate.toLocaleDateString('fr-FR');
+  
+  const html = `
+    <h1>Votre abonnement a été annulé</h1>
+    <p>Votre abonnement reste actif jusqu'au ${formattedDate}.</p>
+    <p>Après cette date, vous n'aurez plus accès aux cours.</p>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/pricing">Renouveler mon abonnement</a>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Confirmation d\'annulation de votre abonnement',
+    html,
+  });
+}
+
+export async function sendSubscriptionExpiredEmail(email: string) {
+  const html = `
+    <h1>Votre abonnement a expiré</h1>
+    <p>Votre accès aux cours est maintenant terminé.</p>
+    <p>Renouvelez votre abonnement pour continuer votre apprentissage.</p>
+    <a href="${process.env.NEXT_PUBLIC_APP_URL}/pricing">Renouveler mon abonnement</a>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: 'Votre abonnement a expiré',
+    html,
+  });
+}
+
+async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }): Promise<boolean> {
+  try {
+    await transporter.sendMail({
+      from: SENDER_INFO,
+      to,
+      subject,
+      html: juice(html),
     });
     return true;
   } catch (err) {
-    console.error("Erreur sendFreeTrialDay3Email:", err);
+    console.error("Erreur sendEmail:", err);
     return false;
   }
 }
 
-
-// Send Free Trial Day 6 Email
-const createFreeTrialDay6Template = (username?: string) => `
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jour 6 - Votre essai gratuit</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
-      color: #1f2937;
-      background: #f3f4f6;
-    }
-    
-    .wrapper {
-      width: 100%;
-      background: #f3f4f6;
-      padding: 40px 20px;
-    }
-    
-    .container {
-      max-width: 580px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-    }
-    
-    .header {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
-      padding: 48px 32px;
-      text-align: center;
-    }
-    
-    .header h1 {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    
-    .body {
-      padding: 40px 32px;
-    }
-    
-    .greeting {
-      font-size: 18px;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 24px;
-    }
-    
-    .description {
-      font-size: 15px;
-      color: #4b5563;
-      margin-bottom: 32px;
-      line-height: 1.7;
-    }
-    
-    .progress-box {
-      background: #fee2e2;
-      border-left: 4px solid #ef4444;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 32px;
-    }
-    
-    .progress-title {
-      font-weight: 700;
-      color: #7f1d1d;
-      margin-bottom: 12px;
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: #fca5a5;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      width: 85%;
-      background: #ef4444;
-    }
-    
-    .cta-section {
-      text-align: center;
-      margin-top: 40px;
-      padding-top: 24px;
-      border-top: 1px solid #f0f0f0;
-    }
-    
-    .cta-button {
-      display: inline-block;
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
-      text-decoration: none;
-      padding: 14px 40px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 15px;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-    }
-    
-    .footer {
-      background: #f9fafb;
-      padding: 24px 32px;
-      text-align: center;
-      font-size: 12px;
-      color: #9ca3af;
-    }
-    
-    .social-links {
-      margin-top: 16px;
-      display: flex;
-      justify-content: center;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-    
-    .social-link {
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      color: #1f2937;
-      transition: color 0.2s;
-      padding: 0 8px;
-    }
-    
-    .social-link:hover {
-      color: #ef4444;
-    }
-    
-    @media (max-width: 600px) {
-      .header {
-        padding: 32px 24px;
-      }
-      
-      .body {
-        padding: 24px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="wrapper">
-    <div class="container">
-      <!-- Header -->
-      <div class="header">
-        <h1>⏰ Jour 6</h1>
-        <p>Dernière ligne droite</p>
-      </div>
-      
-      <!-- Body -->
-      <div class="body">
-        <div class="greeting">
-          ${username ? `Presque là, ${username} ! 🎉` : 'Presque là ! 🎉'}
-        </div>
-        
-        <p class="description">
-          Vous êtes pratiquement à la fin de votre essai gratuit de 7 jours. C'est le moment décisif pour constater tous vos progrès avec la Méthode ERPR.
-        </p>
-        
-        <!-- Progress Box -->
-        <div class="progress-box">
-          <div class="progress-title">Vos jours : 6/7 jours</div>
-          <div class="progress-bar">
-            <div class="progress-fill"></div>
-          </div>
-          <p style="margin-top: 12px; font-size: 13px; color: #7f1d1d;">1 jour restant avant l'expiration</p>
-        </div>
-        
-        <p class="description">
-          <strong>🎯 Dernier jour :</strong> Complétez le chapitre 1, testez les audios interactifs avant votre décision finale. En espérant que vous apprécierez votre expérience avec la Méthode ERPR.
-        </p>
-        
-        <!-- CTA -->
-        <div class="cta-section">
-          <a href="${BASE_URL}/dashboard" class="cta-button">🚀 Terminer le test</a>
-        </div>
-      </div>
-      
-      <!-- Footer -->
-      <div class="footer">
-        <p>© 2025 Méthode ERPR. Tous droits réservés.</p>
-        
-        <!-- Social Links -->
-        <div class="social-links">
-          <a href="https://t.me/ArabeImportance" class="social-link">Telegram</a>
-          <a href="https://www.instagram.com/arabeimportance/" class="social-link">Instagram</a>
-          <a href="https://www.tiktok.com/@arabeimportance?_r=1&_t=ZN-91MgOs7KLRe" class="social-link">TikTok</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
-`;
-export async function sendFreeTrialDay6Email(email: string, username?: string): Promise<boolean> {
-  try {
-    const html = createFreeTrialDay6Template(username);
-    await transporter.sendMail({
-      from: SENDER_INFO,
-      to: email,
-      subject: `⏰ Jour 6 - Dernière ligne droite !`,
-      html: juice(html),
-      text: `Jour 6 de votre essai gratuit. Terminez vos défis : ${BASE_URL}/dashboard`,
-    });
-    return true;
-  } catch (err) {
-    console.error("Erreur sendFreeTrialDay6Email:", err);
-    return false;
-  }
-}
-
-
-// ----------------------------
-// Admin notification for FREE_TRIAL signup
-// ----------------------------
-export async function sendAdminFreeTrialNotification(user: { email: string; createdAt: Date; }): Promise<boolean> {
-  try {
-    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.SMTP_FROM || process.env.SMTP_USER;
-    if (!adminEmail) return false;
-    const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Nouveau essai gratuit</title></head><body style="font-family:Arial,sans-serif;line-height:1.5;color:#111;background:#f9fafb;padding:24px;">
-      <h2 style="margin:0 0 12px 0;">Nouvelle inscription au 7 jours d'essai</h2>
-      <table style="border-collapse:collapse;width:100%;max-width:520px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
-        <tbody>
-          <tr style="background:#10b981;color:#fff;"><td colspan="2" style="padding:12px 16px;font-weight:600;">Détails inscription</td></tr>
-          <tr><td style="padding:8px 12px;font-weight:600;border-bottom:1px solid #f1f5f9;">Email</td><td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;">${user.email}</td></tr>
-          <tr><td style="padding:8px 12px;font-weight:600;">Date inscription</td><td style="padding:8px 12px;">${user.createdAt.toLocaleString('fr-FR')}</td></tr>
-        </tbody>
-      </table>
-      <p style="margin-top:16px;font-size:12px;color:#64748b;">Email automatique de suivi des essais gratuits.</p>
-    </body></html>`;
-    await transporter.sendMail({
-      from: SENDER_INFO,
-      to: adminEmail,
-      subject: `Nouvelle inscription au 7 jours gratuit`,
-      html: juice(html),
-      text: `Nouveau FREE_TRIAL\nEmail: ${user.email}\nDate: ${user.createdAt.toISOString()}`,
-    });
-    return true;
-  } catch (e) {
-    console.error('Erreur sendAdminFreeTrialNotification:', e);
-    return false;
-  }
-}

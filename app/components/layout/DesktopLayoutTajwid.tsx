@@ -1,25 +1,37 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import SidebarContentTajwid from "@/app/components/SidebarContentTajwid";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function DesktopLayoutTajwid({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [courseStarted, setCourseStarted] = useState(false);
+  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
   
   useEffect(() => {
     // Vérifier si le cours a été commencé
     setCourseStarted(localStorage.getItem('courseStarted') === 'true');
   }, []);
 
-  // Si le cours n'a pas été commencé, ne pas afficher la sidebar
-  if (!courseStarted) {
+  // Cacher la sidebar immédiatement si on navigue hors des chapitres tajwid
+  useEffect(() => {
+    if (!pathname.startsWith('/chapitres-tajwid')) {
+      setIsNavigatingAway(true);
+    } else {
+      setIsNavigatingAway(false);
+    }
+  }, [pathname]);
+
+  // Si le cours n'a pas été commencé ou si on navigue ailleurs, ne pas afficher la sidebar
+  if (!courseStarted || isNavigatingAway) {
     return <div className="min-h-screen">{children}</div>;
   }
 
   return (
-    <div className="flex h-screen overflow-hidden relative">
+    <div className="flex h-screen overflow-hidden relative z-[1]">
       {/* Sidebar */}
       <div
         className={`transition-all duration-300 bg-zinc-900 border-r border-zinc-800

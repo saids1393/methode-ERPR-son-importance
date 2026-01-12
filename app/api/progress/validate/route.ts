@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     if (pageNumber !== undefined) {
       // Exclure seulement la page 30 (page 0 est valide)
-      if (pageNumber === 30) {
+      if (pageNumber === 28) {
         return NextResponse.json({ success: false, message: 'Page 30 exclue' });
       }
 

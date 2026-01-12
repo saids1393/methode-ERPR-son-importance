@@ -3,13 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Circle, Home, Play } from "lucide-react";
+import { ChevronDown, ChevronRight, BookOpen, CheckCircle, Circle, Home, Play, PenTool } from "lucide-react";
 import { chaptersTajwid } from "@/lib/chapters-tajwid";
-import { useUserProgress } from "@/hooks/useUserProgress";
-import { useChapterVideos } from "@/hooks/useChapterVideos";
+import { useTajwidProgress } from "@/hooks/useTajwidProgress";
+import { useTajwidChapterVideos } from "@/hooks/useTajwidChapterVideos";
 import { useAutoProgress } from "@/hooks/useAutoProgress";
 import { useRouter } from "next/navigation";
-import FreeTrialRestrictionModal from "./FreeTrialRestrictionModal";
 
 interface User {
   id: string;
@@ -17,32 +16,57 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
-  accountType?: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
-  trialExpired?: boolean;
+  accountType?: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+  subscriptionPlan?: 'SOLO' | 'COACHING' | null;
 }
 
 
 const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<number>) => {
-  // Count total pages (excluding only chapter 10 and page 30)
-  const totalPages = chaptersTajwid
-    .filter(ch => ch.chapterNumber !== 10)
-    .reduce((total, ch) => total + ch.pages.filter(p => p.pageNumber !== 30).length, 0);
+  // Récupérer toutes les pages valides des chapitres Tajwid (1-8), exclure page 0
+  const validPageNumbers = new Set<number>();
+  chaptersTajwid.forEach(ch => {
+    ch.pages.forEach(p => {
+      if (p.pageNumber !== 0) {
+        validPageNumbers.add(p.pageNumber);
+      }
+    });
+  });
+  
+  // Récupérer tous les numéros de chapitres qui ont un quiz
+  const validQuizChapters = new Set<number>();
+  chaptersTajwid.forEach(ch => {
+    if (ch.quiz && ch.quiz.length > 0) {
+      validQuizChapters.add(ch.chapterNumber);
+    }
+  });
 
-  // Count total quizzes (excluding only chapter 10)
-  const totalQuizzes = chaptersTajwid
-    .filter(ch => ch.quiz && ch.quiz.length > 0 && ch.chapterNumber !== 10)
-    .length;
+  // Total = nombre de pages (sans page 28) + nombre de quizzes
+  const totalPages = validPageNumbers.size; // 32 pages (0-32 sans 28)
+  const totalQuizzes = validQuizChapters.size; // 8 quizzes (chapitres 1-8)
+  const totalItems = totalPages + totalQuizzes; // 40 items
 
-  const totalItems = totalPages + totalQuizzes;
+  // Compter uniquement les pages complétées qui existent dans Tajwid (sans page 28)
+  let completedPagesCount = 0;
+  completedPages.forEach(pageNum => {
+    if (validPageNumbers.has(pageNum)) {
+      completedPagesCount++;
+    }
+  });
 
-  // Count only completed pages that are not page 30
-  const completedPagesFiltered = Array.from(completedPages).filter(pageNum => pageNum !== 30);
+  // Compter uniquement les quizzes complétés qui existent dans Tajwid
+  let completedQuizzesCount = 0;
+  completedQuizzes.forEach(quizNum => {
+    if (validQuizChapters.has(quizNum)) {
+      completedQuizzesCount++;
+    }
+  });
 
-  // Count only completed quizzes that are not chapter 10
-  const completedQuizzesFiltered = Array.from(completedQuizzes).filter(quizNum => quizNum !== 10);
-
-  const completedItems = completedPagesFiltered.length + completedQuizzesFiltered.length;
-  return totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+  const completedItems = completedPagesCount + completedQuizzesCount;
+  
+  // 0% si rien validé, 100% si tout validé
+  if (completedItems === 0) return 0;
+  if (completedItems >= totalItems) return 100;
+  return Math.round((completedItems / totalItems) * 100);
 };
 
 
@@ -87,18 +111,12 @@ export default function SidebarContentTajwid() {
   const isChapterLocked = (chapterNumber: number) => {
     if (!user) return false;
     
-    // Si compte payant complet, rien n'est verrouillé
-    if (user.accountType === 'PAID_FULL') return false;
+    // Si compte actif (ACTIVE ou PAID_LEGACY), rien n'est verrouillé
+    if (user.isActive || user.accountType === 'ACTIVE' || user.accountType === 'PAID_LEGACY') return false;
     
-    // Si FREE_TRIAL
-    if (user.accountType === 'FREE_TRIAL') {
-      // Si trial expiré: tout verrouillé sauf chapitres 0 et notice (mais on est pas sur notice ici)
-      if (user.trialExpired) {
-        return true; // Tous les chapitres verrouillés après expiration
-      }
-      
-      // Si trial actif: chapitres 2-10 verrouillés, 1 accessible
-      return chapterNumber > 1;
+    // Si compte inactif, tous les chapitres sont verrouillés
+    if (user.accountType === 'INACTIVE' || !user.isActive) {
+      return true;
     }
     
     return false;
@@ -112,10 +130,9 @@ export default function SidebarContentTajwid() {
     toggleQuizCompletion,
     isProfessorMode,
     updateTrigger,
-    updateFromExternal,
-  } = useUserProgress();
+  } = useTajwidProgress();
 
-  const { getVideoByChapter } = useChapterVideos();
+  const { getVideoByChapter } = useTajwidChapterVideos();
   
   // ✅ Extraire validateIfTimeElapsed et getTimeOnCurrentPage
   const autoProgressHook = useAutoProgress({
@@ -144,7 +161,7 @@ export default function SidebarContentTajwid() {
 
   // ✅ Fonction ajustée pour vérifier pages + quiz, avec cas spécial pour chapitre 1
   const isChapterCompleted = useCallback((chapter: typeof chaptersTajwid[0]) => {
-    const pagesCompleted = chapter.pages.filter(p => p.pageNumber !== 30).every(page => completedPages.has(page.pageNumber));
+    const pagesCompleted = chapter.pages.filter(p => p.pageNumber !== 0).every(page => completedPages.has(page.pageNumber));
     const quizCompleted = chapter.quiz ? completedQuizzes.has(chapter.chapterNumber) : true;
 
     // Cas spécial pour le chapitre 1 : toutes les pages et le quiz
@@ -158,38 +175,10 @@ export default function SidebarContentTajwid() {
   const [showRestrictionModal, setShowRestrictionModal] = useState(false);
   const [restrictedChapterName, setRestrictedChapterName] = useState('');
 
+  // Charger l'utilisateur une seule fois au montage
   useEffect(() => {
     fetchUser();
   }, []);
-
-  // Mettre à jour à chaque focus (tab switch, reconnexion)
-  useEffect(() => {
-    const handleFocus = () => {
-      console.log('🔄 SidebarContentTajwid focus - Rafraîchissement utilisateur');
-      fetchUser();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log('🔄 SidebarContentTajwid tab visible - Rafraîchissement utilisateur');
-        fetchUser();
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-
-  // Mettre à jour aussi quand le pathname change (navigation)
-  useEffect(() => {
-    console.log('🔄 SidebarContentTajwid pathname changed - Rafraîchissement utilisateur');
-    fetchUser();
-  }, [pathname]);
 
   const handleChapterClick = (chapterNumber: number, chapterTitle: string) => {
     if (isChapterLocked(chapterNumber)) {
@@ -261,30 +250,13 @@ export default function SidebarContentTajwid() {
           console.log('📞 [SIDEBAR TAJWID] Auto-validation via setInterval');
           await validateIfTimeElapsed();
         }
-      }, 500);
+      }, 10000); // Vérifier toutes les 10 secondes au lieu de 2
       
       return () => clearInterval(checkInterval);
     }
   }, [isProfessorMode, autoProgressEnabled, getTimeOnCurrentPage, validateIfTimeElapsed, hasValidated]);
 
-  useEffect(() => {
-    if (isProfessorMode) return;
-    const eventSource = new EventSource('/api/progress/stream');
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'progress_update') {
-          updateFromExternal({
-            completedPages: data.completedPages,
-            completedQuizzes: data.completedQuizzes
-          });
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    return () => eventSource.close();
-  }, [isProfessorMode, updateFromExternal]);
+  // Removed EventSource listener - using local state updates instead
 
   if (isLoading) {
     return (
@@ -345,7 +317,7 @@ export default function SidebarContentTajwid() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-grow overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+      <nav className="flex-grow overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-gray-700 scrollbar-track-transparent transition-colors">
         <ul className="space-y-1 px-3">
           {chaptersTajwid.map((chapter) => {
             const chapterComplete = isChapterCompleted(chapter);
@@ -401,7 +373,7 @@ export default function SidebarContentTajwid() {
                           }`}
                         >
                           <BookOpen size={14} className="text-blue-400" />
-                          <span>Synthèse</span>
+                          <span>Introduction</span>
                         </Link>
                       </li>
                     )}
@@ -419,7 +391,7 @@ export default function SidebarContentTajwid() {
                                 : 'hover:bg-gray-800 text-gray-200'
                             }`}
                           >
-                            {!isProfessorMode && chapter.chapterNumber !== 10 && page.pageNumber !== 30 && (
+                            {!isProfessorMode && chapter.chapterNumber !== 10 && chapter.chapterNumber !== 9 && page.pageNumber !== 0 && page.pageNumber !== 33 && (
                               <button
                                 onClick={(e) => handleTogglePageCompletion(page.pageNumber, e)}
                                 className="flex-shrink-0"
@@ -471,6 +443,23 @@ export default function SidebarContentTajwid() {
                         </Link>
                       </li>
                     )}
+
+                    {chapter.chapterNumber !== 10 && chapter.chapterNumber !== 9 && (
+                      <li key={`exercise-${chapter.chapterNumber}`}>
+                        <Link
+                          href={`/chapitres-tajwid/exercice/${chapter.chapterNumber}`}
+                          onClick={(e) => handleNavigation(`/chapitres-tajwid/exercice/${chapter.chapterNumber}`, e)}
+                          className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            pathname === `/chapitres-tajwid/exercice/${chapter.chapterNumber}`
+                              ? 'bg-gray-800 text-blue-400 border-l-2 border-blue-500'
+                              : 'hover:bg-gray-800 text-gray-200'
+                          }`}
+                        >
+                          <PenTool size={14} className="text-blue-400" />
+                          <span className="font-semibold">Exercice {chapter.chapterNumber}</span>
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 )}
               </li>
@@ -485,12 +474,6 @@ export default function SidebarContentTajwid() {
           <span>Quiz complétés: {completedQuizzes.size}</span>
         </div>
       )}
-
-      <FreeTrialRestrictionModal
-        isOpen={showRestrictionModal}
-        onClose={() => setShowRestrictionModal(false)}
-        contentName={restrictedChapterName}
-      />
     </div>
   );
 }

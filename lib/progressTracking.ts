@@ -2,8 +2,11 @@
 
 import { prisma } from '@/lib/prisma';
 
+// Types pour les modules
+export type ModuleType = 'LECTURE' | 'TAJWID';
+
 /**
- * Enregistre qu'une page a été complétée
+ * Enregistre qu'une page a été complétée (MODULE LECTURE)
  * À appeler depuis votre API quand completedPages change
  */
 export async function logPageCompletion(
@@ -12,7 +15,7 @@ export async function logPageCompletion(
   chapterId: number
 ) {
   try {
-    console.log(`📝 [TRACKING] Tentative d'enregistrement page: userId=${userId}, page=${pageNumber}, chapter=${chapterId}`);
+    console.log(`📝 [TRACKING LECTURE] Tentative d'enregistrement page: userId=${userId}, page=${pageNumber}, chapter=${chapterId}`);
 
     const log = await (prisma as any).userProgressLog.create({
       data: {
@@ -24,27 +27,27 @@ export async function logPageCompletion(
       },
     });
 
-    console.log(`✅ [TRACKING] Log créé avec succès:`, log.id);
+    console.log(`✅ [TRACKING LECTURE] Log créé avec succès:`, log.id);
 
-    // Créer/mettre à jour le snapshot quotidien
-    await updateDailySnapshot(userId);
+    // Créer/mettre à jour le snapshot quotidien pour LECTURE
+    await updateDailySnapshot(userId, 'LECTURE');
 
-    console.log(`✅ [TRACKING] Snapshot mis à jour pour userId=${userId}`);
+    console.log(`✅ [TRACKING LECTURE] Snapshot mis à jour pour userId=${userId}`);
   } catch (error) {
-    console.error('❌ [TRACKING] Erreur enregistrement page complétée:', error);
+    console.error('❌ [TRACKING LECTURE] Erreur enregistrement page complétée:', error);
     throw error;
   }
 }
 
 /**
- * Enregistre qu'un quiz a été complété
+ * Enregistre qu'un quiz a été complété (MODULE LECTURE)
  */
 export async function logQuizCompletion(
   userId: string,
   chapterId: number
 ) {
   try {
-    console.log(`📝 [TRACKING] Tentative d'enregistrement quiz: userId=${userId}, chapter=${chapterId}`);
+    console.log(`📝 [TRACKING LECTURE] Tentative d'enregistrement quiz: userId=${userId}, chapter=${chapterId}`);
 
     const log = await (prisma as any).userProgressLog.create({
       data: {
@@ -55,48 +58,129 @@ export async function logQuizCompletion(
       },
     });
 
-    console.log(`✅ [TRACKING] Quiz log créé avec succès:`, log.id);
+    console.log(`✅ [TRACKING LECTURE] Quiz log créé avec succès:`, log.id);
 
-    // Créer/mettre à jour le snapshot quotidien
-    await updateDailySnapshot(userId);
+    // Créer/mettre à jour le snapshot quotidien pour LECTURE
+    await updateDailySnapshot(userId, 'LECTURE');
 
-    console.log(`✅ [TRACKING] Snapshot mis à jour pour userId=${userId}`);
+    console.log(`✅ [TRACKING LECTURE] Snapshot mis à jour pour userId=${userId}`);
   } catch (error) {
-    console.error('❌ [TRACKING] Erreur enregistrement quiz complété:', error);
+    console.error('❌ [TRACKING LECTURE] Erreur enregistrement quiz complété:', error);
+    throw error;
+  }
+}
+
+/**
+ * Enregistre qu'une page a été complétée (MODULE TAJWID)
+ */
+export async function logPageCompletionTajwid(
+  userId: string,
+  pageNumber: number,
+  chapterId: number
+) {
+  try {
+    console.log(`📝 [TRACKING TAJWID] Tentative d'enregistrement page: userId=${userId}, page=${pageNumber}, chapter=${chapterId}`);
+
+    const log = await (prisma as any).userProgressLog.create({
+      data: {
+        userId,
+        actionType: 'PAGE_COMPLETED_TAJWID',
+        pageNumber,
+        chapterId,
+        completedAt: new Date(),
+      },
+    });
+
+    console.log(`✅ [TRACKING TAJWID] Log créé avec succès:`, log.id);
+
+    // Créer/mettre à jour le snapshot quotidien pour TAJWID
+    await updateDailySnapshot(userId, 'TAJWID');
+
+    console.log(`✅ [TRACKING TAJWID] Snapshot mis à jour pour userId=${userId}`);
+  } catch (error) {
+    console.error('❌ [TRACKING TAJWID] Erreur enregistrement page complétée:', error);
+    throw error;
+  }
+}
+
+/**
+ * Enregistre qu'un quiz a été complété (MODULE TAJWID)
+ */
+export async function logQuizCompletionTajwid(
+  userId: string,
+  chapterId: number
+) {
+  try {
+    console.log(`📝 [TRACKING TAJWID] Tentative d'enregistrement quiz: userId=${userId}, chapter=${chapterId}`);
+
+    const log = await (prisma as any).userProgressLog.create({
+      data: {
+        userId,
+        actionType: 'QUIZ_COMPLETED_TAJWID',
+        chapterId,
+        completedAt: new Date(),
+      },
+    });
+
+    console.log(`✅ [TRACKING TAJWID] Quiz log créé avec succès:`, log.id);
+
+    // Créer/mettre à jour le snapshot quotidien pour TAJWID
+    await updateDailySnapshot(userId, 'TAJWID');
+
+    console.log(`✅ [TRACKING TAJWID] Snapshot mis à jour pour userId=${userId}`);
+  } catch (error) {
+    console.error('❌ [TRACKING TAJWID] Erreur enregistrement quiz complété:', error);
     throw error;
   }
 }
 
 /**
  * Met à jour le snapshot quotidien pour un utilisateur
- * Calcule la progression RÉELLE du jour
+ * Calcule la progression RÉELLE du jour pour le module spécifié
  */
-async function updateDailySnapshot(userId: string) {
+async function updateDailySnapshot(userId: string, module: ModuleType = 'LECTURE') {
   try {
-    console.log(`📸 [SNAPSHOT] Mise à jour snapshot pour userId=${userId}`);
+    console.log(`📸 [SNAPSHOT ${module}] Mise à jour snapshot pour userId=${userId}`);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { completedPages: true, completedQuizzes: true },
+      select: { 
+        completedPages: true, 
+        completedQuizzes: true,
+        completedPagesTajwid: true,
+        completedQuizzesTajwid: true,
+      },
     });
 
     if (!user) {
-      console.warn(`⚠️ [SNAPSHOT] Utilisateur ${userId} non trouvé`);
+      console.warn(`⚠️ [SNAPSHOT ${module}] Utilisateur ${userId} non trouvé`);
       return;
     }
 
-    // Filtrer les données réelles (pas la page 30 qui est l'évaluation finale)
-    const validPages = user.completedPages.filter(p => p !== 30);
-    const validQuizzes = user.completedQuizzes.filter(q => q !== 11);
+    let validPages: number[];
+    let validQuizzes: number[];
+    let totalPages: number;
+    let totalQuizzes: number;
 
-    // Calculer la progression réelle
-    // Page 0 incluse, page 30 exclue, chapitre 11 exclu
-    // Total: 30 pages (0-29) et 10 quiz (0-10, excluant 11)
-    const totalPages = 30;
-    const totalQuizzes = 10;
+    if (module === 'TAJWID') {
+      // TAJWID: pages 1-32 (32 pages), exclure page 0 et page 33 (évaluation finale)
+      // 8 quizzes (chapitres 1-8)
+      validPages = (user.completedPagesTajwid || []).filter(p => p !== 0 && p !== 33);
+      validQuizzes = user.completedQuizzesTajwid || [];
+      totalPages = 32;
+      totalQuizzes = 8;
+    } else {
+      // LECTURE: pages 1-29 (29 pages), exclure page 0 et page 30
+      // 10 quizzes (chapitres 0-9, excluant 10 et 11)
+      validPages = (user.completedPages || []).filter(p => p !== 0 && p !== 30);
+      validQuizzes = (user.completedQuizzes || []).filter(q => q !== 10 && q !== 11);
+      totalPages = 29;
+      totalQuizzes = 10;
+    }
+
     const totalItems = totalPages + totalQuizzes;
     const completedItems = validPages.length + validQuizzes.length;
     const progressPercentage = totalItems > 0
@@ -113,14 +197,16 @@ async function updateDailySnapshot(userId: string) {
     // Créer ou mettre à jour le snapshot
     const snapshot = await (prisma as any).dailyProgressSnapshot.upsert({
       where: {
-        userId_snapshotDate: {
+        userId_snapshotDate_module: {
           userId,
           snapshotDate: today,
+          module,
         },
       },
       create: {
         userId,
         snapshotDate: today,
+        module,
         pagesCompletedCount: validPages.length,
         quizzesCompletedCount: validQuizzes.length,
         progressPercentage,
@@ -132,17 +218,17 @@ async function updateDailySnapshot(userId: string) {
       },
     });
 
-    console.log(`✅ [SNAPSHOT] Snapshot enregistré:`, snapshot.id);
+    console.log(`✅ [SNAPSHOT ${module}] Snapshot enregistré:`, snapshot.id);
   } catch (error) {
-    console.error('❌ [SNAPSHOT] Erreur mise à jour snapshot quotidien:', error);
+    console.error(`❌ [SNAPSHOT ${module}] Erreur mise à jour snapshot quotidien:`, error);
     throw error;
   }
 }
 
 /**
- * Récupère les snapshots de la dernière semaine (7 jours)
+ * Récupère les snapshots de la dernière semaine (7 jours) pour un module
  */
-export async function getWeeklyProgressData(userId: string) {
+export async function getWeeklyProgressData(userId: string, module: ModuleType = 'LECTURE') {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
@@ -152,6 +238,7 @@ export async function getWeeklyProgressData(userId: string) {
   const snapshots = await (prisma as any).dailyProgressSnapshot.findMany({
     where: {
       userId,
+      module,
       snapshotDate: {
         gte: sevenDaysAgo,
         lte: today,
@@ -164,9 +251,9 @@ export async function getWeeklyProgressData(userId: string) {
 }
 
 /**
- * Récupère les snapshots du mois en cours
+ * Récupère les snapshots du mois en cours pour un module
  */
-export async function getMonthlyProgressData(userId: string) {
+export async function getMonthlyProgressData(userId: string, module: ModuleType = 'LECTURE') {
   const today = new Date();
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   firstDayOfMonth.setHours(0, 0, 0, 0);
@@ -174,6 +261,7 @@ export async function getMonthlyProgressData(userId: string) {
   const snapshots = await (prisma as any).dailyProgressSnapshot.findMany({
     where: {
       userId,
+      module,
       snapshotDate: {
         gte: firstDayOfMonth,
         lte: today,
@@ -186,9 +274,9 @@ export async function getMonthlyProgressData(userId: string) {
 }
 
 /**
- * Compare progression mois actuel vs mois précédent
+ * Compare progression mois actuel vs mois précédent pour un module
  */
-export async function getMonthlyComparison(userId: string) {
+export async function getMonthlyComparison(userId: string, module: ModuleType = 'LECTURE') {
   const today = new Date();
   
   // Mois actuel
@@ -204,6 +292,7 @@ export async function getMonthlyComparison(userId: string) {
   const currentMonthData = await (prisma as any).dailyProgressSnapshot.findMany({
     where: {
       userId,
+      module,
       snapshotDate: {
         gte: firstDayCurrentMonth,
         lte: today,
@@ -216,6 +305,7 @@ export async function getMonthlyComparison(userId: string) {
   const previousMonthData = await (prisma as any).dailyProgressSnapshot.findMany({
     where: {
       userId,
+      module,
       snapshotDate: {
         gte: firstDayPreviousMonth,
         lte: lastDayPreviousMonth,

@@ -155,7 +155,7 @@ const ExercisePage = ({ playLetterAudio, activeIndex, setActiveIndex }: {
       </div>
 
       
-      <PageNavigation currentChapter={1} currentPage={7} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={1} currentPage={7} module="LECTURE" className="mt-6 mb-4" />
 
 <footer className="border-t-1 text-white text-center p-6 flex-shrink-0 font-semibold text-sm">
         <div>Exercice des Lettres Séparées</div>

@@ -1,23 +1,42 @@
-// app/api/auth/get-user/route.ts
-import { NextResponse, NextRequest } from 'next/server';
-import { getAuthUserFromRequest } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(req: NextRequest) {
-  try {
-    // Récupérer l'utilisateur depuis le token (votre lib custom)
-    const user = await getAuthUserFromRequest(req);
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
 
-    if (!user) {
+export async function GET(request: NextRequest) {
+  try {
+    const token = request.cookies.get('auth-token')?.value;
+
+    if (!token) {
       return NextResponse.json(
-        { error: 'Non authentifié' },
+        { success: false, error: 'Non authentifié' },
         { status: 401 }
       );
     }
 
-    // Récupérer les infos complètes incluant trialExpired
-    const completeUser = await prisma.user.findUnique({
-      where: { id: user.id },
+    // Vérifier le token JWT
+    let payload;
+    try {
+      const verified = await jwtVerify(token, JWT_SECRET);
+      payload = verified.payload;
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, error: 'Token invalide ou expiré' },
+        { status: 401 }
+      );
+    }
+
+    if (!payload?.userId) {
+      return NextResponse.json(
+        { success: false, error: 'Token invalide' },
+        { status: 401 }
+      );
+    }
+
+    // Récupérer l'utilisateur depuis la base de données
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId as string },
       select: {
         id: true,
         email: true,
@@ -25,48 +44,70 @@ export async function GET(req: NextRequest) {
         gender: true,
         isActive: true,
         accountType: true,
-        trialExpired: true,
-      },
+        subscriptionPlan: true,
+        subscriptionStartDate: true,
+        subscriptionEndDate: true,
+        completedPages: true,
+        completedQuizzes: true,
+        completedPagesTajwid: true,
+        completedQuizzesTajwid: true,
+        createdAt: true,
+      }
     });
 
-    if (!completeUser) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Utilisateur non trouvé' },
+        { success: false, error: 'Utilisateur non trouvé' },
         { status: 404 }
       );
     }
 
-    // Récupérer les modules achetés
-    const purchases = await prisma.levelPurchase.findMany({
-      where: { userId: user.id },
-      include: {
-        level: {
-          select: { module: true }
-        }
+    // Vérifier si l'abonnement est actif
+    const hasActiveSubscription = checkActiveSubscription(user);
+
+    // Déterminer les accès
+    const hasLecture = hasActiveSubscription;
+    const hasTajwid = hasActiveSubscription;
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        ...user,
+        hasActiveSubscription,
+        hasLecture,
+        hasTajwid,
       }
     });
 
-    const modules = purchases.map(p => p.level.module);
-    const hasLecture = modules.includes('LECTURE');
-    const hasTajwid = modules.includes('TAJWID');
-
-    return NextResponse.json(
-      {
-        success: true,
-        user: {
-          ...completeUser,
-          hasLecture,
-          hasTajwid
-        },
-      },
-      { status: 200 }
-    );
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get user error:', error);
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      { success: false, error: 'Erreur serveur' },
       { status: 500 }
     );
   }
+}
+
+function checkActiveSubscription(user: {
+  accountType: string;
+  subscriptionEndDate: Date | null;
+}): boolean {
+  // Liste des types de compte qui ont accès
+  const activeAccountTypes = ['ACTIVE', 'PAID', 'PAID_FULL', 'PAID_LEGACY', 'FREE_TRIAL'];
+  
+  if (activeAccountTypes.includes(user.accountType)) {
+    // Si date de fin définie, vérifier qu'elle n'est pas expirée
+    if (user.subscriptionEndDate) {
+      return new Date(user.subscriptionEndDate) > new Date();
+    }
+    // Pas de date de fin = accès illimité
+    return true;
+  }
+
+  // Compte annulé mais encore dans la période payée
+  if (user.accountType === 'CANCELLED' && user.subscriptionEndDate) {
+    return new Date(user.subscriptionEndDate) > new Date();
+  }
+
+  return false;
 }

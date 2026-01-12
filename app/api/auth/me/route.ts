@@ -1,60 +1,112 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUserFromRequest } from '@/lib/auth';
+import { jwtVerify } from 'jose';
 import { prisma } from '@/lib/prisma';
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getAuthUserFromRequest(request);
+    const token = request.cookies.get('auth-token')?.value;
 
-    if (!user || !user.isActive) {
+    if (!token) {
       return NextResponse.json(
-        { error: 'Non autorisé' },
+        { error: 'Non authentifié' },
         { status: 401 }
       );
     }
 
-    // ⭐ OPTIMISÉ : Fetch seulement gender, password et accountType
-    // Au lieu de refetcher tout l'user
-    const userExtra = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: {
-        gender: true,
-        password: true,
-        accountType: true,
-      },
-    });
+    // Vérifier le token JWT
+    let payload;
+    try {
+      const verified = await jwtVerify(token, JWT_SECRET);
+      payload = verified.payload;
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Token invalide ou expiré' },
+        { status: 401 }
+      );
+    }
 
-    // Récupérer les modules achetés
-    const purchases = await prisma.levelPurchase.findMany({
-      where: { userId: user.id },
-      include: {
-        level: {
-          select: { module: true }
-        }
+    if (!payload?.userId) {
+      return NextResponse.json(
+        { error: 'Token invalide' },
+        { status: 401 }
+      );
+    }
+
+    // Récupérer l'utilisateur depuis la base de données
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId as string },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        gender: true,
+        isActive: true,
+        accountType: true,
+        subscriptionPlan: true,
+        subscriptionStartDate: true,
+        subscriptionEndDate: true,
+        stripeCustomerId: true,
+        completedPages: true,
+        completedQuizzes: true,
+        completedPagesTajwid: true,
+        completedQuizzesTajwid: true,
+        studyTimeSeconds: true,
+        createdAt: true,
       }
     });
 
-    const modules = purchases.map(p => p.level.module);
-    const hasLecture = modules.includes('LECTURE');
-    const hasTajwid = modules.includes('TAJWID');
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Utilisateur non trouvé' },
+        { status: 404 }
+      );
+    }
+
+    // Vérifier si l'abonnement est actif
+    const hasActiveSubscription = checkActiveSubscription(user);
+    
+    // Si l'utilisateur a un abonnement actif, il a accès à tous les modules
+    const hasLecture = hasActiveSubscription;
+    const hasTajwid = hasActiveSubscription;
 
     return NextResponse.json({
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      gender: userExtra?.gender || null,
-      isActive: user.isActive,
-      hasPassword: userExtra?.password !== null,
-      accountType: userExtra?.accountType || 'PAID_FULL',
-      modules,
+      ...user,
+      hasActiveSubscription,
       hasLecture,
-      hasTajwid
+      hasTajwid,
     });
-  } catch (error) {
+
+  } catch (error: any) {
     console.error('Auth me error:', error);
     return NextResponse.json(
-      { error: 'Erreur interne du serveur' },
+      { error: 'Erreur serveur' },
       { status: 500 }
     );
   }
+}
+
+function checkActiveSubscription(user: {
+  accountType: string;
+  subscriptionEndDate: Date | null;
+}): boolean {
+  // Liste des types de compte qui ont accès
+  const activeAccountTypes = ['ACTIVE', 'PAID', 'PAID_FULL', 'PAID_LEGACY', 'FREE_TRIAL'];
+  
+  if (activeAccountTypes.includes(user.accountType)) {
+    // Si date de fin définie, vérifier qu'elle n'est pas expirée
+    if (user.subscriptionEndDate) {
+      return new Date(user.subscriptionEndDate) > new Date();
+    }
+    // Pas de date de fin = accès illimité
+    return true;
+  }
+
+  // Compte annulé mais encore dans la période payée
+  if (user.accountType === 'CANCELLED' && user.subscriptionEndDate) {
+    return new Date(user.subscriptionEndDate) > new Date();
+  }
+
+  return false;
 }

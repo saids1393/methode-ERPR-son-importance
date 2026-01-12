@@ -9,7 +9,6 @@ import { useUserProgress } from "@/hooks/useUserProgress";
 import { useChapterVideos } from "@/hooks/useChapterVideos";
 import { useAutoProgress } from "@/hooks/useAutoProgress";
 import { useRouter } from "next/navigation";
-import FreeTrialRestrictionModal from "./FreeTrialRestrictionModal";
 
 interface User {
   id: string;
@@ -17,8 +16,8 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
-  accountType?: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
-  trialExpired?: boolean;
+  accountType?: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+  subscriptionPlan?: 'SOLO' | 'COACHING' | null;
 }
 
 
@@ -26,7 +25,7 @@ const calculateProgress = (completedPages: Set<number>, completedQuizzes: Set<nu
   // Count total pages (excluding only chapter 11 and page 30)
   const totalPages = chapters
     .filter(ch => ch.chapterNumber !== 11)
-    .reduce((total, ch) => total + ch.pages.filter(p => p.pageNumber !== 30).length, 0);
+    .reduce((total, ch) => total + ch.pages.filter(p => p.pageNumber !== 28).length, 0);
 
   // Count total quizzes (excluding only chapter 11)
   const totalQuizzes = chapters
@@ -87,18 +86,12 @@ export default function SidebarContent() {
   const isChapterLocked = (chapterNumber: number) => {
     if (!user) return false;
     
-    // Si compte payant complet, rien n'est verrouillé
-    if (user.accountType === 'PAID_FULL') return false;
+    // Si compte actif (ACTIVE ou PAID_LEGACY), rien n'est verrouillé
+    if (user.isActive || user.accountType === 'ACTIVE' || user.accountType === 'PAID_LEGACY') return false;
     
-    // Si FREE_TRIAL
-    if (user.accountType === 'FREE_TRIAL') {
-      // Si trial expiré: tout verrouillé sauf chapitres 0 et notice (mais on est pas sur notice ici)
-      if (user.trialExpired) {
-        return true; // Tous les chapitres verrouillés après expiration
-      }
-      
-      // Si trial actif: chapitres 2-11 verrouillés, 0-1 accessibles
-      return chapterNumber > 1;
+    // Si compte inactif, tous les chapitres sont verrouillés
+    if (user.accountType === 'INACTIVE' || !user.isActive) {
+      return true;
     }
     
     return false;
@@ -144,7 +137,7 @@ export default function SidebarContent() {
 
   // ✅ Fonction ajustée pour vérifier pages + quiz, avec cas spécial pour chapitre 0
   const isChapterCompleted = useCallback((chapter: typeof chapters[0]) => {
-    const pagesCompleted = chapter.pages.filter(p => p.pageNumber !== 30).every(page => completedPages.has(page.pageNumber));
+    const pagesCompleted = chapter.pages.filter(p => p.pageNumber !== 28).every(page => completedPages.has(page.pageNumber));
     const quizCompleted = chapter.quiz ? completedQuizzes.has(chapter.chapterNumber) : true;
 
     // Cas spécial pour le chapitre 0 : pas de pages, seulement le quiz
@@ -158,38 +151,10 @@ export default function SidebarContent() {
   const [showRestrictionModal, setShowRestrictionModal] = useState(false);
   const [restrictedChapterName, setRestrictedChapterName] = useState('');
 
+  // Charger l'utilisateur une seule fois au montage
   useEffect(() => {
     fetchUser();
   }, []);
-
-  // Mettre à jour à chaque focus (tab switch, reconnexion)
-  useEffect(() => {
-    const handleFocus = () => {
-      console.log('🔄 SidebarContent focus - Rafraîchissement utilisateur');
-      fetchUser();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log('🔄 SidebarContent tab visible - Rafraîchissement utilisateur');
-        fetchUser();
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-
-  // Mettre à jour aussi quand le pathname change (navigation)
-  useEffect(() => {
-    console.log('🔄 SidebarContent pathname changed - Rafraîchissement utilisateur');
-    fetchUser();
-  }, [pathname]);
 
   const handleChapterClick = (chapterNumber: number, chapterTitle: string) => {
     if (isChapterLocked(chapterNumber)) {
@@ -261,30 +226,14 @@ export default function SidebarContent() {
           console.log('📞 [SIDEBAR] Auto-validation via setInterval');
           await validateIfTimeElapsed();
         }
-      }, 500);
+      }, 10000); // Vérifier toutes les 10 secondes au lieu de 2
       
       return () => clearInterval(checkInterval);
     }
   }, [isProfessorMode, autoProgressEnabled, getTimeOnCurrentPage, validateIfTimeElapsed, hasValidated]);
 
-  useEffect(() => {
-    if (isProfessorMode) return;
-    const eventSource = new EventSource('/api/progress/stream');
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'progress_update') {
-          updateFromExternal({
-            completedPages: data.completedPages,
-            completedQuizzes: data.completedQuizzes
-          });
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    return () => eventSource.close();
-  }, [isProfessorMode, updateFromExternal]);
+  // EventSource supprimé - le stream ne faisait que des pings inutiles
+  // Les mises à jour de progression se font via les événements locaux (progressUpdated)
 
   if (isLoading) {
     return (
@@ -345,7 +294,7 @@ export default function SidebarContent() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-grow overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+      <nav className="flex-grow overflow-y-auto touch-auto overscroll-contain scrollbar-thin scrollbar-thumb-transparent hover:scrollbar-thumb-gray-700 scrollbar-track-transparent transition-colors">
         <ul className="space-y-1 px-3">
           {chapters.map((chapter) => {
             const chapterComplete = isChapterCompleted(chapter);
@@ -419,7 +368,7 @@ export default function SidebarContent() {
                                 : 'hover:bg-gray-800 text-gray-200'
                             }`}
                           >
-                            {!isProfessorMode && chapter.chapterNumber !== 11 && page.pageNumber !== 30 && (
+                            {!isProfessorMode && chapter.chapterNumber !== 11 && page.pageNumber !== 28 && page.pageNumber !== 0 && page.pageNumber !== 30 && (
                               <button
                                 onClick={(e) => handleTogglePageCompletion(page.pageNumber, e)}
                                 className="flex-shrink-0"
@@ -485,12 +434,6 @@ export default function SidebarContent() {
           <span>Quiz complétés: {completedQuizzes.size}</span>
         </div>
       )}
-
-      <FreeTrialRestrictionModal
-        isOpen={showRestrictionModal}
-        onClose={() => setShowRestrictionModal(false)}
-        contentName={restrictedChapterName}
-      />
     </div>
   );
 }

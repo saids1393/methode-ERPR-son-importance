@@ -23,7 +23,8 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
-  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
+  accountType: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+  subscriptionPlan?: 'SOLO' | 'COACHING' | null;
 }
 
 interface HomeworkSend {
@@ -53,14 +54,8 @@ export default function ConseilsPage() {
           setUser(userData);
           
           // 🔍 Vérifier si l'utilisateur a accès
-          if (userData.accountType === 'FREE_TRIAL' && userData.trialExpired) {
-            // Si trial expiré, rediriger vers dashboard
-            window.location.replace('/dashboard');
-            return;
-          }
-          
-          // Si pas de compte payant et trial actif, bloquer
-          if (userData.accountType === 'FREE_TRIAL' && !userData.trialExpired) {
+          if (!userData.isActive || userData.accountType === 'INACTIVE') {
+            // Si compte inactif, rediriger vers dashboard
             window.location.replace('/dashboard');
             return;
           }

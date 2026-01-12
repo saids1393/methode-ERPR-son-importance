@@ -30,7 +30,8 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
-  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
+  accountType: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+  subscriptionPlan?: 'SOLO' | 'COACHING' | null;
 }
 
 interface Submission {
@@ -64,6 +65,16 @@ interface HomeworkSend {
   };
 }
 
+interface TajwidHomeworkSend {
+  id: string;
+  sentAt: string;
+  tajwidHomework: {
+    id: string;
+    chapterId: number;
+    title: string;
+  };
+}
+
 // Configuration des statuts
 const statusConfig = {
   PENDING: {
@@ -90,8 +101,21 @@ export default function DevoirsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
   const [homeworkSends, setHomeworkSends] = useState<HomeworkSend[]>([]);
+  const [tajwidHomeworkSends, setTajwidHomeworkSends] = useState<TajwidHomeworkSend[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  // Redirection vers devoirs-tajwid si le module sélectionné est TAJWID
+  const [moduleChecked, setModuleChecked] = useState(false);
+  
+  useEffect(() => {
+    const savedModule = localStorage.getItem('selectedDashboardModule');
+    if (savedModule === 'TAJWID') {
+      router.replace('/devoirs-tajwid');
+    } else {
+      setModuleChecked(true);
+    }
+  }, [router]);
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -190,10 +214,17 @@ export default function DevoirsPage() {
   // Récupération des envois de devoirs
   const fetchHomeworkSends = async () => {
     try {
+      // Lecture
       const response = await fetch('/api/homework/user-sends');
       if (response.ok) {
         const data = await response.json();
         setHomeworkSends(data.sends || []);
+      }
+      // Tajwid (pour le header)
+      const tajwidResponse = await fetch('/api/homework/tajwid/user-sends');
+      if (tajwidResponse.ok) {
+        const tajwidData = await tajwidResponse.json();
+        setTajwidHomeworkSends(tajwidData.sends || []);
       }
     } catch (error) {
       console.error('Erreur lors du chargement des envois :', error);
@@ -357,6 +388,18 @@ export default function DevoirsPage() {
     });
   };
 
+  // Ne pas afficher tant que le module n'est pas vérifié
+  if (!moduleChecked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 text-lg">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
@@ -388,6 +431,7 @@ export default function DevoirsPage() {
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
           homeworkSends={homeworkSends}
+          tajwidHomeworkSends={tajwidHomeworkSends}
         />
         <main className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">

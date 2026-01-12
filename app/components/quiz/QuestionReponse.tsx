@@ -14,14 +14,16 @@ type QuizQuestion = {
 type QuizProps = {
   quiz: QuizQuestion[];
   chapterNumber?: number;
+  onToggleQuizCompletion?: (chapterNumber: number) => void | Promise<void>;
 };
 
-const Quiz: React.FC<QuizProps> = ({ quiz, chapterNumber }) => {
+const Quiz: React.FC<QuizProps> = ({ quiz, chapterNumber, onToggleQuizCompletion }) => {
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [showRecap, setShowRecap] = useState(false);
-  const { toggleQuizCompletion } = useUserProgress();
+  const { toggleQuizCompletion: defaultToggleQuizCompletion } = useUserProgress();
+  const toggleQuizCompletion = onToggleQuizCompletion || defaultToggleQuizCompletion;
   const router = useRouter();
 
   const handleAnswerSelect = (answerIndex: number) => {

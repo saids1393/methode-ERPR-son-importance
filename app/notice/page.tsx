@@ -31,7 +31,8 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
-  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
+  accountType: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+  subscriptionPlan?: 'SOLO' | 'COACHING' | null;
 }
 
 interface HomeworkSend {

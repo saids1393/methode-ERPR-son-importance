@@ -1,39 +1,33 @@
 'use client';
-import { Suspense, useState, useCallback, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useCallback, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { BookOpen, CheckCircle, AlertCircle, Zap, ArrowRight } from 'lucide-react';
+import { BookOpen, CheckCircle, Crown, Zap } from 'lucide-react';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
-// --- CONFIGURATION DE SÉCURITÉ (ALIGNÉE AVEC LE BACKEND) ---
+// --- CONFIGURATION DE SÉCURITÉ ---
 
-// Fournisseurs français grand public et sécurisés
 const ALLOWED_EMAIL_DOMAINS = [
   'orange.fr', 'wanadoo.fr', 'sfr.fr', 'neuf.fr', 'bbox.fr',
   'laposte.net', 'free.fr', 'numericable.fr', 'mailo.com', 'mail.fr',
   'pm.me', 'proton.me'
 ];
 
-// Fournisseurs internationaux de confiance
 const TRUSTED_PROVIDERS = [
   'gmail', 'yahoo', 'outlook', 'hotmail', 'live', 'msn',
   'icloud', 'protonmail'
 ];
 
-// Extensions de domaines européens (TLD)
 const TRUSTED_TLDS = [
   'fr', 'de', 'es', 'it', 'be', 'nl', 'ch', 'pt', 'uk', 'ie',
   'pl', 'cz', 'se', 'no', 'fi', 'dk', 'at'
 ];
 
-// Domaines jetables connus
 const BLOCKED_DOMAINS = [
   'tempmail.com', 'mailinator.com', '10minutemail.com',
   'yopmail.com', 'guerrillamail.com', 'trashmail.com'
 ];
 
-// --- VALIDATION EMAIL AVANCÉE (IDENTIQUE AU BACKEND) ---
 function validateEmailDomain(email: string): { valid: boolean; error?: string } {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -44,22 +38,18 @@ function validateEmailDomain(email: string): { valid: boolean; error?: string } 
   const base = domain.split('.')[0];
   const tld = domain.split('.').pop();
 
-  // Bloquer les domaines jetables
   if (BLOCKED_DOMAINS.includes(domain)) {
     return { valid: false, error: 'Adresse email jetable non autorisée' };
   }
 
-  // Accepter domaines explicitement whitelistés
   if (ALLOWED_EMAIL_DOMAINS.includes(domain)) {
     return { valid: true };
   }
 
-  // Accepter les grands fournisseurs connus (toutes extensions locales)
   if (TRUSTED_PROVIDERS.some(p => domain.startsWith(p + '.') || base === p)) {
     return { valid: true };
   }
 
-  // Accepter les TLD européens
   if (TRUSTED_TLDS.includes(tld || '')) {
     return { valid: true };
   }
@@ -70,47 +60,88 @@ function validateEmailDomain(email: string): { valid: boolean; error?: string } 
   };
 }
 
-// Sanitisation des entrées
 function sanitizeInput(input: string): string {
   if (!input) return '';
-  return input
-    .trim()
-    .slice(0, 255) // Limiter la longueur
-    .replace(/[<>\"']/g, ''); // Supprimer caractères dangereux
+  return input.trim().slice(0, 255).replace(/[<>\"']/g, '');
 }
 
+type PlanType = 'SOLO' | 'COACHING';
+
+interface PlanInfo {
+  id: PlanType;
+  name: string;
+  price: number;
+  description: string;
+  features: string[];
+  popular?: boolean;
+  icon: React.ReactNode;
+  color: string;
+}
+
+const PLANS: PlanInfo[] = [
+  {
+    id: 'SOLO',
+    name: 'Plan Solo',
+    price: 10,
+    description: 'Accès complet aux cours',
+    icon: <BookOpen className="h-6 w-6" />,
+    color: 'blue',
+    features: [
+      'Accès au module Lecture & Écriture',
+      'Accès au module Tajwid',
+      'Vidéos de cours illimitées',
+      'Quiz interactifs',
+      'Suivi de progression',
+      'Devoirs à rendre'
+    ]
+  },
+  {
+    id: 'COACHING',
+    name: 'Plan Coaching',
+    price: 30,
+    description: 'Cours + accompagnement personnalisé',
+    icon: <Crown className="h-6 w-6" />,
+    color: 'purple',
+    popular: true,
+    features: [
+      'Tout le Plan Solo inclus',
+      'Correction personnalisée des devoirs',
+      'Sessions de coaching individuel',
+      'Support prioritaire par WhatsApp',
+      'Conseils personnalisés du professeur',
+      'Suivi hebdomadaire de progression'
+    ]
+  }
+];
+
 export default function CheckoutPage() {
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
-  const [paymentPlan, setPaymentPlan] = useState<'1x' | '2x'>('1x');
+  const [selectedPlan, setSelectedPlan] = useState<PlanType>('SOLO');
   const [isEmailLocked, setIsEmailLocked] = useState(false);
-  const [selectedModule, setSelectedModule] = useState<'LECTURE' | 'TAJWID' | null>(null);
 
-  // Récupérer le module depuis l'URL ou utiliser la sélection
-  const module = selectedModule || searchParams.get('module')?.toUpperCase() || null;
-  
-  // Si pas de module sélectionné et pas d'URL param, afficher écran de sélection
-  const showModuleSelection = !module;
-
-  // Pré-remplir l'email depuis l'URL si présent
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const emailParam = params.get('email');
+      const planParam = params.get('plan')?.toUpperCase();
+      
       if (emailParam) {
         setEmail(emailParam);
         setIsEmailLocked(true);
       }
+      
+      if (planParam === 'SOLO' || planParam === 'COACHING') {
+        setSelectedPlan(planParam);
+      }
     }
   }, []);
 
-  // Validation en temps réel de l'email
   const handleEmailChange = useCallback((value: string) => {
     setEmail(value);
-    setError(''); // Effacer l'erreur générale en cas de nouvelle saisie
+    setError('');
 
     if (value.includes('@')) {
       const validation = validateEmailDomain(value);
@@ -124,15 +155,12 @@ export default function CheckoutPage() {
     }
   }, []);
 
-  // Validation avant envoi
   const validateBeforeSubmit = (): boolean => {
-    // Vérifier que l'email n'est pas vide
     if (!email.trim()) {
       setError('Veuillez saisir votre email');
       return false;
     }
 
-    // Vérifier le format et domaine
     const validation = validateEmailDomain(email);
     if (!validation.valid) {
       setEmailError(validation.error || 'Email invalide');
@@ -148,7 +176,6 @@ export default function CheckoutPage() {
     setError('');
     setEmailError('');
 
-    // Validation préalable
     if (!validateBeforeSubmit()) {
       return;
     }
@@ -156,10 +183,8 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      // Sanitiser et normaliser l'email
       const cleanEmail = sanitizeInput(email).toLowerCase().trim();
 
-      // Vérifier si l'utilisateur existe déjà
       const checkResponse = await fetch('/api/auth/check-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -182,14 +207,12 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Créer la session selon le plan choisi
-      const response = await fetch('/api/stripe/create-checkout-session', {
+      const response = await fetch('/api/stripe/create-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: cleanEmail,
-          paymentPlan, // '1x' ou '2x'
-          module: module || 'LECTURE'
+          plan: selectedPlan
         })
       });
 
@@ -200,7 +223,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Rediriger vers Stripe Checkout
       const stripe = await stripePromise;
       const { error: redirectError } = await stripe!.redirectToCheckout({
         sessionId
@@ -217,143 +239,8 @@ export default function CheckoutPage() {
     }
   };
 
-  // Le formulaire est valide si :
-  // - email est rempli
-  // - pas d'erreur email
-  // - pas en cours de chargement
   const isFormValid = email.trim() && !emailError && !loading;
-
-  // ===== ÉCRAN DE SÉLECTION DU MODULE =====
-  if (showModuleSelection) {
-    return (
-      <div className="checkout-page-dark min-h-screen relative overflow-hidden bg-black">
-        <style jsx>{`
-          .checkout-page-dark {
-            background-color: #000000 !important;
-            color: #ffffff !important;
-          }
-        `}</style>
-
-        {/* Light effects on sides */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 -left-40 w-96 h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
-          <div className="absolute top-0 -right-40 w-96 h-full bg-gradient-to-l from-transparent via-purple-500/10 to-transparent blur-3xl"></div>
-          <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-white/5 to-transparent rounded-full blur-3xl"></div>
-        </div>
-
-        {/* Grid pattern overlay */}
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='white' stroke-width='0.5' opacity='0.05'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`
-          }}
-        ></div>
-
-        <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full max-w-4xl">
-            {/* Logo avec image */}
-            <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
-              <img
-                src="/img/logo_ecrit_blanc-point.png"
-                alt="Logo Méthode ERPR"
-                className="w-14 h-13 object-contain"
-              />
-            </div>
-
-            {/* Titre principal */}
-            <h2 className="mt-4 text-center text-3xl font-bold text-white">
-              Méthode ERPR
-            </h2>
-
-            {/* Sous-titre centré */}
-            <h3 className="mt-2 text-center text-xl font-bold text-white">
-              Choisissez votre module
-            </h3>
-
-            {/* Sélection des modules */}
-            <div className="mt-12 w-full max-w-2xl px-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Option LECTURE */}
-                <button
-                  onClick={() => setSelectedModule('LECTURE')}
-                  className="group relative p-8 rounded-2xl border-2 border-blue-500/30 bg-gray-950/90 hover:border-blue-500/60 hover:bg-gray-900 transition-all duration-300"
-                >
-                  <div className="absolute inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-300"></div>
-                  <div className="relative space-y-4">
-                    <div className="flex items-center justify-center h-16 bg-blue-500/20 rounded-lg">
-                      <BookOpen className="h-8 w-8 text-blue-400" />
-                    </div>
-                    <h4 className="text-xl font-bold text-white">LECTURE</h4>
-                    <p className="text-sm text-gray-400">
-                      Cours complet de lecture et d'écriture en arabe
-                    </p>
-                    <div className="pt-4 border-t border-gray-800">
-                      <p className="text-2xl font-bold text-white">89€</p>
-                      <p className="text-xs text-gray-500 mt-1">Accès illimité à vie</p>
-                    </div>
-                    <div className="flex items-center justify-center pt-2 text-blue-400 group-hover:translate-x-1 transition-transform">
-                      <span className="text-sm font-medium">Continuer</span>
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </div>
-                  </div>
-                </button>
-
-                {/* Option TAJWID */}
-                <button
-                  onClick={() => setSelectedModule('TAJWID')}
-                  className="group relative p-8 rounded-2xl border-2 border-purple-500/30 bg-gray-950/90 hover:border-purple-500/60 hover:bg-gray-900 transition-all duration-300"
-                >
-                  <div className="absolute inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-30 transition duration-300"></div>
-                  <div className="relative space-y-4">
-                    <div className="flex items-center justify-center h-16 bg-purple-500/20 rounded-lg">
-                      <BookOpen className="h-8 w-8 text-purple-400" />
-                    </div>
-                    <h4 className="text-xl font-bold text-white">TAJWID</h4>
-                    <p className="text-sm text-gray-400">
-                      Module d'apprentissage des règles du Tajwid
-                    </p>
-                    <div className="pt-4 border-t border-gray-800">
-                      <p className="text-2xl font-bold text-white">89€</p>
-                      <p className="text-xs text-gray-500 mt-1">Accès illimité à vie</p>
-                    </div>
-                    <div className="flex items-center justify-center pt-2 text-purple-400 group-hover:translate-x-1 transition-transform">
-                      <span className="text-sm font-medium">Continuer</span>
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </div>
-                  </div>
-                </button>
-              </div>
-
-              {/* Lien pour revenir */}
-              <div className="text-center mt-12">
-                <p className="text-sm text-gray-400">
-                  Vous avez besoin d'aide ?{' '}
-                  <a
-                    href="/"
-                    className="text-blue-400 hover:text-blue-300 transition-colors"
-                  >
-                    Revenir à l'accueil
-                  </a>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ===== FORMULAIRE DE CHECKOUT (pour LECTURE et TAJWID) =====
-
-
-  // Déterminer le label et la description selon le module
-  const moduleLabel = module === 'TAJWID' ? 'TAJWID' : 'LECTURE';
-  const moduleDescription = module === 'TAJWID' 
-    ? 'Module d\'apprentissage des règles du Tajwid'
-    : 'Cours complet de lecture et d\'écriture en arabe';
-
-  // Déterminer si on peut afficher le paiement 2x (uniquement pour LECTURE)
-  const canUse2x = module === 'LECTURE';
+  const currentPlan = PLANS.find(p => p.id === selectedPlan)!;
 
   return (
     <div className="checkout-page-dark min-h-screen relative overflow-hidden bg-black">
@@ -364,14 +251,14 @@ export default function CheckoutPage() {
         }
       `}</style>
 
-      {/* Light effects on sides */}
+      {/* Light effects */}
       <div className="absolute inset-0">
         <div className="absolute top-0 -left-40 w-96 h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
         <div className="absolute top-0 -right-40 w-96 h-full bg-gradient-to-l from-transparent via-purple-500/10 to-transparent blur-3xl"></div>
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-b from-white/5 to-transparent rounded-full blur-3xl"></div>
       </div>
 
-      {/* Grid pattern overlay */}
+      {/* Grid pattern */}
       <div
         className="absolute inset-0"
         style={{
@@ -380,8 +267,8 @@ export default function CheckoutPage() {
       ></div>
 
       <div className="relative z-10 flex flex-col justify-center min-h-screen py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full sm:max-w-md">
-          {/* Logo avec image */}
+        <div className="flex flex-col items-center justify-center sm:mx-auto sm:w-full max-w-5xl">
+          {/* Logo */}
           <div className="flex items-center justify-center p-3 rounded-xl bg-opacity-20">
             <img
               src="/img/logo_ecrit_blanc-point.png"
@@ -390,225 +277,241 @@ export default function CheckoutPage() {
             />
           </div>
 
-          {/* Titre principal */}
           <h2 className="mt-4 text-center text-3xl font-bold text-white">
             Méthode ERPR
           </h2>
 
-          {/* Sous-titre centré */}
-          <h3 className="mt-2 text-center text-xl font-bold text-white">
-            {moduleLabel}
+          <h3 className="mt-2 text-center text-xl font-medium text-gray-300">
+            Choisissez votre abonnement
           </h3>
-        </div>
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-          <div className="relative">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-30"></div>
+          <p className="mt-2 text-center text-sm text-gray-400 max-w-md">
+            Accédez aux modules <span className="text-blue-400 font-medium">Lecture</span> et <span className="text-purple-400 font-medium">Tajwid</span> avec l'abonnement de votre choix
+          </p>
 
-            <div className="relative bg-gray-950/90 backdrop-blur-xl py-8 px-6 rounded-2xl border border-gray-800 sm:px-10">
-              {/* Erreur générale */}
-              {error && (
-                <div className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <p className="text-sm text-red-400">{error}</p>
-                </div>
-              )}
+          {/* Plans */}
+          <div className="mt-10 w-full px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {PLANS.map((plan) => (
+                <button
+                  key={plan.id}
+                  onClick={() => setSelectedPlan(plan.id)}
+                  className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 text-left ${
+                    selectedPlan === plan.id
+                      ? plan.color === 'purple'
+                        ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
+                        : 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
+                      : 'border-gray-800 bg-gray-950/90 hover:border-gray-700'
+                  }`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="px-3 py-1 text-xs font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full">
+                        Recommandé
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="relative space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-lg ${
+                        plan.color === 'purple' ? 'bg-purple-500/20' : 'bg-blue-500/20'
+                      }`}>
+                        <span className={plan.color === 'purple' ? 'text-purple-400' : 'text-blue-400'}>
+                          {plan.icon}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-white">{plan.name}</h4>
+                        <p className="text-sm text-gray-400">{plan.description}</p>
+                      </div>
+                    </div>
 
-              <form onSubmit={handleCheckout} className="space-y-6">
-                {/* Email field */}
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                    Adresse email
-                  </label>
+                    <div className="pt-2">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-white">{plan.price}€</span>
+                        <span className="text-gray-400">/mois</span>
+                      </div>
+                    </div>
+
+                    <ul className="space-y-2 pt-4 border-t border-gray-800">
+                      {plan.features.map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <CheckCircle className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
+                            plan.color === 'purple' ? 'text-purple-400' : 'text-blue-400'
+                          }`} />
+                          <span className="text-sm text-gray-300">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <div className="flex justify-center pt-4">
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                        selectedPlan === plan.id
+                          ? plan.color === 'purple'
+                            ? 'border-purple-500 bg-purple-500'
+                            : 'border-blue-500 bg-blue-500'
+                          : 'border-gray-600'
+                      }`}>
+                        {selectedPlan === plan.id && (
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Formulaire */}
+          <div className="mt-10 w-full max-w-md px-4">
+            <div className="relative">
+              <div className={`absolute -inset-0.5 bg-gradient-to-r rounded-2xl blur opacity-30 ${
+                selectedPlan === 'COACHING' 
+                  ? 'from-purple-500/20 to-pink-500/20' 
+                  : 'from-blue-500/20 to-cyan-500/20'
+              }`}></div>
+
+              <div className="relative bg-gray-950/90 backdrop-blur-xl py-8 px-6 rounded-2xl border border-gray-800 sm:px-10">
+                {error && (
+                  <div className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                    <p className="text-sm text-red-400">{error}</p>
+                  </div>
+                )}
+
+                <form onSubmit={handleCheckout} className="space-y-6">
+                  {/* Récap plan */}
+                  <div className={`p-4 rounded-lg border ${
+                    selectedPlan === 'COACHING'
+                      ? 'bg-purple-500/10 border-purple-500/30'
+                      : 'bg-blue-500/10 border-blue-500/30'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {currentPlan.icon}
+                        <span className="font-medium text-white">{currentPlan.name}</span>
+                      </div>
+                      <span className="text-xl font-bold text-white">{currentPlan.price}€/mois</span>
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                      Adresse email
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        autoComplete="email"
+                        required
+                        disabled={loading || isEmailLocked}
+                        value={email}
+                        onChange={(e) => handleEmailChange(e.target.value)}
+                        className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          emailError ? 'border-red-500' : 'border-gray-800'
+                        }`}
+                        placeholder="votre@email.com"
+                      />
+                      {isEmailLocked && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <svg className="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    {emailError && (
+                      <p className="mt-2 text-sm text-red-500">{emailError}</p>
+                    )}
+                  </div>
+
+                  {/* Submit */}
+                  <div>
+                    <button
+                      type="submit"
+                      disabled={!isFormValid}
+                      className={`relative group w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        selectedPlan === 'COACHING'
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500'
+                          : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500'
+                      } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500`}
+                    >
+                      {loading ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Vérification...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-5 w-5 mr-2" />
+                          S'abonner - {currentPlan.price}€/mois
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="text-center">
+                    <p className="text-sm text-gray-400">
+                      Vous avez déjà un compte ?{' '}
+                      <a href="/login" className="text-blue-400 hover:text-blue-300 transition-colors">
+                        Se connecter
+                      </a>
+                    </p>
+                  </div>
+                </form>
+
+                {/* Separator */}
+                <div className="mt-6">
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-800"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-gray-950 px-4 text-gray-500">Paiement sécurisé par Stripe</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trust indicators */}
+                <div className="mt-6 flex justify-center space-x-8">
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900/50 border border-gray-800">
+                      <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0110 1.944 11.954 11.954 0 0117.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      disabled={loading || isEmailLocked}
-                      value={email}
-                      onChange={(e) => handleEmailChange(e.target.value)}
-                      className={`block w-full pl-10 pr-3 py-3 bg-gray-900/50 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        emailError ? 'border-red-500' : 'border-gray-800'
-                      }`}
-                      placeholder="votre@email.com"
-                    />
-                    {isEmailLocked && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <svg className="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    )}
+                    <span className="mt-2 text-xs text-gray-500">Sécurisé</span>
                   </div>
-                  {emailError && (
-                    <p className="mt-2 text-sm text-red-500">{emailError}</p>
-                  )}
-                </div>
-
-                {/* Payment plan selector - Afficher 2x uniquement pour LECTURE */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">
-                    Choisissez votre mode de paiement
-                  </label>
-                  <div className="space-y-3">
-                    {/* Option 1x - Card style */}
-                    <button
-                      type="button"
-                      disabled={loading}
-                      onClick={() => setPaymentPlan('1x')}
-                      className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed ${
-                        paymentPlan === '1x'
-                          ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
-                          : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold text-white">89€</span>
-                            <span className="px-2 py-0.5 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
-                              Recommandé
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-400 mt-1">Paiement en 1 fois</p>
-                          <p className="text-xs text-gray-500 mt-1">Accès immédiat complet</p>
-                        </div>
-                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                          paymentPlan === '1x'
-                            ? 'border-blue-500 bg-blue-500'
-                            : 'border-gray-600'
-                        }`}>
-                          {paymentPlan === '1x' && (
-                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-
-                    {/* Option 2x - Card style - Uniquement pour LECTURE */}
-                    {canUse2x && (
-                      <button
-                        type="button"
-                        disabled={loading}
-                        onClick={() => setPaymentPlan('2x')}
-                        className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed ${
-                          paymentPlan === '2x'
-                            ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
-                            : 'border-gray-800 bg-gray-900/50 hover:border-gray-700'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl font-bold text-white">2 × 44,50€</span>
-                            </div>
-                            <p className="text-sm text-gray-400 mt-1">Paiement en 2 fois</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              44,50€ aujourd'hui + 44,50€ dans 30 jours
-                            </p>
-                          </div>
-                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                            paymentPlan === '2x'
-                              ? 'border-purple-500 bg-purple-500'
-                              : 'border-gray-600'
-                          }`}>
-                            {paymentPlan === '2x' && (
-                              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                      </button>
-                    )}
-                  </div>
-                  {canUse2x && (
-                    <p className="mt-3 text-xs text-center text-gray-500">
-                      💳 Aucun frais supplémentaire pour le paiement en 2 fois
-                    </p>
-                  )}
-                </div>
-
-                {/* Checkout button */}
-                <div>
-                  <button
-                    type="submit"
-                    disabled={!isFormValid}
-                    className="relative group w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Vérification...
-                      </>
-                    ) : (
-                      `Payer ${paymentPlan === '1x' ? '89€' : '44,50€ aujourd\'hui'}`
-                    )}
-                  </button>
-                </div>
-
-                {/* Retour au sélecteur */}
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedModule(null)}
-                    className="text-sm text-gray-400 hover:text-gray-300 transition-colors"
-                  >
-                    ← Changer de module
-                  </button>
-                  <p className="text-sm text-gray-400 mt-2">
-                    Vous avez déjà un compte ?{' '}
-                    <a
-                      href="/login"
-                      className="text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      Se connecter
-                    </a>
-                  </p>
-                </div>
-              </form>
-
-              {/* Separator */}
-              <div className="mt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-800"></div>
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-gray-950 px-4 text-gray-500">Paiement sécurisé par Stripe</span>
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900/50 border border-gray-800">
+                      <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4z"/>
+                        <path fillRule="evenodd" d="M8 10a2 2 0 002-2V4a2 2 0 012 2v4a2 2 0 01-2 2H8z" clipRule="evenodd"/>
+                      </svg>
+                    </div>
+                    <span className="mt-2 text-xs text-gray-500">Sans engagement</span>
                   </div>
                 </div>
-              </div>
 
-              {/* Trust indicators */}
-              <div className="mt-8 flex justify-center space-x-8">
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900/50 border border-gray-800">
-                    <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0110 1.944 11.954 11.954 0 0117.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <span className="mt-2 text-xs text-gray-500">Sécurisé</span>
+                <div className="mt-6 text-center text-xs text-gray-400 space-y-1">
+                  <p>✓ Accès immédiat après paiement</p>
+                  <p>✓ Annulez à tout moment</p>
+                  <p>✓ Accès aux 2 modules inclus</p>
                 </div>
-              </div>
-
-              {/* Features list */}
-              <div className="mt-6 text-center text-xs text-gray-400 space-y-1">
-                <p>✓ Accès immédiat après paiement</p>
-                <p>✓ {moduleDescription}</p>
-                <p>✓ Support inclus</p>
               </div>
             </div>
           </div>

@@ -168,7 +168,7 @@ const ExamplesPage = ({ playLetterAudio, activeExample }: {
     </div>
 
     
-      <PageNavigation currentChapter={4} currentPage={16} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={4} currentPage={16} module="LECTURE" className="mt-6 mb-4" />
 
 <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-sm md:text-base">
       <div>Page 16</div>

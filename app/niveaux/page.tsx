@@ -3,14 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Gift,
   BookOpen,
   GraduationCap,
-  Sparkles,
+  ArrowRight,
+  BookMarked,
+  Languages,
   Clock,
-  Lock,
-  ShoppingCart,
-  CheckCircle,
 } from 'lucide-react';
 import DashboardHeader from '@/app/components/DashboardHeader';
 import DashboardSidebar from '@/app/components/DashboardSidebar';
@@ -21,28 +19,16 @@ interface User {
   username: string | null;
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
-  accountType: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
+  accountType?: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+  subscriptionPlan: 'SOLO' | 'COACHING' | null;
+  hasActiveSubscription?: boolean;
 }
 
-interface Niveau {
-  id: number;
-  title: string;
-  icon: React.ReactNode;
-  description: string;
-  badge: string;
-  comingSoon?: boolean;
-  color: string;
-  price?: number;
-  isAvailable?: boolean;
-  isPurchased?: boolean;
-  module?: string;
-}
 
 export default function NiveauxPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [tajwidPurchased, setTajwidPurchased] = useState(false);
   const router = useRouter();
 
   const fetchUserData = async () => {
@@ -51,83 +37,44 @@ export default function NiveauxPage() {
       if (res.ok) {
         const data = await res.json();
         setUser(data);
-        checkTajwidAccess();
+        
+        const noAccessTypes = ['INACTIVE', 'EXPIRED'];
+        if (noAccessTypes.includes(data.accountType)) {
+          router.push('/pricing');
+          return;
+        }
       } else {
-        router.push('/checkout');
+        router.push('/login');
       }
     } catch (error) {
       console.error('Erreur auth:', error);
-      router.push('/checkout');
+      router.push('/login');
     } finally {
       setLoading(false);
     }
-  };
-
-  const checkTajwidAccess = async () => {
-    try {
-      const res = await fetch('/api/user/check-level-access?module=TAJWID');
-      if (res.ok) {
-        const data = await res.json();
-        setTajwidPurchased(data.hasAccess);
-      }
-    } catch (error) {
-      console.error('Error checking Tajwid access:', error);
-    }
-  };
-
-  const handleBuyTajwid = () => {
-    router.push('/checkout?level=tajwid');
   };
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
+  const handleAccessModule = (module: 'LECTURE' | 'TAJWID') => {
+    localStorage.setItem('selectedDashboardModule', module);
+    router.push('/dashboard');
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-600 text-lg">Chargement des niveaux...</p>
+          <p className="text-gray-600 text-lg">Chargement...</p>
         </div>
       </div>
     );
   }
 
   if (!user) return null;
-
-  const niveaux = [
-    {
-      id: 1,
-      title: 'Niveau Tajwid',
-      icon: <BookOpen className="h-10 w-10 text-indigo-600" />,
-      description:
-        "Un espace d’apprentissage du Tajwid sous forme d’articles clairs et audio-guidés. Disponible avant le mois béni du Ramadan إن شاء الله.",
-      badge: 'Sortie avant Ramadan 2026',
-      comingSoon: true,
-      color: 'indigo',
-    },
-    {
-      id: 2,
-      title: 'Niveau Tamhidi',
-      icon: <GraduationCap className="h-10 w-10 text-emerald-600" />,
-      description:
-        "Introduction à la langue arabe : conjugaison, vocabulaire, étude de texte. Parfait pour bien démarrer et consolider les bases.",
-      badge: 'Disponible courant 2026',
-      comingSoon: true,
-      color: 'emerald',
-    },
-    {
-      id: 3,
-      title: 'Niveau 1',
-      icon: <Sparkles className="h-10 w-10 text-rose-600" />,
-      description:
-        "Un parcours complet : étude de texte, vocabulaire, conjugaison et grammaire. Structuré pour progresser pas à pas vers la maîtrise.",
-      badge: 'Disponible courant 2026',
-      comingSoon: true,
-      color: 'rose',
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,7 +83,6 @@ export default function NiveauxPage() {
         setMobileMenuOpen={setMobileMenuOpen}
       />
 
-      {/* Overlay mobile */}
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
@@ -144,121 +90,97 @@ export default function NiveauxPage() {
         />
       )}
 
-      {/* Contenu principal */}
       <div className="lg:ml-64">
-       <DashboardHeader
-  user={user}
-  mobileMenuOpen={mobileMenuOpen}
-  setMobileMenuOpen={setMobileMenuOpen}
-  homeworkSends={[]}
-/>
-
+        <DashboardHeader
+          user={user}
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+          homeworkSends={[]}
+        />
 
         <main className="p-6 lg:p-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-2xl mb-4">
-              <Gift className="h-8 w-8 text-indigo-600" />
+          {/* En-tête */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mb-4 shadow-lg">
+              <GraduationCap className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-              Niveaux et Modules à Venir
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Choisissez votre module
             </h1>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Découvrez les prochains modules et niveaux à débloquer, conçus
-              pour approfondir votre apprentissage étape par étape.
+            <p className="text-gray-500">
+              Sélectionnez le module que vous souhaitez suivre
             </p>
           </div>
 
-          {/* Grille responsive */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {niveaux.map((niveau) => (
-              <div
-                key={niveau.id}
-                className="relative bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group"
-              >
-                {/* Bande colorée */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br from-${niveau.color}-50 to-white opacity-70 group-hover:opacity-100 transition duration-500`}
-                />
-                <div className="relative z-10 p-8 flex flex-col items-start">
-                  <div
-                    className={`bg-${niveau.color}-100 rounded-xl w-16 h-16 flex items-center justify-center mb-6`}
-                  >
-                    {niveau.icon}
+          {/* Liste des modules - Pleine largeur */}
+          <div className="max-w-3xl mx-auto space-y-4">
+            
+            {/* Module Lecture */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-stretch">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-6 sm:p-8 flex items-center justify-center">
+                  <BookOpen className="h-10 w-10 text-white" />
+                </div>
+                
+                <div className="flex-1 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-1">Module Lecture</h2>
+                    <p className="text-gray-500 text-sm">Apprendre à lire l'arabe avec la méthode ERPR</p>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-3">
-                    {niveau.title}
-                  </h2>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    {niveau.description}
-                  </p>
+                  <button
+                    onClick={() => handleAccessModule('LECTURE')}
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                  >
+                    <span>Accéder</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                  <div className="mt-auto flex flex-col w-full space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`text-sm font-medium bg-${niveau.color}-50 text-${niveau.color}-700 px-3 py-1 rounded-full flex items-center space-x-1`}
-                      >
-                        {niveau.isAvailable && !niveau.comingSoon ? (
-                          <>
-                            <span>{niveau.badge}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Clock className="h-4 w-4" />
-                            <span>{niveau.badge}</span>
-                          </>
-                        )}
-                      </span>
+            {/* Module Tajwid */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-stretch">
+                <div className="bg-gradient-to-br from-purple-500 to-purple-700 p-6 sm:p-8 flex items-center justify-center">
+                  <BookMarked className="h-10 w-10 text-white" />
+                </div>
+                
+                <div className="flex-1 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-1">Module Tajwid</h2>
+                    <p className="text-gray-500 text-sm">Règles de récitation du Coran</p>
+                  </div>
+                  <button
+                    onClick={() => handleAccessModule('TAJWID')}
+                    className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                  >
+                    <span>Accéder</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
 
-                      {niveau.comingSoon && (
-                        <div className="bg-gray-100 p-2 rounded-full">
-                          <Lock className="h-5 w-5 text-gray-500" />
-                        </div>
-                      )}
-
-                      {niveau.isAvailable && !niveau.comingSoon && (
-                        <div className={`p-2 rounded-full ${niveau.isPurchased ? 'bg-green-100' : 'bg-indigo-100'}`}>
-                          {niveau.isPurchased ? (
-                            <CheckCircle className="h-5 w-5 text-green-600" />
-                          ) : (
-                            <ShoppingCart className="h-5 w-5 text-indigo-600" />
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {niveau.isAvailable && !niveau.comingSoon && !niveau.isPurchased && (
-                      <button
-                        onClick={handleBuyTajwid}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                      >
-                        <ShoppingCart className="h-5 w-5" />
-                        <span>Accéder au Tajwid</span>
-                      </button>
-                    )}
-
-                    {niveau.isAvailable && !niveau.comingSoon && niveau.isPurchased && (
-                      <button
-                        onClick={() => {
-                          // Navigue vers le dashboard ou les chapitres Tajwid
-                          router.push('/dashboard');
-                        }}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                      >
-                        <CheckCircle className="h-5 w-5" />
-                        <span>Accéder au module</span>
-                      </button>
-                    )}
+            {/* Module MSA - Bientôt disponible */}
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden opacity-60">
+              <div className="flex flex-col sm:flex-row items-stretch">
+                <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-6 sm:p-8 flex items-center justify-center">
+                  <Languages className="h-10 w-10 text-white" />
+                </div>
+                
+                <div className="flex-1 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-1">Module MSA</h2>
+                    <p className="text-gray-500 text-sm">Arabe Standard Moderne - Conjugaison, vocabulaire</p>
+                  </div>
+                  <div className="w-full sm:w-auto bg-gray-200 text-gray-500 font-medium py-3 px-6 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed">
+                    <Clock className="h-5 w-5" />
+                    <span>Bientôt</span>
                   </div>
                 </div>
-
-                {/* Ruban “À venir” */}
-                {niveau.comingSoon && (
-                  <div className="absolute top-4 right-[-40px] rotate-45 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white text-sm font-semibold py-1 px-12 shadow-md">
-                    À venir
-                  </div>
-                )}
               </div>
-            ))}
+            </div>
+
           </div>
         </main>
       </div>

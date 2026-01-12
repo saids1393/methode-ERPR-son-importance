@@ -2,7 +2,6 @@ import React from 'react';
 import { generateAllStaticParams, getPageByNumbers, chapters } from '@/lib/chapters';
 import { chaptersTajwid } from '@/lib/chapters-tajwid';
 import AutoProgressWrapper from '@/app/components/AutoProgressWrapper';
-import ModuleAccessGuard from '@/app/components/ModuleAccessGuard';
 
 type ParamsType = {
   chapitres: string;
@@ -142,15 +141,12 @@ async function getComponent(chapitres: string, page: string) {
 
 export default async function Page({ params }: Props) {
   const { chapitres, page } = await params;
-  const chapNum = parseInt(chapitres, 10);
   const Component = await getComponent(chapitres, page);
 
   return (
-    <ModuleAccessGuard chapterNumber={chapNum} module="TAJWID">
-      <AutoProgressWrapper>
-        <Component />
-      </AutoProgressWrapper>
-    </ModuleAccessGuard>
+    <AutoProgressWrapper>
+      <Component />
+    </AutoProgressWrapper>
   );
 }
 

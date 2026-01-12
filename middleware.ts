@@ -4,6 +4,11 @@ import { jwtVerify } from 'jose';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
 
+// Rate limiting simple (en mémoire - pour production utiliser Redis)
+const rateLimitMap = new Map<string, { count: number; timestamp: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = 500; // 500 requêtes par minute (augmenté pour supporter les hooks)
+
 function getSecurityHeaders() {
   return {
     'Content-Security-Policy':
@@ -23,316 +28,337 @@ function getSecurityHeaders() {
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'X-Frame-Options': 'DENY',
-    'Permissions-Policy': 'geolocation=(), microphone=()',
+    'X-XSS-Protection': '1; mode=block',
+    'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
   };
 }
 
-// À ajouter dans middleware.ts pour remplacer verifyJWTToken()
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now - entry.timestamp > RATE_LIMIT_WINDOW) {
+    rateLimitMap.set(ip, { count: 1, timestamp: now });
+    return true;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return false;
+  }
+
+  entry.count++;
+  return true;
+}
+
+function getClientIP(request: NextRequest): string {
+  const xff = request.headers.get('x-forwarded-for');
+  if (xff) {
+    return xff.split(',')[0].trim();
+  }
+  return request.headers.get('x-real-ip') || 'unknown';
+}
 
 async function verifyJWTToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    
-    // 🔍 LOGS DE DEBUG
-    console.log('================================');
-    console.log('🔍 [JWT VERIFY] Payload décodé:');
-    console.log('   userId:', payload.userId);
-    console.log('   email:', payload.email);
-    console.log('   username:', payload.username);
-    console.log('   Toutes les clés:', Object.keys(payload));
-    console.log('   Payload complet:', JSON.stringify(payload));
-    console.log('================================');
-    
     return payload;
   } catch (error) {
-    console.error('❌ [JWT VERIFY] Erreur lors de la vérification:', error);
     return null;
   }
 }
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  const response = NextResponse.next();
+function applySecurityHeaders(response: NextResponse) {
   const securityHeaders = getSecurityHeaders();
   Object.entries(securityHeaders).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
+  return response;
+}
 
-  const publicPaths = ['/', '/checkout', '/merci', '/login', '/signup-free', '/complete-profile', '/professor/auth', '/testEcriture'];
+function createRedirectResponse(url: string, request: NextRequest, deleteCookie?: string) {
+  const redirectResponse = NextResponse.redirect(new URL(url, request.url));
+  if (deleteCookie) {
+    redirectResponse.cookies.delete(deleteCookie);
+  }
+  return applySecurityHeaders(redirectResponse);
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // Rate limiting
+  const clientIP = getClientIP(request);
+  if (!checkRateLimit(clientIP)) {
+    return new NextResponse('Too Many Requests', { status: 429 });
+  }
+
+  // Bloquer les requêtes suspectes
+  const userAgent = request.headers.get('user-agent') || '';
+  const suspiciousPatterns = [
+    /sqlmap/i,
+    /nikto/i,
+    /nmap/i,
+    /masscan/i,
+    /<script/i,
+    /union\s+select/i,
+    /\.\.\//,
+  ];
+  
+  if (suspiciousPatterns.some(pattern => pattern.test(pathname) || pattern.test(userAgent))) {
+    return new NextResponse('Forbidden', { status: 403 });
+  }
+
+  // Crée la réponse et ajoute les headers de sécurité
+  const response = NextResponse.next();
+  applySecurityHeaders(response);
+
+  // Pages publiques
+  const publicPaths = [
+    '/', 
+    '/checkout', 
+    '/merci', 
+    '/login', 
+    '/register',
+    '/pricing',
+    '/complete-profile', 
+    '/professor/auth', 
+    '/testEcriture',
+    '/forgot-password',
+    '/reset-password',
+  ];
+  
   if (publicPaths.includes(pathname)) {
     return response;
   }
 
-  if (pathname.startsWith('/api/stripe') || pathname.startsWith('/api/auth')) {
+  // API publiques (Stripe webhook doit rester accessible)
+  const publicApiPaths = [
+    '/api/stripe/webhook',
+    '/api/stripe/create-subscription',
+    '/api/stripe/verify-payment',
+    '/api/auth/login',
+    '/api/auth/register',
+    '/api/auth/check-user',
+    '/api/auth/forgot-password',
+    '/api/auth/reset-password',
+  ];
+
+  // API qui nécessitent juste un token valide (pas de vérification d'abonnement)
+  const authOnlyApiPaths = [
+    '/api/auth/me',
+    '/api/auth/get-user',
+    '/api/auth/complete-profile',
+    '/api/auth/logout',
+    '/api/auth/time',
+    '/api/user',
+  ];
+  
+  if (publicApiPaths.some(path => pathname.startsWith(path))) {
     return response;
   }
 
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/chapitres')) {
+  // API authentifiées mais sans vérification d'abonnement
+  if (authOnlyApiPaths.some(path => pathname.startsWith(path))) {
+    const token = request.cookies.get('auth-token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+    
+    const payload = await verifyJWTToken(token);
+    if (!payload) {
+      return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
+    }
+    
+    return response;
+  }
+
+  // API authentifiées (nécessitent un token valide)
+  if (pathname.startsWith('/api/')) {
+    const token = request.cookies.get('auth-token')?.value;
+    const professorToken = request.cookies.get('professor-token')?.value;
+
+    // API professeur
+    if (pathname.startsWith('/api/professor')) {
+      if (!professorToken) {
+        return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+      }
+      const payload = await verifyJWTToken(professorToken);
+      if (!payload || payload.role !== 'professor') {
+        return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+      }
+      return response;
+    }
+
+    // API utilisateur standard
+    if (!token) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+    
+    const payload = await verifyJWTToken(token);
+    if (!payload) {
+      return NextResponse.json({ error: 'Token invalide' }, { status: 401 });
+    }
+
+    // Vérifier l'abonnement pour les API de contenu
+    const contentApiPaths = ['/api/cours', '/api/chapitres', '/api/videos', '/api/progression'];
+    if (contentApiPaths.some(path => pathname.startsWith(path))) {
+      const accountType = payload.accountType as string;
+      const subscriptionEndDate = payload.subscriptionEndDate as string | null;
+      
+      if (!checkActiveSubscription(accountType, subscriptionEndDate)) {
+        return NextResponse.json({ 
+          error: 'Abonnement requis',
+          code: 'SUBSCRIPTION_REQUIRED'
+        }, { status: 403 });
+      }
+    }
+
+    return response;
+  }
+
+  // Pages protégées (dashboard, chapitres, niveaux, accompagnement, etc.)
+  const protectedPaths = ['/dashboard', '/chapitres', '/niveaux', '/accompagnement', '/tajwid', '/devoirs', '/notice', '/conseil', '/chapitres-tajwid', '/devoirs-tajwid', '/abonnement'];
+  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
+
+  if (isProtectedPath) {
     const professorCourseToken = request.cookies.get('professor-course-token')?.value;
     const userToken = request.cookies.get('auth-token')?.value;
     const professorToken = request.cookies.get('professor-token')?.value;
 
+    // Priorité 1: accès professeur aux chapitres
     if (professorCourseToken && pathname.startsWith('/chapitres')) {
       const professorPayload = await verifyJWTToken(professorCourseToken);
       if (!professorPayload || professorPayload.role !== 'professor' || !professorPayload.isProfessorMode) {
-        const redirectResponse = NextResponse.redirect(new URL('/professor/auth', request.url));
-        redirectResponse.cookies.delete('professor-course-token');
-        Object.entries(securityHeaders).forEach(([key, value]) => {
-          redirectResponse.headers.set(key, value);
-        });
-        return redirectResponse;
+        return createRedirectResponse('/professor/auth', request, 'professor-course-token');
       }
       return response;
     }
 
-    if (pathname.startsWith('/dashboard')) {
-      if (!userToken) {
-        if (professorToken) return NextResponse.redirect(new URL('/professor', request.url));
-        const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
-        Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-        return redirectResponse;
-      }
+    // Priorité 2: utilisateur connecté
+    if (userToken) {
       const userPayload = await verifyJWTToken(userToken);
-      if (!userPayload || userPayload.role === 'professor') {
-        if (professorToken) return NextResponse.redirect(new URL('/professor', request.url));
-        const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
-        redirectResponse.cookies.delete('auth-token');
-        Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-        return redirectResponse;
-      }
-      return response;
-    }
-
-    if (pathname.startsWith('/chapitres')) {
-      if (!userToken) {
-        if (professorToken) return NextResponse.redirect(new URL('/professor', request.url));
-        const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
-        Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-        return redirectResponse;
-      }
-      const userPayload = await verifyJWTToken(userToken);
-      if (!userPayload || userPayload.role === 'professor') {
-        if (professorToken) return NextResponse.redirect(new URL('/professor', request.url));
-        const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
-        redirectResponse.cookies.delete('auth-token');
-        Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-        return redirectResponse;
+      
+      if (!userPayload) {
+        return createRedirectResponse('/login', request, 'auth-token');
       }
 
-      const chapitreMatch = pathname.match(/^\/chapitres\/(\d+)(?:\/|$)/);
-      if (chapitreMatch && userPayload?.userId) {
-        const chapitreNumber = parseInt(chapitreMatch[1], 10);
-        
-        // Bloquer chapitres 2-11 pendant les 7 jours du trial, et 0-11 après expiration
-        if (chapitreNumber >= 2 && chapitreNumber <= 11) {
-          try {
-            const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
-            const checkResponse = await fetch(apiUrl, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${userToken}`
-              },
-              body: JSON.stringify({ userId: userPayload.userId })
-            });
-
-            const data = await checkResponse.json();
-            
-            // Bloquer chapitres 2-11 PENDANT le trial (pas expiré)
-            if (data.accountType === 'FREE_TRIAL' && !data.trialExpired) {
-              const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-              Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-              return redirectResponse;
-            }
-            
-            // Bloquer chapitres 2-11 APRES expiration si pas PAID_FULL
-            if (data.accountType === 'FREE_TRIAL' && data.trialExpired && data.accountType !== 'PAID_FULL') {
-              const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-              Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-              return redirectResponse;
-            }
-          } catch (error) {
-            console.error('Error checking account type:', error);
-          }
+      // Vérifier si c'est un professeur qui essaie d'accéder au dashboard étudiant
+      if (userPayload.role === 'professor') {
+        if (professorToken) {
+          return createRedirectResponse('/professor', request);
         }
+        return createRedirectResponse('/login', request, 'auth-token');
+      }
 
-        // Bloquer chapitres 0-1 SEULEMENT après expiration
-        if ((chapitreNumber === 0 || chapitreNumber === 1) && userPayload?.userId) {
-          try {
-            const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
-            const checkResponse = await fetch(apiUrl, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${userToken}`
-              },
-              body: JSON.stringify({ userId: userPayload.userId })
-            });
-
-            const data = await checkResponse.json();
-            
-            if (data.accountType === 'FREE_TRIAL' && data.trialExpired && data.accountType !== 'PAID_FULL') {
-              const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-              Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-              return redirectResponse;
-            }
-          } catch (error) {
-            console.error('Error checking account type:', error);
+      // 🔒 Bloquer /accompagnement si pas plan COACHING - retourne 404
+      if (pathname.startsWith('/accompagnement')) {
+        // Vérifier le plan actuel via API (Edge Runtime ne supporte pas Prisma)
+        try {
+          const baseUrl = request.nextUrl.origin;
+          const checkResponse = await fetch(`${baseUrl}/api/user/check-coaching`, {
+            headers: {
+              'Cookie': request.headers.get('cookie') || '',
+            },
+          });
+          
+          if (!checkResponse.ok) {
+            return new NextResponse('Not Found', { status: 404 });
           }
+          
+          const data = await checkResponse.json();
+          if (data.subscriptionPlan !== 'COACHING') {
+            return new NextResponse('Not Found', { status: 404 });
+          }
+        } catch (error) {
+          console.error('Erreur vérification coaching:', error);
+          return new NextResponse('Not Found', { status: 404 });
         }
       }
 
+      // L'utilisateur est connecté avec un token valide - laisser passer
+      // La vérification de l'abonnement se fait côté page/API si nécessaire
       return response;
     }
+
+    // Pas de token utilisateur
+    if (professorToken) {
+      return createRedirectResponse('/professor', request);
+    }
+    
+    return createRedirectResponse('/login', request);
   }
 
+  // Pages professeur
   if (pathname.startsWith('/professor')) {
     if (pathname === '/professor/auth') {
       return response;
     }
+    
     const professorToken = request.cookies.get('professor-token')?.value;
+    
     if (!professorToken) {
-      const redirectResponse = NextResponse.redirect(new URL('/professor/auth', request.url));
-      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-      return redirectResponse;
-    }
-    const professorPayload = await verifyJWTToken(professorToken);
-    if (!professorPayload || professorPayload.role !== 'professor') {
-      const redirectResponse = NextResponse.redirect(new URL('/professor/auth', request.url));
-      redirectResponse.cookies.delete('professor-token');
-      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-      return redirectResponse;
-    }
-    return response;
-  }
-
-  // Vérifier les restrictions pour FREE_TRIAL
-  const needsAccountCheck = pathname.match(/^\/chapitres\/(\d+)(?:\/|$)/) ||
-                            pathname === '/accompagnement' ||
-                            pathname === '/conseil' ||
-                            pathname === '/niveaux' ||
-                            pathname === '/devoirs';
-  
-  if (needsAccountCheck) {
-    const userToken = request.cookies.get('auth-token')?.value;
-    if (!userToken) {
-      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
-      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-      return redirectResponse;
+      return createRedirectResponse('/professor/auth', request);
     }
     
-    const userPayload = await verifyJWTToken(userToken);
-    if (!userPayload || !userPayload.userId) {
-      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
-      redirectResponse.cookies.delete('auth-token');
-      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-      return redirectResponse;
+    const professorPayload = await verifyJWTToken(professorToken);
+    
+    if (!professorPayload || professorPayload.role !== 'professor') {
+      return createRedirectResponse('/professor/auth', request, 'professor-token');
     }
-
-    try {
-      const apiUrl = `${request.nextUrl.origin}/api/user/check-account`;
-      const checkResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        },
-        body: JSON.stringify({ userId: userPayload.userId })
-      });
-
-      const data = await checkResponse.json();
-      
-      console.log('🔍 MIDDLEWARE - Chemin:', pathname);
-      console.log('🔍 MIDDLEWARE - Type de compte:', data.accountType);
-      console.log('🔍 MIDDLEWARE - Trial expiré:', data.trialExpired);
-      
-      // Si compte payant complet, tout est accessible
-      if (data.accountType === 'PAID_FULL') {
-        console.log('✅ MIDDLEWARE - PAID_FULL: Accès autorisé pour', pathname);
-        return response;
-      }
-      
-      // Si FREE_TRIAL
-      if (data.accountType === 'FREE_TRIAL') {
-        console.log('🔶 MIDDLEWARE - FREE_TRIAL détecté');
-        // Si trial expiré: bloquer tout sauf dashboard et notice
-        if (data.trialExpired) {
-          console.log('❌ MIDDLEWARE - Trial expiré, redirection vers dashboard');
-          const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-          Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-          return redirectResponse;
-        }
-        
-        // Si trial actif: autoriser chapitres 0 et 1, devoirs, niveaux
-        // Bloquer chapitres 2-11, accompagnement, conseil
-        const chapterMatch = pathname.match(/^\/chapitres\/(\d+)(?:\/|$)/);
-        if (chapterMatch) {
-          const chapterNum = parseInt(chapterMatch[1], 10);
-          if (chapterNum > 1) {
-            console.log('❌ MIDDLEWARE - Chapitre', chapterNum, 'bloqué pendant trial actif');
-            // Chapitres 2-11 bloqués pendant trial actif
-            const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-            Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-            return redirectResponse;
-          }
-        }
-        
-        // Bloquer accompagnement et conseil pendant trial actif
-        if (pathname === '/accompagnement' || pathname === '/conseil') {
-          console.log('❌ MIDDLEWARE - Accompagnement/Conseil bloqué pendant trial actif');
-          const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-          Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-          return redirectResponse;
-        }
-        
-        console.log('✅ MIDDLEWARE - FREE_TRIAL: Accès autorisé pour', pathname);
-        // Devoirs et niveaux sont accessibles pendant trial actif
-        return response;
-      }
-      
-      // Si aucun type de compte reconnu ou autre erreur
-      console.log('❌ MIDDLEWARE - Type de compte non reconnu:', data.accountType);
-      console.log('🔄 MIDDLEWARE - Autorisation par défaut pour:', pathname);
-      return response;
-    } catch (error) {
-      console.error('❌ MIDDLEWARE - Erreur lors de la vérification du compte:', error);
-      console.log('🔄 MIDDLEWARE - Autorisation par défaut (erreur API) pour:', pathname);
-      // En cas d'erreur API, autoriser l'accès par défaut
-      // L'utilisateur sera géré au niveau de la page
-    }
-
+    
     return response;
   }
 
+  // Pages admin
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('auth-token')?.value;
+    
     if (!token) {
-      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
-      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-      return redirectResponse;
+      return createRedirectResponse('/login', request);
     }
+    
     const payload = await verifyJWTToken(token);
+    
     if (!payload) {
-      const redirectResponse = NextResponse.redirect(new URL('/login', request.url));
-      redirectResponse.cookies.delete('auth-token');
-      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-      return redirectResponse;
+      return createRedirectResponse('/login', request, 'auth-token');
     }
-    const ADMIN_EMAILS = [process.env.ADMIN_EMAIL || 'soidroudinesaid51@gmail.com'];
+    
+    const ADMIN_EMAILS = [
+      process.env.ADMIN_EMAIL || 'soidroudinesaid51@gmail.com',
+      process.env.NEXT_PUBLIC_ADMIN_EMAIL,
+    ].filter(Boolean);
+    
     if (typeof payload.email !== 'string' || !ADMIN_EMAILS.includes(payload.email)) {
-      const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url));
-      Object.entries(securityHeaders).forEach(([key, value]) => redirectResponse.headers.set(key, value));
-      return redirectResponse;
+      return createRedirectResponse('/dashboard', request);
     }
+    
     return response;
   }
 
   return response;
 }
 
+/**
+ * Vérifie si l'abonnement est actif
+ */
+function checkActiveSubscription(accountType: string, subscriptionEndDate: string | null): boolean {
+  if (accountType === 'ACTIVE') {
+    if (subscriptionEndDate) {
+      return new Date(subscriptionEndDate) > new Date();
+    }
+    return true;
+  }
+
+  if (accountType === 'CANCELLED' && subscriptionEndDate) {
+    return new Date(subscriptionEndDate) > new Date();
+  }
+
+  return false;
+}
+
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 };

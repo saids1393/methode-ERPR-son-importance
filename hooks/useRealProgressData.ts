@@ -49,9 +49,7 @@ export const useRealProgressData = () => {
     };
 
     fetchProgressData();
-    // Rafraîchir toutes les heures
-    const interval = setInterval(fetchProgressData, 3600000);
-    return () => clearInterval(interval);
+    // Pas de setInterval - rafraîchissement automatique non nécessaire
   }, []);
 
   return data;

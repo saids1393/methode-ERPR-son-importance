@@ -1,16 +1,29 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { BookOpen, Menu, X } from 'lucide-react';
 import SidebarContent from "@/app/components/SidebarContent";
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [courseStarted, setCourseStarted] = useState(false);
+  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
   
   useEffect(() => {
     // Vérifier si le cours a été commencé
     setCourseStarted(localStorage.getItem('courseStarted') === 'true');
   }, []);
+
+  // Cacher la sidebar immédiatement si on navigue hors des chapitres
+  useEffect(() => {
+    if (!pathname.startsWith('/chapitres')) {
+      setIsNavigatingAway(true);
+      setSidebarOpen(false);
+    } else {
+      setIsNavigatingAway(false);
+    }
+  }, [pathname]);
 
   // Bloquer le scroll du body quand la sidebar est ouverte
   useEffect(() => {
@@ -26,8 +39,8 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     };
   }, [sidebarOpen]);
 
-  // Si le cours n'a pas été commencé, ne pas afficher la sidebar
-  if (!courseStarted) {
+  // Si le cours n'a pas été commencé ou si on navigue ailleurs, ne pas afficher la sidebar
+  if (!courseStarted || isNavigatingAway) {
     return <div className="min-h-screen">{children}</div>;
   }
   return (

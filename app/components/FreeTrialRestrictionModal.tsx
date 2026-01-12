@@ -1,20 +1,21 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { X } from 'lucide-react';
+import { X, BookOpen, Crown, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-interface FreeTrialRestrictionModalProps {
+interface SubscriptionRequiredModalProps {
   isOpen: boolean;
   onClose: () => void;
   contentName?: string;
 }
 
+// Garder le même nom d'export pour la compatibilité
 export default function FreeTrialRestrictionModal({
   isOpen,
   onClose,
   contentName = 'ce contenu'
-}: FreeTrialRestrictionModalProps) {
+}: SubscriptionRequiredModalProps) {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string>('');
 
@@ -40,17 +41,16 @@ export default function FreeTrialRestrictionModal({
 
   if (!isOpen) return null;
 
-  const handleUpgrade = () => {
-    if (userEmail) {
-      router.push(`/checkout?email=${encodeURIComponent(userEmail)}`);
-    } else {
-      router.push('/checkout');
-    }
+  const handleSubscribe = (plan: 'solo' | 'coaching') => {
+    const url = userEmail 
+      ? `/checkout?email=${encodeURIComponent(userEmail)}&plan=${plan}`
+      : `/checkout?plan=${plan}`;
+    router.push(url);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full border border-gray-800">
+      <div className="relative bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full border border-gray-800">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
@@ -77,64 +77,86 @@ export default function FreeTrialRestrictionModal({
           </div>
 
           <h3 className="text-2xl font-bold text-white text-center mb-3">
-            Accès premium requis
+            Abonnement requis
           </h3>
 
-          <p className="text-gray-300 text-center mb-2">
-            L'accès "{contentName}" est réservé aux membres premium.
+          <p className="text-gray-300 text-center mb-6">
+            L'accès à "{contentName}" nécessite un abonnement actif.
           </p>
 
+          {/* Options d'abonnement */}
+          <div className="space-y-4 mb-6">
+            {/* Plan Solo */}
+            <button
+              onClick={() => handleSubscribe('solo')}
+              className="w-full p-4 rounded-xl border-2 border-blue-500/30 bg-blue-500/10 hover:border-blue-500/60 transition-all text-left group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/20">
+                    <BookOpen className="h-5 w-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white">Plan Solo</h4>
+                    <p className="text-sm text-gray-400">Accès aux cours</p>
+                  </div>
+                </div>
+                <span className="text-xl font-bold text-white">10€<span className="text-sm text-gray-400">/mois</span></span>
+              </div>
+            </button>
+
+            {/* Plan Coaching */}
+            <button
+              onClick={() => handleSubscribe('coaching')}
+              className="w-full p-4 rounded-xl border-2 border-purple-500/30 bg-purple-500/10 hover:border-purple-500/60 transition-all text-left group relative"
+            >
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                <span className="px-2 py-0.5 text-xs font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full">
+                  Recommandé
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-500/20">
+                    <Crown className="h-5 w-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white">Plan Coaching</h4>
+                    <p className="text-sm text-gray-400">Cours + accompagnement</p>
+                  </div>
+                </div>
+                <span className="text-xl font-bold text-white">30€<span className="text-sm text-gray-400">/mois</span></span>
+              </div>
+            </button>
+          </div>
+
+          {/* Avantages */}
           <div className="bg-gray-800/50 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-300 text-center mb-3">
-              Débloquez tout avec l’accès premium :
+              Avec votre abonnement :
             </p>
-
             <ul className="space-y-2 text-sm text-gray-400">
               <li className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span>Déblocage de tous les chapitres</span>
+                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                <span>Accès aux modules Lecture & Tajwid</span>
               </li>
-
               <li className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span>Suivi & accompagnement A → Z + suivi de vos progressions</span>
+                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                <span>Vidéos, quiz et exercices illimités</span>
               </li>
-
               <li className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span>Corrections de tous vos devoirs (dès le chapitre 2)</span>
-              </li>
-
-              <li className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span>Paiement possible en 2x + code promo <b>ERPR15</b></span>
+                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                <span>Sans engagement - annulez à tout moment</span>
               </li>
             </ul>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={handleUpgrade}
-              className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
-            >
-              Accédez à l'offre premium
-            </button>
-
-            <button
-              onClick={onClose}
-              className="w-full py-3 px-6 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-lg transition-colors"
-            >
-              Retour
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="w-full py-3 px-6 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium rounded-lg transition-colors"
+          >
+            Retour
+          </button>
         </div>
       </div>
     </div>

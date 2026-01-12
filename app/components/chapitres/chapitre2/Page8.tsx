@@ -279,7 +279,7 @@ const AlphabetPage = ({ playLetterAudio, activeVowel }: {
     </div>
 
     
-      <PageNavigation currentChapter={2} currentPage={8} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={2} currentPage={8} module="LECTURE" className="mt-6 mb-4" />
 
 <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-8 font-semibold text-sm md:text-base">
       <div>Page 8</div>

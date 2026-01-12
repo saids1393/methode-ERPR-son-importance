@@ -23,7 +23,8 @@ interface User {
     username: string | null;
     gender: 'HOMME' | 'FEMME' | null;
     isActive: boolean;
-    accountType?: 'FREE_TRIAL' | 'PAID_FULL' | 'PAID_PARTIAL';
+    accountType?: 'ACTIVE' | 'INACTIVE' | 'PAID_LEGACY';
+    subscriptionPlan?: 'SOLO' | 'COACHING' | null;
 }
 
 interface HomeworkSend {
@@ -36,21 +37,35 @@ interface HomeworkSend {
     };
 }
 
+interface TajwidHomeworkSend {
+    id: string;
+    sentAt: string;
+    tajwidHomework: {
+        id: string;
+        chapterId: number;
+        title: string;
+    };
+}
+
 interface DashboardHeaderProps {
     user: User;
     mobileMenuOpen: boolean;
     setMobileMenuOpen: (open: boolean) => void;
     homeworkSends: HomeworkSend[];
+    tajwidHomeworkSends?: TajwidHomeworkSend[];
 }
 
 export default function DashboardHeader({
     user,
     mobileMenuOpen,
     setMobileMenuOpen,
-    homeworkSends
+    homeworkSends,
+    tajwidHomeworkSends = []
 }: DashboardHeaderProps) {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [showEditProfile, setShowEditProfile] = useState(false);
+    const [notificationTab, setNotificationTab] = useState<'LECTURE' | 'TAJWID'>('LECTURE');
+    const [selectedModule, setSelectedModule] = useState<'LECTURE' | 'TAJWID'>('LECTURE');
     const [editForm, setEditForm] = useState({
         username: '',
         currentPassword: '',
@@ -76,14 +91,40 @@ export default function DashboardHeader({
     const [restrictedContent, setRestrictedContent] = useState('');
     const router = useRouter();
 
+    // Charger le module sélectionné depuis localStorage
+    useEffect(() => {
+        const savedModule = localStorage.getItem('selectedDashboardModule');
+        if (savedModule === 'TAJWID' || savedModule === 'LECTURE') {
+            setSelectedModule(savedModule);
+        }
+        
+        // Écouter les changements de localStorage
+        const handleStorageChange = () => {
+            const updatedModule = localStorage.getItem('selectedDashboardModule');
+            if (updatedModule === 'TAJWID' || updatedModule === 'LECTURE') {
+                setSelectedModule(updatedModule);
+            }
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
+
+    // URLs dynamiques selon le module sélectionné
+    const coursUrl = selectedModule === 'TAJWID' ? '/chapitres-tajwid/1/1' : '/chapitres/1/1';
+    const devoirsUrl = selectedModule === 'TAJWID' ? '/devoirs-tajwid' : '/devoirs';
+
     const handleRestrictedClick = (contentName: string) => {
         setRestrictedContent(contentName);
         setShowRestrictionModal(true);
     };
 
     const getSentHomeworkCount = () => {
-        return homeworkSends.length;
+        return homeworkSends.length + tajwidHomeworkSends.length;
     };
+
+    const getLectureCount = () => homeworkSends.length;
+    const getTajwidCount = () => tajwidHomeworkSends.length;
 
     const pathname = usePathname();
 
@@ -238,22 +279,22 @@ export default function DashboardHeader({
                         </Link>
 
                         <Link
-                            href="/chapitres/0/video"
+                            href={coursUrl}
                             className={`${pathname.startsWith("/chapitres") ? "text-gray-900 font-medium border-b-2 border-blue-800" : "text-gray-500 hover:text-gray-900"}`}
                         >
                             Cours
                         </Link>
 
                         <Link
-                            href={user.accountType === 'FREE_TRIAL' ? "#" : "/accompagnement"}
-                            className={`${user.accountType === 'FREE_TRIAL'
+                            href={!user.isActive ? "#" : "/accompagnement"}
+                            className={`${!user.isActive
                                     ? "text-gray-400 opacity-60 cursor-not-allowed"
                                     : pathname === "/accompagnement"
                                         ? "text-gray-900 font-medium border-b-2 border-blue-800"
                                         : "text-gray-500 hover:text-gray-900"
                                 }`}
                             onClick={(e) => {
-                                if (user.accountType === 'FREE_TRIAL') {
+                                if (!user.isActive) {
                                     e.preventDefault();
                                     handleRestrictedClick('Accompagnement');
                                 }
@@ -263,8 +304,8 @@ export default function DashboardHeader({
                         </Link>
 
                         <Link
-                            href="/devoirs"
-                            className={`${pathname === "/devoirs"
+                            href={devoirsUrl}
+                            className={`${pathname === "/devoirs" || pathname === "/devoirs-tajwid"
                                     ? "text-gray-900 font-medium border-b-2 border-blue-800"
                                     : "text-gray-500 hover:text-gray-900"
                                 }`}
@@ -380,7 +421,7 @@ export default function DashboardHeader({
                         {showNotificationModal && (
                             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                                 <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 border border-gray-200 max-h-[80vh] overflow-hidden">
-                                    <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center justify-between mb-4">
                                         <h3 className="text-xl font-bold text-gray-900">
                                             Notifications ({getSentHomeworkCount()})
                                         </h3>
@@ -392,42 +433,109 @@ export default function DashboardHeader({
                                         </button>
                                     </div>
 
-                                    <div className="max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                                        {homeworkSends.length > 0 ? (
-                                            <div className="space-y-3">
-                                                {homeworkSends.map((send) => (
-                                                    <div key={send.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                                        <div className="flex items-start space-x-3">
-                                                            <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                                <span className="text-white text-sm font-bold">
-                                                                    {send.homework.chapterId}
-                                                                </span>
+                                    {/* Onglets Lecture / Tajwid */}
+                                    <div className="flex space-x-2 mb-4">
+                                        <button
+                                            onClick={() => setNotificationTab('LECTURE')}
+                                            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                                                notificationTab === 'LECTURE'
+                                                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            Lecture ({getLectureCount()})
+                                        </button>
+                                        <button
+                                            onClick={() => setNotificationTab('TAJWID')}
+                                            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                                                notificationTab === 'TAJWID'
+                                                    ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            Tajwid ({getTajwidCount()})
+                                        </button>
+                                    </div>
+
+                                    <div className="max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                                        {/* Notifications Lecture */}
+                                        {notificationTab === 'LECTURE' && (
+                                            homeworkSends.length > 0 ? (
+                                                <div className="space-y-3">
+                                                    {homeworkSends.map((send) => (
+                                                        <div key={send.id} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                                            <div className="flex items-start space-x-3">
+                                                                <div className="w-8 h-8 bg-blue-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                                    <span className="text-white text-sm font-bold">
+                                                                        {send.homework.chapterId}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h4 className="font-medium text-gray-900 text-sm">
+                                                                        {send.homework.title}
+                                                                    </h4>
+                                                                    <p className="text-xs text-green-600 mt-1">
+                                                                        Envoyé le {new Date(send.sentAt).toLocaleDateString('fr-FR', {
+                                                                            day: 'numeric',
+                                                                            month: 'long',
+                                                                            year: 'numeric'
+                                                                        })}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0 mt-2"></div>
                                                             </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h4 className="font-medium text-gray-900 text-sm">
-                                                                    {send.homework.title}
-                                                                </h4>
-                                                                <p className="text-xs text-green-600 mt-1">
-                                                                    Envoyé le {new Date(send.sentAt).toLocaleDateString('fr-FR', {
-                                                                        day: 'numeric',
-                                                                        month: 'long',
-                                                                        year: 'numeric'
-                                                                    })}
-                                                                </p>
-                                                            </div>
-                                                            <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0 mt-2"></div>
                                                         </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="text-center py-8">
-                                                <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                                                <p className="text-gray-500">Aucune notification pour le moment</p>
-                                                <p className="text-gray-400 text-sm mt-1">
-                                                    Les devoirs envoyés apparaîtront ici
-                                                </p>
-                                            </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-8">
+                                                    <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                                                    <p className="text-gray-500">Aucun devoir Lecture envoyé</p>
+                                                    <p className="text-gray-400 text-sm mt-1">
+                                                        Les devoirs envoyés apparaîtront ici
+                                                    </p>
+                                                </div>
+                                            )
+                                        )}
+
+                                        {/* Notifications Tajwid */}
+                                        {notificationTab === 'TAJWID' && (
+                                            tajwidHomeworkSends.length > 0 ? (
+                                                <div className="space-y-3">
+                                                    {tajwidHomeworkSends.map((send) => (
+                                                        <div key={send.id} className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                                            <div className="flex items-start space-x-3">
+                                                                <div className="w-8 h-8 bg-purple-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                                    <span className="text-white text-sm font-bold">
+                                                                        {send.tajwidHomework.chapterId}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h4 className="font-medium text-gray-900 text-sm">
+                                                                        {send.tajwidHomework.title}
+                                                                    </h4>
+                                                                    <p className="text-xs text-green-600 mt-1">
+                                                                        Envoyé le {new Date(send.sentAt).toLocaleDateString('fr-FR', {
+                                                                            day: 'numeric',
+                                                                            month: 'long',
+                                                                            year: 'numeric'
+                                                                        })}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0 mt-2"></div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-8">
+                                                    <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                                                    <p className="text-gray-500">Aucun devoir Tajwid envoyé</p>
+                                                    <p className="text-gray-400 text-sm mt-1">
+                                                        Les devoirs envoyés apparaîtront ici
+                                                    </p>
+                                                </div>
+                                            )
                                         )}
                                     </div>
                                 </div>

@@ -15,6 +15,7 @@ import {
   Calendar,
   Download,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
   Mail,
   Users,

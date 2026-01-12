@@ -1,5 +1,6 @@
 // lib/chapters.tsx
 import React, { JSX } from "react";
+import { chaptersTajwid } from "./chapters-tajwid";
 
 export type Page = {
   title: string;
@@ -605,8 +606,12 @@ export const chapters: Chapter[] = [
 // Fonctions utilitaires pour faciliter l'utilisation
 
 // Helper functions
-export const getChapterByNumber = (chapterNumber: number): Chapter | undefined => {
-  return chapters.find(chapter => chapter.chapterNumber === chapterNumber);
+export const getChapterByNumber = (
+  chapterNumber: number,
+  module: 'LECTURE' | 'TAJWID' = 'LECTURE'
+): Chapter | undefined => {
+  const selectedChapters = module === 'TAJWID' ? chaptersTajwid : chapters;
+  return selectedChapters.find(chapter => chapter.chapterNumber === chapterNumber);
 };
 
 export const getPageByNumbers = (chapterNumber: number, pageNumber: number): Page | undefined => {
@@ -652,7 +657,7 @@ export const getPreviousPage = (currentChapter: number, currentPage: number): Pa
 };
 
 // Types pour la navigation universelle
-export type ContentType = 'introduction' | 'video' | 'page' | 'quiz';
+export type ContentType = 'introduction' | 'video' | 'page' | 'quiz' | 'exercise';
 
 export interface NavigationItem {
   type: ContentType;
@@ -662,12 +667,24 @@ export interface NavigationItem {
   pageNumber?: number;
 }
 
+/**
+ * Helper pour générer le chemin de base selon le module
+ * LECTURE: /chapitres/
+ * TAJWID: /chapitres-tajwid/
+ */
+const getBasePath = (module: 'LECTURE' | 'TAJWID' = 'LECTURE'): string => {
+  return module === 'TAJWID' ? '/chapitres-tajwid/' : '/chapitres/';
+};
+
 export const getNextContent = (
   currentChapter: number,
   currentType: ContentType,
-  currentPage?: number
+  currentPage?: number,
+  module: 'LECTURE' | 'TAJWID' = 'LECTURE'
 ): NavigationItem | undefined => {
-  const chapter = getChapterByNumber(currentChapter);
+  const selectedChapters = module === 'TAJWID' ? chaptersTajwid : chapters;
+  const basePath = getBasePath(module);
+  const chapter = selectedChapters.find(ch => ch.chapterNumber === currentChapter);
   if (!chapter) return undefined;
 
   switch (currentType) {
@@ -676,7 +693,7 @@ export const getNextContent = (
       if (chapter.introduction) {
         return {
           type: 'introduction',
-          href: `/chapitres/${currentChapter}/introduction`,
+          href: `${basePath}${currentChapter}/introduction`,
           label: 'Lire la synthèse',
           chapterNumber: currentChapter
         };
@@ -691,7 +708,7 @@ export const getNextContent = (
       } else if (chapter.quiz) {
         return {
           type: 'quiz',
-          href: `/chapitres/${currentChapter}/quiz`,
+          href: `${basePath}${currentChapter}/quiz`,
           label: 'Faire le quiz',
           chapterNumber: currentChapter
         };
@@ -711,7 +728,7 @@ export const getNextContent = (
       } else if (chapter.quiz) {
         return {
           type: 'quiz',
-          href: `/chapitres/${currentChapter}/quiz`,
+          href: `${basePath}${currentChapter}/quiz`,
           label: 'Faire le quiz',
           chapterNumber: currentChapter
         };
@@ -737,25 +754,25 @@ export const getNextContent = (
       if (chapter.quiz) {
         return {
           type: 'quiz',
-          href: `/chapitres/${currentChapter}/quiz`,
+          href: `${basePath}${currentChapter}/quiz`,
           label: 'Faire le quiz',
           chapterNumber: currentChapter
         };
       }
 
-      const nextChapterAfterPage = getChapterByNumber(currentChapter + 1);
+      const nextChapterAfterPage = getChapterByNumber(currentChapter + 1, module);
       if (nextChapterAfterPage) {
         if (nextChapterHasVideo(nextChapterAfterPage)) {
           return {
             type: 'video',
-            href: `/chapitres/${nextChapterAfterPage.chapterNumber}/video`,
+            href: `${basePath}${nextChapterAfterPage.chapterNumber}/video`,
             label: 'Chapitre suivant',
             chapterNumber: nextChapterAfterPage.chapterNumber
           };
         } else if (nextChapterAfterPage.introduction) {
           return {
             type: 'introduction',
-            href: `/chapitres/${nextChapterAfterPage.chapterNumber}/introduction`,
+            href: `${basePath}${nextChapterAfterPage.chapterNumber}/introduction`,
             label: 'Chapitre suivant',
             chapterNumber: nextChapterAfterPage.chapterNumber
           };
@@ -763,21 +780,31 @@ export const getNextContent = (
       }
       break;
 
-    // Après le quiz → chapitre suivant
+    // Après le quiz → exercice (TAJWID) ou chapitre suivant
     case 'quiz':
-      const nextChapterAfterQuiz = getChapterByNumber(currentChapter + 1);
+      // Pour TAJWID, afficher d'abord l'exercice du chapitre actuel
+      if (module === 'TAJWID') {
+        return {
+          type: 'exercise',
+          href: `/chapitres-tajwid/exercice/${currentChapter}`,
+          label: `Exercice ${currentChapter}`,
+          chapterNumber: currentChapter
+        };
+      }
+      
+      const nextChapterAfterQuiz = getChapterByNumber(currentChapter + 1, module);
       if (nextChapterAfterQuiz) {
         if (nextChapterHasVideo(nextChapterAfterQuiz)) {
           return {
             type: 'video',
-            href: `/chapitres/${nextChapterAfterQuiz.chapterNumber}/video`,
+            href: `${basePath}${nextChapterAfterQuiz.chapterNumber}/video`,
             label: 'Chapitre suivant',
             chapterNumber: nextChapterAfterQuiz.chapterNumber
           };
         } else if (nextChapterAfterQuiz.introduction) {
           return {
             type: 'introduction',
-            href: `/chapitres/${nextChapterAfterQuiz.chapterNumber}/introduction`,
+            href: `${basePath}${nextChapterAfterQuiz.chapterNumber}/introduction`,
             label: 'Chapitre suivant',
             chapterNumber: nextChapterAfterQuiz.chapterNumber
           };
@@ -788,6 +815,36 @@ export const getNextContent = (
             label: 'Chapitre suivant',
             chapterNumber: nextChapterAfterQuiz.chapterNumber,
             pageNumber: nextChapterAfterQuiz.pages[0].pageNumber
+          };
+        }
+      }
+      break;
+
+    // Après un exercice → chapitre suivant
+    case 'exercise':
+      const nextChapterAfterExercise = getChapterByNumber(currentChapter + 1, module);
+      if (nextChapterAfterExercise) {
+        if (nextChapterHasVideo(nextChapterAfterExercise)) {
+          return {
+            type: 'video',
+            href: `/chapitres-tajwid/${nextChapterAfterExercise.chapterNumber}/video`,
+            label: 'Chapitre suivant',
+            chapterNumber: nextChapterAfterExercise.chapterNumber
+          };
+        } else if (nextChapterAfterExercise.introduction) {
+          return {
+            type: 'introduction',
+            href: `/chapitres-tajwid/${nextChapterAfterExercise.chapterNumber}/introduction`,
+            label: 'Chapitre suivant',
+            chapterNumber: nextChapterAfterExercise.chapterNumber
+          };
+        } else if (nextChapterAfterExercise.pages.length > 0) {
+          return {
+            type: 'page',
+            href: nextChapterAfterExercise.pages[0].href,
+            label: 'Chapitre suivant',
+            chapterNumber: nextChapterAfterExercise.chapterNumber,
+            pageNumber: nextChapterAfterExercise.pages[0].pageNumber
           };
         }
       }

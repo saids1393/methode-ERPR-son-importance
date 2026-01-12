@@ -229,3 +229,184 @@ export async function getHomeworkSendStats() {
     }));
   } catch(err) { console.error(err); return []; }
 }
+
+interface TajwidHomeworkData {
+  id: string;
+  chapterId: number;
+  title: string;
+  content: string;
+}
+
+export async function generateTajwidHomeworkPDF(homework: TajwidHomeworkData): Promise<Uint8Array> {
+  const pdfDoc = await PDFDocument.create();
+  let currentPage = pdfDoc.addPage([595, 842]);
+  const { width, height } = currentPage.getSize();
+
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const fontSize = 12;
+  const titleFontSize = 18;
+  const margin = 50;
+  let y = height - margin;
+
+  currentPage.drawText('MÉTHODE ERPR - DEVOIR TAJWID', { x: margin, y, size: titleFontSize, font: boldFont, color: rgb(0.2,0.6,0.4) });
+  y -= 30;
+  currentPage.drawText(`Chapitre ${homework.chapterId}`, { x: margin, y, size: fontSize+2, font: boldFont, color: rgb(0.4,0.4,0.4) });
+  y -= 40;
+
+  const safeTitle = removeUnsupportedChars(homework.title);
+  currentPage.drawText(safeTitle, { x: margin, y, size: titleFontSize-2, font: boldFont, color: rgb(0.1,0.1,0.1) });
+  y -= 40;
+
+  const lines = homework.content.split('\n');
+  for (const line of lines) {
+    const safeLine = removeUnsupportedChars(line);
+    if (y < 100) { currentPage = pdfDoc.addPage([595,842]); y = currentPage.getSize().height - margin; }
+    if (safeLine.trim()) {
+      const maxWidth = width - 2*margin;
+      const words = safeLine.split(' ');
+      let currentLine = '';
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const textWidth = font.widthOfTextAtSize(testLine, fontSize);
+        if (textWidth > maxWidth && currentLine) {
+          currentPage.drawText(currentLine, { x: margin, y, size: fontSize, font });
+          y -= 20;
+          currentLine = word;
+        } else { currentLine = testLine; }
+      }
+      if (currentLine) { currentPage.drawText(currentLine, { x: margin, y, size: fontSize, font }); y -= 20; }
+    } else { y -= 15; }
+  }
+
+  y = 50;
+  currentPage.drawText(`Généré le ${new Date().toLocaleDateString('fr-FR')} - Méthode ERPR Tajwid`, { x: margin, y, size: 10, font, color: rgb(0.5,0.5,0.5) });
+
+  return pdfDoc.save();
+}
+
+const getTajwidHomeworkEmailTemplate = (homework: TajwidHomeworkData, user: UserData) => `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nouveau devoir Tajwid - Chapitre ${homework.chapterId}</title>
+<style>
+body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; line-height:1.6; color:#333; max-width:600px; margin:0 auto; padding:20px; background:#f8f9fa;}
+.container { background:#fff; border-radius:12px; padding:40px; box-shadow:0 4px 6px rgba(0,0,0,0.1);}
+.header { text-align:center; margin-bottom:40px; padding-bottom:20px; border-bottom:2px solid #e9ecef;}
+.logo { background:linear-gradient(135deg,#16a085 0%,#27ae60 100%); color:#fff; padding:15px 30px; border-radius:8px; display:inline-block; font-size:24px; font-weight:bold; margin-bottom:20px;}
+.homework-badge { background:#16a085; color:#fff; padding:8px 20px; border-radius:20px; font-size:14px; font-weight:600; display:inline-block;}
+.homework-details { background:#f8f9fa; padding:25px; border-radius:8px; margin:30px 0;}
+.homework-content { background:#fff; border:1px solid #e9ecef; border-radius:8px; padding:20px; margin:20px 0; white-space:pre-line; line-height:1.8;}
+.cta-button { background:#16a085; color:#fff; padding:15px 30px; text-decoration:none; border-radius:8px; display:inline-block; font-weight:bold; margin:20px 0;}
+.footer { text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid #e9ecef; color:#6c757d; font-size:14px;}
+.tips-box { background:#d5f4e6; padding:20px; border-radius:8px; margin:20px 0; border-left:4px solid #16a085;}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<div class="logo">📚 Méthode ERPR Tajwid</div>
+<div class="homework-badge">📝 Nouveau devoir Tajwid disponible</div>
+</div>
+
+<h1 style="text-align:center;">${user.username ? `Félicitations ${user.username} !`:'Félicitations !'}</h1>
+<p>Vous venez de terminer le chapitre ${homework.chapterId} de Tajwid! Voici votre devoir pour consolider vos acquis.</p>
+
+<div class="homework-details">
+<h3>📋 Détails du devoir</h3>
+<div><strong>Chapitre :</strong> ${homework.chapterId}</div>
+<div><strong>Titre :</strong> ${homework.title}</div>
+<div><strong>Date d'envoi :</strong> ${new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+</div>
+
+<div class="homework-content">
+<h4>📖 Contenu :</h4>
+${homework.content}
+</div>
+
+<div style="text-align:center;">
+<a href="${process.env.NEXTAUTH_URL || 'http://localhost:6725'}/dashboard" class="cta-button">🚀 Continuer mon apprentissage</a>
+</div>
+
+<div class="tips-box">
+<h4>💡 Conseils pour réussir</h4>
+<ul>
+<li>Prenez votre temps pour bien comprendre chaque exercice</li>
+<li>Relisez le chapitre si nécessaire</li>
+<li>Pratiquez régulièrement la récitation</li>
+<li>Contactez le support si vous avez des questions</li>
+</ul>
+</div>
+
+<div class="footer">
+<p><strong>Méthode ERPR Tajwid</strong><br>Perfectionnez votre récitation du Coran<br>Créé par Professeur Soidroudine</p>
+<p>Besoin d'aide ? arabeimportance@gmail.com<br>© ${new Date().getFullYear()} Tous droits réservés</p>
+</div>
+</div>
+</body>
+</html>
+`;
+
+export async function sendTajwidHomeworkEmail(homework: TajwidHomeworkData, user: UserData): Promise<boolean> {
+  try {
+    const pdfBytes = await generateTajwidHomeworkPDF(homework);
+    await transporter.sendMail({
+      from: { name:'Méthode ERPR Tajwid', address:process.env.SMTP_FROM||process.env.SMTP_USER||'arabeimportance@gmail.com' },
+      to: user.email,
+      subject:`📝 Nouveau devoir Tajwid - Chapitre ${homework.chapterId} | Méthode ERPR`,
+      html:getTajwidHomeworkEmailTemplate(homework,user),
+      attachments:[{ filename:`devoir-tajwid-chapitre-${homework.chapterId}.pdf`, content:Buffer.from(pdfBytes), contentType:'application/pdf' }]
+    });
+    return true;
+  } catch(err) {
+    console.error('❌ Erreur envoi email devoir Tajwid:',err);
+    return false;
+  }
+}
+
+export async function checkAndSendTajwidHomework(userId: string, chapterNumber: number): Promise<boolean> {
+  try {
+    const homework = await prisma.tajwidHomework.findFirst({ where: { chapterId: chapterNumber } });
+    if (!homework) return false;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, username: true, gender: true, isActive: true },
+    });
+    if (!user || !user.isActive) return false;
+
+    const existingOrNewSend = await prisma.tajwidHomeworkSend.upsert({
+      where: { userId_tajwidHomeworkId: { userId, tajwidHomeworkId: homework.id } },
+      update: {},
+      create: {
+        userId,
+        tajwidHomeworkId: homework.id,
+        emailSent: false,
+      },
+    });
+
+    if (existingOrNewSend.emailSent) {
+      console.log('🚫 Email Tajwid déjà envoyé, blocage.');
+      return false;
+    }
+
+    const emailSent = await sendTajwidHomeworkEmail(homework, user);
+
+    await prisma.tajwidHomeworkSend.update({
+      where: { id: existingOrNewSend.id },
+      data: {
+        emailSent,
+        sentAt: emailSent ? new Date() : undefined,
+      },
+    });
+
+    return emailSent;
+  } catch (err) {
+    console.error('❌ Erreur checkAndSendTajwidHomework:', err);
+    return false;
+  }
+}

@@ -243,7 +243,7 @@ const ExercisePage = () => (
     </div>
 
     
-      <PageNavigation currentChapter={9} currentPage={24} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={9} currentPage={24} module="LECTURE" className="mt-6 mb-4" />
 
 <footer className="border-t-1 text-white text-center p-4 md:p-6 mt-12 font-semibold text-sm md:text-base">
       <div>Page 24 - Exercice des lettres solaires et lunaires</div>

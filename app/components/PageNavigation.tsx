@@ -1,18 +1,19 @@
-"use client";
-
 import React from 'react';
 import UniversalNavigation from './UniversalNavigation';
+import { ModuleType } from '@/lib/chapters';
 
 interface PageNavigationProps {
   currentChapter: number;
   currentPage: number;
   className?: string;
+  module: ModuleType;  // Obligatoire pour éviter les bugs
 }
 
 const PageNavigation: React.FC<PageNavigationProps> = ({
   currentChapter,
   currentPage,
-  className = ""
+  className = "",
+  module
 }) => {
   return (
     <UniversalNavigation
@@ -20,6 +21,7 @@ const PageNavigation: React.FC<PageNavigationProps> = ({
       currentType="page"
       currentPage={currentPage}
       className={className}
+      module={module}
     />
   );
 };

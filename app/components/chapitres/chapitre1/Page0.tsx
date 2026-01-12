@@ -306,7 +306,7 @@ const Page0 = () => {
         </div>
       )}
 
-      <PageNavigation currentChapter={1} currentPage={0} className="mt-6 mb-4" />
+      <PageNavigation currentChapter={1} currentPage={0} module="LECTURE" className="mt-6 mb-4" />
 
       <footer className="text-center text-gray-400 text-sm py-6">
         © 2025 - Page 0 - الصَّفْحَة ٠

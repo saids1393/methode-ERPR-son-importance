@@ -129,9 +129,9 @@ export function useUserProgress() {
     }
   }, [isProfessorMode, forceUpdate]);
 
-  // Toggle page completion – page 0 autorisée
+  // Toggle page completion – exclure page 0 et page 30
   const togglePageCompletion = useCallback(async (pageNumber: number) => {
-    if (isProfessorMode || pageNumber === 30) return; // page 0 autorisée
+    if (isProfessorMode || pageNumber === 28 || pageNumber === 0 || pageNumber === 30) return;
 
     const isCompleted = completedPages.has(pageNumber);
     const action = isCompleted ? 'remove' : 'add';

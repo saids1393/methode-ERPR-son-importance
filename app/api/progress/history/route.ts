@@ -5,6 +5,7 @@ import {
   getWeeklyProgressData,
   getMonthlyProgressData,
   getMonthlyComparison,
+  ModuleType,
 } from '@/lib/progressTracking';
 
 interface DayProgress {
@@ -24,19 +25,27 @@ export async function GET(request: NextRequest) {
 
     const timeZone = request.headers.get('X-Timezone') || 'Europe/Paris';
     
-    const weekSnapshots = await getWeeklyProgressData(user.id);
-    const monthSnapshots = await getMonthlyProgressData(user.id);
-    const monthlyComparison = await getMonthlyComparison(user.id);
+    // Récupérer le module depuis les paramètres de requête
+    const { searchParams } = new URL(request.url);
+    const module = (searchParams.get('module') || 'LECTURE') as ModuleType;
+    
+    const weekSnapshots = await getWeeklyProgressData(user.id, module);
+    const monthSnapshots = await getMonthlyProgressData(user.id, module);
+    const monthlyComparison = await getMonthlyComparison(user.id, module);
+
+    // Définir les totaux selon le module
+    const totalPages = module === 'TAJWID' ? 32 : 29;
 
     // Calculer la progression hebdomadaire (redémarre à 0 chaque semaine)
-    const weekData = formatWeekDataWithDelta(weekSnapshots, timeZone);
-    const monthData = formatMonthDataWithDelta(monthSnapshots, timeZone);
+    const weekData = formatWeekDataWithDelta(weekSnapshots, timeZone, totalPages);
+    const monthData = formatMonthDataWithDelta(monthSnapshots, timeZone, totalPages);
 
     return NextResponse.json({
       weekData,
       monthData,
       monthlyStats: monthlyComparison,
       source: 'REAL_DATA',
+      module,
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
@@ -49,7 +58,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Calcule la progression hebdomadaire (redémarre à 0 chaque lundi)
-function formatWeekDataWithDelta(snapshots: any[], timeZone: string): DayProgress[] {
+function formatWeekDataWithDelta(snapshots: any[], timeZone: string, totalPages: number): DayProgress[] {
   const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
   const today = getDateInTimeZone(new Date(), timeZone);
   today.setHours(0, 0, 0, 0);
@@ -95,12 +104,12 @@ function formatWeekDataWithDelta(snapshots: any[], timeZone: string): DayProgres
     const weeklyProgress = Math.max(0, currentPercentage - basePercentage);
 
     // Le completed/total reflète la progression hebdomadaire
-    const dailyCompletedPages = Math.round((weeklyProgress / 100) * 30);
+    const dailyCompletedPages = Math.round((weeklyProgress / 100) * totalPages);
 
     weekData.push({
       day: dayName,
       completed: dailyCompletedPages,
-      total: 30,
+      total: totalPages,
       percentage: weeklyProgress,
     });
   }
@@ -109,7 +118,7 @@ function formatWeekDataWithDelta(snapshots: any[], timeZone: string): DayProgres
 }
 
 // Calcule la progression mensuelle par semaine (chaque semaine redémarre à 0)
-function formatMonthDataWithDelta(snapshots: any[], timeZone: string): DayProgress[] {
+function formatMonthDataWithDelta(snapshots: any[], timeZone: string, totalPages: number): DayProgress[] {
   const today = getDateInTimeZone(new Date(), timeZone);
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -149,12 +158,12 @@ function formatMonthDataWithDelta(snapshots: any[], timeZone: string): DayProgre
     // Progression depuis le début de cette semaine (redémarre à 0 chaque semaine)
     const weeklyProgress = Math.max(0, currentPercentage - basePercentage);
 
-    const weeklyCompletedPages = Math.round((weeklyProgress / 100) * 30);
+    const weeklyCompletedPages = Math.round((weeklyProgress / 100) * totalPages);
 
     monthData.push({
       day: weekLabel,
       completed: weeklyCompletedPages,
-      total: 30,
+      total: totalPages,
       percentage: weeklyProgress,
     });
   }

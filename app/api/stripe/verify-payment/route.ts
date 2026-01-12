@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { getUserByEmail, createUser, generateToken } from '@/lib/auth';
+import { createUser, generateAuthToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendWelcomeEmail } from '@/lib/email';
 
@@ -18,6 +18,7 @@ export async function POST(req: Request) {
     // Récupérer la session Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
+    // Vérifier le statut du paiement (pour abonnement, c'est 'paid' après le premier paiement)
     if (session.payment_status !== 'paid') {
       return NextResponse.json(
         { error: 'Paiement non confirmé' },
@@ -34,171 +35,173 @@ export async function POST(req: Request) {
       );
     }
 
-    const module = (session.metadata?.module || 'LECTURE').toUpperCase();
+    // Récupérer le plan d'abonnement
+    const plan = session.metadata?.plan as 'SOLO' | 'COACHING' || 'SOLO';
+    const subscriptionId = session.subscription as string;
+    const customerId = session.customer as string;
 
-    if (session.metadata?.paymentPlan === '2x' && session.metadata?.paymentNumber === '1' && module !== 'TAJWID') {
-      const customerId = session.customer as string;
-      const paymentIntentId = session.payment_intent as string;
+    console.log(`📦 Vérification paiement pour ${email}`);
+    console.log(`   Plan: ${plan}`);
+    console.log(`   Subscription ID: ${subscriptionId}`);
 
-      console.log(`💳 1er paiement 2x détecté pour ${email} (verify-payment)`);
-      console.log(`   Customer ID: ${customerId}`);
-      console.log(`   Payment Intent: ${paymentIntentId}`);
-
+    // Récupérer les détails de l'abonnement pour la date de fin
+    let subscriptionEndDate: Date | null = null;
+    if (subscriptionId) {
       try {
-        const existing = await prisma.secondPayment.findUnique({
-          where: { firstPaymentIntentId: paymentIntentId },
-        });
-
-        if (!existing) {
-          const secondPayment = await prisma.secondPayment.create({
-            data: {
-              customerId,
-              firstPaymentIntentId: paymentIntentId,
-              status: 'PENDING',
-            },
-          });
-
-          console.log(`✅ SecondPayment créé: ${secondPayment.id}`);
-          console.log(`📅 2e paiement prévu le: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}`);
-        } else {
-          console.log(`⚠️ SecondPayment existe déjà pour ${paymentIntentId}`);
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        if (subscription && 'current_period_end' in subscription && typeof subscription.current_period_end === 'number') {
+          subscriptionEndDate = new Date(subscription.current_period_end * 1000);
+          console.log(`   Fin d'abonnement: ${subscriptionEndDate.toLocaleDateString()}`);
         }
-      } catch (dbErr: any) {
-        console.error('❌ Erreur création SecondPayment:', dbErr.message);
+      } catch (e) {
+        console.error('Erreur récupération abonnement:', e);
       }
     }
 
-    // Vérifier si l'utilisateur existe déjà
-    let user = await getUserByEmail(email);
+    // Vérifier si l'utilisateur existe déjà (directement avec Prisma)
+    let user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        password: true,
+        isActive: true,
+        accountType: true,
+        subscriptionPlan: true,
+      }
+    });
+    
     let isNewAccount = false;
-    let wasFreeTrial = false;
 
     if (!user) {
-      // Créer un nouvel utilisateur (ne pas forcer PAID_FULL si achat TAJWID)
-      user = await createUser({
+      // Créer un nouvel utilisateur avec abonnement actif
+      const newUser = await createUser({
         email: email,
-        stripeCustomerId: session.customer as string,
+        stripeCustomerId: customerId,
         stripeSessionId: sessionId,
-        accountType: module === 'TAJWID' ? 'PAID_LEGACY' : 'PAID_FULL',
+        subscriptionPlan: plan,
+        stripeSubscriptionId: subscriptionId,
       });
+      
+      // Mettre à jour avec les infos d'abonnement
+      user = await prisma.user.update({
+        where: { id: newUser.id },
+        data: {
+          isActive: true,
+          accountType: 'ACTIVE',
+          subscriptionPlan: plan,
+          subscriptionStartDate: new Date(),
+          subscriptionEndDate: subscriptionEndDate,
+          stripeSubscriptionId: subscriptionId,
+        },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          password: true,
+          isActive: true,
+          accountType: true,
+          subscriptionPlan: true,
+        }
+      });
+      
       isNewAccount = true;
-    } else if (!user.isActive) {
-      // Activer l'utilisateur existant
+      console.log(`✅ Nouveau compte créé avec abonnement ${plan}`);
+    } else {
+      // Mettre à jour l'utilisateur existant
       await prisma.user.update({
         where: { id: user.id },
         data: {
           isActive: true,
-          stripeCustomerId: session.customer as string,
+          accountType: 'ACTIVE',
+          subscriptionPlan: plan,
+          subscriptionStartDate: new Date(),
+          subscriptionEndDate: subscriptionEndDate,
+          stripeCustomerId: customerId,
           stripeSessionId: sessionId,
-          ...(module !== 'TAJWID' ? { accountType: 'PAID_FULL' } : {}),
+          stripeSubscriptionId: subscriptionId,
         }
       });
-      user.isActive = true;
-    } else if (module !== 'TAJWID') {
-      // Utilisateur existant et actif - Mettre à niveau si FREE_TRIAL (uniquement module Lecture)
-      const existingUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          accountType: true,
-          username: true,
-          password: true,
-        },
-      });
-
-      if (existingUser?.accountType === 'FREE_TRIAL') {
-        wasFreeTrial = true;
-        console.log(`🔄 Mise à niveau FREE_TRIAL → PAID_FULL pour ${email}`);
-        await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            accountType: 'PAID_FULL',
-            stripeCustomerId: session.customer as string,
-            stripeSessionId: sessionId,
-            trialEndDate: null,
-            trialExpired: false,
-            conversionDate: new Date(),
-          }
-        });
-
-        // Mettre à jour les données utilisateur avec les nouvelles infos
-        user.username = existingUser.username;
-        console.log(`✅ Compte mis à niveau avec succès`);
-      }
+      console.log(`✅ Abonnement ${plan} activé pour compte existant`);
     }
 
-    // Lier l'achat au Level correspondant (TAJWID ou LECTURE)
+    // Enregistrer le paiement
     try {
-      let level = await prisma.level.findFirst({
-        where: { module: module as any },
-      });
-
-      if (!level) {
-        // Créer automatiquement si manquant
-        level = await prisma.level.create({
-          data: {
-            title: module === 'TAJWID' ? 'Module Tajwid' : 'Méthode Lecture',
-            price: module === 'TAJWID' ? 29 : 89,
-            module: module as any,
-          },
-        });
-      }
-
-      // Créer l'achat si pas déjà présent
-      await prisma.levelPurchase.upsert({
-        where: { userId_levelId: { userId: user.id, levelId: level.id } },
-        create: { userId: user.id, levelId: level.id },
-        update: {},
+      await prisma.payment.upsert({
+        where: { stripeSessionId: sessionId },
+        create: {
+          stripeSessionId: sessionId,
+          stripePaymentIntentId: session.payment_intent as string || `sub_${subscriptionId}`,
+          amount: session.amount_total || 0,
+          currency: session.currency || 'eur',
+          status: 'SUCCEEDED',
+          userId: user.id,
+        },
+        update: {
+          status: 'SUCCEEDED',
+        }
       });
     } catch (e) {
-      console.error('❌ Erreur LevelPurchase:', e);
+      console.error('Erreur enregistrement paiement:', e);
     }
 
-    // Générer un token JWT
-    const token = await generateToken({
-      userId: user.id,
-      email: user.email,
+    // Récupérer l'utilisateur mis à jour pour le token
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        password: true,
+        accountType: true,
+        subscriptionPlan: true,
+        subscriptionEndDate: true,
+      }
     });
 
-    // ======= ANTI-DOUBLON EMAIL =======
-    // Email de bienvenue SEULEMENT pour les nouveaux comptes PAID_FULL
-    if (isNewAccount && module !== 'TAJWID') {
+    if (!updatedUser) {
+      return NextResponse.json(
+        { error: 'Erreur lors de la récupération de l\'utilisateur' },
+        { status: 500 }
+      );
+    }
+
+    // Générer un token JWT avec generateAuthToken (pas generateToken)
+    const token = await generateAuthToken({
+      id: updatedUser.id,
+      email: updatedUser.email,
+      accountType: updatedUser.accountType,
+      subscriptionPlan: updatedUser.subscriptionPlan,
+      subscriptionEndDate: updatedUser.subscriptionEndDate,
+    });
+
+    // Email de bienvenue pour les nouveaux comptes
+    if (isNewAccount) {
       const claim = await prisma.user.updateMany({
-        where: { id: user.id, welcomeEmailSent: false, accountType: 'PAID_FULL' },
+        where: { id: updatedUser.id, welcomeEmailSent: false },
         data: { welcomeEmailSent: true },
       });
 
       if (claim.count === 1) {
-        await sendWelcomeEmail(user.email, user.username || undefined).catch(error => {
-          console.error('❌ Erreur envoi email de bienvenue (payment):', error);
+        await sendWelcomeEmail(updatedUser.email, updatedUser.username || undefined).catch(error => {
+          console.error('❌ Erreur envoi email de bienvenue:', error);
         });
+        console.log(`📧 Email de bienvenue envoyé à ${email}`);
       }
     }
 
-    // ======= EMAIL DE BIENVENUE POUR CONVERSION FREE_TRIAL -> PAID_FULL =======
-    if (wasFreeTrial) {
-      const claim = await prisma.user.updateMany({
-        where: { id: user.id, welcomeEmailSent: false },
-        data: { welcomeEmailSent: true },
-      });
-
-      if (claim.count === 1) {
-        await sendWelcomeEmail(user.email, user.username || undefined).catch(error => {
-          console.error('❌ Erreur envoi email de bienvenue (conversion):', error);
-        });
-      }
-    }
-
-    // Créer la réponse et y attacher le cookie
-    // Si l'utilisateur vient d'un FREE_TRIAL, il a déjà un profil complet
+    // Créer la réponse avec le cookie d'authentification
     const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
         email: user.email,
-        isActive: user.isActive,
+        isActive: true,
+        subscriptionPlan: plan,
       },
-      needsProfileCompletion: wasFreeTrial ? false : (!user.username || !user.password),
-      redirectTo: module === 'TAJWID' ? '/niveaux' : '/dashboard'
+      needsProfileCompletion: !updatedUser.username || !updatedUser.password,
+      redirectTo: !updatedUser.username || !updatedUser.password ? '/complete-profile' : '/dashboard'
     });
 
     response.cookies.set({
