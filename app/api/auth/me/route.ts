@@ -92,7 +92,7 @@ function checkActiveSubscription(user: {
   subscriptionEndDate: Date | null;
 }): boolean {
   // Liste des types de compte qui ont accès
-  const activeAccountTypes = ['ACTIVE', 'PAID', 'PAID_FULL', 'PAID_LEGACY', 'FREE_TRIAL'];
+  const activeAccountTypes = ['ACTIVE', 'PAID', 'PAID_LEGACY'];
   
   if (activeAccountTypes.includes(user.accountType)) {
     // Si date de fin définie, vérifier qu'elle n'est pas expirée

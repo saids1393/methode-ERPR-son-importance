@@ -7,14 +7,21 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function DesktopLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true); // Par défaut fermé
   const [courseStarted, setCourseStarted] = useState(false);
   const [isNavigatingAway, setIsNavigatingAway] = useState(false);
   
   useEffect(() => {
     // Vérifier si le cours a été commencé
     setCourseStarted(localStorage.getItem('courseStarted') === 'true');
-  }, []);
+    
+    // Vérifier si on doit ouvrir la sidebar automatiquement (à chaque navigation)
+    const shouldAutoOpen = localStorage.getItem('autoOpenCourseSidebar');
+    if (shouldAutoOpen === 'true') {
+      setCollapsed(false); // Ouvrir la sidebar
+      localStorage.removeItem('autoOpenCourseSidebar'); // Supprimer le flag
+    }
+  }, [pathname]); // Re-vérifier à chaque changement de page
 
   // Cacher la sidebar immédiatement si on navigue hors des chapitres
   useEffect(() => {

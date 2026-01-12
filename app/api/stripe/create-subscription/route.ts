@@ -6,11 +6,7 @@ export async function POST(req: Request) {
   try {
     const { email, plan } = await req.json();
 
-    if (!email) {
-      console.log("❌ Aucun email fourni");
-      return NextResponse.json({ error: "Email requis" }, { status: 400 });
-    }
-
+    // Email est maintenant optionnel - Stripe le récupérera dans son formulaire
     if (!plan || !['SOLO', 'COACHING'].includes(plan)) {
       console.log("❌ Plan invalide:", plan);
       return NextResponse.json({ error: "Plan invalide" }, { status: 400 });
@@ -22,7 +18,7 @@ export async function POST(req: Request) {
         : "http://localhost:3000";
 
     console.log("🔵 CREATE SUBSCRIPTION SESSION");
-    console.log("📧 Email:", email);
+    console.log("📧 Email:", email || '(sera demandé par Stripe)');
     console.log("📦 Plan:", plan);
 
     // Déterminer le Price ID selon le plan
@@ -44,29 +40,34 @@ export async function POST(req: Request) {
       }, { status: 500 });
     }
 
-    // Créer ou récupérer le client Stripe
-    let customer;
-    const existingCustomers = await stripe.customers.list({
-      email: email,
-      limit: 1,
-    });
-
-    if (existingCustomers.data.length > 0) {
-      customer = existingCustomers.data[0];
-      console.log("👤 Client existant:", customer.id);
-    } else {
-      customer = await stripe.customers.create({
+    // Si email fourni, créer ou récupérer le client Stripe
+    let customerId: string | undefined;
+    
+    if (email) {
+      let customer;
+      const existingCustomers = await stripe.customers.list({
         email: email,
-        metadata: { 
-          plan: plan,
-          source: 'checkout_page'
-        },
+        limit: 1,
       });
-      console.log("👤 Nouveau client créé:", customer.id);
+
+      if (existingCustomers.data.length > 0) {
+        customer = existingCustomers.data[0];
+        console.log("👤 Client existant:", customer.id);
+      } else {
+        customer = await stripe.customers.create({
+          email: email,
+          metadata: { 
+            plan: plan,
+            source: 'checkout_page'
+          },
+        });
+        console.log("👤 Nouveau client créé:", customer.id);
+      }
+      customerId = customer.id;
     }
 
     // Créer la session de checkout pour un abonnement
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig: any = {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [
@@ -75,22 +76,29 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
-      customer: customer.id,
       allow_promotion_codes: true,
       success_url: `${baseUrl}/merci?session_id={CHECKOUT_SESSION_ID}&subscription=true`,
       cancel_url: `${baseUrl}/checkout?plan=${plan.toLowerCase()}`,
       metadata: { 
-        email, 
         plan,
-        customerId: customer.id,
       },
       subscription_data: {
         metadata: {
-          email,
           plan,
         }
       }
-    });
+    };
+
+    // Si on a un customer, l'utiliser, sinon Stripe créera un customer automatiquement
+    // (pour le mode subscription, Stripe demande l'email et crée le customer)
+    if (customerId) {
+      sessionConfig.customer = customerId;
+      sessionConfig.metadata.email = email;
+      sessionConfig.subscription_data.metadata.email = email;
+    }
+    // Pas besoin de customer_creation pour subscription mode - Stripe gère automatiquement
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     console.log("✅ Session d'abonnement créée:", session.id);
     return NextResponse.json({ sessionId: session.id });

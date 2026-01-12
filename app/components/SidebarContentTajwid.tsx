@@ -96,7 +96,6 @@ export default function SidebarContentTajwid() {
           console.log('✅ User fetched in SidebarContentTajwid:', {
             email: data.user.email,
             accountType: data.user.accountType,
-            trialExpired: data.user.trialExpired,
           });
         }
       }

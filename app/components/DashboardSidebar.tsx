@@ -97,6 +97,8 @@ export default function DashboardSidebar({
 
     const handleCoursClick = () => {
         localStorage.setItem('courseStarted', 'true');
+        // Signaler qu'il faut ouvrir la sidebar cours automatiquement
+        localStorage.setItem('autoOpenCourseSidebar', 'true');
         
         // Démarrer le timer
         fetch('/api/auth/time/start', {

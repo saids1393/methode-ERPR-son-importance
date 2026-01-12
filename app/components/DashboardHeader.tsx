@@ -15,7 +15,6 @@ import {
     Eye,
     EyeOff
 } from 'lucide-react';
-import FreeTrialRestrictionModal from './FreeTrialRestrictionModal';
 
 interface User {
     id: string;
@@ -281,6 +280,7 @@ export default function DashboardHeader({
                         <Link
                             href={coursUrl}
                             className={`${pathname.startsWith("/chapitres") ? "text-gray-900 font-medium border-b-2 border-blue-800" : "text-gray-500 hover:text-gray-900"}`}
+                            onClick={() => localStorage.setItem('autoOpenCourseSidebar', 'true')}
                         >
                             Cours
                         </Link>
@@ -320,9 +320,107 @@ export default function DashboardHeader({
                     <button
                         className="lg:hidden p-2 text-gray-600"
                         onClick={() => setMobileMenuOpen(true)}
+                        aria-label="Ouvrir le menu"
                     >
                         <Menu className="w-6 h-6" />
                     </button>
+
+                    {/* Drawer Mobile Menu */}
+                    {mobileMenuOpen && (
+                        <div className="fixed inset-0 z-50 flex lg:hidden">
+                            {/* Overlay - transparent avec léger flou */}
+                            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
+                            {/* Drawer */}
+                            <div className="relative bg-white w-72 h-full shadow-xl z-50 animate-slide-in-left">
+                                {/* Header avec logo */}
+                                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
+                                            <img
+                                                src="/img/logo-bleu-fonce-point.png"
+                                                alt="Logo Méthode ERPR"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <span className="text-lg font-bold text-gray-900" style={{ fontFamily: "'Spectral', serif" }}>
+                                            Méthode ERPR
+                                        </span>
+                                    </div>
+                                    <button
+                                        className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        aria-label="Fermer le menu"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                {/* Navigation */}
+                                <nav className="flex flex-col p-4 space-y-1">
+                                    <Link 
+                                        href="/dashboard" 
+                                        className="flex items-center px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors" 
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Accueil
+                                    </Link>
+                                    <Link 
+                                        href={coursUrl} 
+                                        className="flex items-center px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors" 
+                                        onClick={() => { localStorage.setItem('autoOpenCourseSidebar', 'true'); setMobileMenuOpen(false); }}
+                                    >
+                                        Cours
+                                    </Link>
+                                    <Link 
+                                        href={!user.isActive ? '#' : '/accompagnement'} 
+                                        className={`flex items-center px-4 py-3 font-medium rounded-lg transition-colors ${!user.isActive ? 'text-gray-400 opacity-60 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`} 
+                                        onClick={e => { if (!user.isActive) { e.preventDefault(); handleRestrictedClick('Accompagnement'); setMobileMenuOpen(false); } else { setMobileMenuOpen(false); } }}
+                                    >
+                                        Accompagnement
+                                    </Link>
+                                    <Link 
+                                        href={devoirsUrl} 
+                                        className="flex items-center px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors" 
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Devoirs
+                                    </Link>
+                                    <Link 
+                                        href="/notice" 
+                                        className="flex items-center px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors" 
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Notice
+                                    </Link>
+                                    <Link 
+                                        href="/conseil" 
+                                        className="flex items-center px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors" 
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Conseil
+                                    </Link>
+                                    <Link 
+                                        href="/niveaux" 
+                                        className="flex items-center px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors" 
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Niveaux
+                                    </Link>
+                                    
+                                    {/* Séparateur */}
+                                    <div className="my-2 border-t border-gray-200"></div>
+                                    
+                                    <Link 
+                                        href="/abonnement" 
+                                        className="flex items-center px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors" 
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        Abonnement
+                                    </Link>
+                                </nav>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Right Icons */}
                     <div className="flex items-center space-x-4 justify-center">
@@ -791,12 +889,6 @@ export default function DashboardHeader({
                     </div>
                 </div>
             )}
-
-            <FreeTrialRestrictionModal
-                isOpen={showRestrictionModal}
-                onClose={() => setShowRestrictionModal(false)}
-                contentName={restrictedContent}
-            />
         </>
     );
 }

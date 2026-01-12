@@ -71,7 +71,6 @@ export default function SidebarContent() {
           console.log('✅ User fetched in SidebarContent:', {
             email: data.user.email,
             accountType: data.user.accountType,
-            trialExpired: data.user.trialExpired,
           });
         }
       }

@@ -13,7 +13,14 @@ export default function MobileLayoutTajwid({ children }: { children: React.React
   useEffect(() => {
     // Vérifier si le cours a été commencé
     setCourseStarted(localStorage.getItem('courseStarted') === 'true');
-  }, []);
+    
+    // Vérifier si on doit ouvrir la sidebar automatiquement (à chaque navigation)
+    const shouldAutoOpen = localStorage.getItem('autoOpenCourseSidebar');
+    if (shouldAutoOpen === 'true') {
+      setSidebarOpen(true); // Ouvrir la sidebar
+      localStorage.removeItem('autoOpenCourseSidebar'); // Supprimer le flag
+    }
+  }, [pathname]); // Re-vérifier à chaque changement de page
 
   // Cacher la sidebar immédiatement si on navigue hors des chapitres tajwid
   useEffect(() => {
