@@ -7,30 +7,27 @@ import SidebarContent from "@/app/components/SidebarContent";
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [courseStarted, setCourseStarted] = useState(false);
-  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  // Marquer le composant comme monté côté client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   useEffect(() => {
-    // Vérifier si le cours a été commencé
-    setCourseStarted(localStorage.getItem('courseStarted') === 'true');
+    if (!mounted) return;
     
     // Vérifier si on doit ouvrir la sidebar automatiquement (à chaque navigation)
-    const shouldAutoOpen = localStorage.getItem('autoOpenCourseSidebar');
-    if (shouldAutoOpen === 'true') {
-      setSidebarOpen(true); // Ouvrir la sidebar
-      localStorage.removeItem('autoOpenCourseSidebar'); // Supprimer le flag
+    try {
+      const shouldAutoOpen = localStorage.getItem('autoOpenCourseSidebar');
+      if (shouldAutoOpen === 'true') {
+        setSidebarOpen(true); // Ouvrir la sidebar
+        localStorage.removeItem('autoOpenCourseSidebar'); // Supprimer le flag
+      }
+    } catch (e) {
+      console.warn('localStorage non disponible:', e);
     }
-  }, [pathname]); // Re-vérifier à chaque changement de page
-
-  // Cacher la sidebar immédiatement si on navigue hors des chapitres
-  useEffect(() => {
-    if (!pathname.startsWith('/chapitres')) {
-      setIsNavigatingAway(true);
-      setSidebarOpen(false);
-    } else {
-      setIsNavigatingAway(false);
-    }
-  }, [pathname]);
+  }, [pathname, mounted]); // Re-vérifier à chaque changement de page
 
   // Bloquer le scroll du body quand la sidebar est ouverte
   useEffect(() => {
@@ -45,11 +42,6 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
       document.body.style.overflow = '';
     };
   }, [sidebarOpen]);
-
-  // Si le cours n'a pas été commencé ou si on navigue ailleurs, ne pas afficher la sidebar
-  if (!courseStarted || isNavigatingAway) {
-    return <div className="min-h-screen">{children}</div>;
-  }
   return (
     <div className="md:hidden flex flex-col h-screen w-full bg-zinc-950">
       {/* Header mobile */}

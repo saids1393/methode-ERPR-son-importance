@@ -31,43 +31,62 @@ export default function LayoutSwitcher({ children }: { children: React.ReactNode
   useEffect(() => {
     // Parser les cookies correctement
     const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-      return null;
+      try {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return null;
+      } catch (e) {
+        console.warn('Erreur lecture cookie:', e);
+        return null;
+      }
     };
 
-    const hasStartedCourse = localStorage.getItem('courseStarted') === 'true';
+    // Fonction sécurisée pour lire localStorage (Safari peut bloquer)
+    const safeGetLocalStorage = (key: string): string | null => {
+      try {
+        return localStorage.getItem(key);
+      } catch (e) {
+        console.warn('localStorage non disponible:', e);
+        return null;
+      }
+    };
+
+    const hasStartedCourse = safeGetLocalStorage('courseStarted') === 'true';
     const isProfessorAccess = !!getCookie('professor-course-token');
 
     console.log('🔍 LAYOUT - Course started check:', hasStartedCourse, 'for path:', pathname);
     console.log('👨‍🏫 LAYOUT - Professor access check:', isProfessorAccess);
 
-    // Logique de la sidebar
+    // Logique de la sidebar - TOUJOURS afficher sur les pages de chapitres
+    // car l'utilisateur est déjà sur la page (donc il a accès)
     let shouldShowSidebar = false;
     let type: 'default' | 'tajwid' = 'default';
 
     if (pathname.startsWith('/chapitres-tajwid/')) {
+      // Si on est sur une page chapitres-tajwid, afficher la sidebar
+      shouldShowSidebar = true;
+      type = 'tajwid';
+      
       if (isProfessorAccess) {
-        shouldShowSidebar = true;
-        type = 'tajwid';
         console.log('📱 SIDEBAR TAJWID PROFESSEUR activée');
       } else if (hasStartedCourse) {
-        shouldShowSidebar = true;
-        type = 'tajwid';
         console.log('📱 SIDEBAR TAJWID ÉLÈVE activée');
       } else {
-        console.log('📱 SIDEBAR TAJWID DÉSACTIVÉE - cours non commencé par élève');
+        // Même sans courseStarted, on affiche la sidebar si on est sur la page
+        console.log('📱 SIDEBAR TAJWID activée (utilisateur sur page chapitre)');
       }
     } else if (pathname.startsWith('/chapitres/')) {
+      // Si on est sur une page chapitres, afficher la sidebar
+      shouldShowSidebar = true;
+      
       if (isProfessorAccess) {
-        shouldShowSidebar = true;
         console.log('📱 SIDEBAR PROFESSEUR activée');
       } else if (hasStartedCourse) {
-        shouldShowSidebar = true;
         console.log('📱 SIDEBAR ÉLÈVE activée');
       } else {
-        console.log('📱 SIDEBAR DÉSACTIVÉE - cours non commencé par élève');
+        // Même sans courseStarted, on affiche la sidebar si on est sur la page
+        console.log('📱 SIDEBAR activée (utilisateur sur page chapitre)');
       }
     }
 
