@@ -41,6 +41,9 @@ export async function GET(request: NextRequest) {
           stripeCustomerId: true,
           completedPages: true,
           completedQuizzes: true,
+          completedPagesTajwid: true,
+          completedQuizzesTajwid: true,
+          subscriptionPlan: true,
           studyTimeSeconds: true,
           createdAt: true,
           updatedAt: true,
@@ -54,19 +57,32 @@ export async function GET(request: NextRequest) {
 
     // Enrichir les données utilisateur
     const enrichedUsers = users.map((user) => {
+      // Progression Lecture
       const completedPagesCount = user.completedPages.filter((p: number) => p !== 0 && p !== 30).length;
       const completedQuizzesCount = user.completedQuizzes.filter((q: number) => q !== 11).length;
-      const totalPossibleItems = 29 + 11; // 29 pages + 11 quiz
-      const progressPercentage = Math.round(
-        ((completedPagesCount + completedQuizzesCount) / totalPossibleItems) * 100
+      const totalPossibleItemsLecture = 29 + 11; // 29 pages + 11 quiz
+      const progressPercentageLecture = Math.round(
+        ((completedPagesCount + completedQuizzesCount) / totalPossibleItemsLecture) * 100
+      );
+
+      // Progression Tajwid
+      const completedPagesTajwidCount = user.completedPagesTajwid.filter((p: number) => p !== 0).length;
+      const completedQuizzesTajwidCount = user.completedQuizzesTajwid.length;
+      const totalPossibleItemsTajwid = 32 + 8; // 32 pages (sans page 0) + 8 quiz
+      const progressPercentageTajwid = Math.round(
+        ((completedPagesTajwidCount + completedQuizzesTajwidCount) / totalPossibleItemsTajwid) * 100
       );
 
       return {
         ...user,
         completedPagesCount,
         completedQuizzesCount,
-        progressPercentage,
-        isPaid: !!user.stripeCustomerId, // Seulement si stripeCustomerId existe
+        completedPagesTajwidCount,
+        completedQuizzesTajwidCount,
+        progressPercentage: progressPercentageLecture,
+        progressPercentageLecture,
+        progressPercentageTajwid,
+        isPaid: !!user.stripeCustomerId,
         studyTimeFormatted: formatStudyTime(user.studyTimeSeconds)
       };
     });

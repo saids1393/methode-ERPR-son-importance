@@ -1085,8 +1085,11 @@ export default function DashboardPage() {
             <Link
               href={nextPage.href || (selectedModule === 'TAJWID' ? '/chapitres-tajwid/1/1' : '/chapitres/1/1')}
               onClick={() => {
+                // Toujours ouvrir la sidebar cours automatiquement
+                localStorage.setItem('courseStarted', 'true');
+                localStorage.setItem('autoOpenCourseSidebar', 'true');
+                
                 if (nextPage.isFirstPage) {
-                  localStorage.setItem('courseStarted', 'true');
                   fetch('/api/auth/time/start', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

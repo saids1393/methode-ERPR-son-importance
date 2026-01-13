@@ -31,9 +31,14 @@ interface User {
   gender: 'HOMME' | 'FEMME' | null;
   isActive: boolean;
   stripeCustomerId: string | null;
+  subscriptionPlan: 'SOLO' | 'COACHING' | null;
   completedPagesCount: number;
   completedQuizzesCount: number;
+  completedPagesTajwidCount: number;
+  completedQuizzesTajwidCount: number;
   progressPercentage: number;
+  progressPercentageLecture: number;
+  progressPercentageTajwid: number;
   isPaid: boolean;
   studyTimeFormatted: string;
   studyTimeSeconds: number;
@@ -341,6 +346,15 @@ export default function AdminUsersPage() {
                   </th>
                   <th className="text-left py-3 sm:py-4 px-3 sm:px-6 hidden md:table-cell">
                     <button
+                      onClick={() => handleSort('subscriptionPlan')}
+                      className="flex items-center gap-1 sm:gap-2 text-zinc-300 hover:text-white transition-colors text-xs sm:text-sm"
+                    >
+                      Abonnement
+                      <ArrowUpDown className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </button>
+                  </th>
+                  <th className="text-left py-3 sm:py-4 px-3 sm:px-6 hidden md:table-cell">
+                    <button
                       onClick={() => handleSort('studyTimeSeconds')}
                       className="flex items-center gap-1 sm:gap-2 text-zinc-300 hover:text-white transition-colors text-xs sm:text-sm"
                     >
@@ -406,6 +420,19 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="py-3 sm:py-4 px-3 sm:px-6 hidden md:table-cell">
+                      {user.subscriptionPlan ? (
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          user.subscriptionPlan === 'COACHING' 
+                            ? 'bg-purple-900/50 text-purple-300 border border-purple-700' 
+                            : 'bg-blue-900/50 text-blue-300 border border-blue-700'
+                        }`}>
+                          {user.subscriptionPlan === 'COACHING' ? '🎓 Coaching' : '📖 Solo'}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-500 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 sm:py-4 px-3 sm:px-6 hidden md:table-cell">
                       <div className="flex items-center gap-2">
                         <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400" />
                         <span className="text-white font-mono text-sm">{user.studyTimeFormatted}</span>
@@ -413,19 +440,31 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="py-3 sm:py-4 px-3 sm:px-6">
                       <div className="space-y-2">
+                        {/* Progression Lecture */}
                         <div className="flex items-center gap-2">
+                          <span className="text-blue-400 text-xs w-12">Lecture</span>
                           <div className="flex-1 bg-zinc-600 rounded-full h-2 min-w-[40px] sm:min-w-[60px]">
                             <div 
-                              className="bg-green-400 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${user.progressPercentage}%` }}
+                              className="bg-blue-400 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${user.progressPercentageLecture}%` }}
                             ></div>
                           </div>
-                          <span className="text-white font-semibold text-xs sm:text-sm w-8 sm:w-12">
-                            {user.progressPercentage}%
+                          <span className="text-white font-semibold text-xs w-8">
+                            {user.progressPercentageLecture}%
                           </span>
                         </div>
-                        <div className="text-xs text-zinc-400 hidden sm:block">
-                          {user.completedPagesCount}/29 pages • {user.completedQuizzesCount}/11 quiz
+                        {/* Progression Tajwid */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-purple-400 text-xs w-12">Tajwid</span>
+                          <div className="flex-1 bg-zinc-600 rounded-full h-2 min-w-[40px] sm:min-w-[60px]">
+                            <div 
+                              className="bg-purple-400 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${user.progressPercentageTajwid}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-white font-semibold text-xs w-8">
+                            {user.progressPercentageTajwid}%
+                          </span>
                         </div>
                       </div>
                     </td>

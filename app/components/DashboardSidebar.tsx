@@ -263,15 +263,18 @@ export default function DashboardSidebar({
                     {/* Niveaux */}
                     <Link
                         href="/niveaux"
-                        className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
                             pathname === "/niveaux"
                                 ? "text-blue-800 bg-blue-100 font-medium"
                                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                         }`}
                         onClick={() => setMobileMenuOpen(false)}
                     >
-                        <BarChart className="h-5 w-5" />
-                        <span>Niveaux</span>
+                        <div className="flex items-center space-x-3">
+                            <BarChart className="h-5 w-5" />
+                            <span>Niveaux</span>
+                        </div>
+                        <span className="text-[10px] font-semibold bg-green-500 text-white px-1.5 py-0.5 rounded-full">Nouveau</span>
                     </Link>
 
                     {/* Séparateur */}
